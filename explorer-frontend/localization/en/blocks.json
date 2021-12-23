@@ -5,5 +5,12 @@
     "Type": "Type",
     "Transactions": "Transactions",
     "Size": "Size (bytes)",
-    "Weight": "Weight (wu)"
+    "Weight": "Weight (wu)",
+    "Meta": {
+        "Title": "Veil Explorer - block explorer",
+        "Description": "Explore veil blocks"
+    },
+    "Title": "Blocks",
+    "SortDesc": "Newest",
+    "SortAsc": "Oldest"
 }

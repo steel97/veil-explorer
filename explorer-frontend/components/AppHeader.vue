@@ -283,6 +283,7 @@ import Cookie from "js-cookie";
 const { t, availableLocales, getLocaleMessage, locale, fallbackLocale } =
   useI18n();
 const data = useChainInfo();
+const route = useRoute();
 
 const initialized = ref(false);
 const menuOpened = ref(false);
@@ -311,10 +312,12 @@ const getLinks = () => {
   return [
     {
       locale: t("Header.Links.Home"),
+      name: "index",
       link: "/",
     },
     {
       locale: t("Header.Links.Blocks"),
+      name: "blocks-page-sort",
       link: "/blocks",
     },
     {
@@ -367,7 +370,7 @@ const switchLang = (lang: string) => {
 };
 
 const computeClasses = (link: ILink) => {
-  if (link.link == "/")
+  if (link.name == route.name)
     return ["underline", "text-sky-700", "dark:text-sky-400"];
   return ["text-gray-600", "dark:text-gray-300"];
 };

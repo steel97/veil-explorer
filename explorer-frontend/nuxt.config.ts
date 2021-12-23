@@ -6,6 +6,7 @@ export default defineNuxtConfig({
         CHAIN_APIS: JSON.parse(process.env.CHAIN_APIS),
         BASE_URL: process.env.BASE_URL,
         RECENT_BLOCKS_COUNT: process.env.RECENT_BLOCKS_COUNT,
+        BLOCKS_PER_PAGE: process.env.BLOCKS_PER_PAGE,
         MAX_BLOCK_WEIGHT: process.env.MAX_BLOCK_WEIGHT,
         SYNC_NOTICE_CASE: process.env.SYNC_NOTICE_CASE
     },

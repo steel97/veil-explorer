@@ -5,5 +5,12 @@
     "Type": "Тип",
     "Transactions": "Транзакции",
     "Size": "Размер (байты)",
-    "Weight": "Вес (wu)"
+    "Weight": "Вес (wu)",
+    "Meta": {
+        "Title": "Veil Explorer - обзор блоков",
+        "Description": "Обзор блоков veil"
+    },
+    "Title": "Блоки",
+    "SortDesc": "Новые",
+    "SortAsc": "Старые"
 }

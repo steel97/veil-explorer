@@ -14,8 +14,8 @@
         <SyncNotice v-if="isSynchronizing" />
         <SearchBox />
         <main class="max-w-7xl w-full mx-auto">
-          <transition name="fade">
-            <div :key="route.name">
+          <transition name="fade" mode="out-in">
+            <div :key="route.path">
               <NuxtPage />
             </div>
           </transition>

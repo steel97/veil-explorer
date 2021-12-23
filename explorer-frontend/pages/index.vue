@@ -8,7 +8,7 @@
       <h1 class="uppercase font-semibold">
         {{ t("Home.RecentBlocks") }}
       </h1>
-      <div>
+      <div class="text-right">
         <NuxtLink
           to="/blocks"
           class="
