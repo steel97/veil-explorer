@@ -276,7 +276,10 @@ const toggleBlockInfo = (block: SimplifiedBlock) => {
   else openedBlock.push(block.height);
 };
 
+let stopUpdates = false;
+
 const blockAppearAnimator = () => {
+  if (stopUpdates) return;
   let currentOpacity = targetOpacity.value + 0.05;
   if (currentOpacity > 1.0) {
     setTimeout(() => {
@@ -295,4 +298,6 @@ onMounted(() =>
     blockAppearAnimator();
   }, 10)
 );
+
+onBeforeUnmount(() => (stopUpdates = true));
 </script>
