@@ -43,7 +43,7 @@ Description=Veil-explorer frontend service
 
 [Service]
 User=explorer-frontend
-KillMode=process
+KillMode=control-group
 WorkingDirectory=/home/explorer-frontend/server/
 ExecStart=/home/explorer-frontend/server/start.sh
 Restart=always

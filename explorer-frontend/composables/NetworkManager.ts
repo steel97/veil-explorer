@@ -33,7 +33,7 @@ export const useNetworkManager = () => {
             latestBlockState.value = simplifiedBlock;
         });
 
-        connection.start().catch(err => document.write(err));
+        connection.start().catch(err => console.log(err));
     }
 
     return { connect };
