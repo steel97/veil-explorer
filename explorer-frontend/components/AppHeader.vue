@@ -16,7 +16,7 @@
             <NuxtLink to="/" class="flex items-center">
               <img
                 class="h-6 w-auto pr-2 my-3"
-                src="/assets/images/logo.png"
+                src="/images/logo.png"
                 :alt="t('Header.Title')"
               />
               <span class="font-semibold">{{ t("Header.Title") }}</span>
@@ -111,9 +111,7 @@
                 ><img
                   class="locale-icon"
                   :alt="getCurrentLocale().name"
-                  :src="
-                    '/assets/images/langs/' + getCurrentLocale().code + '.png'
-                  "
+                  :src="'/images/langs/' + getCurrentLocale().code + '.png'"
               /></span>
               <span class="grow cursor-default uppercase">{{
                 getCurrentLocale().name
@@ -146,7 +144,7 @@
                   ><img
                     class="locale-icon"
                     :alt="val.name"
-                    :src="'/assets/images/langs/' + val.code + '.png'"
+                    :src="'/images/langs/' + val.code + '.png'"
                 /></span>
                 <span class="grow uppercase">{{ val.name }}</span>
               </div>
@@ -227,9 +225,7 @@
               <span class="mr-2"
                 ><img
                   class="locale-icon"
-                  :src="
-                    '/assets/images/langs/' + getCurrentLocale().code + '.png'
-                  "
+                  :src="'/images/langs/' + getCurrentLocale().code + '.png'"
               /></span>
               <span class="grow cursor-default uppercase">{{
                 getCurrentLocale().name
@@ -261,7 +257,7 @@
                 <span class="mr-2"
                   ><img
                     class="locale-icon"
-                    :src="'/assets/images/langs/' + val.code + '.png'"
+                    :src="'/images/langs/' + val.code + '.png'"
                 /></span>
                 <span class="grow uppercase">{{ val.name }}</span>
               </div>

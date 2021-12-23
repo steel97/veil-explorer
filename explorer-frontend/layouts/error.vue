@@ -75,6 +75,6 @@ if (process.server) {
   const nuxtApp = useNuxtApp();
   const error = new Error();
   error.statusCode = 404;
-  nuxtApp.ssrContext.error = error;
+  error.nuxtApp.ssrContext.error = error;
 }
 </script>

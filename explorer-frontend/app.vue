@@ -74,7 +74,7 @@ const meta = {
     },
     {
       name: "og:image",
-      content: "/assets/images/ogimage.png",
+      content: "/images/ogimage.png",
     },
     {
       name: "og:site_name",
