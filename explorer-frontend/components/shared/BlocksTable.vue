@@ -266,7 +266,6 @@ const reactivityWatcher = computed(() => props.reactivityFix);
 let targetOpacity = 1.0;
 var latestBlock = ref<number>(0);
 watch(reactivityWatcher, () => {
-  console.log("t");
   if (props.data.length == 0) return;
 
   const el = document.getElementById(`block-${latestBlock.value}`);

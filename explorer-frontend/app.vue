@@ -34,7 +34,7 @@ import SyncNotice from "@/components/SyncNotice";
 import SearchBox from "@/components/SearchBox";
 import AppFooter from "@/components/AppFooter";
 import { useConfigs } from "@/composables/Configs";
-import { useChainInfo } from "@/composables/States";
+import { useThemeState, useChainInfo } from "@/composables/States";
 import { useNetworkManager } from "@/composables/NetworkManager";
 import { BlockchainInfo } from "@/models/API/BlockchainInfo";
 import { useI18n } from "vue-i18n";
@@ -47,10 +47,11 @@ const { getApiPath } = useConfigs();
 const { connect } = useNetworkManager();
 const { t, availableLocales, fallbackLocale, locale } = useI18n();
 const chainInfoDataState = useChainInfo();
-const theme = useCookie("theme") || "";
-const lang = useCookie("lang") || fallbackLocale.value;
+const themeState = useThemeState();
+const theme = useCookie("theme").value || "";
+const lang = useCookie("lang").value || fallbackLocale.value;
 
-let currentLang = lang.value;
+let currentLang = lang;
 
 if (availableLocales.indexOf(currentLang) == -1) {
   currentLang = fallbackLocale.value;
@@ -58,50 +59,54 @@ if (availableLocales.indexOf(currentLang) == -1) {
 
 locale.value = currentLang;
 
-const meta = {
-  meta: [
-    {
-      name: "viewport",
-      content: "width=device-width, initial-scale=1, maximum-scale=5",
+themeState.value = theme == "dark" ? "dark" : "";
+
+const meta = computed(() => {
+  return {
+    meta: [
+      {
+        name: "viewport",
+        content: "width=device-width, initial-scale=1, maximum-scale=5",
+      },
+      {
+        "http-equiv": "X-UA-Compatible",
+        content: "IE=edge",
+      },
+      {
+        name: "robots",
+        content: "index,follow",
+      },
+      {
+        name: "og:image",
+        content: "/images/ogimage.png",
+      },
+      {
+        name: "og:site_name",
+        content: t("Meta.SiteName"),
+      },
+      {
+        name: "og:type",
+        content: "website",
+      },
+    ],
+    link: [
+      {
+        rel: "icon",
+        href: "/favicon.ico",
+      },
+      {
+        rel: "preconnect",
+        href: "https://fonts.gstatic.com",
+      },
+    ],
+    htmlAttrs: {
+      lang: locale.value,
     },
-    {
-      "http-equiv": "X-UA-Compatible",
-      content: "IE=edge",
+    bodyAttrs: {
+      class: themeState.value, // prevent xss
     },
-    {
-      name: "robots",
-      content: "index,follow",
-    },
-    {
-      name: "og:image",
-      content: "/images/ogimage.png",
-    },
-    {
-      name: "og:site_name",
-      content: t("Meta.SiteName"),
-    },
-    {
-      name: "og:type",
-      content: "website",
-    },
-  ],
-  link: [
-    {
-      rel: "icon",
-      href: "/favicon.ico",
-    },
-    {
-      rel: "preconnect",
-      href: "https://fonts.gstatic.com",
-    },
-  ],
-  htmlAttrs: {
-    lang: currentLang,
-  },
-  bodyAttrs: {
-    class: theme.value == "dark" ? "dark" : "", // prevent xss
-  },
-};
+  };
+});
 
 useMeta(meta);
 

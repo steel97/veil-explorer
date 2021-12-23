@@ -272,13 +272,14 @@
 import { ref } from "@vue/reactivity";
 import { SunIcon, MoonIcon } from "@heroicons/vue/solid";
 import { MenuIcon } from "@heroicons/vue/outline";
-import { useChainInfo } from "@/composables/States";
+import { useThemeState, useChainInfo } from "@/composables/States";
 import { useI18n } from "vue-i18n";
 import Cookie from "js-cookie";
 
 const { t, availableLocales, getLocaleMessage, locale, fallbackLocale } =
   useI18n();
 const data = useChainInfo();
+const themeState = useThemeState();
 const route = useRoute();
 
 const initialized = ref(false);
@@ -293,7 +294,9 @@ watch(themeSwitch, (nval) => {
   const now = new Date();
   now.setDate(now.getDate() + 90);
 
-  Cookie.set("theme", themeSwitch.value ? "dark" : "light", {
+  themeState.value = themeSwitch.value ? "dark" : "";
+
+  Cookie.set("theme", themeState.value, {
     expires: now,
     sameSite: "lax",
   });
