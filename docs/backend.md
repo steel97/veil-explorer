@@ -1,3 +1,4 @@
+DotNet 6+ required to run backend
 Backend installation tutorial (ubuntu 20.04+):
 
 1. create user for backend app

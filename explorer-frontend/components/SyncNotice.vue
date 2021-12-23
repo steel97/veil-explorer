@@ -26,10 +26,12 @@ import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
 const chainInfoDataState = useChainInfo();
-const syncState = computed(
-  () =>
+const syncState = computed(() => {
+  if (chainInfoDataState.value.chainInfo == null) return 0;
+  return (
     (chainInfoDataState.value.currentSyncedBlock /
       chainInfoDataState.value.chainInfo.blocks) *
     100
-);
+  );
+});
 </script>

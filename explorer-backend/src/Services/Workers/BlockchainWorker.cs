@@ -62,7 +62,7 @@ public class BlockchainWorker : BackgroundService
                 var getChainalgoStatsResponse = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", getChainalgoStatsRequest, options);
                 var chainalgoStats = await getChainalgoStatsResponse.Content.ReadFromJsonAsync<GetChainalgoStats>(options);
 
-                if (blockchainInfo != null)
+                if (blockchainInfo != null && blockchainInfo.Result != null)
                 {
                     _chainInfoSingleton.currentChainInfo = blockchainInfo.Result;
                     if (_chainInfoSingleton.currentChainInfo != null)
@@ -71,7 +71,7 @@ public class BlockchainWorker : BackgroundService
                 else
                     _logger.LogWarning("BlockChainInfo is null");
 
-                if (chainalgoStats != null)
+                if (chainalgoStats != null && chainalgoStats.Result != null)
                     _chainInfoSingleton.currentChainAlgoStats = chainalgoStats.Result;
                 else
                     _logger.LogWarning("ChainalgoStats is null");
