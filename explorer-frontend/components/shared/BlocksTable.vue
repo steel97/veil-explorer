@@ -104,6 +104,7 @@ const config = useRuntimeConfig();
 
 const props = defineProps<{
   data: Array<SimplifiedBlock>;
+  reactivityFix: number;
 }>();
 
 const { formatDateLocal } = useFormatting();
@@ -260,16 +261,21 @@ const getBlockWeightRaw = (block: SimplifiedBlock) =>
 const getBlockWeight = (block: SimplifiedBlock) =>
   `width: ${getBlockWeightRaw(block)}%`;
 
+const reactivityWatcher = computed(() => props.reactivityFix);
+
 let targetOpacity = 1.0;
 var latestBlock = ref<number>(0);
-watch(props.data, (nval) => {
-  if (nval.length == 0) return;
+watch(reactivityWatcher, () => {
+  console.log("t");
+  if (props.data.length == 0) return;
+
   const el = document.getElementById(`block-${latestBlock.value}`);
   if (el != null) el.style.opacity = 1.0;
-  latestBlock.value = nval[0].height;
+
+  latestBlock.value = props.data[0].height;
   targetOpacity = 0;
   lastTime = null;
-  requestAnimationFrame(blockAppearAnimator);
+  if (!document.hidden) requestAnimationFrame(blockAppearAnimator);
 });
 
 const getStyle = (index: number) => {

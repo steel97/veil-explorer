@@ -35,7 +35,7 @@
       </div>
     </div>
     <div class="rounded p-4 bg-gray-50 dark:bg-gray-800">
-      <BlocksTable :data="blocks" />
+      <BlocksTable :data="blocks" :reactivityFix="reactivityFix" />
     </div>
     <Pagination
       :overallEntries="chainInfoDataState.currentSyncedBlock"
@@ -78,6 +78,7 @@ const changeSort = async (target: string) => {
   window.history.replaceState({}, null, buildRouteSort(target));
   const blocksInfoLocal = await fetchBlocks();
   blocks.value = blocksInfoLocal.data.value;
+  reactivityFix.value++;
 };
 
 const buildRouteTemplate = () =>
@@ -90,6 +91,7 @@ const selectPage = async (pg: number) => {
   window.history.replaceState({}, null, link);
   const blocksInfoLocal = await fetchBlocks();
   blocks.value = blocksInfoLocal.data.value;
+  reactivityFix.value++;
 };
 
 const fetchBlocks = async () =>
@@ -103,11 +105,13 @@ const fetchBlocks = async () =>
 
 const blocksInfo = await fetchBlocks();
 const blocks = ref<Array<SimplifiedBlock>>(blocksInfo.data.value);
+const reactivityFix = ref(0);
 
 watch(latestBlock, (nval) => {
   if (currentPage.value > 1 || targetSort.value == 0) return;
   blocks.value.pop();
   blocks.value.unshift(nval);
+  reactivityFix.value++;
 });
 
 const { t } = useI18n();

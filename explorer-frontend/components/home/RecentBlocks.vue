@@ -1,6 +1,6 @@
 <template>
   <div class="rounded p-4 bg-gray-50 dark:bg-gray-800">
-    <BlocksTable :data="recentBlocks" />
+    <BlocksTable :data="recentBlocks" :reactivityFix="reactivityFix" />
   </div>
 </template>
 
@@ -23,9 +23,11 @@ const recentBlocksInfo = await useAsyncData("recentblocksinfo", () =>
 const recentBlocks = reactive<Array<SimplifiedBlock>>(
   recentBlocksInfo.data.value
 );
+const reactivityFix = ref(0);
 
 watch(latestBlock, (nval) => {
   recentBlocks.pop();
   recentBlocks.unshift(nval);
+  reactivityFix.value++;
 });
 </script>
