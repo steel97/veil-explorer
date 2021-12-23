@@ -1,5 +1,4 @@
 using Npgsql;
-using explorer_backend.Models.Data;
 
 namespace explorer_backend.Persistence.Repositories;
 

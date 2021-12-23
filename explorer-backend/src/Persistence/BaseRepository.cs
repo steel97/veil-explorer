@@ -1,10 +1,13 @@
 using Npgsql;
+using System.Text.RegularExpressions;
 
 namespace explorer_backend.Persistence;
 
 public class BaseRepository
 {
     private readonly IConfiguration _config;
+    private static Regex regex = new("^[A-Fa-f0-9]+$", RegexOptions.Compiled);
+
     public BaseRepository(IConfiguration config)
     {
         _config = config;
@@ -21,7 +24,13 @@ public class BaseRepository
     protected string? TransformDouble(double input) => TransformHex(BitConverter.ToString(BitConverter.GetBytes(input)).Replace("-", "").ToLowerInvariant());
 
 
-    protected string? TransformHex(string? hexInput) => hexInput != null ? $@"'\x{hexInput}'::bytea" : "NULL";
+    protected string? TransformHex(string? hexInput)
+    {
+        if (string.IsNullOrEmpty(hexInput)) return "NULL";
+        if (!regex.IsMatch(hexInput)) throw new Exception("HEX value is wrong");
+
+        return hexInput != null ? $@"'\x{hexInput}'::bytea" : "NULL";
+    }
 
     protected async Task<double> ReadDoubleFromBytea(NpgsqlDataReader reader, int ordinal)
     {
