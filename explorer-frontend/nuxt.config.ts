@@ -8,7 +8,11 @@ export default defineNuxtConfig({
         RECENT_BLOCKS_COUNT: process.env.RECENT_BLOCKS_COUNT,
         BLOCKS_PER_PAGE: process.env.BLOCKS_PER_PAGE,
         MAX_BLOCK_WEIGHT: process.env.MAX_BLOCK_WEIGHT,
-        SYNC_NOTICE_CASE: process.env.SYNC_NOTICE_CASE
+        SYNC_NOTICE_CASE: process.env.SYNC_NOTICE_CASE,
+        locales: {
+            "en": "English",
+            "ru": "Русский"
+        }
     },
     css: ["~/assets/css/tailwind.css"],
     build: {

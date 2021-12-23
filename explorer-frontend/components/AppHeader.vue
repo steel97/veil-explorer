@@ -250,16 +250,16 @@
                   px-2
                   cursor-pointer
                 "
-                v-for="val in getLocales()"
-                :key="'lang-' + val.code"
-                @click="switchLang(val.code)"
+                v-for="valm in getLocales()"
+                :key="'lang-m-' + valm.code"
+                @click="switchLang(valm.code)"
               >
                 <span class="mr-2"
                   ><img
                     class="locale-icon"
-                    :src="'/images/langs/' + val.code + '.png'"
+                    :src="'/images/langs/' + valm.code + '.png'"
                 /></span>
-                <span class="grow uppercase">{{ val.name }}</span>
+                <span class="grow uppercase">{{ valm.name }}</span>
               </div>
             </div>
           </div>
@@ -281,6 +281,7 @@ const { t, availableLocales, getLocaleMessage, locale, fallbackLocale } =
 const data = useChainInfo();
 const themeState = useThemeState();
 const route = useRoute();
+const config = useRuntimeConfig();
 
 const initialized = ref(false);
 const menuOpened = ref(false);
@@ -333,7 +334,7 @@ const getLinks = () => {
 const getCurrentLocale = () => {
   return {
     code: locale.value,
-    name: t("Core.LocaleName"),
+    name: config.locales[locale.value],
   };
 };
 
@@ -343,7 +344,7 @@ const getLocales = () => {
     if (lang == getCurrentLocale().code) return;
     locales.push({
       code: lang,
-      name: getLocaleMessage(lang).Core.LocaleName.source,
+      name: config.locales[lang],
     });
   });
   return locales;

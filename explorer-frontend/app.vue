@@ -1,28 +1,30 @@
 <template>
-  <div
-    class="
-      bg-gray-200
-      dark:bg-gray-700
-      transition-colors
-      ease-linear
-      duration-200
-    "
-  >
-    <div class="min-h-screen mb-10">
-      <AppHeader />
-      <div class="w-full px-2 text-gray-800 dark:text-gray-300">
-        <SyncNotice v-if="isSynchronizing" />
-        <SearchBox />
-        <main class="max-w-7xl w-full mx-auto">
-          <transition name="fade" mode="out-in">
-            <div :key="route.path">
-              <NuxtPage />
-            </div>
-          </transition>
-        </main>
+  <div :class="themeState">
+    <div
+      class="
+        bg-gray-200
+        dark:bg-gray-700
+        transition-colors
+        ease-linear
+        duration-200
+      "
+    >
+      <div class="min-h-screen mb-10">
+        <AppHeader />
+        <div class="w-full px-2 text-gray-800 dark:text-gray-300">
+          <SyncNotice v-if="isSynchronizing" />
+          <SearchBox />
+          <main class="max-w-7xl w-full mx-auto">
+            <transition name="fade" mode="out-in">
+              <div :key="route.path">
+                <NuxtPage />
+              </div>
+            </transition>
+          </main>
+        </div>
       </div>
+      <AppFooter />
     </div>
-    <AppFooter />
   </div>
 </template>
 
@@ -101,9 +103,6 @@ const meta = computed(() => {
     ],
     htmlAttrs: {
       lang: locale.value,
-    },
-    bodyAttrs: {
-      class: themeState.value, // prevent xss
     },
   };
 });
