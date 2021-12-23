@@ -283,22 +283,14 @@ const blockAppearAnimator = () => {
   if (stopUpdates) return;
   let currentOpacity = targetOpacity.value + 0.05;
   if (currentOpacity > 1.0) {
-    setTimeout(() => {
-      blockAppearAnimator();
-    }, 10);
+    setTimeout(blockAppearAnimator, 10);
     return;
   }
   targetOpacity.value = currentOpacity;
-  setTimeout(() => {
-    blockAppearAnimator();
-  }, 10);
+  setTimeout(blockAppearAnimator, 10);
 };
 
-onMounted(() =>
-  setTimeout(() => {
-    blockAppearAnimator();
-  }, 10)
-);
+onMounted(() => setTimeout(blockAppearAnimator, 10));
 
 onBeforeUnmount(() => (stopUpdates = true));
 </script>

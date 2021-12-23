@@ -2,6 +2,7 @@ namespace explorer_backend.Configs;
 
 public class ExplorerConfig
 {
+    public int TxScopeTimeout { get; set; }
     public int HubNotifyDelay { get; set; }
     public int PullBlocksDelay { get; set; }
     public int PullBlockchainInfoDelay { get; set; }
