@@ -263,7 +263,8 @@ const getBlockWeight = (block: SimplifiedBlock) =>
 let targetOpacity = ref(1.0);
 watch(props.data, (nval) => {
   targetOpacity.value = 0;
-  setTimeout(blockAppearAnimator, 10);
+  lastTime = null;
+  requestAnimationFrame(blockAppearAnimator);
 });
 
 const getStyle = (index: number) => {
@@ -279,16 +280,22 @@ const toggleBlockInfo = (block: SimplifiedBlock) => {
 };
 
 let stopUpdates = false;
+let lastTime: number | null;
 
-const blockAppearAnimator = () => {
+const blockAppearAnimator = (timestamp: number) => {
+  if (lastTime == null) lastTime = timestamp;
+  var elapsed = timestamp - lastTime;
+  lastTime = timestamp;
+
   if (stopUpdates) return;
-  let currentOpacity = targetOpacity.value + 0.05;
+
+  let currentOpacity = targetOpacity.value + 0.001 * elapsed;
   if (currentOpacity > 1.0) {
     targetOpacity.value = 1.0;
     return;
   }
   targetOpacity.value = currentOpacity;
-  setTimeout(blockAppearAnimator, 10);
+  requestAnimationFrame(blockAppearAnimator);
 };
 
 onBeforeUnmount(() => (stopUpdates = true));
