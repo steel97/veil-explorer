@@ -57,52 +57,51 @@ if (availableLocales.indexOf(currentLang) == -1) {
 
 locale.value = currentLang;
 
-const meta = computed(() => {
-  return {
-    meta: [
-      {
-        name: "viewport",
-        content: "width=device-width, initial-scale=1, maximum-scale=5",
-      },
-      {
-        "http-equiv": "X-UA-Compatible",
-        content: "IE=edge",
-      },
-      {
-        name: "robots",
-        content: "index,follow",
-      },
-      {
-        name: "og:image",
-        content: "/assets/images/ogimage.png",
-      },
-      {
-        name: "og:site_name",
-        content: t("Meta.SiteName"),
-      },
-      {
-        name: "og:type",
-        content: "website",
-      },
-    ],
-    link: [
-      {
-        rel: "icon",
-        href: "/favicon.ico",
-      },
-      {
-        rel: "preconnect",
-        href: "https://fonts.gstatic.com",
-      },
-    ],
-    htmlAttrs: {
-      lang: locale.value,
+const meta = {
+  meta: [
+    {
+      name: "viewport",
+      content: "width=device-width, initial-scale=1, maximum-scale=5",
     },
-    bodyAttrs: {
-      class: theme.value == "dark" ? "dark" : "", // prevent xss
+    {
+      "http-equiv": "X-UA-Compatible",
+      content: "IE=edge",
     },
-  };
-});
+    {
+      name: "robots",
+      content: "index,follow",
+    },
+    {
+      name: "og:image",
+      content: "/assets/images/ogimage.png",
+    },
+    {
+      name: "og:site_name",
+      content: t("Meta.SiteName"),
+    },
+    {
+      name: "og:type",
+      content: "website",
+    },
+  ],
+  link: [
+    {
+      rel: "icon",
+      href: "/favicon.ico",
+    },
+    {
+      rel: "preconnect",
+      href: "https://fonts.gstatic.com",
+    },
+  ],
+  htmlAttrs: {
+    lang: currentLang,
+  },
+  bodyAttrs: {
+    class: theme.value == "dark" ? "dark" : "", // prevent xss
+  },
+};
+
 useMeta(meta);
 
 const chainInfoDataState = useChainInfo();

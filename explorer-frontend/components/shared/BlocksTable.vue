@@ -18,15 +18,15 @@
     :style="getStyle(index)"
   >
     <div>
-      <a
-        href="#"
+      <NuxtLink
+        :to="'/block-height/' + val.height"
         class="
           text-sky-700
           dark:text-sky-400
           hover:underline
           underline-offset-4
         "
-        >#{{ val.height }}</a
+        >#{{ val.height }}</NuxtLink
       >
     </div>
     <div
