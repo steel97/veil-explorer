@@ -57,9 +57,7 @@ public class BlocksWorker : BackgroundService
                 {
                     var blocksRepository = scope.ServiceProvider.GetRequiredService<IBlocksRepository>();
                     var transactionsRepository = scope.ServiceProvider.GetRequiredService<ITransactionsRepository>();
-                    var txInputsRepository = scope.ServiceProvider.GetRequiredService<ITxInputsRepository>();
-                    var ringctInputsRepository = scope.ServiceProvider.GetRequiredService<IRingctInputsRepository>();
-                    var txOutputsRepository = scope.ServiceProvider.GetRequiredService<ITxOutputsRepository>();
+                    var rawTxsRepository = scope.ServiceProvider.GetRequiredService<IRawTxsRepository>();
 
                     var latestSyncedBlock = await blocksRepository.GetLatestBlockAsync(true);
                     var currentIndexedBlock = (latestSyncedBlock != null ? latestSyncedBlock.height : 0) + 1;
@@ -179,6 +177,7 @@ public class BlocksWorker : BackgroundService
                             {
                                 ArgumentNullException.ThrowIfNull(tx);
                                 ArgumentNullException.ThrowIfNull(tx.txid);
+                                ArgumentNullException.ThrowIfNull(tx.hex);
 
                                 var targetTx = await transactionsRepository.GetTransactionByIdAsync(tx.txid);
                                 if (targetTx != null) continue;
@@ -198,121 +197,9 @@ public class BlocksWorker : BackgroundService
                                         targetTx.block_height = i;
 
                                         var txCompleted = await transactionsRepository.InsertTransactionAsync(targetTx);
-                                        var inputsCompleted = true;
-                                        var inputsRCTCompleted = true;
-                                        var outputsCompleted = true;
+                                        var txRawCompleted = await rawTxsRepository.InsertTransactionAsync(tx.txid, tx.hex);
 
-
-                                        if (tx.vin != null)
-                                            for (var index = 0; index < tx.vin.Count(); index++)
-                                            {
-                                                var input = tx.vin[index];
-                                                var txInput = new TxInput
-                                                {
-
-                                                    txid_hex = tx.txid,
-                                                    input_index = index,
-                                                    type = input.type switch
-                                                    {
-                                                        "anon" => TxInputType.ANON,
-                                                        "zerocoinspend" => TxInputType.ZEROCOINSPEND,
-                                                        _ => TxInputType.UNKNOWN
-                                                    },
-                                                    num_inputs = input.num_inputs,
-                                                    ring_size = input.ring_size,
-                                                    prev_txid_hex = input.txid,
-                                                    denomination = input.denomination,
-                                                    serial_hex = input.serial,
-                                                    pubcoin_hex = input.pubcoin,
-                                                    vout = input.vout,
-                                                    scriptsig_asm = input.scriptSig?.asm,
-                                                    scriptsig_hex = input.scriptSig?.hex,
-                                                    txinwitnes_hexes = input.txinwitness,
-                                                    sequence = input.sequence
-                                                };
-                                                var txInputUniqueId = await txInputsRepository.InsertTxInputAsync(txInput);
-                                                if (txInputUniqueId == null)
-                                                {
-                                                    inputsCompleted = false;
-                                                    break;
-                                                }
-
-                                                // ringct inputs
-                                                if (input.ringct_inputs != null)
-                                                    foreach (var rctInput in input.ringct_inputs)
-                                                    {
-                                                        var rctInputModel = new Models.Data.RingctInput();
-                                                        rctInputModel.tx_input_id = txInputUniqueId.Value;
-                                                        rctInputModel.txid_hex = rctInput.txid;
-                                                        rctInputModel.vout_n = rctInput.vout_n;
-                                                        var rctState = await ringctInputsRepository.InsertRingctInputAsync(rctInputModel);
-
-                                                        if (rctState == null)
-                                                        {
-                                                            inputsRCTCompleted = false;
-                                                            break;
-                                                        }
-                                                    }
-                                            }
-
-                                        if (tx.vout != null)
-                                            foreach (var txout in tx.vout)
-                                            {
-                                                var txOutputModel = new TxOutput();
-                                                txOutputModel.txid_hex = tx.txid;
-                                                txOutputModel.output_index = txout.output_index;
-                                                txOutputModel.type = txout.type switch
-                                                {
-                                                    "coinbase" => TxOutputType.COINBASE,
-                                                    "standard" => TxOutputType.STANDARD,
-                                                    "data" => TxOutputType.DATA,
-                                                    "blind" => TxOutputType.BLIND,
-                                                    "ringct" => TxOutputType.RINGCT,
-                                                    "unknown" => TxOutputType.UNKNOWN,
-                                                    _ => TxOutputType.UNKNOWN
-                                                };
-                                                txOutputModel.valuesat = txout.valueSat;
-                                                txOutputModel.vout_n = txout.vout_n;
-                                                txOutputModel.scriptpub_asm = txout.scriptPubKey?.asm;
-                                                txOutputModel.scriptpub_hex = txout.scriptPubKey?.hex;
-                                                txOutputModel.scriptpub_type = txout.scriptPubKey?.type switch
-                                                {
-                                                    "nonstandard" => TxScriptPubType.TX_NONSTANDARD,
-                                                    "pubkey" => TxScriptPubType.TX_PUBKEY,
-                                                    "pubkeyhash" => TxScriptPubType.TX_PUBKEYHASH,
-                                                    "pubkeyhash256" => TxScriptPubType.TX_PUBKEYHASH256,
-                                                    "timelocked_pubkeyhash" => TxScriptPubType.TX_TIMELOCKED_PUBKEYHASH,
-                                                    "timelocked_pubkeyhash256" => TxScriptPubType.TX_TIMELOCKED_PUBKEYHASH256,
-                                                    "scripthash" => TxScriptPubType.TX_SCRIPTHASH,
-                                                    "scripthash256" => TxScriptPubType.TX_SCRIPTHASH256,
-                                                    "timelocked_scripthash" => TxScriptPubType.TX_TIMELOCKED_SCRIPTHASH,
-                                                    "timelocked_scripthash256" => TxScriptPubType.TX_TIMELOCKED_SCRIPTHASH256,
-                                                    "multisig" => TxScriptPubType.TX_MULTISIG,
-                                                    "timelocked_multisig" => TxScriptPubType.TX_TIMELOCKED_MULTISIG,
-                                                    "nulldata" => TxScriptPubType.TX_NULL_DATA,
-                                                    "witness_v0_keyhash" => TxScriptPubType.TX_WITNESS_V0_KEYHASH,
-                                                    "witness_v0_scripthash" => TxScriptPubType.TX_WITNESS_V0_SCRIPTHASH,
-                                                    "witness_unknown" => TxScriptPubType.TX_WITNESS_UNKNOWN,
-                                                    "zerocoinmint" => TxScriptPubType.TX_ZEROCOINMINT,
-                                                    _ => TxScriptPubType.UNKNOWN
-                                                };
-                                                txOutputModel.reqsigs = txout.scriptPubKey?.reqSigs ?? 0;
-                                                txOutputModel.addresses = txout.scriptPubKey?.addresses;
-                                                txOutputModel.data_hex = txout.data_hex;
-                                                txOutputModel.ct_fee = txout.ct_fee.ToString(CultureInfo.InvariantCulture);
-                                                txOutputModel.valuecommitment_hex = txout.valueCommitment;
-                                                txOutputModel.pubkey_hex = txout.pubkey;
-
-                                                var outState = await txOutputsRepository.InsertTxOutputAsync(txOutputModel);
-
-                                                if (outState == null)
-                                                {
-                                                    outputsCompleted = false;
-                                                    break;
-                                                }
-                                            }
-
-                                        if (txCompleted && inputsCompleted && inputsRCTCompleted && outputsCompleted)
+                                        if (txCompleted && txRawCompleted)
                                             txscope.Complete();
                                         else
                                             txFailed = true;

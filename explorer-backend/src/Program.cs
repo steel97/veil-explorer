@@ -22,9 +22,7 @@ builder.Services.AddHostedService<HubBackgroundWorker>();
 
 builder.Services.AddTransient<IBlocksRepository, BlocksRepository>();
 builder.Services.AddTransient<ITransactionsRepository, TransactionsRepository>();
-builder.Services.AddTransient<ITxInputsRepository, TxInputsRepository>();
-builder.Services.AddTransient<IRingctInputsRepository, RingctInputsRepository>();
-builder.Services.AddTransient<ITxOutputsRepository, TxOutputsRepository>();
+builder.Services.AddTransient<IRawTxsRepository, RawTxsRepository>();
 
 builder.Services.AddHttpClient();
 builder.Services.AddSignalR(options => { });
