@@ -1,4 +1,6 @@
 bin
 obj
 output
+internal
 appsettings.json
+*.cfg
