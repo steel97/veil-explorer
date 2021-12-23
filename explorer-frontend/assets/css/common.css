@@ -1,0 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+html, body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    @apply font-inter;
+}
+
+/* some fixes required due to nuxt3-beta... */
+.underline-offset-14 {
+    text-underline-offset: 14px;
+}
+
+.form-switch .form-check-input {
+	margin-top: .1rem;
+	background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3E%3Ccircle r='3' fill='%23fff'/%3E%3C/svg%3E");
+	background-position: 0;
+	-webkit-transition: background-position .15s ease-in-out;
+	transition: background-position .15s ease-in-out;
+}
+
+.form-switch .form-check-input:checked {
+    background-position: 100%;
+}
+.form-switch .form-check-input:checked, .form-switch .form-check-input:focus {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3E%3Ccircle r='3' fill='%23fff'/%3E%3C/svg%3E");
+}
+
+.form-check-input:checked {
+    background-color: rgb(3 105 161);
+    border-color: rgb(3 105 161);
+}

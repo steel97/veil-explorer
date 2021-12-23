@@ -1,0 +1,441 @@
+<template>
+  <header
+    class="
+      relative
+      shadow
+      mb-3
+      bg-gray-50
+      text-gray-800
+      dark:bg-gray-800 dark:text-gray-300
+    "
+  >
+    <div class="max-w-full mx-auto pr-3">
+      <div class="flex justify-between items-center py-2">
+        <div class="flex items-center">
+          <div class="px-3 pr-2">
+            <NuxtLink to="/" class="flex items-center">
+              <img
+                class="h-6 w-auto pr-2 my-3"
+                src="/assets/images/logo.png"
+                :alt="t('Header.Title')"
+              />
+              <span class="font-semibold">{{ t("Header.Title") }}</span>
+            </NuxtLink>
+          </div>
+          <div class="border-l">
+            <span class="pl-2 font-base uppercase text-sm">{{
+              data?.chainInfo?.chain ?? t("Core.NoData")
+            }}</span>
+          </div>
+        </div>
+        <div class="-mr-2 -my-2 lg:hidden">
+          <button
+            type="button"
+            class="
+              p-2
+              inline-flex
+              items-center
+              justify-center
+              text-gray-400
+              hover:text-gray-500
+              focus:outline-none
+            "
+            @click="openMenu"
+          >
+            <span class="sr-only">{{ t("Header.OpenMenu") }}</span>
+            <MenuIcon class="h-6 w-6" />
+          </button>
+        </div>
+        <nav class="hidden lg:flex uppercase px-10 grow">
+          <ul class="flex space-x-4 justify-center grow text-sm">
+            <li v-for="(link, index) in getLinks()" :key="'link' + index">
+              <NuxtLink
+                :to="link.link"
+                class="
+                  font-medium
+                  hover:underline
+                  underline-offset-14
+                  decoration-2
+                  hover:text-sky-700 hover:dark:text-sky-400
+                "
+                :class="computeClasses(link)"
+              >
+                {{ link.locale }}
+              </NuxtLink>
+            </li>
+          </ul>
+        </nav>
+        <div class="hidden lg:flex items-center justify-end">
+          <div class="flex justify-center">
+            <div class="form-check form-switch flex items-center">
+              <label
+                class="
+                  form-check-label
+                  inline-block
+                  text-sm
+                  flex
+                  items-center
+                  mr-4
+                "
+                for="switchTheme"
+              >
+                <MoonIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" />
+                <span class="uppercase">{{ t("Header.DarkMode") }}</span>
+              </label>
+              <input
+                class="
+                  form-check-input
+                  appearance-none
+                  w-9
+                  rounded-full
+                  float-left
+                  h-5
+                  align-top
+                  bg-no-repeat bg-contain
+                  focus:outline-none
+                  cursor-pointer
+                  shadow-sm
+                  bg-gray-300
+                  dark:bg-gray-600
+                "
+                type="checkbox"
+                role="switch"
+                id="switchTheme"
+                v-model="themeSwitch"
+              />
+            </div>
+          </div>
+          <div class="mx-2 popover-wrapper text-sm">
+            <div class="flex justify-between items-center lang-width px-2">
+              <span class="mr-2"
+                ><img
+                  class="locale-icon"
+                  :alt="getCurrentLocale().name"
+                  :src="
+                    '/assets/images/langs/' + getCurrentLocale().code + '.png'
+                  "
+              /></span>
+              <span class="grow cursor-default uppercase">{{
+                getCurrentLocale().name
+              }}</span>
+            </div>
+            <div
+              class="
+                lang-width
+                popover-content
+                bg-gray-50
+                text-gray-800
+                dark:bg-gray-800 dark:text-gray-300
+                pt-2
+              "
+            >
+              <div
+                class="
+                  flex
+                  items-center
+                  justify-between
+                  lang-entry
+                  px-2
+                  cursor-pointer
+                "
+                v-for="val in getLocales()"
+                :key="'lang-' + val.code"
+                @click="switchLang(val.code)"
+              >
+                <span class="mr-2"
+                  ><img
+                    class="locale-icon"
+                    :alt="val.name"
+                    :src="'/assets/images/langs/' + val.code + '.png'"
+                /></span>
+                <span class="grow uppercase">{{ val.name }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      v-show="initialized"
+      :style="{ visibility: menuOpened ? 'visible' : 'hidden' }"
+      class="lg:hidden"
+    >
+      <div class="transition-[height] ease-out duration-200 menu-collapse">
+        <nav class="flex flex-col lg:hidden uppercase px-4 grow">
+          <ul class="flex flex-col space-y-4 grow text-sm mb-4">
+            <li v-for="(link, index) in getLinks()" :key="'link' + index">
+              <NuxtLink
+                :to="link.link"
+                class="
+                  font-medium
+                  hover:text-sky-700 hover:underline
+                  underline-offset-8
+                  decoration-2
+                "
+                :class="computeClasses(link)"
+              >
+                {{ link.locale }}
+              </NuxtLink>
+            </li>
+          </ul>
+        </nav>
+        <div class="flex px-4">
+          <div class="form-check form-switch flex items-center">
+            <label
+              class="
+                form-check-label
+                inline-block
+                text-sm
+                flex
+                items-center
+                mr-4
+              "
+              for="switchThemeMobile"
+            >
+              <MoonIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" />
+              <span class="uppercase">{{ t("Header.DarkMode") }}</span>
+            </label>
+            <input
+              class="
+                form-check-input
+                appearance-none
+                w-9
+                rounded-full
+                float-left
+                h-5
+                align-top
+                bg-no-repeat bg-contain
+                focus:outline-none
+                cursor-pointer
+                shadow-sm
+                bg-gray-300
+                dark:bg-gray-600
+              "
+              type="checkbox"
+              role="switch"
+              id="switchThemeMobile"
+              v-model="themeSwitch"
+            />
+          </div>
+        </div>
+        <div>
+          <div class="mx-2 mt-4 text-sm">
+            <div
+              class="flex justify-between items-center lang-width px-2"
+              @click="openLocaleMenu()"
+            >
+              <span class="mr-2"
+                ><img
+                  class="locale-icon"
+                  :src="
+                    '/assets/images/langs/' + getCurrentLocale().code + '.png'
+                  "
+              /></span>
+              <span class="grow cursor-default uppercase">{{
+                getCurrentLocale().name
+              }}</span>
+            </div>
+            <div
+              v-if="menuLocaleOpened"
+              class="
+                lang-width
+                bg-gray-50
+                text-gray-800
+                dark:bg-gray-800 dark:text-gray-300
+                pt-2
+              "
+            >
+              <div
+                class="
+                  flex
+                  items-center
+                  justify-between
+                  lang-entry
+                  px-2
+                  cursor-pointer
+                "
+                v-for="val in getLocales()"
+                :key="'lang-' + val.code"
+                @click="switchLang(val.code)"
+              >
+                <span class="mr-2"
+                  ><img
+                    class="locale-icon"
+                    :src="'/assets/images/langs/' + val.code + '.png'"
+                /></span>
+                <span class="grow uppercase">{{ val.name }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+</template>
+<script setup lang="ts">
+import { ref } from "@vue/reactivity";
+import { SunIcon, MoonIcon } from "@heroicons/vue/solid";
+import { MenuIcon } from "@heroicons/vue/outline";
+import { useChainInfo } from "@/composables/States";
+import { useI18n } from "vue-i18n";
+import Cookie from "js-cookie";
+
+const { t, availableLocales, getLocaleMessage, locale, fallbackLocale } =
+  useI18n();
+const data = useChainInfo();
+
+const initialized = ref(false);
+const menuOpened = ref(false);
+const menuHeight = ref("0px");
+const menuLocaleOpened = ref(false);
+
+const cookie = useCookie("theme") || "";
+const themeSwitch = ref(cookie.value == "dark" ? true : false);
+
+watch(themeSwitch, (nval) => {
+  const now = new Date();
+  now.setDate(now.getDate() + 90);
+
+  Cookie.set("theme", themeSwitch.value ? "dark" : "light", {
+    expires: now,
+    sameSite: "lax",
+  });
+
+  if (nval) document.body.classList.add("dark");
+  else document.body.classList.remove("dark");
+});
+
+onMounted(() => (initialized.value = true));
+
+const getLinks = () => {
+  return [
+    {
+      locale: t("Header.Links.Home"),
+      link: "/",
+    },
+    {
+      locale: t("Header.Links.Blocks"),
+      link: "/blocks",
+    },
+    {
+      locale: t("Header.Links.TxStats"),
+      link: "/tx-stats",
+    },
+    {
+      locale: t("Header.Links.UTxs"),
+      link: "/unconfirmed-tx",
+    },
+  ];
+};
+
+const getCurrentLocale = () => {
+  return {
+    code: locale.value,
+    name: t("Core.LocaleName"),
+  };
+};
+
+const getLocales = () => {
+  const locales = [];
+  availableLocales.forEach((lang) => {
+    if (lang == getCurrentLocale().code) return;
+    locales.push({
+      code: lang,
+      name: getLocaleMessage(lang).Core.LocaleName.source,
+    });
+  });
+  return locales;
+};
+
+const switchLang = (lang: string) => {
+  let targetLang = lang;
+  if (availableLocales.indexOf(targetLang) == -1) {
+    targetLang = fallbackLocale.value;
+  }
+
+  const now = new Date();
+  now.setDate(now.getDate() + 90);
+
+  Cookie.set("lang", targetLang, {
+    expires: now,
+    sameSite: "lax",
+  });
+
+  locale.value = targetLang;
+
+  openLocaleMenu();
+};
+
+const computeClasses = (link: ILink) => {
+  if (link.link == "/")
+    return ["underline", "text-sky-700", "dark:text-sky-400"];
+  return ["text-gray-600", "dark:text-gray-300"];
+};
+
+const recalculateMenuSize = () => {
+  let size = 220 + (menuLocaleOpened.value ? getLocales().length * 30 : 0);
+  menuHeight.value = menuOpened.value ? `${size}px` : "0px";
+};
+
+const openMenu = () => {
+  menuOpened.value = !menuOpened.value;
+
+  recalculateMenuSize();
+};
+
+const openLocaleMenu = () => {
+  menuLocaleOpened.value = !menuLocaleOpened.value;
+
+  recalculateMenuSize();
+};
+</script>
+
+<style lang="postcss" scoped>
+.menu-collapse {
+  height: v-bind(menuHeight);
+}
+
+.lang-width {
+  min-width: 140px;
+}
+
+.lang-entry {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.popover-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.popover-content {
+  opacity: 0;
+  visibility: hidden;
+  position: absolute;
+  right: 0px;
+  top: 40px;
+  transform: translate(0, 10px);
+}
+
+.popover-content:before {
+  position: absolute;
+  z-index: -1;
+  content: "";
+  top: -8px;
+  transition-duration: 0.15s;
+  transition-property: transform;
+}
+
+.popover-wrapper:hover .popover-content {
+  z-index: 10;
+  opacity: 1;
+  visibility: visible;
+  transform: translate(0, -20px);
+  transition: all 0.25s cubic-bezier(0.75, -0.02, 0.2, 0.97);
+}
+
+.locale-icon {
+  width: 24px;
+}
+</style>

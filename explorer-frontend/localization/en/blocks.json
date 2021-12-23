@@ -1,0 +1,9 @@
+{
+    "Height": "Height",
+    "Timestamp": "Date",
+    "Age": "Age",
+    "Type": "Type",
+    "Transactions": "Transactions",
+    "Size": "Size (bytes)",
+    "Weight": "Weight (wu)"
+}
