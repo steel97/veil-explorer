@@ -14,5 +14,6 @@
         "Hour": "hr(s)",
         "Minute": "min.",
         "Second": "sec."
-    }
+    },
+    "Synchronizing": "Synchronizing with blockchain {progress}%"
 }

@@ -8,12 +8,17 @@
       duration-200
     "
   >
-    <div class="min-h-screen">
+    <div class="min-h-screen mb-10">
       <AppHeader />
       <div class="w-full px-2 text-gray-800 dark:text-gray-300">
+        <SyncNotice v-if="isSynchronizing" />
         <SearchBox />
         <main class="max-w-7xl w-full mx-auto">
-          <NuxtPage />
+          <transition name="fade">
+            <div :key="route.name">
+              <NuxtPage />
+            </div>
+          </transition>
         </main>
       </div>
     </div>
@@ -25,6 +30,7 @@
 import "@/assets/css/tailwind.css";
 import "@/assets/css/common.css";
 import AppHeader from "@/components/AppHeader";
+import SyncNotice from "@/components/SyncNotice";
 import SearchBox from "@/components/SearchBox";
 import AppFooter from "@/components/AppFooter";
 import { useConfigs } from "@/composables/Configs";
@@ -32,6 +38,10 @@ import { useChainInfo } from "@/composables/States";
 import { useNetworkManager } from "@/composables/NetworkManager";
 import { BlockchainInfo } from "@/models/API/BlockchainInfo";
 import { useI18n } from "vue-i18n";
+import { useRoute } from "#imports";
+
+const config = useRuntimeConfig();
+const route = useRoute();
 
 const { getApiPath } = useConfigs();
 const { connect } = useNetworkManager();
@@ -102,6 +112,12 @@ const chainInfo = await useAsyncData("blockchaininfo", () =>
 );
 
 chainInfoDataState.value = chainInfo.data.value;
+
+const isSynchronizing = computed(
+  () =>
+    chainInfoDataState.value.chainInfo.blocks - config.SYNC_NOTICE_CASE >
+    chainInfoDataState.value.currentSyncedBlock
+);
 
 onMounted(() => {
   connect();

@@ -3,7 +3,6 @@
     class="
       relative
       shadow
-      mt-3
       p-6
       text-sm text-center text-gray-600
       bg-gray-50

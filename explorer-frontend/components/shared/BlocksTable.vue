@@ -15,6 +15,7 @@
     v-for="(val, index) in props.data"
     :key="'block-' + val.height"
     :class="index < data.length - 1 ? 'border-b' : ''"
+    :style="getStyle(index)"
   >
     <div>
       <a
@@ -221,4 +222,34 @@ const getBlockWeightRaw = (block: SimplifiedBlock) =>
 
 const getBlockWeight = (block: SimplifiedBlock) =>
   `width: ${getBlockWeightRaw(block)}%`;
+
+let targetOpacity = ref(1.0);
+watch(props.data, (nval) => {
+  targetOpacity.value = 0;
+});
+
+const getStyle = (index: number) => {
+  if (index == 0) return { opacity: targetOpacity.value };
+  return {};
+};
+
+const blockAppearAnimator = () => {
+  let currentOpacity = targetOpacity.value + 0.05;
+  if (currentOpacity > 1.0) {
+    setTimeout(() => {
+      blockAppearAnimator();
+    }, 16);
+    return;
+  }
+  targetOpacity.value = currentOpacity;
+  setTimeout(() => {
+    blockAppearAnimator();
+  }, 16);
+};
+
+onMounted(() =>
+  setTimeout(() => {
+    blockAppearAnimator();
+  }, 16)
+);
 </script>

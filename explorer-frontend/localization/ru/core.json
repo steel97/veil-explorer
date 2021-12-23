@@ -14,5 +14,6 @@
         "Hour": "ч.",
         "Minute": "мин.",
         "Second": "сек."
-    }
+    },
+    "Synchronizing": "Синхронизиция с блокчейном {progress}%"
 }
