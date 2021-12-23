@@ -41,3 +41,7 @@ html, body {
 .fade-leave-to {
   opacity: 0;
 }
+
+.smargins {
+    margin: 2px;
+}

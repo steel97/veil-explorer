@@ -46,6 +46,7 @@ const route = useRoute();
 const { getApiPath } = useConfigs();
 const { connect } = useNetworkManager();
 const { t, availableLocales, fallbackLocale, locale } = useI18n();
+const chainInfoDataState = useChainInfo();
 const theme = useCookie("theme") || "";
 const lang = useCookie("lang") || fallbackLocale.value;
 
@@ -103,8 +104,6 @@ const meta = {
 };
 
 useMeta(meta);
-
-const chainInfoDataState = useChainInfo();
 
 const chainInfo = await useAsyncData("blockchaininfo", () =>
   $fetch<BlockchainInfo>(`${getApiPath()}/blockchaininfo`)

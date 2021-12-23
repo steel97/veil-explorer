@@ -37,20 +37,30 @@
     <div class="rounded p-4 bg-gray-50 dark:bg-gray-800">
       <BlocksTable :data="blocks" />
     </div>
+    <Pagination
+      :overallEntries="chainInfoDataState.currentSyncedBlock"
+      :entriesPerPage="config.BLOCKS_PER_PAGE"
+      :currentPage="currentPage"
+      :linkTemplate="buildRouteTemplate()"
+      @pageSelected="selectPage"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import BlocksTable from "@/components/shared/BlocksTable";
+import Pagination from "@/components/shared/Pagination";
 import { useI18n } from "vue-i18n";
 import { reactive } from "@vue/reactivity";
 import { useLatestBlockInfo } from "@/composables/States";
 import { useConfigs } from "@/composables/Configs";
+import { useChainInfo } from "@/composables/States";
 import { SimplifiedBlock } from "@/models/API/SimplifiedBlock";
 
 const { getApiPath } = useConfigs();
 const config = useRuntimeConfig();
 const latestBlock = useLatestBlockInfo();
+const chainInfoDataState = useChainInfo();
 
 const route = useRoute();
 
@@ -66,6 +76,17 @@ const buildRouteSort = (target: string) =>
 const changeSort = async (target: string) => {
   targetSort = target == "asc" ? 0 : 1;
   window.history.replaceState({}, null, buildRouteSort(target));
+  const blocksInfoLocal = await fetchBlocks();
+  blocks.value = blocksInfoLocal.data.value;
+};
+
+const buildRouteTemplate = () => "/blocks/{page}/" + targetSort;
+
+const selectPage = async (pg: number) => {
+  if (pg == currentPage.value) return;
+  const link = buildRouteTemplate().replace("{page}", pg);
+  currentPage.value = pg;
+  window.history.replaceState({}, null, link);
   const blocksInfoLocal = await fetchBlocks();
   blocks.value = blocksInfoLocal.data.value;
 };

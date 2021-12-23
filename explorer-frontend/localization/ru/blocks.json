@@ -10,6 +10,7 @@
         "Title": "Veil Explorer - обзор блоков",
         "Description": "Обзор блоков veil"
     },
+    "Expand": "Раскрыть",
     "Title": "Блоки",
     "SortDesc": "Новые",
     "SortAsc": "Старые"

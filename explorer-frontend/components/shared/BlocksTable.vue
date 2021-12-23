@@ -29,13 +29,14 @@
         >#{{ val.height }}</NuxtLink
       >
     </div>
-    <div
+    <button
+      :aria-label="t('Blocks.Expand')"
       class="flex justify-end items-center md:hidden"
       @click="toggleBlockInfo(val)"
     >
       <span>{{ getAge(val) }}</span>
       <ChevronDownIcon class="h-5 w-5 text-sky-700 dark:text-sky-400" />
-    </div>
+    </button>
     <div
       class="md:hidden grid grid-cols-2 col-span-2"
       v-if="openedBlock.indexOf(val.height) > -1"
