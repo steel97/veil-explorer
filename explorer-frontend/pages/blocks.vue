@@ -68,19 +68,20 @@ const page = (route.params.page > 0 ? route.params.page : 1) - 1;
 const currentPage = ref(page + 1);
 
 const sort: string = route.params.sort ?? "desc";
-let targetSort = sort.toLowerCase() == "asc" ? 0 : 1;
+const targetSort = ref(sort.toLowerCase() == "asc" ? 0 : 1);
 
 const buildRouteSort = (target: string) =>
   "/blocks/" + currentPage.value + "/" + target;
 
 const changeSort = async (target: string) => {
-  targetSort = target == "asc" ? 0 : 1;
+  targetSort.value = target == "asc" ? 0 : 1;
   window.history.replaceState({}, null, buildRouteSort(target));
   const blocksInfoLocal = await fetchBlocks();
   blocks.value = blocksInfoLocal.data.value;
 };
 
-const buildRouteTemplate = () => "/blocks/{page}/" + targetSort;
+const buildRouteTemplate = () =>
+  "/blocks/{page}/" + (targetSort.value == 0 ? "asc" : "desc");
 
 const selectPage = async (pg: number) => {
   if (pg == currentPage.value) return;
@@ -96,7 +97,7 @@ const fetchBlocks = async () =>
     $fetch<Array<SimplifiedBlock>>(
       `${getApiPath()}/blocks?offset=${
         (currentPage.value - 1) * config.BLOCKS_PER_PAGE
-      }&count=${config.BLOCKS_PER_PAGE}&sort=${targetSort}`
+      }&count=${config.BLOCKS_PER_PAGE}&sort=${targetSort.value}`
     )
   );
 
@@ -104,7 +105,7 @@ const blocksInfo = await fetchBlocks();
 const blocks = ref<Array<SimplifiedBlock>>(blocksInfo.data.value);
 
 watch(latestBlock, (nval) => {
-  if (currentPage.value > 1 || targetSort == 0) return;
+  if (currentPage.value > 1 || targetSort.value == 0) return;
   blocks.value.pop();
   blocks.value.unshift(nval);
 });
