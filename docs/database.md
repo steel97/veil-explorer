@@ -2,14 +2,14 @@ explorer uses veil-node and postgresql to retrive required data.
 PostgreSQL installation guide: https://www.postgresql.org/download/linux/ubuntu/
 Minimum required version: Postgresql 13
 
-After installation:
+Guide after installation (ubuntu 20.04+):
 1. change password for postgres user
 sudo passwd postgres
 
 2. switch to postgres user
 sudo -i -u postgres
 
-3. create app user
+3. create app user (not superuser)
 createuser --interactive -e veilusr -D -P -R
 
 4. create app database
@@ -22,3 +22,5 @@ su <your user>
 sudo nano /etc/postgresql/<version>/main/postgresql.conf
 
 # you can tweak configuration by using pgtune: https://pgtune.leopard.in.ua/#/
+
+7. import sql scripts to newly created database from explorer-backend/schemas/ folder

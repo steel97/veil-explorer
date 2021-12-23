@@ -1,0 +1,1 @@
+dotnet publish ./explorer-backend.csproj -c Release -o ./output/linux-x64 --self-contained -r linux-x64

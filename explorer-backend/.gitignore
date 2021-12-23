@@ -4,3 +4,4 @@ output
 internal
 appsettings.json
 *.cfg
+*.rsa
