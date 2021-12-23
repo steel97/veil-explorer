@@ -15,7 +15,7 @@
     v-for="(val, index) in props.data"
     :key="'block-' + val.height"
     :class="index < props.data.length - 1 ? 'border-b' : ''"
-    :style="getStyle(index)"
+    :id="'block-' + val.height"
   >
     <div>
       <NuxtLink
@@ -260,15 +260,20 @@ const getBlockWeightRaw = (block: SimplifiedBlock) =>
 const getBlockWeight = (block: SimplifiedBlock) =>
   `width: ${getBlockWeightRaw(block)}%`;
 
-let targetOpacity = ref(1.0);
+let targetOpacity = 1.0;
+var latestBlock = ref<number>(0);
 watch(props.data, (nval) => {
-  targetOpacity.value = 0;
+  if (nval.length == 0) return;
+  const el = document.getElementById(`block-${latestBlock.value}`);
+  if (el != null) el.style.opacity = 1.0;
+  latestBlock.value = nval[0].height;
+  targetOpacity = 0;
   lastTime = null;
   requestAnimationFrame(blockAppearAnimator);
 });
 
 const getStyle = (index: number) => {
-  if (index == 0) return { opacity: targetOpacity.value };
+  if (index == 0) return { opacity: targetOpacity };
   return {};
 };
 
@@ -289,12 +294,17 @@ const blockAppearAnimator = (timestamp: number) => {
 
   if (stopUpdates) return;
 
-  let currentOpacity = targetOpacity.value + 0.001 * elapsed;
+  const el = document.getElementById(`block-${latestBlock.value}`);
+
+  let currentOpacity = targetOpacity + 0.001 * elapsed;
   if (currentOpacity > 1.0) {
-    targetOpacity.value = 1.0;
+    targetOpacity = 1.0;
+    if (el != null) el.style.opacity = targetOpacity;
     return;
   }
-  targetOpacity.value = currentOpacity;
+  targetOpacity = currentOpacity;
+
+  if (el != null) el.style.opacity = targetOpacity;
   requestAnimationFrame(blockAppearAnimator);
 };
 
