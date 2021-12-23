@@ -23,4 +23,12 @@ sudo nano /etc/postgresql/<version>/main/postgresql.conf
 
 # you can tweak configuration by using pgtune: https://pgtune.leopard.in.ua/#/
 
-7. import sql scripts to newly created database from explorer-backend/schemas/ folder
+7. change pg_hba.conf to allow unix domain socket connection from app:
+sudo nano /etc/postgresql/<version>/main/pg_hba.conf
+# add next entry:
+local   veilexplorer    veilusr                                 md5
+
+8. restart postgresql server
+sudo service postgresql restart
+
+9. import sql scripts to newly created database from explorer-backend/schemas/ folder
