@@ -19,7 +19,7 @@
           smargins
           bg-gray-50
           dark:bg-gray-800
-          w-10
+          pagi
           h-auto
           flex
           justify-center
@@ -35,7 +35,7 @@
           smargins
           bg-gray-300
           dark:bg-gray-600
-          w-10
+          pagi
           h-auto
           flex
           justify-center
@@ -157,3 +157,9 @@ const elements = computed(() => {
   return targetElements;
 });
 </script>
+
+<style scoped>
+.pagi {
+  min-width: 2.5rem;
+}
+</style>
