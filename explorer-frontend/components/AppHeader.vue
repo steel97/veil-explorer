@@ -40,7 +40,7 @@
               hover:text-gray-500
               focus:outline-none
             "
-            @click="openMenu"
+            @click="toggleMenu"
           >
             <span class="sr-only">{{ t("Header.OpenMenu") }}</span>
             <MenuIcon class="h-6 w-6" />
@@ -163,6 +163,7 @@
           <ul class="flex flex-col space-y-4 grow text-sm mb-4">
             <li v-for="(link, index) in getLinks()" :key="'link' + index">
               <NuxtLink
+                @click="toggleMenu()"
                 :to="link.link"
                 class="
                   font-medium
@@ -380,7 +381,7 @@ const recalculateMenuSize = () => {
   menuHeight.value = menuOpened.value ? `${size}px` : "0px";
 };
 
-const openMenu = () => {
+const toggleMenu = () => {
   menuOpened.value = !menuOpened.value;
 
   recalculateMenuSize();

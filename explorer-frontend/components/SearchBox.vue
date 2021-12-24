@@ -5,6 +5,7 @@
     >
       <span class="absolute inset-y-0 left-0 flex items-center pl-3">
         <button
+          @click="search()"
           type="submit"
           aria-label="Search"
           class="p-1 focus:outline-none focus:shadow-outline"
@@ -24,9 +25,11 @@
         </button>
       </span>
       <input
-        type="search"
+        type="text"
         name="q"
         id="searchbox"
+        ref="searchbox"
+        @model="searchbox"
         class="
           py-4
           text-sm
@@ -51,4 +54,9 @@
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
+const searchbox = ref<string>("");
+
+const search = () => {
+  //searchbox.value
+};
 </script>
