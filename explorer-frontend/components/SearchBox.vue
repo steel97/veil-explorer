@@ -30,7 +30,7 @@
         id="searchbox"
         ref="searchbox"
         v-model="searchmodel"
-        @submit="search()"
+        @change="search()"
         class="
           py-4
           text-sm
