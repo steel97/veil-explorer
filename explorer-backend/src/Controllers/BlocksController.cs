@@ -14,7 +14,7 @@ namespace explorer_backend.Controllers;
 public class BlocksController : ControllerBase
 {
 
-    private readonly ILogger<BlocksController> _logger;
+    private readonly ILogger _logger;
     private readonly IOptions<APIConfig> _apiConfig;
     private readonly IBlocksRepository _blocksRepository;
 

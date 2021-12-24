@@ -10,7 +10,7 @@ namespace explorer_backend.Controllers;
 public class BlockchainInfoController : ControllerBase
 {
 
-    private readonly ILogger<BlockchainInfoController> _logger;
+    private readonly ILogger _logger;
     private readonly ChaininfoSingleton _chainInfoSingleton;
 
     public BlockchainInfoController(ILogger<BlockchainInfoController> logger, ChaininfoSingleton chainInfoSingleton)
@@ -19,7 +19,8 @@ public class BlockchainInfoController : ControllerBase
         _chainInfoSingleton = chainInfoSingleton;
     }
 
-    [HttpGet(Name = "GetBlockchainInfo")]
+    [HttpGet(Name = "BlockchainInfo")]
+    [ProducesResponseType(typeof(BlockchainInfo), StatusCodes.Status200OK)]
     public BlockchainInfo Get()
     {
         return new BlockchainInfo

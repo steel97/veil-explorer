@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using System.Text.RegularExpressions;
 using Microsoft.Extensions.Options;
 using explorer_backend.Models.API;
 using explorer_backend.Configs;
@@ -13,25 +12,21 @@ namespace explorer_backend.Controllers;
 [Produces("application/json")]
 public class SearchController : ControllerBase
 {
-    private static Regex blockHeightRegex = new("^(0|[1-9][0-9]*)$", RegexOptions.Compiled);
-    private readonly ILogger<SearchController> _logger;
-    private readonly IOptions<APIConfig> _apiConfig;
+    private readonly ILogger _logger;
     private readonly IBlocksRepository _blocksRepository;
     private readonly ITransactionsRepository _transactionsRepository;
     private readonly IUtilityService _utilityService;
 
-    public SearchController(ILogger<SearchController> logger, IOptions<APIConfig> apiConfig, IBlocksRepository blocksRepository, ITransactionsRepository transactionsRepository, IUtilityService utilityService)
+    public SearchController(ILogger<SearchController> logger, IBlocksRepository blocksRepository, ITransactionsRepository transactionsRepository, IUtilityService utilityService)
     {
         _logger = logger;
-        _apiConfig = apiConfig;
         _blocksRepository = blocksRepository;
         _transactionsRepository = transactionsRepository;
         _utilityService = utilityService;
     }
 
     [HttpPost(Name = "Search")]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(List<SearchResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(SearchResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> Get(SearchRequest body)
     {
         var response = new SearchResponse();
@@ -41,7 +36,7 @@ public class SearchController : ControllerBase
 
         if (body.Query != null)
         {
-            if (blockHeightRegex.IsMatch(body.Query))
+            if (_utilityService.IsNumeric(body.Query))
             {
                 response.Found = true;
                 response.Type = EntityType.BLOCK_HEIGHT;

@@ -1,1 +1,2 @@
-OFFSET is slow, use workaround
+- OFFSET is slow, use workaround
+- blocks with tx count retrieve benchmark: subquery and join both gives equal result for lots of rows, still subquery faster for small amount of rows
