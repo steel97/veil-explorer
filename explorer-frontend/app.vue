@@ -116,7 +116,11 @@ const chainInfo = await useAsyncData("blockchaininfo", () =>
 chainInfoDataState.value = chainInfo.data.value;
 
 const isSynchronizing = computed(() => {
-  if (chainInfoDataState.value.chainInfo == null) return false;
+  if (
+    chainInfoDataState.value == null ||
+    chainInfoDataState.value.chainInfo == null
+  )
+    return false;
 
   const shouldSync =
     chainInfoDataState.value.chainInfo.blocks - config.SYNC_NOTICE_CASE >

@@ -49,7 +49,8 @@ public class BlocksRepository : BaseRepository, IBlocksRepository
         using var conn = Connection;
         await conn.OpenAsync();
 
-        using (var cmd = new NpgsqlCommand($@"SELECT blocks.height, blocks.""size"", blocks.weight, blocks.proof_type, blocks.""time"", blocks.mediantime, COUNT(transactions.block_height) FROM blocks LEFT JOIN transactions ON blocks.height = transactions.block_height WHERE blocks.synced = true GROUP BY blocks.height ORDER BY height {(sort == SortDirection.ASC ? "ASC" : "DESC")} OFFSET {offset} LIMIT {count};", conn))
+        //using (var cmd = new NpgsqlCommand($@"SELECT blocks.height, blocks.""size"", blocks.weight, blocks.proof_type, blocks.""time"", blocks.mediantime, COUNT(transactions.block_height) FROM blocks LEFT JOIN transactions ON blocks.height = transactions.block_height WHERE blocks.synced = true GROUP BY blocks.height ORDER BY height {(sort == SortDirection.ASC ? "ASC" : "DESC")} OFFSET {offset} LIMIT {count};", conn))
+        using (var cmd = new NpgsqlCommand($@"SELECT b.height, b.""size"", b.weight, b.proof_type, b.""time"", b.mediantime, (SELECT COUNT(t.txid) as txn from transactions t where t.block_height = b.height) FROM blocks b WHERE b.synced = true ORDER BY height {(sort == SortDirection.ASC ? "ASC" : "DESC")} OFFSET {offset} limit {count};", conn))
         {
             await using (var reader = await cmd.ExecuteReaderAsync())
             {

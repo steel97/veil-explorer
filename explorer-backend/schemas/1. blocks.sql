@@ -30,6 +30,7 @@ CREATE TABLE public.blocks (
 	CONSTRAINT blocks_pk PRIMARY KEY (height)
 );
 CREATE INDEX blocks_hash_idx ON public.blocks (hash);
-CREATE INDEX blocks_time_idx ON public.blocks ("time");
+/*CREATE INDEX blocks_time_idx ON public.blocks ("time");
 CREATE INDEX blocks_mediantime_idx ON public.blocks (mediantime);
-CREATE INDEX blocks_height_idx ON public.blocks (height);
+CREATE INDEX blocks_height_idx ON public.blocks (height);*/
+CREATE INDEX blocks_height_synced_idx ON public.blocks (height,synced);

@@ -38,7 +38,12 @@
       <BlocksTable :data="blocks" :reactivityFix="reactivityFix" />
     </div>
     <Pagination
-      :overallEntries="chainInfoDataState.currentSyncedBlock"
+      :overallEntries="
+        chainInfoDataState != null &&
+        chainInfoDataState.currentSyncedBlock != null
+          ? chainInfoDataState.currentSyncedBlock
+          : 0
+      "
       :entriesPerPage="config.BLOCKS_PER_PAGE"
       :currentPage="currentPage"
       :linkTemplate="buildRouteTemplate()"
