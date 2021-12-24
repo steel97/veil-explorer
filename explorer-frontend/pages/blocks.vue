@@ -100,7 +100,7 @@ const selectPage = async (pg: number) => {
 };
 
 const fetchBlocks = async () =>
-  await useFetch<void, Array<SimplifiedBlock>>(
+  await useFetch<string, Array<SimplifiedBlock>>(
     `${getApiPath()}/blocks?offset=${
       (currentPage.value - 1) * config.BLOCKS_PER_PAGE
     }&count=${config.BLOCKS_PER_PAGE}&sort=${targetSort.value}`

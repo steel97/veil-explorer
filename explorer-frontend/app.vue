@@ -109,7 +109,7 @@ const meta = computed(() => {
 
 useMeta(meta);
 
-const chainInfo = await useFetch<void, BlockchainInfo>(
+const chainInfo = await useFetch<string, BlockchainInfo>(
   `${getApiPath()}/blockchaininfo`
 );
 chainInfoDataState.value = chainInfo.data.value;

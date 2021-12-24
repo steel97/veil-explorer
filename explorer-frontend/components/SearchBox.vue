@@ -29,7 +29,8 @@
         name="q"
         id="searchbox"
         ref="searchbox"
-        @model="searchbox"
+        v-model="searchmodel"
+        @submit="search()"
         class="
           py-4
           text-sm
@@ -51,12 +52,43 @@
 </template>
 
 <script setup lang="ts">
+import { SearchResponse, EntityType } from "@/models/API/SearchResponse";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
-const searchbox = ref<string>("");
+const { getApiPath } = useConfigs();
+const searchmodel = ref<string>("");
+const router = useRouter();
 
-const search = () => {
-  //searchbox.value
+const search = async () => {
+  const query = searchmodel.value;
+  if (query == "" || query == null) return;
+  const searchResponse = await useFetch<string, SearchResponse>(
+    `${getApiPath()}/search`,
+    {
+      method: "POST",
+      body: {
+        query: query,
+      },
+    }
+  );
+  const data = searchResponse.data.value;
+  switch (data.type) {
+    case EntityType.UNKNOWN:
+      router.replace(`/search/notfound`);
+      break;
+    case EntityType.BLOCK_HEIGHT:
+      router.replace(`/block-height/${data.query}`);
+      break;
+    case EntityType.BLOCK_HASH:
+      router.replace(`/block/${data.query}`);
+      break;
+    case EntityType.TRANSACTION_HASH:
+      router.replace(`/tx/${data.query}`);
+      break;
+    case EntityType.ADDRESS:
+      router.replace(`/address/${data.query}`);
+      break;
+  }
 };
 </script>
