@@ -1,10 +1,11 @@
 using Npgsql;
+using explorer_backend.Services.Core;
 
 namespace explorer_backend.Persistence.Repositories;
 
 public class RawTxsRepository : BaseRepository, IRawTxsRepository
 {
-    public RawTxsRepository(IConfiguration config) : base(config) { }
+    public RawTxsRepository(IConfiguration config, IUtilityService utilityService) : base(config, utilityService) { }
 
     public async Task<byte[]?> GetTransactionByIdAsync(string txid)
     {

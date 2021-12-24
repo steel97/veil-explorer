@@ -1,12 +1,13 @@
 using Npgsql;
 using explorer_backend.Models.Data;
 using explorer_backend.Models.API;
+using explorer_backend.Services.Core;
 
 namespace explorer_backend.Persistence.Repositories;
 
 public class BlocksRepository : BaseRepository, IBlocksRepository
 {
-    public BlocksRepository(IConfiguration config) : base(config) { }
+    public BlocksRepository(IConfiguration config, IUtilityService utilityService) : base(config, utilityService) { }
 
     protected async Task<Block?> ReadBlock(NpgsqlDataReader reader)
     {
@@ -108,6 +109,23 @@ public class BlocksRepository : BaseRepository, IBlocksRepository
                 if (!success) return null;
 
                 return await ReadBlock(reader);
+            }
+        }
+    }
+
+    public async Task<int?> ProbeBlockByHashAsync(string hash)
+    {
+        using var conn = Connection;
+        await conn.OpenAsync();
+
+        using (var cmd = new NpgsqlCommand($"SELECT height FROM blocks WHERE hash = {TransformHex(hash)}", conn))
+        {
+            await using (var reader = await cmd.ExecuteReaderAsync())
+            {
+                var success = await reader.ReadAsync();
+                if (!success) return null;
+
+                return reader.GetInt32(0);
             }
         }
     }

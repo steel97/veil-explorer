@@ -1,11 +1,12 @@
 using Npgsql;
 using explorer_backend.Models.Data;
+using explorer_backend.Services.Core;
 
 namespace explorer_backend.Persistence.Repositories;
 
 public class TransactionsRepository : BaseRepository, ITransactionsRepository
 {
-    public TransactionsRepository(IConfiguration config) : base(config) { }
+    public TransactionsRepository(IConfiguration config, IUtilityService utilityService) : base(config, utilityService) { }
 
     protected async Task<Transaction?> ReadTransaction(NpgsqlDataReader reader)
     {
@@ -36,6 +37,23 @@ public class TransactionsRepository : BaseRepository, ITransactionsRepository
                 if (!success) return null;
 
                 return await ReadTransaction(reader);
+            }
+        }
+    }
+
+    public async Task<string?> ProbeTransactionByHashAsync(string txid)
+    {
+        using var conn = Connection;
+        await conn.OpenAsync();
+
+        using (var cmd = new NpgsqlCommand($"SELECT txid FROM transactions WHERE txid = {TransformHex(txid)}", conn))
+        {
+            await using (var reader = await cmd.ExecuteReaderAsync())
+            {
+                var success = await reader.ReadAsync();
+                if (!success) return null;
+
+                return await ReadHexFromBytea(reader, 0);
             }
         }
     }

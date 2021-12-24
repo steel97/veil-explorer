@@ -1,16 +1,17 @@
 using Npgsql;
-using System.Text.RegularExpressions;
+using explorer_backend.Services.Core;
 
 namespace explorer_backend.Persistence;
 
 public class BaseRepository
 {
     private readonly IConfiguration _config;
-    private static Regex regex = new("^[A-Fa-f0-9]+$", RegexOptions.Compiled);
+    private readonly IUtilityService _utilityService;
 
-    public BaseRepository(IConfiguration config)
+    public BaseRepository(IConfiguration config, IUtilityService utilityService)
     {
         _config = config;
+        _utilityService = utilityService;
     }
 
     protected NpgsqlConnection Connection
@@ -27,7 +28,7 @@ public class BaseRepository
     protected string? TransformHex(string? hexInput)
     {
         if (string.IsNullOrEmpty(hexInput)) return "NULL";
-        if (!regex.IsMatch(hexInput)) throw new Exception("HEX value is wrong");
+        if (!_utilityService.VerifyHex(hexInput)) throw new Exception("HEX value is wrong");
 
         return hexInput != null ? $@"'\x{hexInput}'::bytea" : "NULL";
     }
