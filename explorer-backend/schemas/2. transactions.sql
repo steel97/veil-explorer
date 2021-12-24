@@ -10,5 +10,4 @@ CREATE TABLE public.transactions (
 	CONSTRAINT transactions_pk PRIMARY KEY (txid),
 	CONSTRAINT transactions_fk FOREIGN KEY (block_height) REFERENCES public.blocks(height) ON DELETE SET NULL
 );
-CREATE INDEX transactions_txid_idx ON public.transactions (txid);
 CREATE INDEX transactions_block_height_idx ON public.transactions (block_height);
