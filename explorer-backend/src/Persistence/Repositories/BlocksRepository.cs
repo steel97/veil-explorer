@@ -2,12 +2,18 @@ using Npgsql;
 using explorer_backend.Models.Data;
 using explorer_backend.Models.API;
 using explorer_backend.Services.Core;
+using explorer_backend.Services.Caching;
 
 namespace explorer_backend.Persistence.Repositories;
 
 public class BlocksRepository : BaseRepository, IBlocksRepository
 {
-    public BlocksRepository(IConfiguration config, IUtilityService utilityService) : base(config, utilityService) { }
+    private readonly ChaininfoSingleton _chainInfoSingleton;
+
+    public BlocksRepository(IConfiguration config, IUtilityService utilityService, ChaininfoSingleton chainInfoSingleton) : base(config, utilityService)
+    {
+        _chainInfoSingleton = chainInfoSingleton;
+    }
 
     protected async Task<Block?> ReadBlock(NpgsqlDataReader reader)
     {
@@ -51,7 +57,14 @@ public class BlocksRepository : BaseRepository, IBlocksRepository
         await conn.OpenAsync();
 
         //using (var cmd = new NpgsqlCommand($@"SELECT blocks.height, blocks.""size"", blocks.weight, blocks.proof_type, blocks.""time"", blocks.mediantime, COUNT(transactions.block_height) FROM blocks LEFT JOIN transactions ON blocks.height = transactions.block_height WHERE blocks.synced = true GROUP BY blocks.height ORDER BY height {(sort == SortDirection.ASC ? "ASC" : "DESC")} OFFSET {offset} LIMIT {count};", conn))
-        using (var cmd = new NpgsqlCommand($@"SELECT b.height, b.""size"", b.weight, b.proof_type, b.""time"", b.mediantime, (SELECT COUNT(t.txid) as txn from transactions t where t.block_height = b.height) FROM blocks b WHERE b.synced = true ORDER BY b.height {(sort == SortDirection.ASC ? "ASC" : "DESC")} OFFSET {offset} limit {count};", conn))
+        /*
+        
+        b.height > 
+        
+        */
+        var offsetQuery = sort == SortDirection.DESC ? $"b.height < {_chainInfoSingleton.currentSyncedBlock + 1 - offset}" : $"b.height > {offset}";
+
+        using (var cmd = new NpgsqlCommand($@"SELECT b.height, b.""size"", b.weight, b.proof_type, b.""time"", b.mediantime, (SELECT COUNT(t.txid) as txn from transactions t where t.block_height = b.height) FROM blocks b WHERE {offsetQuery} AND b.synced = true ORDER BY b.height {(sort == SortDirection.ASC ? "ASC" : "DESC")} limit {count};", conn))
         {
             await using (var reader = await cmd.ExecuteReaderAsync())
             {

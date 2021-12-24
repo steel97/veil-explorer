@@ -55,19 +55,19 @@ public class SearchController : ControllerBase
                 }
                 else if (_utilityService.VerifyHex(body.Query))
                 {
-                    var block = await _blocksRepository.ProbeBlockByHashAsync(body.Query);
-                    if (block != null)
+                    var tx = await _transactionsRepository.ProbeTransactionByHashAsync(body.Query);
+                    if (tx != null)
                     {
                         response.Found = true;
-                        response.Type = EntityType.BLOCK_HASH;
+                        response.Type = EntityType.TRANSACTION_HASH;
                     }
                     else
                     {
-                        var tx = await _transactionsRepository.ProbeTransactionByHashAsync(body.Query);
-                        if (tx != null)
+                        var block = await _blocksRepository.ProbeBlockByHashAsync(body.Query);
+                        if (block != null)
                         {
                             response.Found = true;
-                            response.Type = EntityType.TRANSACTION_HASH;
+                            response.Type = EntityType.BLOCK_HASH;
                         }
                     }
                 }

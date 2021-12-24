@@ -157,57 +157,48 @@ const getAge = (block: SimplifiedBlock) => {
     if (diff < check.val) continue;
 
     const infFormatted = diff / check.val;
+    if (Math.floor(infFormatted) == 0) continue;
     let secondaryInfFormatted = 0;
+    let secondaryInfFloor = 0;
     if (index + 1 < allChecks.length) {
       let scheck = allChecks[index + 1];
       let previnf = (Math.floor(infFormatted) * check.val) / scheck.val;
       secondaryInfFormatted = diff / scheck.val - previnf;
+      secondaryInfFloor = Math.floor(secondaryInfFormatted);
     }
     switch (check.locale) {
       case "Year":
         resp = `${Math.floor(infFormatted)} ${t("Core.Ages.Year")}`;
-        if (secondaryInfFormatted > 0)
-          resp += `, ${Math.floor(secondaryInfFormatted)} ${t(
-            "Core.Ages.Month"
-          )}`;
+        if (secondaryInfFloor > 0)
+          resp += `, ${secondaryInfFloor} ${t("Core.Ages.Month")}`;
         break;
       case "Month":
         resp = `${Math.floor(infFormatted)} ${t("Core.Ages.Month")}`;
-        if (secondaryInfFormatted > 0)
-          resp += `, ${Math.floor(secondaryInfFormatted)} ${t(
-            "Core.Ages.Week"
-          )}`;
+        if (secondaryInfFloor > 0)
+          resp += `, ${secondaryInfFloor} ${t("Core.Ages.Week")}`;
         break;
       case "Week":
         resp = `${Math.floor(infFormatted)} ${t("Core.Ages.Week")}`;
-        if (secondaryInfFormatted > 0)
-          resp += `, ${Math.floor(secondaryInfFormatted)} ${t(
-            "Core.Ages.Day"
-          )}`;
+        if (secondaryInfFloor > 0)
+          resp += `, ${secondaryInfFloor} ${t("Core.Ages.Day")}`;
         break;
       case "Day":
         resp = `${Math.floor(infFormatted)} ${t("Core.Ages.Day")}`;
-        if (secondaryInfFormatted > 0)
-          resp += `, ${Math.floor(secondaryInfFormatted)} ${t(
-            "Core.Ages.Hour"
-          )}`;
+        if (secondaryInfFloor > 0)
+          resp += `, ${secondaryInfFloor} ${t("Core.Ages.Hour")}`;
         break;
       case "Hour":
         resp = `${Math.floor(infFormatted)} ${t("Core.Ages.Hour")}`;
-        if (secondaryInfFormatted > 0)
-          resp += `, ${Math.floor(secondaryInfFormatted)} ${t(
-            "Core.Ages.Minute"
-          )}`;
+        if (secondaryInfFloor > 0)
+          resp += `, ${secondaryInfFloor} ${t("Core.Ages.Minute")}`;
         break;
       case "Minute":
         resp = `${Math.floor(infFormatted)} ${t("Core.Ages.Minute")}`;
-        if (secondaryInfFormatted > 0)
-          resp += `, ${Math.floor(secondaryInfFormatted)} ${t(
-            "Core.Ages.Second"
-          )}`;
+        if (secondaryInfFloor > 0)
+          resp += `, ${secondaryInfFloor} ${t("Core.Ages.Second")}`;
         break;
       case "Second":
-        resp = `${Math.floor(infFormatted)} ${t("Core.Ages.Second")}`;
+        resp = `${secondaryInfFloor} ${t("Core.Ages.Second")}`;
         break;
     }
     break;
