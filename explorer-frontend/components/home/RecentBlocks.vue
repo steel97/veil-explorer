@@ -15,10 +15,8 @@ const { getApiPath } = useConfigs();
 const config = useRuntimeConfig();
 const latestBlock = useLatestBlockInfo();
 
-const recentBlocksInfo = await useAsyncData("recentblocksinfo", () =>
-  $fetch<Array<SimplifiedBlock>>(
-    `${getApiPath()}/blocks?offset=0&count=${config.RECENT_BLOCKS_COUNT}&sort=1`
-  )
+const recentBlocksInfo = await useFetch<void, Array<SimplifiedBlock>>(
+  `${getApiPath()}/blocks?offset=0&count=${config.RECENT_BLOCKS_COUNT}&sort=1`
 );
 const recentBlocks = reactive<Array<SimplifiedBlock>>(
   recentBlocksInfo.data.value

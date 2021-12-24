@@ -109,10 +109,9 @@ const meta = computed(() => {
 
 useMeta(meta);
 
-const chainInfo = await useAsyncData("blockchaininfo", () =>
-  $fetch<BlockchainInfo>(`${getApiPath()}/blockchaininfo`)
+const chainInfo = await useFetch<void, BlockchainInfo>(
+  `${getApiPath()}/blockchaininfo`
 );
-
 chainInfoDataState.value = chainInfo.data.value;
 
 const isSynchronizing = computed(() => {
