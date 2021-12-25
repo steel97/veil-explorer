@@ -31,7 +31,18 @@ public class AddressController : ControllerBase
     [ProducesResponseType(typeof(AddressResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> Get(AddressRequest body)
     {
-        var response = new AddressResponse();
+        var response = new AddressResponse
+        {
+            IsValid = false,
+            Fetched = false
+        };
+
+        if (_utilityService.VerifyAddress(body.Address))
+        {
+            response.IsValid = true;
+
+            var reqAddr = _utilityService.CleanupAddress(body.Address);
+        }
 
         return Ok(response);
     }

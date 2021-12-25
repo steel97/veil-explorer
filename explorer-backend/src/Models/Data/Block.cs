@@ -18,8 +18,8 @@ public class Block
     public string? merkleroot_hex { get; set; }
     public long time { get; set; }
     public long mediantime { get; set; }
-    public long nonce { get; set; }
-    public long nonce64 { get; set; }
+    public ulong nonce { get; set; }
+    public ulong nonce64 { get; set; }
     public string? mixhash_hex { get; set; }
     public string? bits_hex { get; set; }
     public double difficulty { get; set; }

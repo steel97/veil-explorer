@@ -152,7 +152,7 @@ const getAge = (block: SimplifiedBlock) => {
   ];
 
   let resp = "";
-  for (let index = 0; index < allChecks.length; i++) {
+  for (let index = 0; index < allChecks.length; index++) {
     const check = allChecks[index];
     if (diff < check.val) continue;
 

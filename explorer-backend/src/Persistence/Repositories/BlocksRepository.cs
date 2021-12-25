@@ -35,8 +35,8 @@ public class BlocksRepository : BaseRepository, IBlocksRepository
         block.merkleroot_hex = await ReadHexFromBytea(reader, 13);
         block.time = reader.GetInt64(14);
         block.mediantime = reader.GetInt64(15);
-        block.nonce = reader.GetInt64(16);
-        block.nonce64 = reader.GetInt64(17);
+        block.nonce = (ulong)reader.GetDecimal(16);
+        block.nonce64 = (ulong)reader.GetDecimal(17);
         block.mixhash_hex = await ReadHexFromBytea(reader, 18);
         block.bits_hex = await ReadHexFromBytea(reader, 19);
         block.difficulty = await ReadDoubleFromBytea(reader, 20);

@@ -30,3 +30,7 @@ CREATE TABLE public.blocks (
 	CONSTRAINT blocks_pk PRIMARY KEY (height)
 );
 CREATE INDEX blocks_hash_idx ON public.blocks (hash);
+
+/* fix for nonce64, for some reason it's unsigned */
+ALTER TABLE public.blocks ALTER COLUMN nonce64 TYPE numeric USING nonce64::numeric;
+ALTER TABLE public.blocks ALTER COLUMN nonce TYPE numeric USING nonce::numeric;

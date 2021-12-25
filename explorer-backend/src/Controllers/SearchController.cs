@@ -43,12 +43,12 @@ public class SearchController : ControllerBase
             }
             else
             {
-                if (body.Query.Length == 34 || body.Query.Length == 42)
+                if (_utilityService.VerifyAddress(body.Query))
                 {
                     response.Found = true;
                     response.Type = EntityType.ADDRESS;
                 }
-                else if (_utilityService.VerifyHex(body.Query))
+                else if (body.Query.Length == 64 && _utilityService.VerifyHex(body.Query))
                 {
                     var tx = await _transactionsRepository.ProbeTransactionByHashAsync(body.Query);
                     if (tx != null)

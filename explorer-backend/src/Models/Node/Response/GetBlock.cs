@@ -21,8 +21,8 @@ public class GetBlockResult
     public List<string>? Tx { get; set; }
     public long Time { get; set; }
     public long Mediantime { get; set; }
-    public long Nonce { get; set; }
-    public long Nonce64 { get; set; }
+    public ulong Nonce { get; set; }
+    public ulong Nonce64 { get; set; }
     public string? Mixhash { get; set; }
     public string? Bits { get; set; }
     public double Difficulty { get; set; }
