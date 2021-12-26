@@ -28,6 +28,7 @@ export RECENT_BLOCKS_COUNT=5
 export BLOCKS_PER_PAGE=15
 export MAX_BLOCK_WEIGHT=4000000
 export SYNC_NOTICE_CASE=15
+export COOKIE_SAVE_DAYS=90
 
 
 4.2 change permissions and test frontend, if there are no errors, move to step 5.
