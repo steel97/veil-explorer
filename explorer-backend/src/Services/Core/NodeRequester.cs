@@ -31,45 +31,59 @@ public class NodeRequester : INodeRequester
 
     public async ValueTask ValidateAddressAndCacheAsync(string target, CancellationToken token)
     {
-        using var httpClient = _httpClientFactory.CreateClient();
-        var options = new JsonSerializerOptions
+        try
         {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
+            using var httpClient = _httpClientFactory.CreateClient();
+            var options = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
 
-        ConfigureHttpClient(httpClient);
+            ConfigureHttpClient(httpClient);
 
-        var request = new JsonRPCRequest
+            var request = new JsonRPCRequest
+            {
+                Id = 1,
+                Method = "validateaddress",
+                Params = new List<object>(new object[] { target })
+            };
+            var response = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", request, options);
+            var data = await response.Content.ReadFromJsonAsync<ValidateAddrees>(options);
+            if (data != null)
+                _nodeApiCacheSingleton.SetApiCache($"validateaddress-{target}", data);
+        }
+        catch
         {
-            Id = 1,
-            Method = "validateaddress",
-            Params = new List<object>(new object[] { target })
-        };
-        var response = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", request, options);
-        var data = await response.Content.ReadFromJsonAsync<ValidateAddrees>(options);
-        if (data != null)
-            _nodeApiCacheSingleton.SetApiCache($"validateaddress-{target}", data);
+
+        }
     }
 
     public async ValueTask ScanTxOutsetAndCacheAsync(string target, CancellationToken token)
     {
-        using var httpClient = _httpClientFactory.CreateClient();
-        var options = new JsonSerializerOptions
+        try
         {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
+            using var httpClient = _httpClientFactory.CreateClient();
+            var options = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
 
-        ConfigureHttpClient(httpClient);
+            ConfigureHttpClient(httpClient);
 
-        var request = new JsonRPCRequest
+            var request = new JsonRPCRequest
+            {
+                Id = 1,
+                Method = "scantxoutset",
+                Params = new List<object>(new object[] { "start", new object[] { $"addr({target})" } })
+            };
+            var response = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", request, options);
+            var data = await response.Content.ReadFromJsonAsync<ScanTxOutset>(options);
+            if (data != null)
+                _nodeApiCacheSingleton.SetApiCache($"scantxoutset-{target}", data);
+        }
+        catch
         {
-            Id = 1,
-            Method = "scantxoutset",
-            Params = new List<object>(new object[] { "start", new object[] { $"addr({target})" } })
-        };
-        var response = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", request, options);
-        var data = await response.Content.ReadFromJsonAsync<ScanTxOutset>(options);
-        if (data != null)
-            _nodeApiCacheSingleton.SetApiCache($"scantxoutset-{target}", data);
+
+        }
     }
 }
