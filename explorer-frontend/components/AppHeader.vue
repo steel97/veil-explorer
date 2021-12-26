@@ -289,22 +289,18 @@ const menuOpened = ref(false);
 const menuHeight = ref("0px");
 const menuLocaleOpened = ref(false);
 
-const cookie = useCookie("theme") || "";
-const themeSwitch = ref(cookie.value == "dark" ? true : false);
+const themeSwitch = ref(themeState.value == "dark" ? true : false);
 
 watch(themeSwitch, (nval) => {
   const now = new Date();
-  now.setDate(now.getDate() + 90);
+  now.setDate(now.getDate() + config.COOKIE_SAVE_DAYS);
 
-  themeState.value = themeSwitch.value ? "dark" : "";
+  themeState.value = themeSwitch.value ? "dark" : "light";
 
   Cookie.set("theme", themeState.value, {
     expires: now,
     sameSite: "lax",
   });
-
-  if (nval) document.body.classList.add("dark");
-  else document.body.classList.remove("dark");
 });
 
 onMounted(() => (initialized.value = true));
@@ -358,7 +354,7 @@ const switchLang = (lang: string) => {
   }
 
   const now = new Date();
-  now.setDate(now.getDate() + 90);
+  now.setDate(now.getDate() + config.COOKIE_SAVE_DAYS);
 
   Cookie.set("lang", targetLang, {
     expires: now,

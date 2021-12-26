@@ -1,5 +1,5 @@
 <template>
-  <div :class="themeState">
+  <div :class="themeState" id="clfix">
     <div
       class="
         bg-gray-200
@@ -42,6 +42,7 @@ import { useLocalization } from "@/composables/Localization";
 import { BlockchainInfo } from "@/models/API/BlockchainInfo";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "#imports";
+import Cookie from "js-cookie";
 
 const config = useRuntimeConfig();
 const route = useRoute();
@@ -56,14 +57,38 @@ const theme = useCookie("theme").value ?? "";
 const lang = useCookie("lang").value ?? getClientLocale();
 
 let currentLang = lang;
+let currentTheme = theme;
+
+let usedMedia = false;
+if (process.client && currentTheme == "") {
+  if (
+    window.matchMedia &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+  ) {
+    usedMedia = true;
+    currentTheme = "dark";
+
+    const now = new Date();
+    now.setDate(now.getDate() + config.COOKIE_SAVE_DAYS);
+    Cookie.set("theme", "dark", {
+      expires: now,
+      sameSite: "lax",
+    });
+  }
+}
 
 if (availableLocales.indexOf(currentLang) == -1) {
   currentLang = fallbackLocale.value;
 }
 
 locale.value = currentLang;
+themeState.value = currentTheme == "dark" ? "dark" : "";
 
-themeState.value = theme == "dark" ? "dark" : "";
+onMounted(() => {
+  if (usedMedia) {
+    document.getElementById("clfix").classList = "dark";
+  }
+});
 
 const meta = computed(() => {
   return {
