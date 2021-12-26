@@ -42,13 +42,19 @@
       v-if="openedBlock.indexOf(val.height) > -1"
     >
       <div>{{ t("Blocks.Timestamp") }}</div>
-      <div class="text-right">{{ formatDateLocal(val.time) }}</div>
+      <div class="text-right">
+        <div>{{ formatDateLocal(val.time) }}</div>
+        <div class="text-xs text-gray-500 dark:text-gray-400">
+          {{ formatTimeLocal(val.time) }}
+        </div>
+      </div>
 
       <div>{{ t("Blocks.Type") }}</div>
       <div class="text-right">
         <div>{{ getPow(val)[0] }}</div>
         <div
-          class="text-xs text-gray-500 dark:text-gray-400"
+          class="text-xs text-gray-500 dark:text-gray-400 yy"
+          v-if="getPow(val)[2] != null"
           v-html="getPow(val)[1]"
         ></div>
       </div>
@@ -70,7 +76,12 @@
         </div>
       </div>
     </div>
-    <div class="hidden md:block">{{ formatDateLocal(val.time) }}</div>
+    <div class="hidden md:block">
+      <div>{{ formatDateLocal(val.time) }}</div>
+      <div class="text-xs text-gray-500 dark:text-gray-400">
+        {{ formatTimeLocal(val.time) }}
+      </div>
+    </div>
     <div class="hidden md:block">{{ getAge(val) }}</div>
     <div class="hidden md:block">
       <div>{{ getPow(val)[0] }}</div>
@@ -107,7 +118,7 @@ const props = defineProps<{
   reactivityFix: number;
 }>();
 
-const { formatDateLocal } = useFormatting();
+const { formatDateLocal, formatTimeLocal } = useFormatting();
 const { t } = useI18n();
 
 const getAge = (block: SimplifiedBlock) => {
@@ -211,6 +222,7 @@ const getPow = (block: SimplifiedBlock) => {
 
   let high = "";
   let low = "&nbsp;";
+  let lowI: string | null = null;
 
   switch (proofType) {
     case BlockType.UNKNOWN: {
@@ -243,7 +255,9 @@ const getPow = (block: SimplifiedBlock) => {
     }
   }
 
-  return [high, low];
+  if (low != "&nbsp;") lowI = low;
+
+  return [high, low, lowI];
 };
 
 const getBlockWeightRaw = (block: SimplifiedBlock) =>

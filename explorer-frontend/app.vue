@@ -38,6 +38,7 @@ import AppFooter from "@/components/AppFooter";
 import { useConfigs } from "@/composables/Configs";
 import { useThemeState, useChainInfo } from "@/composables/States";
 import { useNetworkManager } from "@/composables/NetworkManager";
+import { useLocalization } from "@/composables/Localization";
 import { BlockchainInfo } from "@/models/API/BlockchainInfo";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "#imports";
@@ -47,11 +48,12 @@ const route = useRoute();
 
 const { getApiPath } = useConfigs();
 const { connect } = useNetworkManager();
+const { getClientLocale } = useLocalization();
 const { t, availableLocales, fallbackLocale, locale } = useI18n();
 const chainInfoDataState = useChainInfo();
 const themeState = useThemeState();
-const theme = useCookie("theme").value || "";
-const lang = useCookie("lang").value || fallbackLocale.value;
+const theme = useCookie("theme").value ?? "";
+const lang = useCookie("lang").value ?? getClientLocale();
 
 let currentLang = lang;
 
