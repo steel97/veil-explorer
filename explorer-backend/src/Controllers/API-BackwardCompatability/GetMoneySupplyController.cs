@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Mvc;
+using ExplorerBackend.Core;
 using ExplorerBackend.Configs;
 using ExplorerBackend.Models.API;
 using ExplorerBackend.Services.Caching;
@@ -28,11 +29,12 @@ public class GetMoneySupplyController : ControllerBase
     public MoneySupplyResponse? Get()
     {
         var totalSupply = _chainInfoSingleton.currentChainInfo?.Moneysupply ?? 0;
-        var circulatingSupply = (double)totalSupply - (_chainInfoSingleton.BudgetWalletAmount + _chainInfoSingleton.FoundationWalletAmmount);
+        var totalSupplyPrepared = (double)totalSupply / Constants.MoneyConvert;
+        var circulatingSupply = totalSupplyPrepared - (_chainInfoSingleton.BudgetWalletAmount + _chainInfoSingleton.FoundationWalletAmmount);
 
         return new MoneySupplyResponse
         {
-            total_supply = totalSupply,
+            total_supply = totalSupplyPrepared,
             circulating_supply = circulatingSupply,
             team_budget = _chainInfoSingleton.BudgetWalletAmount,
             foundation_budget = _chainInfoSingleton.FoundationWalletAmmount,
