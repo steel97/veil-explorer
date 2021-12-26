@@ -81,7 +81,12 @@ public class AddressController : ControllerBase
                 }
             }
 
-            if (scanTxOutsetRes == null || body.ForceScanAmount)
+            if ((scanTxOutsetRes == null || body.ForceScanAmount) && (
+                validateRes != null &&
+                validateRes.Result != null &&
+                validateRes.Result.isvalid &&
+                !(validateRes.Result.isstealthaddress ?? false)
+            ))
             {
                 try
                 {

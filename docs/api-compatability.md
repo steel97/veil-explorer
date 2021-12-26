@@ -48,7 +48,10 @@ Returned in simplified format, missed some fields, new format example below:
 New version doesn't send x16rt field which now is always zero
 
 3. /api/getaddressbalance/<address>
-New version return null or amount, null means that address is invalid or added to work queue, request this api until returned value is number
+New version indicate status with response status code
+400 - bad request (address is invalid or it is a stealth address)
+200 - success
+202 - request added to queue, retry requeste until you get status 200
 
 4. /api/getmoneysupply
 New version uses double type for all variables except for budget_address and foundation_address

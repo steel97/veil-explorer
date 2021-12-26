@@ -18,23 +18,26 @@ public class GetAddressBalanceController : ControllerBase
     private readonly ILogger _logger;
     private readonly IOptions<APIConfig> _apiConfig;
     private readonly IUtilityService _utilityService;
+    private readonly ValidateAddressBackgroundTaskQueue _validateAddressBackgroundTaskQueue;
     private readonly ScanTxOutsetBackgroundTaskQueue _scanTxOutsetBackgroundTaskQueue;
     private readonly INodeRequester _nodeRequester;
     private readonly NodeApiCacheSingleton _nodeApiCacheSingleton;
 
     public GetAddressBalanceController(ILogger<GetAddressBalanceController> logger, IOptions<APIConfig> apiConfig, IUtilityService utilityService,
-        ScanTxOutsetBackgroundTaskQueue scanTxOutsetBackgroundTaskQueue,
+        ValidateAddressBackgroundTaskQueue validateAddressBackgroundTaskQueue, ScanTxOutsetBackgroundTaskQueue scanTxOutsetBackgroundTaskQueue,
         INodeRequester nodeRequester, NodeApiCacheSingleton nodeApiCacheSingleton)
     {
         _logger = logger;
         _apiConfig = apiConfig;
         _utilityService = utilityService;
+        _validateAddressBackgroundTaskQueue = validateAddressBackgroundTaskQueue;
         _scanTxOutsetBackgroundTaskQueue = scanTxOutsetBackgroundTaskQueue;
         _nodeRequester = nodeRequester;
         _nodeApiCacheSingleton = nodeApiCacheSingleton;
     }
 
     [HttpGet("{address}")]
+    [ProducesResponseType(StatusCodes.Status202Accepted)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(double?), StatusCodes.Status200OK)]
     public async Task<IActionResult> Get(string address, CancellationToken cancellationToken)
@@ -45,9 +48,49 @@ public class GetAddressBalanceController : ControllerBase
         {
             var reqAddr = _utilityService.CleanupAddress(address);
 
+            var validateRes = _nodeApiCacheSingleton.GetApiCache<ValidateAddrees>($"validateaddress-{reqAddr}");
             var scanTxOutsetRes = _nodeApiCacheSingleton.GetApiCache<ScanTxOutset>($"scantxoutset-{reqAddr}");
 
-            if (scanTxOutsetRes == null)
+            if (validateRes == null)
+            {
+                try
+                {
+                    // validate address
+                    var validateAddressFlag = new AsyncFlag
+                    {
+                        State = false
+                    };
+                    await _validateAddressBackgroundTaskQueue.QueueBackgroundWorkItemAsync(async token =>
+                    {
+                        await _nodeRequester.ValidateAddressAndCacheAsync(reqAddr, token);
+                        if (validateAddressFlag != null)
+                            validateAddressFlag.State = true;
+                    });
+                    await AsyncUtils.WaitUntilAsync(cancellationToken, () => validateAddressFlag.State, _apiConfig.Value.ApiQueueSpinDelay, _apiConfig.Value.ApiQueueWaitTimeout);
+
+                    validateRes = _nodeApiCacheSingleton.GetApiCache<ValidateAddrees>($"validateaddress-{reqAddr}");
+                }
+                catch (TimeoutException)
+                {
+
+                }
+            }
+
+            if (
+              validateRes == null ||
+              validateRes.Result == null ||
+              !validateRes.Result.isvalid ||
+              (validateRes.Result.isstealthaddress ?? false)
+            )
+                return StatusCode(400, response);
+
+
+            if (scanTxOutsetRes == null && (
+                 validateRes != null &&
+                 validateRes.Result != null &&
+                 validateRes.Result.isvalid &&
+                 !(validateRes.Result.isstealthaddress ?? false)
+             ))
             {
                 try
                 {
@@ -72,9 +115,14 @@ public class GetAddressBalanceController : ControllerBase
             }
 
             if (scanTxOutsetRes != null && scanTxOutsetRes.Result != null)
+            {
                 response = scanTxOutsetRes.Result.total_amount;
+                return Ok(response);
+            }
         }
+        else
+            return StatusCode(400, response);
 
-        return Ok(response);
+        return StatusCode(202, response);
     }
 }
