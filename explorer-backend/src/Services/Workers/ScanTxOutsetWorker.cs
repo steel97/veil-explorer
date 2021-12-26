@@ -46,6 +46,8 @@ public class ScanTxOutsetWorker : BackgroundService
             {
                 Func<CancellationToken, ValueTask>? workItem = await _taskQueue.DequeueAsync(stopToken);
                 await workItem(stopToken);
+
+                await Task.Delay(TimeSpan.FromMilliseconds(_explorerConfig.CurrentValue.NodeWorkersPullDelay));
             }
             catch (OperationCanceledException)
             {
