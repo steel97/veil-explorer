@@ -1,6 +1,6 @@
 // Taken from here: https://stackoverflow.com/a/61066995
 
-namespace explorer_backend.Core;
+namespace ExplorerBackend.Core;
 
 public static class AsyncUtils
 {

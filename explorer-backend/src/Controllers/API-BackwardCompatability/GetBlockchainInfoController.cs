@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using explorer_backend.Models.Node.Response;
-using explorer_backend.Services.Caching;
+using ExplorerBackend.Models.Node.Response;
+using ExplorerBackend.Services.Caching;
 
-namespace explorer_backend.Controllers;
+namespace ExplorerBackend.Controllers;
 
 [ApiController]
 [Route("/api/[controller]")]
@@ -21,8 +21,6 @@ public class GetBlockchainInfoController : ControllerBase
 
     [HttpGet(Name = "GetBlockchainInfo")]
     [ProducesResponseType(typeof(GetBlockchainInfoResult), StatusCodes.Status200OK)]
-    public GetBlockchainInfoResult? Get()
-    {
-        return _chainInfoSingleton.currentChainInfo;
-    }
+    public GetBlockchainInfoResult? Get() => _chainInfoSingleton.currentChainInfo;
+
 }

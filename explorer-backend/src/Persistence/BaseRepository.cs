@@ -1,7 +1,7 @@
 using Npgsql;
-using explorer_backend.Services.Core;
+using ExplorerBackend.Services.Core;
 
-namespace explorer_backend.Persistence;
+namespace ExplorerBackend.Persistence;
 
 public class BaseRepository
 {

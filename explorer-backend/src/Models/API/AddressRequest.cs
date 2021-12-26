@@ -1,4 +1,4 @@
-namespace explorer_backend.Models.API;
+namespace ExplorerBackend.Models.API;
 
 public class AddressRequest
 {

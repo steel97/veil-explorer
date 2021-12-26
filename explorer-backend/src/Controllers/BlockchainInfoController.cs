@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using explorer_backend.Models.API;
-using explorer_backend.Services.Caching;
+using ExplorerBackend.Models.API;
+using ExplorerBackend.Services.Caching;
 
-namespace explorer_backend.Controllers;
+namespace ExplorerBackend.Controllers;
 
 [ApiController]
 [Route("/api/[controller]")]

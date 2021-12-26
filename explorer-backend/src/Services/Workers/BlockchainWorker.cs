@@ -1,12 +1,12 @@
 using System.Text.Json;
 using System.Net.Http.Headers;
 using Microsoft.Extensions.Options;
-using explorer_backend.Configs;
-using explorer_backend.Services.Caching;
-using explorer_backend.Models.Node;
-using explorer_backend.Models.Node.Response;
+using ExplorerBackend.Configs;
+using ExplorerBackend.Services.Caching;
+using ExplorerBackend.Models.Node;
+using ExplorerBackend.Models.Node.Response;
 
-namespace explorer_backend.Services.Workers;
+namespace ExplorerBackend.Services.Workers;
 
 public class BlockchainWorker : BackgroundService
 {

@@ -1,4 +1,4 @@
-namespace explorer_backend.Core;
+namespace ExplorerBackend.Core;
 
 public class AsyncFlag
 {

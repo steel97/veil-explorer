@@ -1,6 +1,6 @@
-using explorer_backend.Models.Data;
+using ExplorerBackend.Models.Data;
 
-namespace explorer_backend.Models.API;
+namespace ExplorerBackend.Models.API;
 
 public class SimplifiedBlock
 {

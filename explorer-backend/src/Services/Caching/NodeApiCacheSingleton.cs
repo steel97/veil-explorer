@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Caching.Memory;
-using explorer_backend.Configs;
+using ExplorerBackend.Configs;
 using MemoryCache = Microsoft.Extensions.Caching.Memory.MemoryCache;
 
-namespace explorer_backend.Services.Caching;
+namespace ExplorerBackend.Services.Caching;
 
 public class NodeApiCacheSingleton
 {

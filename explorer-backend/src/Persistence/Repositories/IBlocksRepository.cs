@@ -1,7 +1,7 @@
-using explorer_backend.Models.Data;
-using explorer_backend.Models.API;
+using ExplorerBackend.Models.Data;
+using ExplorerBackend.Models.API;
 
-namespace explorer_backend.Persistence.Repositories;
+namespace ExplorerBackend.Persistence.Repositories;
 
 public interface IBlocksRepository
 {

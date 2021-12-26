@@ -1,6 +1,6 @@
-using explorer_backend.Models.Node.Response;
+using ExplorerBackend.Models.Node.Response;
 
-namespace explorer_backend.Services.Caching;
+namespace ExplorerBackend.Services.Caching;
 
 public class ChaininfoSingleton
 {

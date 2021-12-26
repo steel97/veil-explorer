@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using explorer_backend.Models.Node.Response;
-using explorer_backend.Services.Caching;
+using ExplorerBackend.Models.Node.Response;
+using ExplorerBackend.Services.Caching;
 
-namespace explorer_backend.Controllers;
+namespace ExplorerBackend.Controllers;
 
 [ApiController]
 [Route("/api/[controller]")]
@@ -21,8 +21,5 @@ public class GetChainalgoStatsController : ControllerBase
 
     [HttpGet(Name = "GetChainalgoStats")]
     [ProducesResponseType(typeof(GetChainalgoStatsResult), StatusCodes.Status200OK)]
-    public GetChainalgoStatsResult? Get()
-    {
-        return _chainInfoSingleton.currentChainAlgoStats;
-    }
+    public GetChainalgoStatsResult? Get() => _chainInfoSingleton.currentChainAlgoStats;
 }

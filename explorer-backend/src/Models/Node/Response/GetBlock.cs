@@ -1,4 +1,4 @@
-namespace explorer_backend.Models.Node.Response;
+namespace ExplorerBackend.Models.Node.Response;
 
 public class GetBlock : JsonRPCResponse
 {

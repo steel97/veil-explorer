@@ -1,13 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using explorer_backend.Core;
-using explorer_backend.Models.Node.Response;
-using explorer_backend.Configs;
-using explorer_backend.Services.Queues;
-using explorer_backend.Services.Core;
-using explorer_backend.Services.Caching;
+using ExplorerBackend.Core;
+using ExplorerBackend.Models.Node.Response;
+using ExplorerBackend.Configs;
+using ExplorerBackend.Services.Queues;
+using ExplorerBackend.Services.Core;
+using ExplorerBackend.Services.Caching;
 
-namespace explorer_backend.Controllers;
+namespace ExplorerBackend.Controllers;
 
 [ApiController]
 [Route("/api/[controller]")]

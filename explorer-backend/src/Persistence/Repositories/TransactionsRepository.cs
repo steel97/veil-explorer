@@ -1,8 +1,8 @@
 using Npgsql;
-using explorer_backend.Models.Data;
-using explorer_backend.Services.Core;
+using ExplorerBackend.Models.Data;
+using ExplorerBackend.Services.Core;
 
-namespace explorer_backend.Persistence.Repositories;
+namespace ExplorerBackend.Persistence.Repositories;
 
 public class TransactionsRepository : BaseRepository, ITransactionsRepository
 {

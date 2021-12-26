@@ -1,6 +1,4 @@
-using explorer_backend.Models.Data;
-
-namespace explorer_backend.Persistence.Repositories;
+namespace ExplorerBackend.Persistence.Repositories;
 
 public interface IRawTxsRepository
 {

@@ -1,10 +1,10 @@
 using Npgsql;
-using explorer_backend.Models.Data;
-using explorer_backend.Models.API;
-using explorer_backend.Services.Core;
-using explorer_backend.Services.Caching;
+using ExplorerBackend.Models.Data;
+using ExplorerBackend.Models.API;
+using ExplorerBackend.Services.Core;
+using ExplorerBackend.Services.Caching;
 
-namespace explorer_backend.Persistence.Repositories;
+namespace ExplorerBackend.Persistence.Repositories;
 
 public class BlocksRepository : BaseRepository, IBlocksRepository
 {

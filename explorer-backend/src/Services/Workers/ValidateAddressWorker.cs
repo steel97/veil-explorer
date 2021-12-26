@@ -1,11 +1,11 @@
 using System.Text.Json;
 using System.Net.Http.Headers;
 using Microsoft.Extensions.Options;
-using explorer_backend.Configs;
-using explorer_backend.Services.Caching;
-using explorer_backend.Services.Queues;
+using ExplorerBackend.Configs;
+using ExplorerBackend.Services.Caching;
+using ExplorerBackend.Services.Queues;
 
-namespace explorer_backend.Services.Workers;
+namespace ExplorerBackend.Services.Workers;
 
 public class ValidateAddressWorker : BackgroundService
 {

@@ -1,4 +1,4 @@
-namespace explorer_backend.Models.Node;
+namespace ExplorerBackend.Models.Node;
 
 public class JsonRPCResponse
 {

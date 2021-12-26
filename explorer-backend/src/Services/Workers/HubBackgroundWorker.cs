@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.SignalR;
-using explorer_backend.Hubs;
-using explorer_backend.Configs;
-using explorer_backend.Services.Caching;
+using ExplorerBackend.Hubs;
+using ExplorerBackend.Configs;
+using ExplorerBackend.Services.Caching;
 
-namespace explorer_backend.Services.Workers;
+namespace ExplorerBackend.Services.Workers;
 
 public class HubBackgroundWorker : BackgroundService
 {

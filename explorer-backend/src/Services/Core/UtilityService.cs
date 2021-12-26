@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace explorer_backend.Services.Core;
+namespace ExplorerBackend.Services.Core;
 
 public class UtilityService : IUtilityService
 {

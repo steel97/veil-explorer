@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace explorer_backend.Models.Node.Response;
+namespace ExplorerBackend.Models.Node.Response;
 
 public class GetRawTransaction : JsonRPCResponse
 {

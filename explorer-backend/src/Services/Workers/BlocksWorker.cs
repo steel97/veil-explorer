@@ -3,16 +3,16 @@ using System.Transactions;
 using System.Net.Http.Headers;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.SignalR;
-using explorer_backend.Hubs;
-using explorer_backend.Configs;
-using explorer_backend.Services.Caching;
-using explorer_backend.Persistence.Repositories;
-using explorer_backend.Models.API;
-using explorer_backend.Models.Data;
-using explorer_backend.Models.Node;
-using explorer_backend.Models.Node.Response;
+using ExplorerBackend.Hubs;
+using ExplorerBackend.Configs;
+using ExplorerBackend.Services.Caching;
+using ExplorerBackend.Persistence.Repositories;
+using ExplorerBackend.Models.API;
+using ExplorerBackend.Models.Data;
+using ExplorerBackend.Models.Node;
+using ExplorerBackend.Models.Node.Response;
 
-namespace explorer_backend.Services.Workers;
+namespace ExplorerBackend.Services.Workers;
 
 public class BlocksWorker : BackgroundService
 {

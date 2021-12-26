@@ -1,8 +1,8 @@
 using System.Threading.Channels;
 using Microsoft.Extensions.Options;
-using explorer_backend.Configs;
+using ExplorerBackend.Configs;
 
-namespace explorer_backend.Services.Queues;
+namespace ExplorerBackend.Services.Queues;
 
 public class ScanTxOutsetBackgroundTaskQueue : IBackgroundTaskQueue
 {

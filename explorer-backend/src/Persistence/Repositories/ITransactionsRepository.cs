@@ -1,6 +1,6 @@
-using explorer_backend.Models.Data;
+using ExplorerBackend.Models.Data;
 
-namespace explorer_backend.Persistence.Repositories;
+namespace ExplorerBackend.Persistence.Repositories;
 
 public interface ITransactionsRepository
 {

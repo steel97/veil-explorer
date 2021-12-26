@@ -1,6 +1,4 @@
-using explorer_backend.Models.Node.Response;
-
-namespace explorer_backend.Models.API;
+namespace ExplorerBackend.Models.API;
 
 public class MoneySupplyResponse
 {

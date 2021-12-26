@@ -1,4 +1,4 @@
-namespace explorer_backend.Configs;
+namespace ExplorerBackend.Configs;
 
 public class ServerConfig
 {

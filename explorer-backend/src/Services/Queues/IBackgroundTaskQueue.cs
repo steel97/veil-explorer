@@ -1,4 +1,4 @@
-namespace explorer_backend.Services.Queues;
+namespace ExplorerBackend.Services.Queues;
 
 public interface IBackgroundTaskQueue
 {

@@ -1,11 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using explorer_backend.Models.API;
-using explorer_backend.Configs;
-using explorer_backend.Services.Core;
-using explorer_backend.Persistence.Repositories;
+using ExplorerBackend.Models.API;
+using ExplorerBackend.Services.Core;
+using ExplorerBackend.Persistence.Repositories;
 
-namespace explorer_backend.Controllers;
+namespace ExplorerBackend.Controllers;
 
 [ApiController]
 [Route("/api/[controller]")]

@@ -1,4 +1,5 @@
-namespace explorer_backend.Models.Node;
+namespace ExplorerBackend.Models.Node;
+
 public class JsonRPCRequest
 {
     public string Jsonrpc

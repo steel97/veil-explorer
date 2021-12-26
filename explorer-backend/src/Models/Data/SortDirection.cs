@@ -1,4 +1,5 @@
-namespace explorer_backend.Models.Data;
+namespace ExplorerBackend.Models.Data;
+
 public enum SortDirection
 {
     ASC = 0,

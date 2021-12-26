@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.SignalR;
-using explorer_backend.Services.Caching;
+using ExplorerBackend.Services.Caching;
 
-namespace explorer_backend.Hubs;
+namespace ExplorerBackend.Hubs;
 
 public class EventsHub : Hub
 {
