@@ -20,6 +20,7 @@ public class HubBackgroundWorker : BackgroundService
         _explorerConfig = explorerConfig;
         _chainInfoSingleton = chaininfoSingleton;
     }
+
     protected override async Task ExecuteAsync(CancellationToken stopToken)
     {
         while (!stopToken.IsCancellationRequested)
@@ -37,6 +38,10 @@ public class HubBackgroundWorker : BackgroundService
 
                 // TimeSpan not reuired here since we use milliseconds, still put it there to change in future if required
                 await Task.Delay(TimeSpan.FromMilliseconds(_explorerConfig.CurrentValue.HubNotifyDelay));
+            }
+            catch (OperationCanceledException)
+            {
+
             }
             catch (Exception ex)
             {

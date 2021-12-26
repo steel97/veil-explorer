@@ -4,6 +4,7 @@ using explorer_backend.Configs;
 using explorer_backend.Services.Core;
 using explorer_backend.Services.Caching;
 using explorer_backend.Services.Workers;
+using explorer_backend.Services.Queues;
 using explorer_backend.Persistence.Repositories;
 
 var baseCorsPolicty = "_baseCorsPolicy";
@@ -16,11 +17,20 @@ builder.Services.Configure<ExplorerConfig>(builder.Configuration.GetSection("Exp
 builder.Services.Configure<ServerConfig>(builder.Configuration.GetSection("Server"));
 
 builder.Services.AddSingleton<ChaininfoSingleton>();
+builder.Services.AddSingleton<NodeApiCacheSingleton>();
 builder.Services.AddSingleton<IUtilityService, UtilityService>();
+builder.Services.AddSingleton<INodeRequester, NodeRequester>();
 
 builder.Services.AddHostedService<BlocksWorker>();
 builder.Services.AddHostedService<BlockchainWorker>();
 builder.Services.AddHostedService<HubBackgroundWorker>();
+builder.Services.AddHostedService<ScanTxOutsetWorker>();
+
+builder.Services.AddSingleton<ValidateAddressBackgroundTaskQueue>();
+builder.Services.AddSingleton<ScanTxOutsetBackgroundTaskQueue>();
+
+builder.Services.AddHostedService<ValidateAddressWorker>();
+builder.Services.AddHostedService<ScanTxOutsetWorker>();
 
 builder.Services.AddTransient<IBlocksRepository, BlocksRepository>();
 builder.Services.AddTransient<ITransactionsRepository, TransactionsRepository>();

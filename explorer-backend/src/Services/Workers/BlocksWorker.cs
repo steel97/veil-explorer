@@ -1,7 +1,6 @@
 using System.Text.Json;
 using System.Transactions;
 using System.Net.Http.Headers;
-using System.Globalization;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.SignalR;
 using explorer_backend.Hubs;
@@ -33,6 +32,7 @@ public class BlocksWorker : BackgroundService
         _httpClientFactory = httpClientFactory;
         _chainInfoSingleton = chaininfoSingleton;
     }
+
     protected override async Task ExecuteAsync(CancellationToken stopToken)
     {
         using var httpClient = _httpClientFactory.CreateClient();
@@ -250,6 +250,10 @@ public class BlocksWorker : BackgroundService
                 }
                 // TimeSpan not reuired here since we use milliseconds, still put it there to change in future if required
                 await Task.Delay(TimeSpan.FromMilliseconds(_explorerConfig.CurrentValue.PullBlocksDelay));
+            }
+            catch (OperationCanceledException)
+            {
+
             }
             catch (Exception ex)
             {

@@ -22,6 +22,7 @@ public class BlockchainWorker : BackgroundService
         _httpClientFactory = httpClientFactory;
         _chainInfoSingleton = chaininfoSingleton;
     }
+
     protected override async Task ExecuteAsync(CancellationToken stopToken)
     {
         using var httpClient = _httpClientFactory.CreateClient();
@@ -78,6 +79,10 @@ public class BlockchainWorker : BackgroundService
 
                 // TimeSpan not reuired here since we use milliseconds, still put it there to change in future if required
                 await Task.Delay(TimeSpan.FromMilliseconds(_explorerConfig.CurrentValue.PullBlockchainInfoDelay));
+            }
+            catch (OperationCanceledException)
+            {
+
             }
             catch (Exception ex)
             {
