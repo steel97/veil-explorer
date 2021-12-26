@@ -7,6 +7,8 @@ public class ExplorerConfig
     public int PullBlocksDelay { get; set; }
     public int PullBlockchainInfoDelay { get; set; }
     public int BlocksPerBatch { get; set; }
+    public string? BudgetAddress { get; set; }
+    public string? FoundationAddress { get; set; }
     public MemoryCache? MemoryCache { get; set; }
     public Node? Node { get; set; }
     public QueueConfig? ScanTxOutsetQueue { get; set; }

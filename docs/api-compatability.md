@@ -46,3 +46,9 @@ Returned in simplified format, missed some fields, new format example below:
 
 2. /api/getchainalgostats
 New version doesn't send x16rt field which now is always zero
+
+3. /api/getaddressbalance/<address>
+New version return null or amount, null means that address is invalid or added to work queue, request this api until returned value is number
+
+4. /api/getmoneysupply
+New version uses double type for all variables except for budget_address and foundation_address
