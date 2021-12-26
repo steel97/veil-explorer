@@ -1,1 +1,9 @@
-{}
+{
+    "ViewTitle": "View address",
+    "CopyToClipboard": "Copy address",
+    "CopySuccess": "Address copied",
+    "Meta": {
+        "Title": "Veil Explorer - view address {address}",
+        "Description": "View information about address {address}"
+    }
+}

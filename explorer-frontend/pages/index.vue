@@ -3,7 +3,7 @@
     <h1 class="uppercase font-semibold py-4">
       {{ t("Home.NetworkSummary") }}
     </h1>
-    <network-summary />
+    <NetworkSummary />
     <div class="flex pb-4 pt-6 justify-between">
       <h1 class="uppercase font-semibold">
         {{ t("Home.RecentBlocks") }}
@@ -23,7 +23,7 @@
         </NuxtLink>
       </div>
     </div>
-    <recent-blocks />
+    <RecentBlocks />
   </div>
 </template>
 

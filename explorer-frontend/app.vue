@@ -43,6 +43,7 @@ import { BlockchainInfo } from "@/models/API/BlockchainInfo";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "#imports";
 import Cookie from "js-cookie";
+import "toastify-js/src/toastify.css";
 
 const config = useRuntimeConfig();
 const route = useRoute();

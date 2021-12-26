@@ -1,1 +1,9 @@
-{}
+{
+    "ViewTitle": "Просмотр адреса",
+    "CopyToClipboard": "Копировать адрес",
+    "CopySuccess": "Адрес скопирован",
+    "Meta": {
+        "Title": "Veil Explorer - просмотр адреса {address}",
+        "Description": "Просмотр информации о адресе {address}"
+    }
+}
