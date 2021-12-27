@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using ExplorerBackend.VeilStructs;
 using ExplorerBackend.Models.API;
 using ExplorerBackend.Configs;
 using ExplorerBackend.Models.Data;
+using ExplorerBackend.Services.Core;
 using ExplorerBackend.Persistence.Repositories;
 
 namespace ExplorerBackend.Controllers;
@@ -17,13 +19,15 @@ public class BlockController : ControllerBase
     private readonly IOptions<APIConfig> _apiConfig;
     private readonly IBlocksRepository _blocksRepository;
     private readonly ITransactionsRepository _transactionsRepository;
+    private readonly IUtilityService _utilityService;
 
-    public BlockController(ILogger<BlockController> logger, IOptions<APIConfig> apiConfig, IBlocksRepository blocksRepository, ITransactionsRepository transactionsRepository)
+    public BlockController(ILogger<BlockController> logger, IOptions<APIConfig> apiConfig, IBlocksRepository blocksRepository, ITransactionsRepository transactionsRepository, IUtilityService utilityService)
     {
         _logger = logger;
         _apiConfig = apiConfig;
         _blocksRepository = blocksRepository;
         _transactionsRepository = transactionsRepository;
+        _utilityService = utilityService;
     }
 
     [HttpPost(Name = "GetBlock")]
@@ -44,16 +48,30 @@ public class BlockController : ControllerBase
         };
 
         Block? block = null;
-        if (body.Hash != null)
+        if (body.Hash != null && _utilityService.VerifyHex(body.Hash))
             block = await _blocksRepository.GetBlockByHashAsync(body.Hash);
         else if (body.Height != null)
             block = await _blocksRepository.GetBlockByHeightAsync(body.Height.Value);
+        else
+            return Problem($"count should be less or equal than {_apiConfig.Value.MaxBlocksPullCount}", statusCode: 400);
 
         if (block != null)
         {
             response.Found = true;
             response.Block = block;
-            response.Transactions = await _transactionsRepository.GetTransactionsForBlockAsync(block.height);
+            var rtxs = await _transactionsRepository.GetTransactionsForBlockAsync(block.height);
+            if (rtxs != null)
+                foreach (var rawTx in rtxs)
+                {
+                    if (rawTx.data == null) continue;
+                    var tx = VeilSerialization.Deserialize<VeilTransaction>(rawTx.data, 0);
+                    /*Console.WriteLine(tx.TxOut?.Count);
+                    if (tx?.TxOut != null)
+                        foreach (var txout in tx.TxOut)
+                        {
+                            Console.WriteLine(txout.Amount);
+                        }*/
+                }
         }
 
         return Ok(response);

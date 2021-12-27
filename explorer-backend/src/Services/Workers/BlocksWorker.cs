@@ -99,26 +99,26 @@ public class BlocksWorker : BackgroundService
 
                             // get block's transactions
                             var pulledTxs = new List<GetRawTransactionResult>();
-                            var txIds = block.Result.Tx ?? new List<string>();
-                            foreach (var txId in txIds)
-                            {
-                                var getTxRequest = new JsonRPCRequest
+                            if (block.Result.Tx != null)
+                                foreach (var txId in block.Result.Tx)
                                 {
-                                    Id = 1,
-                                    Method = "getrawtransaction",
-                                    Params = new List<object>(new object[] { txId, true })
-                                };
-                                var getTxResponse = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", getTxRequest, options);
-                                var tx = await getTxResponse.Content.ReadFromJsonAsync<GetRawTransaction>(options);
+                                    var getTxRequest = new JsonRPCRequest
+                                    {
+                                        Id = 1,
+                                        Method = "getrawtransaction",
+                                        Params = new List<object>(new object[] { txId, true })
+                                    };
+                                    var getTxResponse = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", getTxRequest, options);
+                                    var tx = await getTxResponse.Content.ReadFromJsonAsync<GetRawTransaction>(options);
 
-                                if (tx == null || tx.Result == null)
-                                {
-                                    _logger.LogInformation($"Can't pull transaction {txId} for block #{i}");
-                                    break;
+                                    if (tx == null || tx.Result == null)
+                                    {
+                                        _logger.LogInformation($"Can't pull transaction {txId} for block #{i}");
+                                        break;
+                                    }
+
+                                    pulledTxs.Add(tx.Result);
                                 }
-
-                                pulledTxs.Add(tx.Result);
-                            }
 
                             // save data to db
                             // check if block already exists in DB
