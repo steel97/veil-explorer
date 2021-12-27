@@ -70,7 +70,7 @@
             {{ t("Address.Loading") }}
           </div>
           <div
-            class="grid grid-cols-2 gap-0.5 mb-2 w-full"
+            class="grid grid-cols-2 gap-0.5 w-full border-b py-4"
             v-if="addressInfo != null && addressInfo.hash != null"
           >
             <div>{{ t("Address.Hash160") }}</div>
@@ -79,7 +79,7 @@
             </div>
           </div>
           <div
-            class="grid grid-cols-2 gap-0.5 mb-2 w-full"
+            class="grid grid-cols-2 gap-0.5 w-full border-b py-4"
             v-if="
               addressInfo != null &&
               addressInfo.address != null &&
@@ -93,14 +93,14 @@
             </div>
           </div>
           <div
-            class="grid grid-cols-2 gap-0.5 mb-2 w-full"
+            class="grid grid-cols-2 gap-0.5 w-full border-b py-4"
             v-if="addressInfo != null && addressInfo.version != null"
           >
             <div>{{ t("Address.Version") }}</div>
             <div class="text-right md:text-left">{{ addressInfo.version }}</div>
           </div>
           <div
-            class="grid grid-cols-2 gap-0.5 mb-2 w-full"
+            class="grid grid-cols-2 gap-0.5 w-full border-b py-4"
             v-if="addressInfo != null && addressInfo.scriptHash"
           >
             <div>{{ t("Address.Scripthash") }}</div>
@@ -109,7 +109,7 @@
             </div>
           </div>
           <div
-            class="grid grid-cols-2 gap-0.5 mb-2 w-full"
+            class="grid grid-cols-2 gap-0.5 w-full border-b py-4"
             v-if="addressInfo != null && addressInfo.address != null"
           >
             <div>{{ t("Address.IsValid") }}</div>
@@ -127,7 +127,7 @@
             </div>
           </div>
           <div
-            class="grid grid-cols-2 gap-0.5 mb-2 w-full"
+            class="grid grid-cols-2 gap-0.5 w-full border-b py-4"
             v-if="
               addressInfo != null &&
               addressInfo.address != null &&
@@ -149,7 +149,7 @@
             </div>
           </div>
           <div
-            class="grid grid-cols-2 gap-0.5 mb-2 w-full"
+            class="grid grid-cols-2 gap-0.5 w-full border-b py-4"
             v-if="addressInfo != null && addressInfo.address != null"
           >
             <div>{{ t("Address.IsScript") }}</div>
@@ -167,7 +167,7 @@
             </div>
           </div>
           <div
-            class="grid grid-cols-2 gap-0.5 mb-2 w-full"
+            class="grid grid-cols-2 gap-0.5 w-full border-b py-4"
             v-if="addressInfo != null && addressInfo.address != null"
           >
             <div>{{ t("Address.IsWitness") }}</div>
@@ -185,7 +185,7 @@
             </div>
           </div>
           <div
-            class="grid grid-cols-2 gap-0.5 mb-2 w-full"
+            class="grid grid-cols-2 gap-0.5 w-full border-b py-4"
             v-if="
               addressInfo != null &&
               addressInfo.address != null &&
@@ -198,7 +198,7 @@
             </div>
           </div>
           <div
-            class="grid grid-cols-2 gap-0.5 mb-2 w-full"
+            class="grid grid-cols-2 gap-0.5 w-full border-b py-4"
             v-if="
               addressInfo != null &&
               addressInfo.address != null &&
@@ -211,7 +211,7 @@
             </div>
           </div>
         </div>
-        <div class="flex justify-start md:justify-end">
+        <div class="flex justify-start md:justify-end mt-4 md:mt-0">
           <!-- QR section -->
           <div>
             <QrcodeVue
