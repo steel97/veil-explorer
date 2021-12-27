@@ -70,144 +70,40 @@
             {{ t("Address.Loading") }}
           </div>
           <div
-            class="grid grid-cols-2 gap-0.5 w-full border-b py-4"
-            v-if="addressInfo != null && addressInfo.hash != null"
+            class="grid grid-cols-2 gap-0.5 w-full py-4 border-b"
+            v-for="(val, index) in getAddressDetails"
+            :class="index < getAddressDetails.length - 1 ? '' : 'md:border-b-0'"
+            :key="'detail-' + index"
           >
-            <div>{{ t("Address.Hash160") }}</div>
+            <div>{{ t(val.placeholder) }}</div>
             <div class="text-right md:text-left overflow-hidden text-ellipsis">
-              {{ addressInfo.hash }}
-            </div>
-          </div>
-          <div
-            class="grid grid-cols-2 gap-0.5 w-full border-b py-4"
-            v-if="
-              addressInfo != null &&
-              addressInfo.address != null &&
-              addressInfo.address.scriptPubKey != null &&
-              addressInfo.address.scriptPubKey != ''
-            "
-          >
-            <div>{{ t("Address.ScriptPublicKey") }}</div>
-            <div class="text-right md:text-left overflow-hidden text-ellipsis">
-              {{ addressInfo.address.scriptPubKey }}
-            </div>
-          </div>
-          <div
-            class="grid grid-cols-2 gap-0.5 w-full border-b py-4"
-            v-if="addressInfo != null && addressInfo.version != null"
-          >
-            <div>{{ t("Address.Version") }}</div>
-            <div class="text-right md:text-left">{{ addressInfo.version }}</div>
-          </div>
-          <div
-            class="grid grid-cols-2 gap-0.5 w-full border-b py-4"
-            v-if="addressInfo != null && addressInfo.scriptHash"
-          >
-            <div>{{ t("Address.Scripthash") }}</div>
-            <div class="text-right md:text-left overflow-hidden text-ellipsis">
-              {{ addressInfo.scriptHash }}
-            </div>
-          </div>
-          <div
-            class="grid grid-cols-2 gap-0.5 w-full border-b py-4"
-            v-if="addressInfo != null && addressInfo.address != null"
-          >
-            <div>{{ t("Address.IsValid") }}</div>
-            <div class="text-right md:text-left">
-              <CheckIcon
-                v-if="addressInfo.address.isvalid"
-                :title="t('Address.Yes')"
-                class="inline-block h-5 w-5 mr-2 text-sky-700 dark:text-sky-400"
-              />
-              <XIcon
-                v-if="!addressInfo.address.isvalid"
-                :title="t('Address.No')"
-                class="inline-block h-5 w-5 mr-2 text-sky-700 dark:text-sky-400"
-              />
-            </div>
-          </div>
-          <div
-            class="grid grid-cols-2 gap-0.5 w-full border-b py-4"
-            v-if="
-              addressInfo != null &&
-              addressInfo.address != null &&
-              addressInfo.address.isstealthaddress
-            "
-          >
-            <div>{{ t("Address.IsStealth") }}</div>
-            <div class="text-right md:text-left">
-              <CheckIcon
-                v-if="addressInfo.address.isstealthaddress"
-                :title="t('Address.Yes')"
-                class="inline-block h-5 w-5 mr-2 text-sky-700 dark:text-sky-400"
-              />
-              <XIcon
-                v-if="!addressInfo.address.isstealthaddress"
-                :title="t('Address.No')"
-                class="inline-block h-5 w-5 mr-2 text-sky-700 dark:text-sky-400"
-              />
-            </div>
-          </div>
-          <div
-            class="grid grid-cols-2 gap-0.5 w-full border-b py-4"
-            v-if="addressInfo != null && addressInfo.address != null"
-          >
-            <div>{{ t("Address.IsScript") }}</div>
-            <div class="text-right md:text-left">
-              <CheckIcon
-                v-if="addressInfo.address.isscript"
-                :title="t('Address.Yes')"
-                class="inline-block h-5 w-5 mr-2 text-sky-700 dark:text-sky-400"
-              />
-              <XIcon
-                v-if="!addressInfo.address.isscript"
-                :title="t('Address.No')"
-                class="inline-block h-5 w-5 mr-2 text-sky-700 dark:text-sky-400"
-              />
-            </div>
-          </div>
-          <div
-            class="grid grid-cols-2 gap-0.5 w-full border-b py-4"
-            v-if="addressInfo != null && addressInfo.address != null"
-          >
-            <div>{{ t("Address.IsWitness") }}</div>
-            <div class="text-right md:text-left">
-              <CheckIcon
-                v-if="addressInfo.address.iswitness"
-                :title="t('Address.Yes')"
-                class="inline-block h-5 w-5 mr-2 text-sky-700 dark:text-sky-400"
-              />
-              <XIcon
-                v-if="!addressInfo.address.iswitness"
-                :title="t('Address.No')"
-                class="inline-block h-5 w-5 mr-2 text-sky-700 dark:text-sky-400"
-              />
-            </div>
-          </div>
-          <div
-            class="grid grid-cols-2 gap-0.5 w-full border-b py-4"
-            v-if="
-              addressInfo != null &&
-              addressInfo.address != null &&
-              addressInfo.address.witness_version
-            "
-          >
-            <div>{{ t("Address.WitnessVersion") }}</div>
-            <div class="text-right md:text-left">
-              {{ addressInfo.address.witness_version }}
-            </div>
-          </div>
-          <div
-            class="grid grid-cols-2 gap-0.5 w-full border-b py-4"
-            v-if="
-              addressInfo != null &&
-              addressInfo.address != null &&
-              addressInfo.address.witness_program
-            "
-          >
-            <div>{{ t("Address.WitnessProgram") }}</div>
-            <div class="text-right md:text-left overflow-hidden text-ellipsis">
-              {{ addressInfo.address.witness_program }}
+              <span v-if="val.check == null">{{ val.value }}</span>
+              <span v-else>
+                <CheckIcon
+                  v-if="val.check"
+                  :title="t('Address.Yes')"
+                  class="
+                    inline-block
+                    h-5
+                    w-5
+                    mr-2
+                    text-sky-700
+                    dark:text-sky-400
+                  "
+                />
+                <XIcon
+                  v-if="!val.check"
+                  :title="t('Address.No')"
+                  class="
+                    inline-block
+                    h-5
+                    w-5
+                    mr-2
+                    text-sky-700
+                    dark:text-sky-400
+                  "
+                />
+              </span>
             </div>
           </div>
         </div>
@@ -320,6 +216,79 @@ const config = useRuntimeConfig();
 const address: string = route.params.address;
 const addressReactive = ref(address);
 const reloadingBalance = ref(false);
+
+const getAddressDetails = computed(() => {
+  if (addressInfo.value == null) return [];
+
+  const res = [];
+
+  if (addressInfo.value.hash != null)
+    res.push({
+      placeholder: "Address.Hash160",
+      value: addressInfo.value.hash,
+      check: null,
+    });
+
+  if (addressInfo.value.version != null)
+    res.push({
+      placeholder: "Address.Version",
+      value: addressInfo.value.version,
+      check: null,
+    });
+
+  if (addressInfo.value.scriptHash != null)
+    res.push({
+      placeholder: "Address.Scripthash",
+      value: addressInfo.value.scriptHash,
+      check: null,
+    });
+
+  if (addressInfo.value.address != null) {
+    if (addressInfo.value.address.scriptPubKey != null)
+      res.push({
+        placeholder: "Address.ScriptPublicKey",
+        value: addressInfo.value.address.scriptPubKey,
+        check: null,
+      });
+
+    if (addressInfo.value.address.isvalid != null)
+      res.push({
+        placeholder: "Address.IsValid",
+        value: addressInfo.value.address.isvalid,
+        check: addressInfo.value.address.isvalid,
+      });
+
+    if (addressInfo.value.address.isstealthaddress != null)
+      res.push({
+        placeholder: "Address.IsStealth",
+        value: addressInfo.value.address.isstealthaddress,
+        check: addressInfo.value.address.isstealthaddress,
+      });
+
+    if (addressInfo.value.address.iswitness != null)
+      res.push({
+        placeholder: "Address.IsWitness",
+        value: addressInfo.value.address.iswitness,
+        check: addressInfo.value.address.iswitness,
+      });
+
+    if (addressInfo.value.address.witness_version != null)
+      res.push({
+        placeholder: "Address.WitnessVersion",
+        value: addressInfo.value.address.witness_version,
+        check: null,
+      });
+
+    if (addressInfo.value.address.witness_program != null)
+      res.push({
+        placeholder: "Address.WitnessProgram",
+        value: addressInfo.value.address.witness_program,
+        check: null,
+      });
+  }
+
+  return res;
+});
 
 const copyToClipboard = () => {
   try {

@@ -22,5 +22,6 @@ export interface AddressResponse {
     amountFetched: boolean,
     amount: number,
     version: number | null,
-    hash: string | null
+    hash: string | null,
+    scriptHash: string | null
 }
