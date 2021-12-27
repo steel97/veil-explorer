@@ -6,4 +6,6 @@ public interface IUtilityService
     bool IsNumeric(string? val);
     bool VerifyAddress(string? val);
     string CleanupAddress(string? val);
+    byte[] HexToByteArray(string hex);
+    string ToHex(byte[] val);
 }

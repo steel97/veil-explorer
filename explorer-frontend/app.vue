@@ -31,6 +31,7 @@
 <script setup lang="ts">
 import "@/assets/css/tailwind.css";
 import "@/assets/css/common.css";
+import "toastify-js/src/toastify.css";
 import AppHeader from "@/components/AppHeader";
 import SyncNotice from "@/components/SyncNotice";
 import SearchBox from "@/components/SearchBox";
@@ -43,7 +44,6 @@ import { BlockchainInfo } from "@/models/API/BlockchainInfo";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "#imports";
 import Cookie from "js-cookie";
-import "toastify-js/src/toastify.css";
 
 const config = useRuntimeConfig();
 const route = useRoute();

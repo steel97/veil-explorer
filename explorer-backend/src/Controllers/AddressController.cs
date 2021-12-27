@@ -1,6 +1,8 @@
+using System.Security.Cryptography;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using ExplorerBackend.Core;
+using ExplorerBackend.Core.Node;
 using ExplorerBackend.Models.API;
 using ExplorerBackend.Models.Node.Response;
 using ExplorerBackend.Configs;
@@ -117,6 +119,49 @@ public class AddressController : ControllerBase
                 {
                     response.IsValid = validateRes.Result.isvalid;
                     response.Address = validateRes.Result;
+
+                    if (response.IsValid)
+                    {
+                        if (validateRes.Result.scriptPubKey != null && _utilityService.VerifyHex(validateRes.Result.scriptPubKey))
+                        {
+                            try
+                            {
+                                using var sha256 = SHA256.Create();
+                                var ch = sha256.ComputeHash(_utilityService.HexToByteArray(validateRes.Result.scriptPubKey));
+                                response.ScriptHash = new String(_utilityService.ToHex(ch).Reverse().ToArray());
+                            }
+                            catch
+                            {
+
+                            }
+                        }
+                        try
+                        {
+                            var b58Data = Base58Encoding.Decode(reqAddr);
+                            var version = b58Data[0];
+                            var hash = b58Data.Skip(1).ToArray();
+
+                            response.Version = version;
+                            response.Hash = _utilityService.ToHex(hash);
+                            response.Hash = response.Hash.Substring(0, response.Hash.Length - 8);
+                        }
+                        catch
+                        {
+                            try
+                            {
+                                var ver = (byte)0;
+                                var isP2PKH = (byte)0;
+                                var mainnet = false;
+
+                                var bechData = Bech32Converter.DecodeBech32(reqAddr, out ver, out isP2PKH, out mainnet);
+                                response.Version = ver;
+                            }
+                            catch
+                            {
+
+                            }
+                        }
+                    }
 
                     // copy amount if it exists
 

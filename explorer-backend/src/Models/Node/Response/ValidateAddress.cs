@@ -2,10 +2,10 @@ namespace ExplorerBackend.Models.Node.Response;
 
 public class ValidateAddrees : JsonRPCResponse
 {
-    public ValidateAddreesResult? Result { get; set; }
+    public ValidateAddressResult? Result { get; set; }
 }
 
-public class ValidateAddreesResult
+public class ValidateAddressResult
 {
     public bool isvalid { get; set; }
     public string? address { get; set; }

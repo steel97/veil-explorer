@@ -6,7 +6,6 @@ export enum EntityType {
     ADDRESS = 4
 }
 
-
 export interface SearchResponse {
     found: boolean
     query: string | null,

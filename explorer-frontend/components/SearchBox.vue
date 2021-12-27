@@ -31,6 +31,7 @@
         ref="searchbox"
         v-model="searchmodel"
         @change="search()"
+        @keydown.enter="search()"
         class="
           py-4
           text-sm
