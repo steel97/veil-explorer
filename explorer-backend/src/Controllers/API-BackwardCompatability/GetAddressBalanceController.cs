@@ -48,27 +48,39 @@ public class GetAddressBalanceController : ControllerBase
         {
             var reqAddr = _utilityService.CleanupAddress(address);
 
-            var validateRes = _nodeApiCacheSingleton.GetApiCache<ValidateAddrees>($"validateaddress-{reqAddr}");
+            var validateRes = _nodeApiCacheSingleton.GetApiCache<ValidateAddress>($"validateaddress-{reqAddr}");
             var scanTxOutsetRes = _nodeApiCacheSingleton.GetApiCache<ScanTxOutset>($"scantxoutset-{reqAddr}");
 
-            if (validateRes == null)
+            if (validateRes == null && !_nodeApiCacheSingleton.IsInQueue($"validateaddress-{reqAddr}"))
             {
                 try
                 {
-                    // validate address
-                    var validateAddressFlag = new AsyncFlag
+                    if (await _nodeApiCacheSingleton.PutInQueueAsync($"validateaddress-{reqAddr}"))
                     {
-                        State = false
-                    };
-                    await _validateAddressBackgroundTaskQueue.QueueBackgroundWorkItemAsync(async token =>
-                    {
-                        await _nodeRequester.ValidateAddressAndCacheAsync(reqAddr, token);
-                        if (validateAddressFlag != null)
-                            validateAddressFlag.State = true;
-                    });
-                    await AsyncUtils.WaitUntilAsync(cancellationToken, () => validateAddressFlag.State, _apiConfig.Value.ApiQueueSpinDelay, _apiConfig.Value.ApiQueueWaitTimeout);
+                        // validate address
+                        var validateAddressFlag = new AsyncFlag
+                        {
+                            State = false
+                        };
+                        await _validateAddressBackgroundTaskQueue.QueueBackgroundWorkItemAsync(async token =>
+                        {
+                            try
+                            {
+                                await _nodeRequester.ValidateAddressAndCacheAsync(reqAddr, token);
+                            }
+                            catch
+                            {
+                            }
 
-                    validateRes = _nodeApiCacheSingleton.GetApiCache<ValidateAddrees>($"validateaddress-{reqAddr}");
+                            await _nodeApiCacheSingleton.RemoveFromQueueAsync($"validateaddress-{reqAddr}");
+
+                            if (validateAddressFlag != null)
+                                validateAddressFlag.State = true;
+                        });
+                        await AsyncUtils.WaitUntilAsync(cancellationToken, () => validateAddressFlag.State, _apiConfig.Value.ApiQueueSpinDelay, _apiConfig.Value.ApiQueueWaitTimeout);
+
+                        validateRes = _nodeApiCacheSingleton.GetApiCache<ValidateAddress>($"validateaddress-{reqAddr}");
+                    }
                 }
                 catch (TimeoutException)
                 {
@@ -90,23 +102,36 @@ public class GetAddressBalanceController : ControllerBase
                  validateRes.Result != null &&
                  validateRes.Result.isvalid &&
                  !(validateRes.Result.isstealthaddress ?? false)
-             ))
+             ) && !_nodeApiCacheSingleton.IsInQueue($"scantxoutset-{reqAddr}"))
             {
                 try
                 {
-                    // try get balance
-                    var scanTxOutsetFlag = new AsyncFlag
+                    if (await _nodeApiCacheSingleton.PutInQueueAsync($"scantxoutset-{reqAddr}"))
                     {
-                        State = false
-                    };
-                    await _scanTxOutsetBackgroundTaskQueue.QueueBackgroundWorkItemAsync(async token =>
-                    {
-                        await _nodeRequester.ScanTxOutsetAndCacheAsync(reqAddr, token);
-                        if (scanTxOutsetFlag != null)
-                            scanTxOutsetFlag.State = true;
-                    });
-                    await AsyncUtils.WaitUntilAsync(cancellationToken, () => scanTxOutsetFlag.State, _apiConfig.Value.ApiQueueSpinDelay, _apiConfig.Value.ApiQueueWaitTimeout);
-                    scanTxOutsetRes = _nodeApiCacheSingleton.GetApiCache<ScanTxOutset>($"scantxoutset-{reqAddr}");
+                        // try get balance
+                        var scanTxOutsetFlag = new AsyncFlag
+                        {
+                            State = false
+                        };
+                        await _scanTxOutsetBackgroundTaskQueue.QueueBackgroundWorkItemAsync(async token =>
+                        {
+                            try
+                            {
+                                await _nodeRequester.ScanTxOutsetAndCacheAsync(reqAddr, token);
+                            }
+                            catch
+                            {
+
+                            }
+
+                            await _nodeApiCacheSingleton.RemoveFromQueueAsync($"scantxoutset-{reqAddr}");
+
+                            if (scanTxOutsetFlag != null)
+                                scanTxOutsetFlag.State = true;
+                        });
+                        await AsyncUtils.WaitUntilAsync(cancellationToken, () => scanTxOutsetFlag.State, _apiConfig.Value.ApiQueueSpinDelay, _apiConfig.Value.ApiQueueWaitTimeout);
+                        scanTxOutsetRes = _nodeApiCacheSingleton.GetApiCache<ScanTxOutset>($"scantxoutset-{reqAddr}");
+                    }
                 }
                 catch (TimeoutException)
                 {

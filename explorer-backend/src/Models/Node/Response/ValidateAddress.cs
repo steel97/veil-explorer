@@ -1,6 +1,6 @@
 namespace ExplorerBackend.Models.Node.Response;
 
-public class ValidateAddrees : JsonRPCResponse
+public class ValidateAddress : JsonRPCResponse
 {
     public ValidateAddressResult? Result { get; set; }
 }

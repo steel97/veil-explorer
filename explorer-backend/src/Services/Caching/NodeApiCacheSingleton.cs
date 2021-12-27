@@ -9,6 +9,8 @@ public class NodeApiCacheSingleton
 {
     private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
     private MemoryCache Cache { get; set; }
+    private List<string> ApisInQueue = new();
+    private SemaphoreSlim ApisQueueSemaphore = new(1, 1);
 
     public NodeApiCacheSingleton(IOptionsMonitor<ExplorerConfig> explorerConfig)
     {
@@ -18,6 +20,61 @@ public class NodeApiCacheSingleton
             ExpirationScanFrequency = TimeSpan.FromMilliseconds(_explorerConfig.CurrentValue.MemoryCache?.ExpirationScanFrequency ?? 1000)
         });
     }
+
+    public async Task<bool> PutInQueueAsync(string key)
+    {
+        var res = false;
+        try
+        {
+            await ApisQueueSemaphore.WaitAsync();
+
+            try
+            {
+                if (!ApisInQueue.Contains(key))
+                {
+                    ApisInQueue.Add(key);
+                    res = true;
+                }
+            }
+            catch
+            {
+
+            }
+
+            ApisQueueSemaphore.Release();
+        }
+        catch
+        {
+
+        }
+        return res;
+    }
+
+    public async Task RemoveFromQueueAsync(string key)
+    {
+        try
+        {
+            await ApisQueueSemaphore.WaitAsync();
+
+            try
+            {
+                if (!ApisInQueue.Contains(key))
+                    ApisInQueue.Remove(key);
+            }
+            catch
+            {
+
+            }
+
+            ApisQueueSemaphore.Release();
+        }
+        catch
+        {
+
+        }
+    }
+
+    public bool IsInQueue(string key) => ApisInQueue.Contains(key);
 
     public void SetApiCache(string key, object apiResult)
     {

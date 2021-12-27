@@ -48,7 +48,7 @@ public class NodeRequester : INodeRequester
                 Params = new List<object>(new object[] { target })
             };
             var response = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", request, options);
-            var data = await response.Content.ReadFromJsonAsync<ValidateAddrees>(options);
+            var data = await response.Content.ReadFromJsonAsync<ValidateAddress>(options);
             if (data != null)
                 _nodeApiCacheSingleton.SetApiCache($"validateaddress-{target}", data);
         }
