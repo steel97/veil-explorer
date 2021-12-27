@@ -60,9 +60,11 @@ import { reactive } from "@vue/reactivity";
 import { useLatestBlockInfo } from "@/composables/States";
 import { useConfigs } from "@/composables/Configs";
 import { useChainInfo } from "@/composables/States";
+import { useUI } from "@/composables/UI";
 import { SimplifiedBlock } from "@/models/API/SimplifiedBlock";
 
 const { getApiPath } = useConfigs();
+const { scrollToAnimated } = useUI();
 const config = useRuntimeConfig();
 const latestBlock = useLatestBlockInfo();
 const chainInfoDataState = useChainInfo();
@@ -91,6 +93,9 @@ const buildRouteTemplate = () =>
 
 const selectPage = async (pg: number) => {
   if (pg == currentPage.value) return;
+
+  scrollToAnimated(document.documentElement, 0, 150);
+
   const link = buildRouteTemplate().replace("{page}", pg);
   currentPage.value = pg;
   window.history.replaceState({}, null, link);

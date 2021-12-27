@@ -14,7 +14,7 @@ sudo mkdir /home/explorer-frontend/server/
 sudo chmod 755 /home/explorer-frontend/server
 sudo chown -R explorer-frontend /home/explorer-frontend/server/
 
-4.1 now you can create startup script
+4.1 now you can create startup script (variables starting from CHAIN_APIS are public, so dont use sensetive data here)
 su explorer-frontend
 cd /home/explorer-frontend/server/
 sudo nano start.sh

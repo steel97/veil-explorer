@@ -11,23 +11,23 @@
   >
     <div class="max-w-full mx-auto pr-3">
       <div class="flex justify-between items-center py-2">
-        <div class="flex items-center">
+        <NuxtLink to="/" class="flex items-center">
           <div class="px-3 pr-2">
-            <NuxtLink to="/" class="flex items-center">
+            <div class="flex items-center">
               <img
                 class="h-6 w-auto pr-2 my-3"
                 src="/images/logo.png"
                 :alt="t('Header.Title')"
               />
               <span class="font-semibold">{{ t("Header.Title") }}</span>
-            </NuxtLink>
+            </div>
           </div>
           <div class="border-l">
             <span class="pl-2 font-base uppercase text-sm">{{
               data?.chainInfo?.chain ?? t("Core.NoData")
             }}</span>
           </div>
-        </div>
+        </NuxtLink>
         <div class="-mr-2 -my-2 lg:hidden">
           <button
             type="button"
@@ -314,7 +314,7 @@ const getLinks = () => {
     },
     {
       locale: t("Header.Links.Blocks"),
-      name: "blocks-page-sort",
+      name: "block",
       link: "/blocks",
     },
     {
@@ -367,7 +367,10 @@ const switchLang = (lang: string) => {
 };
 
 const computeClasses = (link: ILink) => {
-  if (link.name == route.name)
+  if (
+    (link.name == route.name && route.name == "") ||
+    route.name.startsWith(link.name)
+  )
     return ["underline", "text-sky-700", "dark:text-sky-400"];
   return ["text-gray-600", "dark:text-gray-300"];
 };
