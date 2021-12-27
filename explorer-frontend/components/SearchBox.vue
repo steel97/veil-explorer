@@ -1,7 +1,17 @@
 <template>
   <div class="flex justify-center">
-    <div
-      class="relative max-w-7xl w-full my-6 text-gray-600 dark:text-gray-300"
+    <form
+      method="post"
+      @submit.prevent="search()"
+      class="
+        block
+        relative
+        max-w-7xl
+        w-full
+        my-6
+        text-gray-600
+        dark:text-gray-300
+      "
     >
       <span class="absolute inset-y-0 left-0 flex items-center pl-3">
         <button
@@ -31,7 +41,6 @@
         ref="searchbox"
         v-model="searchmodel"
         @change="search()"
-        @keydown.enter="search()"
         class="
           py-4
           text-sm
@@ -48,7 +57,7 @@
         autocomplete="off"
         :aria-label="t('Core.Search.Label')"
       />
-    </div>
+    </form>
   </div>
 </template>
 
