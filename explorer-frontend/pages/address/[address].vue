@@ -405,7 +405,7 @@ const meta = computed(() => {
       },
       {
         name: "og:url",
-        content: `${config.BASE_URL}/`,
+        content: `${config.BASE_URL}/address/${address}`,
       },
     ],
   };

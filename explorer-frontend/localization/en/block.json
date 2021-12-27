@@ -1,0 +1,7 @@
+{
+    "BlockTitle": "Block",
+    "Meta": {
+        "Title": "Veil Explorer - viewing block {block}",
+        "Description": "Viewing information about block {block}"
+    }
+}

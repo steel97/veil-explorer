@@ -8,6 +8,7 @@ import NetworkSummary from "./network_summary.json";
 import Blocks from "./blocks.json";
 import Search from "./search.json";
 import Address from "./address.json";
+import Block from "./block.json";
 
 const locale: any = {
     Core: Core,
@@ -19,7 +20,8 @@ const locale: any = {
     NetworkSummary: NetworkSummary,
     Blocks: Blocks,
     Search: Search,
-    Address: Address
+    Address: Address,
+    Block: Block
 }
 
 export default locale;
