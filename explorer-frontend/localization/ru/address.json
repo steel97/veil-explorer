@@ -2,6 +2,7 @@
     "ViewTitle": "Просмотр адреса",
     "CopyToClipboard": "Копировать адрес",
     "CopySuccess": "Адрес скопирован",
+    "QrCode": "QR код",
     "Meta": {
         "Title": "Veil Explorer - просмотр адреса {address}",
         "Description": "Просмотр информации о адресе {address}"

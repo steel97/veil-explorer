@@ -78,10 +78,12 @@
             <div>{{ t(val.placeholder) }}</div>
             <div class="text-right md:text-left overflow-hidden text-ellipsis">
               <span v-if="val.check == null">{{ val.value }}</span>
-              <span v-else>
+              <span
+                v-else
+                :title="val.check ? t('Address.Yes') : t('Address.No')"
+              >
                 <CheckIcon
                   v-if="val.check"
-                  :title="t('Address.Yes')"
                   class="
                     inline-block
                     h-5
@@ -93,7 +95,6 @@
                 />
                 <XIcon
                   v-if="!val.check"
-                  :title="t('Address.No')"
                   class="
                     inline-block
                     h-5
@@ -116,6 +117,7 @@
               :margin="2"
               render-as="svg"
               level="H"
+              :aria-label="t('Address.QrCode')"
             />
             <div>
               <div class="flex justify-between mt-2">
