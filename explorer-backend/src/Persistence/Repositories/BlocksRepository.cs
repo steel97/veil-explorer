@@ -126,6 +126,24 @@ public class BlocksRepository : BaseRepository, IBlocksRepository
         }
     }
 
+    public async Task<Block?> GetBlockByHashAsync(string hash)
+    {
+        using var conn = Connection;
+        await conn.OpenAsync();
+
+        using (var cmd = new NpgsqlCommand($"SELECT * FROM blocks WHERE hash = {TransformHex(hash)}", conn))
+        {
+            await using (var reader = await cmd.ExecuteReaderAsync())
+            {
+                var success = await reader.ReadAsync();
+                if (!success) return null;
+
+                return await ReadBlock(reader);
+            }
+        }
+    }
+
+
     public async Task<int?> ProbeBlockByHashAsync(string hash)
     {
         using var conn = Connection;

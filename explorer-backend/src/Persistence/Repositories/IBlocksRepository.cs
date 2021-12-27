@@ -9,6 +9,7 @@ public interface IBlocksRepository
     Task<Block?> GetLatestBlockAsync(bool onlySynced = false);
     Task<Block?> GetBlockByHeightAsync(int height);
     Task<int?> ProbeBlockByHashAsync(string hash);
+    Task<Block?> GetBlockByHashAsync(string hash);
     Task<bool> InsertBlockAsync(Block blockTemplate);
     Task<bool> SetBlockSyncStateAsync(int height, bool state);
 }
