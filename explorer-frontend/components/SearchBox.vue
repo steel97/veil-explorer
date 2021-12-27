@@ -62,9 +62,13 @@ const searchmodel = ref<string>("");
 const router = useRouter();
 
 const search = async () => {
+  await searchInner();
+};
+
+const searchInner = async (retry = 0) => {
   const query = searchmodel.value;
   if (query == "" || query == null) return;
-  const searchResponse = await useFetch<string, SearchResponse>(
+  const resData = await useFetch<string, SearchResponse>(
     `${getApiPath()}/search`,
     {
       method: "POST",
@@ -73,7 +77,15 @@ const search = async () => {
       },
     }
   );
-  const data = searchResponse.data.value;
+
+  const data = resData.data.value;
+  if (data == null) {
+    // again ohmyfetch/nuxt3 bug
+    // to-do remove, when fix come to ohmyfetch/nuxt3
+    if (retry == 0) await searchInner(1);
+    else router.replace(`/search/notfound`);
+    return;
+  }
   switch (data.type) {
     case EntityType.UNKNOWN:
       router.replace(`/search/notfound`);
