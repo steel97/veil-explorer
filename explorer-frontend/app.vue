@@ -142,7 +142,6 @@ const chainInfo = await useFetch<string, BlockchainInfo>(
 );
 
 chainInfoDataState.value = chainInfo.data.value;
-console.log(chainInfoDataState.value);
 
 const isSynchronizing = computed(() => {
   if (
