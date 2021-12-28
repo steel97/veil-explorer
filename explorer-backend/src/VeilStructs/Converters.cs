@@ -97,7 +97,7 @@ public class Converters
         if (scriptPubKey.IsPayToScriptHash())
         {
             typeRet = txnouttype.TX_SCRIPTHASH;
-            byte[] hashBytes = new byte[22];
+            byte[] hashBytes = new byte[20];
             Array.Copy(scriptPubKey.Hash!, 2, hashBytes, 0, hashBytes.Length);
             vSolutionsRet?.Add(hashBytes);
             return true;
@@ -197,14 +197,14 @@ public class Converters
         if (script.Size() == VeilPubKey.PUBLIC_KEY_SIZE + 2 && script.Hash?[0] == VeilPubKey.PUBLIC_KEY_SIZE && script.Hash?.Last() == (byte)opcodetype.OP_CHECKSIG)
         {
             //pubkey = valtype(script.begin() + 1, script.begin() + CPubKey::PUBLIC_KEY_SIZE + 1);
-            pubkey = new byte[VeilPubKey.PUBLIC_KEY_SIZE + 1];
+            pubkey = new byte[VeilPubKey.PUBLIC_KEY_SIZE];
             Array.Copy(script.Hash!, 1, pubkey, 0, pubkey.Length);
             return VeilPubKey.ValidSize(pubkey);
         }
         if (script.Size() == VeilPubKey.COMPRESSED_PUBLIC_KEY_SIZE + 2 && script.Hash?[0] == VeilPubKey.COMPRESSED_PUBLIC_KEY_SIZE && script.Hash.Last() == (byte)opcodetype.OP_CHECKSIG)
         {
             //pubkey = valtype(script.begin() + 1, script.begin() + CPubKey::COMPRESSED_PUBLIC_KEY_SIZE + 1);
-            pubkey = new byte[VeilPubKey.COMPRESSED_PUBLIC_KEY_SIZE + 1];
+            pubkey = new byte[VeilPubKey.COMPRESSED_PUBLIC_KEY_SIZE];
             Array.Copy(script.Hash!, 1, pubkey, 0, pubkey.Length);
             return VeilPubKey.ValidSize(pubkey);
         }
@@ -217,7 +217,7 @@ public class Converters
         if (script.Size() == 25 && script.Hash?[0] == (byte)opcodetype.OP_DUP && script.Hash?[1] == (byte)opcodetype.OP_HASH160 && script.Hash?[2] == 20 && script.Hash?[23] == (byte)opcodetype.OP_EQUALVERIFY && script.Hash?[24] == (byte)opcodetype.OP_CHECKSIG)
         {
             //pubkeyhash = valtype(script.begin() + 3, script.begin() + 23);
-            pubkeyhash = new byte[23];
+            pubkeyhash = new byte[20];
             Array.Copy(script.Hash, 3, pubkeyhash, 0, pubkeyhash.Length);
             return true;
         }
@@ -249,7 +249,7 @@ public class Converters
 
     public static bool ExtractDestination(Script scriptPubKey, out IDestination addressRet)
     {
-        List<byte[]> vSolutions = new List<byte[]>();
+        var vSolutions = new List<byte[]>();
         txnouttype whichType;
         addressRet = new KeyId();
         if (!Solver(scriptPubKey, out whichType, vSolutions))

@@ -135,6 +135,7 @@ public class BlockController : ControllerBase
                     txsimple.IsCoinStake = tx.IsCoinStake();
                     txsimple.IsBasecoin = tx.IsBasecoin();
                     txsimple.Inputs = new List<TxVinSimpleDecoded>();
+                    txsimple.Outputs = new List<TxVoutSimpleDecoded>();
 
                     if (tx.TxIn != null)
                         foreach (var txin in tx.TxIn)
@@ -165,6 +166,39 @@ public class BlockController : ControllerBase
 
                             txsimple.Inputs.Add(txinsimple);
                         }
+
+
+                    if (tx.TxOut != null)
+                    {
+                        var outIndex = 0;
+                        foreach (var txout in tx.TxOut)
+                        {
+                            var txoutsimple = new TxVoutSimpleDecoded();
+
+                            txnouttype scriptType = txnouttype.TX_NONSTANDARD;
+
+                            if (txout.ScriptPubKey != null)
+                            {
+                                Converters.Solver(txout.ScriptPubKey, out scriptType, new List<byte[]>());
+                                if (txout.ScriptPubKey.Hash != null && txout.ScriptPubKey.Hash.Length > 0)
+                                    txoutsimple.IsOpreturn = txout.ScriptPubKey.Hash[0] == (byte)opcodetype.OP_RETURN;
+                                else
+                                    txoutsimple.IsOpreturn = false;
+                            }
+                            else
+                                txoutsimple.IsOpreturn = false;
+
+                            txoutsimple.Addresses = txout.GetAddresses();
+                            txoutsimple.IsCoinBase = tx.IsBasecoin() && outIndex == 0;
+                            txoutsimple.Amount = txout.Amount;
+                            txoutsimple.Type = txout.OutputType;
+                            txoutsimple.ScriptPubKeyType = scriptType;
+
+                            txsimple.Outputs.Add(txoutsimple);
+
+                            outIndex++;
+                        }
+                    }
 
                     response.Transactions.Add(txsimple);
                 }

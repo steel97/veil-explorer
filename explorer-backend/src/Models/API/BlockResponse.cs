@@ -1,4 +1,5 @@
 using ExplorerBackend.Models.Data;
+using ExplorerBackend.VeilStructs;
 
 namespace ExplorerBackend.Models.API;
 
@@ -22,6 +23,7 @@ public class TransactionSimpleDecoded
 {
     public string? TxId { get; set; }
     public List<TxVinSimpleDecoded>? Inputs { get; set; }
+    public List<TxVoutSimpleDecoded>? Outputs { get; set; }
     public bool IsBasecoin { get; set; }
     public bool IsCoinStake { get; set; }
     public bool IsZerocoinMint { get; set; }
@@ -33,12 +35,23 @@ public class TxVinSimpleDecoded
     public string? PrevOutTx { get; set; }
     public uint PrevOutNum { get; set; }
     public List<string>? PrevOutAddresses { get; set; }
-    public double PrevOutAmount { get; set; }
+    public long PrevOutAmount { get; set; }
 
     public TxInType Type { get; set; }
-    public double ZerocoinSpend { get; set; }
+    public long ZerocoinSpend { get; set; }
 
     public List<RingCTInput>? AnonInputs { get; set; }
+}
+
+public class TxVoutSimpleDecoded
+{
+    public List<string>? Addresses { get; set; }
+    public bool IsOpreturn { get; set; }
+    public bool IsCoinBase { get; set; }
+    public long Amount { get; set; }
+    public OutputTypes Type { get; set; }
+    public txnouttype ScriptPubKeyType { get; set; }
+
 }
 
 public class RingCTInput

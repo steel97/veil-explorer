@@ -216,7 +216,7 @@ public class Script
         {
             version = Converters.DecodeOP_N((opcodetype)Hash[0]);
             program = new byte[Hash.Count() - 2];
-            Array.Copy(Hash, 2, program, 0, Hash.Length - 2);
+            Array.Copy(Hash, 2, program, 0, program.Length);
             return true;
         }
         return false;
@@ -400,17 +400,17 @@ public class VeilTxOut
 
     public List<string> GetAddresses()
     {
-        if (ScriptPubKey == null) return new List<string>();
+        var ret = new List<string>();
+        if (ScriptPubKey == null) return ret;
         if (OutputType == OutputTypes.OUTPUT_STANDARD)
         {
             var nrr = 0;
             txnouttype ctype;
             var addresses = new List<IDestination>();
             Converters.ExtractDestinations(ScriptPubKey, out ctype, addresses, out nrr);
-            //Console.WriteLine(Converters.EncodeDestination(addresses[0]));
-
+            addresses.ForEach(addr => ret.Add(Converters.EncodeDestination(addr)));
         }
-        return new List<string>();
+        return ret;
     }
 }
 

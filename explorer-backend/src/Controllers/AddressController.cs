@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using NBitcoin.DataEncoders;
 using ExplorerBackend.Core;
-using ExplorerBackend.Core.Node;
 using ExplorerBackend.Models.API;
 using ExplorerBackend.Models.Node.Response;
 using ExplorerBackend.Configs;
