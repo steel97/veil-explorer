@@ -8,4 +8,5 @@ public interface IUtilityService
     string CleanupAddress(string? val);
     byte[] HexToByteArray(string hex);
     string ToHex(byte[] val);
+    string ToHexReversed(byte[] val);
 }

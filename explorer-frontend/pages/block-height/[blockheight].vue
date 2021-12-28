@@ -22,7 +22,7 @@
       :block="blockData"
     />
 
-    <h1 class="font-semibold py-4 uppercase">
+    <h1 class="font-semibold pt-4 uppercase">
       {{ t("Block.Transactions") }}
     </h1>
 

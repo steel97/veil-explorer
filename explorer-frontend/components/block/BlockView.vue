@@ -122,6 +122,7 @@
             @focus="showTooltip"
             @mouseleave="hideTooltip"
             @blur="hideTooltip"
+            @click.prevent="toggleTooltip"
           >
             <LockClosedIcon class="h-5 w-5" :class="getConfirmationClass" />
             {{ calculateConfirmations }}
@@ -152,7 +153,7 @@
       </div>
     </div>
     <div class="md:grid grid-cols-2 gap-6">
-      <div class="grid grid-cols-2 gap-0.5 w-full py-4">
+      <div class="grid grid-cols-2 gap-0.5 w-full py-4 border-b md:border-0">
         <div>{{ t("Block.Size") }}</div>
         <div class="text-right">
           <div>
@@ -190,6 +191,7 @@ import {
   createPopperLite as createPopper,
   preventOverflow,
   flip,
+  hide,
 } from "@popperjs/core";
 
 const props = defineProps<{
@@ -233,6 +235,14 @@ const showTooltip = () => {
 
 const hideTooltip = () => {
   confirmationsTooltipEl.value.removeAttribute("data-show");
+};
+
+const tooltipState = ref(false);
+
+const toggleTooltip = () => {
+  tooltipState.value = !tooltipState.value;
+  if (tooltipState.value) showTooltip();
+  else hideTooltip();
 };
 
 onMounted(() => {

@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using NBitcoin.DataEncoders;
 using ExplorerBackend.Core;
 using ExplorerBackend.Core.Node;
 using ExplorerBackend.Models.API;
@@ -163,7 +164,9 @@ public class AddressController : ControllerBase
                         }
                         try
                         {
-                            var b58Data = Base58Encoding.Decode(reqAddr);
+                            var b58enc = new Base58Encoder();
+                            var b58Data = b58enc.DecodeData(reqAddr);
+                            //var b58Data = Base58Encoding.Decode(reqAddr);
                             var version = b58Data[0];
                             var hash = b58Data.Skip(1).ToArray();
 
@@ -176,10 +179,13 @@ public class AddressController : ControllerBase
                             try
                             {
                                 var ver = (byte)0;
-                                var isP2PKH = (byte)0;
-                                var mainnet = false;
+                                //var isP2PKH = (byte)0;
+                                //var mainnet = false;
 
-                                var bechData = Bech32Converter.DecodeBech32(reqAddr, out ver, out isP2PKH, out mainnet);
+                                var bech = new Bech32Encoder(null);
+                                var bechData = bech.Decode(reqAddr, out ver);
+
+                                //var bechData = Bech32Converter.DecodeBech32(reqAddr, out ver, out isP2PKH, out mainnet);
                                 response.Version = ver;
                             }
                             catch

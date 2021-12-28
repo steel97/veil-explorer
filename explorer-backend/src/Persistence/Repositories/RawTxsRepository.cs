@@ -24,6 +24,30 @@ public class RawTxsRepository : BaseRepository, IRawTxsRepository
         }
     }
 
+    public async Task<Dictionary<string, byte[]>?> GetTransactionsByIdsAsync(List<string> txids)
+    {
+        using var conn = Connection;
+        await conn.OpenAsync();
+
+        var query = $"txid = {TransformHex(txids[0])}";
+        txids.Skip(1).ToList().ForEach(txid => query += $" OR txid = {TransformHex(txid)}");
+
+        var result = new Dictionary<string, byte[]>();
+        using (var cmd = new NpgsqlCommand($"SELECT txid, \"data\" FROM rawtxs WHERE {query}", conn))
+        {
+            await using (var reader = await cmd.ExecuteReaderAsync())
+            {
+                while (await reader.ReadAsync())
+                {
+                    var txid = await ReadHexFromBytea(reader, 0);
+                    var data = await ReadBytea(reader, 1);
+                    result.Add(txid ?? "", data ?? new byte[] { });
+                }
+            }
+        }
+        return result;
+    }
+
     public async Task<bool> InsertTransactionAsync(string txid_hex, string data_hex)
     {
         using var conn = Connection;

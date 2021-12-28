@@ -21,4 +21,5 @@ public class UtilityService : IUtilityService
                      .ToArray();
 
     public string ToHex(byte[] val) => BitConverter.ToString(val).Replace("-", "").ToLowerInvariant();
+    public string ToHexReversed(byte[] val) => ToHex(val.Reverse().ToArray());
 }
