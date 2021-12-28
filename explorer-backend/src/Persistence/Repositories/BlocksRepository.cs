@@ -126,6 +126,23 @@ public class BlocksRepository : BaseRepository, IBlocksRepository
         }
     }
 
+    public async Task<string?> ProbeHashByHeight(int height)
+    {
+        using var conn = Connection;
+        await conn.OpenAsync();
+
+        using (var cmd = new NpgsqlCommand($"SELECT hash FROM blocks WHERE height = {height}", conn))
+        {
+            await using (var reader = await cmd.ExecuteReaderAsync())
+            {
+                var success = await reader.ReadAsync();
+                if (!success) return null;
+
+                return await ReadHexFromBytea(reader, 0);
+            }
+        }
+    }
+
     public async Task<Block?> GetBlockByHashAsync(string hash)
     {
         using var conn = Connection;

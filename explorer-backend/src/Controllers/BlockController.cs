@@ -57,8 +57,31 @@ public class BlockController : ControllerBase
 
         if (block != null)
         {
+            var nextBlockHash = await _blocksRepository.ProbeHashByHeight(block.height + 1);
+            var prevBlockHash = await _blocksRepository.ProbeHashByHeight(block.height - 1);
+
             response.Found = true;
             response.Block = block;
+
+            var verHex = BitConverter.GetBytes(block.version);
+            verHex = verHex.Reverse().ToArray();
+            response.VersionHex = _utilityService.ToHex(verHex);
+
+            if (nextBlockHash != null)
+                response.NextBlock = new BlockBasicData
+                {
+                    Hash = nextBlockHash,
+                    Height = block.height + 1
+                };
+
+            if (prevBlockHash != null)
+                response.PrevBlock = new BlockBasicData
+                {
+                    Hash = prevBlockHash,
+                    Height = block.height - 1
+                };
+
+            response.Transactions = new List<TransactionSimpleDecoded>();
             var rtxs = await _transactionsRepository.GetTransactionsForBlockAsync(block.height);
             if (rtxs != null)
                 foreach (var rawTx in rtxs)

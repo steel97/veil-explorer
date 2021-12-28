@@ -8,6 +8,7 @@ public interface IBlocksRepository
     Task<List<SimplifiedBlock>> GetSimplifiedBlocks(int offset, int count, SortDirection sort);
     Task<Block?> GetLatestBlockAsync(bool onlySynced = false);
     Task<Block?> GetBlockByHeightAsync(int height);
+    Task<string?> ProbeHashByHeight(int height);
     Task<int?> ProbeBlockByHashAsync(string hash);
     Task<Block?> GetBlockByHashAsync(string hash);
     Task<bool> InsertBlockAsync(Block blockTemplate);

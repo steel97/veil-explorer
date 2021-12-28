@@ -51,11 +51,11 @@
 
       <div>{{ t("Blocks.Type") }}</div>
       <div class="text-right">
-        <div>{{ getPow(val)[0] }}</div>
+        <div>{{ getPow(val.proofType)[0] }}</div>
         <div
           class="text-xs text-gray-500 dark:text-gray-400 yy"
-          v-if="getPow(val)[2] != null"
-          v-html="getPow(val)[1]"
+          v-if="getPow(val.proofType)[2] != null"
+          v-html="getPow(val.proofType)[1]"
         ></div>
       </div>
 
@@ -84,10 +84,10 @@
     </div>
     <div class="hidden md:block">{{ getAge(val) }}</div>
     <div class="hidden md:block">
-      <div>{{ getPow(val)[0] }}</div>
+      <div>{{ getPow(val.proofType)[0] }}</div>
       <div
         class="text-xs text-gray-500 dark:text-gray-400"
-        v-html="getPow(val)[1]"
+        v-html="getPow(val.proofType)[1]"
       ></div>
     </div>
     <div class="hidden md:block">{{ val.txCount }}</div>
@@ -109,7 +109,8 @@ import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/vue/solid";
 import { useI18n } from "vue-i18n";
 import { useFormatting } from "@/composables/Formatting";
 import { BlockType, SimplifiedBlock } from "@/models/API/SimplifiedBlock";
-import locale from "~~/localization/en";
+import { useBlockchain } from "@/composables/Blockchain";
+import locale from "@/localization/en";
 
 const config = useRuntimeConfig();
 
@@ -118,6 +119,7 @@ const props = defineProps<{
   reactivityFix: number;
 }>();
 
+const { getPow } = useBlockchain();
 const { formatDateLocal, formatTimeLocal } = useFormatting();
 const { t } = useI18n();
 
@@ -215,49 +217,6 @@ const getAge = (block: SimplifiedBlock) => {
     break;
   }
   return resp;
-};
-
-const getPow = (block: SimplifiedBlock) => {
-  const proofType = block.proofType;
-
-  let high = "";
-  let low = "&nbsp;";
-  let lowI: string | null = null;
-
-  switch (proofType) {
-    case BlockType.UNKNOWN: {
-      high = "Unknown";
-      break;
-    }
-    case BlockType.POW_X16RT: {
-      high = "Proof-of-work";
-      low = "X16RT";
-      break;
-    }
-    case BlockType.POW_ProgPow: {
-      high = "Proof-of-work";
-      low = "ProgPow";
-      break;
-    }
-    case BlockType.POW_RandomX: {
-      high = "Proof-of-work";
-      low = "RandomX";
-      break;
-    }
-    case BlockType.POW_Sha256D: {
-      high = "Proof-of-work";
-      low = "Sha256D";
-      break;
-    }
-    case BlockType.POS: {
-      high = "Proof-of-stake";
-      break;
-    }
-  }
-
-  if (low != "&nbsp;") lowI = low;
-
-  return [high, low, lowI];
 };
 
 const getBlockWeightRaw = (block: SimplifiedBlock) =>

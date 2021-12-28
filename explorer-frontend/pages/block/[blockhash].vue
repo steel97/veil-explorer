@@ -5,12 +5,12 @@
         {{ t("Block.BlockTitle") }}: {{ getBlock }}
       </div>
     </h1>
-    <Block />
+    <BlockView />
   </div>
 </template>
 
 <script setup lang="ts">
-import Block from "@/components/block/Block";
+import Block from "@/components/block/BlockView";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();

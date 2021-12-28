@@ -7,7 +7,7 @@ export enum EntityType {
 }
 
 export interface SearchResponse {
-    found: boolean
-    query: string | null,
-    type: EntityType
+    found: boolean;
+    query: string | null;
+    type: EntityType;
 }

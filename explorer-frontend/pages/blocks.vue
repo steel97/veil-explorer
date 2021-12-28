@@ -138,7 +138,10 @@ const meta = computed(() => {
       },
       {
         name: "og:url",
-        content: `${config.BASE_URL}/blocks`,
+        content: `${config.BASE_URL}${buildRouteTemplate().replace(
+          "{page}",
+          currentPage.value
+        )}`,
       },
     ],
   };

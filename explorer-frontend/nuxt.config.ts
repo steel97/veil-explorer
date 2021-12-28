@@ -7,6 +7,7 @@ export default defineNuxtConfig({
         BASE_URL: process.env.BASE_URL,
         RECENT_BLOCKS_COUNT: process.env.RECENT_BLOCKS_COUNT,
         BLOCKS_PER_PAGE: process.env.BLOCKS_PER_PAGE,
+        TXS_PER_PAGE: process.env.TXS_PER_PAGE,
         MAX_BLOCK_WEIGHT: process.env.MAX_BLOCK_WEIGHT,
         SYNC_NOTICE_CASE: process.env.SYNC_NOTICE_CASE,
         COOKIE_SAVE_DAYS: process.env.COOKIE_SAVE_DAYS,
