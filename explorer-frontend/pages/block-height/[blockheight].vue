@@ -76,7 +76,6 @@ const blockHash = computed(
   () => blockData.value?.block?.hash_hex ?? t("Core.NoData")
 );
 
-const pageAddition = route.params.page != "" ? `/${route.params.page}` : "";
 const buildRouteTemplate = () =>
   `/block-height/${route.params.blockheight}/{page}/`;
 
