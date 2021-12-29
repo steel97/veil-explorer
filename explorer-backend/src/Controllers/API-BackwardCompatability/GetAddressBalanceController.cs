@@ -69,14 +69,14 @@ public class GetAddressBalanceController : ControllerBase
             {
                 try
                 {
-                    if (await _nodeApiCacheSingleton.PutInQueueAsync($"scantxoutset-{reqAddr}"))
+                    // try get balance
+                    var scanTxOutsetFlag = new AsyncFlag
                     {
-                        // try get balance
-                        var scanTxOutsetFlag = new AsyncFlag
-                        {
-                            State = false
-                        };
-                        await _scanTxOutsetBackgroundTaskQueue.QueueBackgroundWorkItemAsync(async token =>
+                        State = false
+                    };
+                    await _scanTxOutsetBackgroundTaskQueue.QueueBackgroundWorkItemAsync(async token =>
+                    {
+                        if (await _nodeApiCacheSingleton.PutInQueueAsync($"scantxoutset-{reqAddr}"))
                         {
                             try
                             {
@@ -91,10 +91,10 @@ public class GetAddressBalanceController : ControllerBase
 
                             if (scanTxOutsetFlag != null)
                                 scanTxOutsetFlag.State = true;
-                        });
-                        await AsyncUtils.WaitUntilAsync(cancellationToken, () => scanTxOutsetFlag.State, _apiConfig.Value.ApiQueueSpinDelay, _apiConfig.Value.ApiQueueWaitTimeout);
-                        scanTxOutsetRes = _nodeApiCacheSingleton.GetApiCache<ScanTxOutset>($"scantxoutset-{reqAddr}");
-                    }
+                        }
+                    });
+                    await AsyncUtils.WaitUntilAsync(cancellationToken, () => scanTxOutsetFlag.State, _apiConfig.Value.ApiQueueSpinDelay, _apiConfig.Value.ApiQueueWaitTimeout);
+                    scanTxOutsetRes = _nodeApiCacheSingleton.GetApiCache<ScanTxOutset>($"scantxoutset-{reqAddr}");
                 }
                 catch (TimeoutException)
                 {
