@@ -38,6 +38,8 @@ builder.Services.AddTransient<IBlocksRepository, BlocksRepository>();
 builder.Services.AddTransient<ITransactionsRepository, TransactionsRepository>();
 builder.Services.AddTransient<IRawTxsRepository, RawTxsRepository>();
 
+builder.Services.AddTransient<ITransactionDecoder, TransactionsDecoder>();
+
 builder.Services.AddHttpClient();
 builder.Services.AddSignalR(options => { });
 builder.Services.AddControllers();
