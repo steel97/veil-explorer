@@ -3,7 +3,7 @@
     <h1 class="uppercase font-semibold py-4">
       {{ t("Home.NetworkSummary") }}
     </h1>
-    <HomeNetworkSummary />
+    <NetworkSummary />
     <div class="flex pb-4 pt-6 justify-between">
       <h1 class="uppercase font-semibold">
         {{ t("Home.RecentBlocks") }}
@@ -23,11 +23,13 @@
         </NuxtLink>
       </div>
     </div>
-    <HomeRecentBlocks />
+    <RecentBlocks />
   </div>
 </template>
 
 <script setup lang="ts">
+import NetworkSummary from "@/components/home/NetworkSummary";
+import RecentBlocks from "@/components/home/RecentBlocks";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();

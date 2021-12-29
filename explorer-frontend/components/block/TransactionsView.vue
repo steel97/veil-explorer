@@ -19,12 +19,13 @@
         {{ tx.txId }}
       </RouterLink>
     </h2>
-    <SharedTransactionData :tx="tx" />
+    <TransactionData :tx="tx" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { TransactionSimpleDecoded } from "@/models/API/BlockResponse";
+import TransactionData from "@/components/shared/TransactionData";
 
 const config = useRuntimeConfig();
 

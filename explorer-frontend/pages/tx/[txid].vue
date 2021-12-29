@@ -82,14 +82,15 @@
     <h1 class="font-semibold pt-4 uppercase">
       {{ t("Tx.InputsOutputs") }}
     </h1>
-    <SharedTransactionData
+    <TransactionData
       :tx="tx.transaction"
       v-if="tx != null && tx.transaction != null"
-    ></SharedTransactionData>
+    />
   </div>
 </template>
 
 <script setup lang="ts">
+import TransactionData from "@/components/shared/TransactionData";
 import { useFormatting } from "@/composables/Formatting";
 import { useChainInfo } from "@/composables/States";
 import { TxRequest } from "@/models/API/TxRequest";

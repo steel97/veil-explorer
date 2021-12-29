@@ -23,12 +23,12 @@
     >
       {{ t("UnconfirmedTx.NoTxs") }}
     </div>
-    <BlockTransactionsView
+    <TransactionsView
       v-if="unconfirmedTxData != null && unconfirmedTxData.transactions != null"
       :txdata="unconfirmedTxData.transactions"
     />
 
-    <SharedPagination
+    <Pagination
       v-if="unconfirmedTxData != null && unconfirmedTxData.transactions != null"
       :overallEntries="unconfirmedTxData.txnCount"
       :entriesPerPage="config.TXS_PER_PAGE"
@@ -40,6 +40,8 @@
 </template>
 
 <script setup lang="ts">
+import TransactionsView from "@/components/block/TransactionsView";
+import Pagination from "@/components/shared/Pagination";
 import { UnconfirmedTxResponse } from "@/models/API/UnconfirmedTxResponse";
 import { useUI } from "@/composables/UI";
 import { useI18n } from "vue-i18n";
