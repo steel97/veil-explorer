@@ -26,6 +26,7 @@ export BASE_URL=http://<ip>:3000
 export CHAIN_APIS="[{\"name\": \"main\", \"path\": \"http://<ip>:5000/api\"}]"
 export RECENT_BLOCKS_COUNT=5
 export BLOCKS_PER_PAGE=15
+export TXS_PER_PAGE=15
 export MAX_BLOCK_WEIGHT=4000000
 export SYNC_NOTICE_CASE=15
 export COOKIE_SAVE_DAYS=90
