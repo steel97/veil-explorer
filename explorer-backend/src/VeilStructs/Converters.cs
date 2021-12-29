@@ -8,9 +8,238 @@ public class Converters
     public const int WITNESS_V0_SCRIPTHASH_SIZE = 32;
     public const int WITNESS_V0_KEYHASH_SIZE = 20;
 
+    const int HashSize = 160 / 8;//160/8?
+
+    // piece of bech32, did that for veil specific stuff, can be replaced with NBitcoin implemention?
+    static int[] CHARSET_REV = new int[]{
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    15, -1, 10, 17, 21, 20, 26, 30,  7,  5, -1, -1, -1, -1, -1, -1,
+    -1, 29, -1, 24, 13, 25,  9,  8, 23, -1, 18, 22, 31, 27, 19, -1,
+     1,  0,  3, 16, 11, 28, 12, 14,  6,  4,  2, -1, -1, -1, -1, -1,
+    -1, 29, -1, 24, 13, 25,  9,  8, 23, -1, 18, 22, 31, 27, 19, -1,
+     1,  0,  3, 16, 11, 28, 12, 14,  6,  4,  2, -1, -1, -1, -1, -1
+};
+    bool VerifyChecksum(string hrp, byte[] values)
+    {
+        // PolyMod computes what value to xor into the final values to make the checksum 0. However,
+        // if we required that the checksum was 0, it would be the case that appending a 0 to a valid
+        // list of values would result in a new valid list. For that reason, Bech32 requires the
+        // resulting checksum to be 1 instead.
+        return PolyMod(Cat(ExpandHRP(hrp), values)) == 1;
+    }
+
+    byte[] ExpandHRP(string hrp)
+    {
+        //byte[] ret = new byte[hrp.Length + 90];
+        var ret = new byte[hrp.Length * 2 + 1];
+        //ret.reserve(hrp.Length + 90);
+        //ret.resize(hrp.Length * 2 + 1);
+        for (var i = 0; i < hrp.Length; ++i)
+        {
+            var c = hrp[i];
+            ret[i] = (byte)(c >> 5);
+            ret[i + hrp.Length + 1] = (byte)(c & 0x1f);
+        }
+        ret[hrp.Length] = 0;
+        return ret;
+    }
+
+    public byte[] Cat(byte[] x, byte[] y)
+    {
+        //x.insert(x.end(), y.begin(), y.end());
+        var local = new List<byte>(x);
+        local.AddRange(y);
+        return local.ToArray();
+    }
+
+    private static readonly uint[] Generator = { 0x3b6a57b2U, 0x26508e6dU, 0x1ea119faU, 0x3d4233ddU, 0x2a1462b3U };
+    private uint PolyMod(byte[] values)
+    {
+        uint chk = 1;
+        for (int i = 0; i < values.Length; i++)
+        {
+            var top = chk >> 25;
+            chk = values[i] ^ ((chk & 0x1ffffff) << 5);
+            chk ^= ((top >> 0) & 1) == 1 ? Generator[0] : 0;
+            chk ^= ((top >> 1) & 1) == 1 ? Generator[1] : 0;
+            chk ^= ((top >> 2) & 1) == 1 ? Generator[2] : 0;
+            chk ^= ((top >> 3) & 1) == 1 ? Generator[3] : 0;
+            chk ^= ((top >> 4) & 1) == 1 ? Generator[4] : 0;
+        }
+        return chk;
+    }
+
+    public Tuple<string?, byte[]?> Decode(string str)
+    {
+        bool lower = false, upper = false;
+        for (var i = 0; i < str.Length; ++i)
+        {
+            char c = str[i];
+            if (c >= 'a' && c <= 'z') lower = true;
+            else if (c >= 'A' && c <= 'Z') upper = true;
+            else if (c < 33 || c > 126) return new Tuple<string?, byte[]?>(null, null);
+        }
+
+        if (lower && upper) return new Tuple<string?, byte[]?>(null, null);
+        var pos = str.LastIndexOf('1');
+        if (str.Length > 122 || pos == -1 || pos == 0 || pos + 7 > str.Length)
+            return new Tuple<string?, byte[]?>(null, null);
+
+        byte[] values = new byte[str.Length - 1 - pos];
+        for (var i = 0; i < str.Length - 1 - pos; ++i)
+        {
+            char c = str[i + pos + 1];
+            var rev = CHARSET_REV[c];
+
+            if (rev == -1)
+                return new Tuple<string?, byte[]?>(null, null);
+
+            values[i] = (byte)rev;
+        }
+        string hrp = "";
+        for (var i = 0; i < pos; ++i)
+            hrp += str[i].ToString().ToLowerInvariant();
+
+        if (!VerifyChecksum(hrp, values))
+            return new Tuple<string?, byte[]?>(null, null);
+
+        return new Tuple<string?, byte[]?>(hrp, values.Take(values.Count() - 6).ToArray());
+    }
+
+    static bool ConvertBits(Action<byte> outfn, byte[] val, int valOffset, int valCount, int frombits, int tobits, bool pad)
+
+    {
+        int acc = 0;
+        int bits = 0;
+        int maxv = (1 << tobits) - 1;
+        int max_acc = (1 << (frombits + tobits - 1)) - 1;
+        for (int i = valOffset; i < valOffset + valCount; i++)
+        {
+            acc = ((acc << frombits) | val[i]) & max_acc;
+            bits += frombits;
+            while (bits >= tobits)
+            {
+                bits -= tobits;
+                outfn((byte)((acc >> bits) & maxv));
+            }
+        }
+        if (pad)
+        {
+            if (bits != 0)
+                outfn((byte)((acc << (tobits - bits)) & maxv));
+        }
+        else if (bits >= frombits || ((acc << (tobits - bits)) & maxv) != 0)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    public IDestination? DecodeDestination(string str)
+    {
+        var chainParams = new VeilChainParams();
+        var b58check = new Base58CheckEncoder();
+        byte[] data;
+
+        try
+        {
+            data = b58check.DecodeData(str);
+
+            // base58-encoded Bitcoin addresses.
+            // Public-key-hash-addresses have version 0 (or 111 testnet).
+            // The data vector contains RIPEMD160(SHA256(pubkey)), where pubkey is the serialized public key.
+            byte[] pubkey_prefix = new byte[] { chainParams.Base58Prefix(Base58Type.PUBKEY_ADDRESS)[1] };
+            if (data.Length == HashSize + pubkey_prefix.Length && data.Take(pubkey_prefix.Length).SequenceEqual(pubkey_prefix)) //std::equal(pubkey_prefix.begin(), pubkey_prefix.end(), data.begin()))
+                return new KeyId(data.Skip(pubkey_prefix.Length).ToArray());
+
+            // Script-hash-addresses have version 5 (or 196 testnet).
+            // The data vector contains RIPEMD160(SHA256(cscript)), where cscript is the serialized redemption script.
+            byte[] script_prefix = new byte[] { chainParams.Base58Prefix(Base58Type.SCRIPT_ADDRESS)[1] };
+            if (data.Length == HashSize + script_prefix.Length && data.Take(script_prefix.Length).SequenceEqual(script_prefix))
+                return new ScriptId(data.Skip(script_prefix.Length).ToArray());
+
+            byte[] stealth_prefix = chainParams.Base58Prefix(Base58Type.STEALTH_ADDRESS);
+            if (data.Length > stealth_prefix.Length && data.Take(stealth_prefix.Length).SequenceEqual(stealth_prefix))
+            {
+                var sx = new VeilStealthAddress();
+                if (0 == sx.FromRaw(data.Skip(stealth_prefix.Count()).ToArray()))
+                    return sx;
+                return null;
+            }
+        }
+        catch
+        {
+
+        }
+
+
+        data = new byte[] { };
+        var dataz = new List<byte>();
+        var bech = Decode(str);
+
+        if (bech != null && bech.Item2 != null && bech.Item2.Length > 0 && (bech.Item1 == chainParams.Bech32HRPStealth() || bech.Item1 == chainParams.Bech32HRPBase()))
+        {
+            // Bech32 decoding
+            int version = bech!.Item2![0]; // The first 5 bit symbol is the witness version (0-16)
+            bool fIsStealth = bech.Item1 == chainParams.Bech32HRPStealth();
+            // The rest of the symbols are converted witness program bytes.
+            //if (fIsStealth)
+            //    data.reserve(((bech.second.size()) * 5) / 8);
+            //else
+            //    data.reserve(((bech.second.size() - 1) * 5) / 8);
+
+            var offsetl = fIsStealth ? 0 : 1;
+            //ConvertBits(c => data.Add(c), bech.Item2, offsetl, bech.Item2.Count() - offsetl, 5, 8, false)
+            //if (ConvertBits < 5, 8, false > ([&](unsigned char c) { data.push_back(c); }, bech.second.begin() + (fIsStealth ? 0 : 1), bech.second.end()))
+            if (ConvertBits(c => dataz.Add(c), bech.Item2, offsetl, bech.Item2.Count() - offsetl, 5, 8, false))
+            {
+                data = dataz.ToArray();
+                if (version == 0)
+                {
+                    {
+
+
+                        if (data.Count() == WITNESS_V0_KEYHASH_SIZE)
+                            return new WitKeyId(data);
+                    }
+                    {
+                        if (data.Count() == WITNESS_V0_SCRIPTHASH_SIZE)
+                            return new WitScriptId(data);
+                    }
+                    {
+                        if (data.Count() == 70)
+                        { //Size of stealth addr
+                            var sx = new VeilStealthAddress();
+                            if (0 == sx.FromRaw(data))
+                                return sx;
+                        }
+                    }
+                    return null;
+                }
+                if (version > 16 || data.Count() < 2 || data.Count() > 40)
+                    return null;
+
+                var unk = new VeilWitnessUnknown();
+                unk.version = version;
+                unk.program = data;
+
+                return unk;
+            }
+        }
+        return null;
+    }
+
+    public bool IsValidDestination(IDestination dest)
+    {
+        //CKeyID, CScriptID, WitnessV0ScriptHash, WitnessV0KeyHash, WitnessUnknown, CStealthAddress, CExtKeyPair, CKeyID256, CScriptID256
+        return dest is KeyId || dest is ScriptId || dest is WitScriptId || dest is WitKeyId || dest is VeilStealthAddress || dest is ExtKey || dest is VeilWitnessUnknown;
+    }
+
     public static string EncodeDestination(IDestination value, bool m_bech32 = false)
     {
-        var m_params = new ChainParams();
+        var m_params = new VeilChainParams();
         var b58check = new Base58CheckEncoder();
         if (value is KeyId)
         {
@@ -63,6 +292,13 @@ public class Converters
             return bech32::Encode(m_params.Bech32HRPBase(), data);*/
             var id = (WitKeyId)value;
             return bech.Encode(0, id.ToBytes());
+        }
+
+        if (value is VeilStealthAddress)
+        {
+            var bech = new Bech32Encoder(m_params.bech32_hrp_stealth);
+            var id = (VeilStealthAddress)value;
+            return bech.Encode(0, id.RawData);
         }
 
         if (value is WitScriptId)
@@ -167,7 +403,7 @@ public class Converters
         {
             typeRet = txnouttype.TX_MULTISIG;
             vSolutionsRet?.Add(new byte[] { (byte)required }); // safe as required is in range 1..16
-            //vSolutionsRet.insert(vSolutionsRet.end(), keys.begin(), keys.end());
+                                                               //vSolutionsRet.insert(vSolutionsRet.end(), keys.begin(), keys.end());
             foreach (var key in keys)
                 vSolutionsRet?.Add(key);
 

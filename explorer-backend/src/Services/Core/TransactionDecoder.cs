@@ -103,7 +103,7 @@ public class TransactionsDecoder : ITransactionDecoder
                     if (tx.IsBasecoin())
                     {
                         long reward;
-                        Budget.GetBlockRewards(blockHeight, out reward, out _, out _, out _);
+                        VeilBudget.GetBlockRewards(blockHeight, out reward, out _, out _, out _);
                         txinsimple.PrevOutAmount = reward;
                     }
 

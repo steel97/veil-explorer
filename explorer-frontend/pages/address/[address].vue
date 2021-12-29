@@ -36,40 +36,6 @@
         <div>
           <!-- Info section -->
           <div
-            class="flex items-center mb-2 uppercase"
-            v-if="addressInfo == null || !addressInfo.fetched"
-          >
-            <svg
-              class="
-                animate-spin
-                ml-1
-                mr-3
-                h-5
-                w-5
-                text-gray-800
-                dark:text-gray-300
-              "
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                class="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                stroke-width="4"
-              ></circle>
-              <path
-                class="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
-            </svg>
-            {{ t("Address.Loading") }}
-          </div>
-          <div
             class="grid grid-cols-2 gap-0.5 w-full py-4 border-b"
             v-for="(val, index) in getAddressDetails"
             :class="index < getAddressDetails.length - 1 ? '' : 'md:border-b-0'"
@@ -218,6 +184,7 @@ const config = useRuntimeConfig();
 const address: string = route.params.address as string;
 const addressReactive = ref(address);
 const reloadingBalance = ref(false);
+const router = useRouter();
 
 const getAddressDetails = computed(() => {
   if (addressInfo.value == null) return [];
@@ -348,15 +315,15 @@ const shouldFetchBalance = () =>
     !addressInfo.value.address.isstealthaddress) &&
   !addressInfo.value.amountFetched;
 
-const shouldFetchAddress = () =>
-  addressInfo.value != null && !addressInfo.value.fetched;
-
 const checkLoad = async () => {
-  if (shouldFetchBalance() || shouldFetchAddress()) {
+  if (shouldFetchBalance()) {
     addressInfo.value = await fetchAddress();
     setTimeout(checkLoad, 500);
   }
 };
+
+if (addressInfo.value != null && !addressInfo.value.fetched)
+  router.push("/search/notfound");
 
 onMounted(() => {
   setTimeout(checkLoad, 500);

@@ -1,4 +1,4 @@
-export interface ValidateAddressResult {
+export interface ValidateAddress {
     isvalid: boolean;
     address: string | null;
     scriptPubKey: string | null;
@@ -18,7 +18,7 @@ export interface ValidateAddressResult {
 
 export interface AddressResponse {
     fetched: boolean;
-    address: ValidateAddressResult | null;
+    address: ValidateAddress | null;
     amountFetched: boolean;
     amount: number;
     version: number | null;

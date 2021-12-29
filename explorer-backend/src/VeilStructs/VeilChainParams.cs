@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace ExplorerBackend.VeilStructs;
 
 public enum Base58Type : int
@@ -21,7 +23,7 @@ public enum Base58Type : int
 };
 
 // hard coded for mainnet
-public class ChainParams
+public class VeilChainParams
 {
     public List<byte[]>? base58Prefixes = new();
     public List<byte[]>? bech32Prefixes = new();
@@ -29,7 +31,8 @@ public class ChainParams
     public byte[] bech32_hrp_stealth = new byte[] { (byte)'s', (byte)'v' };
     public byte[] bech32_hrp_base = new byte[] { (byte)'b', (byte)'v' };
 
-    public ChainParams()
+
+    public VeilChainParams()
     {
         for (var i = 0; i < 14; i++) base58Prefixes.Add(new byte[] { });
         for (var i = 0; i < 14; i++) bech32Prefixes.Add(new byte[] { });
@@ -53,4 +56,7 @@ public class ChainParams
     {
         return bech32Prefixes![(int)type];
     }
+
+    public string Bech32HRPStealth() => Encoding.ASCII.GetString(bech32_hrp_stealth);
+    public string Bech32HRPBase() => Encoding.ASCII.GetString(bech32_hrp_base);
 }

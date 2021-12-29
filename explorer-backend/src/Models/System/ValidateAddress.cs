@@ -1,11 +1,6 @@
-namespace ExplorerBackend.Models.Node.Response;
+namespace ExplorerBackend.Models.System;
 
-public class ValidateAddress : JsonRPCResponse
-{
-    public ValidateAddressResult? Result { get; set; }
-}
-
-public class ValidateAddressResult
+public class ValidateAddress
 {
     public bool isvalid { get; set; }
     public string? address { get; set; }
@@ -20,6 +15,6 @@ public class ValidateAddressResult
     public bool? isextkey { get; set; }
 
     public bool? isstealthaddress { get; set; }
-    public int? prefix_num_bits { get; set; }
+    public uint? prefix_num_bits { get; set; }
     public string? prefix_bitfield { get; set; }
 }

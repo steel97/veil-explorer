@@ -58,7 +58,7 @@ public class NodeApiCacheSingleton
 
             try
             {
-                if (!ApisInQueue.Contains(key))
+                if (ApisInQueue.Contains(key))
                     ApisInQueue.Remove(key);
             }
             catch

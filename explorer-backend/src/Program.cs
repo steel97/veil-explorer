@@ -28,10 +28,8 @@ builder.Services.AddHostedService<ScanTxOutsetWorker>();
 builder.Services.AddHostedService<SupplyWorker>();
 builder.Services.AddHostedService<MempoolWorker>();
 
-builder.Services.AddSingleton<ValidateAddressBackgroundTaskQueue>();
 builder.Services.AddSingleton<ScanTxOutsetBackgroundTaskQueue>();
 
-builder.Services.AddHostedService<ValidateAddressWorker>();
 builder.Services.AddHostedService<ScanTxOutsetWorker>();
 
 builder.Services.AddTransient<IBlocksRepository, BlocksRepository>();

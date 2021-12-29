@@ -1,6 +1,6 @@
 namespace ExplorerBackend.VeilStructs;
 
-public class Budget
+public class VeilBudget
 {
     const int nHeightSupplyCreationStop = 9816000;
     const int nBlocksPerPeriod = 43200;

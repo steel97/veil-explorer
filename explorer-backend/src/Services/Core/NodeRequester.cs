@@ -29,35 +29,6 @@ public class NodeRequester : INodeRequester
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", _explorerConfig.CurrentValue.Node.Authorization);
     }
 
-    public async ValueTask ValidateAddressAndCacheAsync(string target, CancellationToken token)
-    {
-        try
-        {
-            using var httpClient = _httpClientFactory.CreateClient();
-            var options = new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            };
-
-            ConfigureHttpClient(httpClient);
-
-            var request = new JsonRPCRequest
-            {
-                Id = 1,
-                Method = "validateaddress",
-                Params = new List<object>(new object[] { target })
-            };
-            var response = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", request, options);
-            var data = await response.Content.ReadFromJsonAsync<ValidateAddress>(options);
-            if (data != null)
-                _nodeApiCacheSingleton.SetApiCache($"validateaddress-{target}", data);
-        }
-        catch
-        {
-
-        }
-    }
-
     public async ValueTask ScanTxOutsetAndCacheAsync(string target, CancellationToken token)
     {
         try
