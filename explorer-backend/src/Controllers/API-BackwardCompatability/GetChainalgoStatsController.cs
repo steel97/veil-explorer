@@ -21,5 +21,5 @@ public class GetChainalgoStatsController : ControllerBase
 
     [HttpGet(Name = "GetChainalgoStats")]
     [ProducesResponseType(typeof(GetChainalgoStatsResult), StatusCodes.Status200OK)]
-    public GetChainalgoStatsResult? Get() => _chainInfoSingleton.currentChainAlgoStats;
+    public GetChainalgoStatsResult? Get() => _chainInfoSingleton.CurrentChainAlgoStats;
 }

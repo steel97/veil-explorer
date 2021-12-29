@@ -6,9 +6,11 @@ public class ExplorerConfig
     public int HubNotifyDelay { get; set; }
     public int PullBlocksDelay { get; set; }
     public int PullBlockchainInfoDelay { get; set; }
+    public int PullBlockchainStatsDelay { get; set; }
     public int NodeWorkersPullDelay { get; set; }
     public int SupplyPullDelay { get; set; }
     public int PullMempoolDelay { get; set; }
+    public int StatsPointsCount { get; set; }
     public int BlocksPerBatch { get; set; }
     public string? BudgetAddress { get; set; }
     public string? FoundationAddress { get; set; }

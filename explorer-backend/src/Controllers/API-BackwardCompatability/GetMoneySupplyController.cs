@@ -28,7 +28,7 @@ public class GetMoneySupplyController : ControllerBase
     [ProducesResponseType(typeof(MoneySupplyResponse), StatusCodes.Status200OK)]
     public MoneySupplyResponse? Get()
     {
-        var totalSupply = _chainInfoSingleton.currentChainInfo?.Moneysupply ?? 0;
+        var totalSupply = _chainInfoSingleton.CurrentChainInfo?.Moneysupply ?? 0;
         var totalSupplyPrepared = (double)totalSupply / Constants.COIN;
         var circulatingSupply = totalSupplyPrepared - (_chainInfoSingleton.BudgetWalletAmount + _chainInfoSingleton.FoundationWalletAmmount);
 

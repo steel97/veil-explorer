@@ -21,6 +21,6 @@ public class GetBlockchainInfoController : ControllerBase
 
     [HttpGet(Name = "GetBlockchainInfo")]
     [ProducesResponseType(typeof(GetBlockchainInfoResult), StatusCodes.Status200OK)]
-    public GetBlockchainInfoResult? Get() => _chainInfoSingleton.currentChainInfo;
+    public GetBlockchainInfoResult? Get() => _chainInfoSingleton.CurrentChainInfo;
 
 }

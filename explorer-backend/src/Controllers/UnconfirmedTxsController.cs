@@ -60,7 +60,7 @@ public class UnconfirmedTransactions : ControllerBase
                     Data = _utilityService.HexToByteArray(rtx.hex!)
                 }));
 
-                txs = await _transactionDecoder.DecodeTransactions(txTargets, (int)((_chaininfoSingleton.currentChainInfo?.Blocks ?? 0) + 1));
+                txs = await _transactionDecoder.DecodeTransactions(txTargets, (int)((_chaininfoSingleton.CurrentChainInfo?.Blocks ?? 0) + 1));
 
             }
         }

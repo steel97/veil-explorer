@@ -62,7 +62,7 @@ public class BlocksRepository : BaseRepository, IBlocksRepository
         b.height > 
         
         */
-        var offsetQuery = sort == SortDirection.DESC ? $"b.height < {_chainInfoSingleton.currentSyncedBlock + 1 - offset}" : $"b.height > {offset}";
+        var offsetQuery = sort == SortDirection.DESC ? $"b.height < {_chainInfoSingleton.CurrentSyncedBlock + 1 - offset}" : $"b.height > {offset}";
 
         using (var cmd = new NpgsqlCommand($@"SELECT b.height, b.""size"", b.weight, b.proof_type, b.""time"", b.mediantime, (SELECT COUNT(t.txid) as txn from transactions t where t.block_height = b.height) FROM blocks b WHERE {offsetQuery} AND b.synced = true ORDER BY b.height {(sort == SortDirection.ASC ? "ASC" : "DESC")} limit {count};", conn))
         {

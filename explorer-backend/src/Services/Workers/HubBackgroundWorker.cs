@@ -29,7 +29,7 @@ public class HubBackgroundWorker : BackgroundService
             {
                 try
                 {
-                    await _hubContext.Clients.Group("chaininfo").SendAsync("BlockchainInfoUpdated", _chainInfoSingleton.currentSyncedBlock, _chainInfoSingleton.currentChainInfo, _chainInfoSingleton.currentChainAlgoStats);
+                    await _hubContext.Clients.Group("chaininfo").SendAsync("BlockchainInfoUpdated", _chainInfoSingleton.CurrentSyncedBlock, _chainInfoSingleton.CurrentChainInfo, _chainInfoSingleton.CurrentChainAlgoStats);
                 }
                 catch
                 {

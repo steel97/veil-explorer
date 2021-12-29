@@ -11,6 +11,7 @@ import Address from "./address.json";
 import Block from "./block.json";
 import Tx from "./tx.json";
 import UnconfirmedTx from "./unconfirmedtx.json";
+import TxStats from "./txstats.json";
 
 const locale: any = {
     Core: Core,
@@ -25,7 +26,8 @@ const locale: any = {
     Address: Address,
     Block: Block,
     Tx: Tx,
-    UnconfirmedTx: UnconfirmedTx
+    UnconfirmedTx: UnconfirmedTx,
+    TxStats: TxStats
 }
 
 export default locale;

@@ -25,9 +25,9 @@ public class BlockchainInfoController : ControllerBase
     {
         return new BlockchainInfo
         {
-            CurrentSyncedBlock = _chainInfoSingleton.currentSyncedBlock,
-            ChainInfo = _chainInfoSingleton.currentChainInfo,
-            AlgoStats = _chainInfoSingleton.currentChainAlgoStats
+            CurrentSyncedBlock = _chainInfoSingleton.CurrentSyncedBlock,
+            ChainInfo = _chainInfoSingleton.CurrentChainInfo,
+            AlgoStats = _chainInfoSingleton.CurrentChainAlgoStats
         };
     }
 }

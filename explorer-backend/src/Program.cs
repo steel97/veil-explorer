@@ -23,6 +23,7 @@ builder.Services.AddSingleton<INodeRequester, NodeRequester>();
 
 builder.Services.AddHostedService<BlocksWorker>();
 builder.Services.AddHostedService<BlockchainWorker>();
+builder.Services.AddHostedService<BlockchainStatsWorker>();
 builder.Services.AddHostedService<HubBackgroundWorker>();
 builder.Services.AddHostedService<ScanTxOutsetWorker>();
 builder.Services.AddHostedService<SupplyWorker>();

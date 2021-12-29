@@ -45,7 +45,6 @@ public class TxController : ControllerBase
         var txTargets = new List<TxDecodeTarget>();
 
         var probeTx = _chaininfoSingleton.UnconfirmedTxs?.Where(tx => tx.txid == body.Hash).FirstOrDefault();
-        var height = 0;
 
         var response = new TxResponse();
 
@@ -59,7 +58,7 @@ public class TxController : ControllerBase
 
             response.TxId = probeTx.txid!;
             response.Confirmed = false;
-            response.BlockHeight = (int)((_chaininfoSingleton.currentChainInfo?.Blocks ?? 0) + 1);
+            response.BlockHeight = (int)((_chaininfoSingleton.CurrentChainInfo?.Blocks ?? 0) + 1);
             response.Timestamp = probeTx.time;
             response.Version = probeTx.version;
             response.Size = probeTx.size;
@@ -91,7 +90,7 @@ public class TxController : ControllerBase
 
 
 
-        response.Transaction = (await _transactionDecoder.DecodeTransactions(txTargets, height))![0];
+        response.Transaction = (await _transactionDecoder.DecodeTransactions(txTargets, response.BlockHeight))![0];
 
 
 

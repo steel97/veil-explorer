@@ -65,15 +65,15 @@ public class BlockchainWorker : BackgroundService
 
                 if (blockchainInfo != null && blockchainInfo.Result != null)
                 {
-                    _chainInfoSingleton.currentChainInfo = blockchainInfo.Result;
-                    if (_chainInfoSingleton.currentChainInfo != null)
-                        _chainInfoSingleton.currentChainInfo.Next_super_block = (uint)Math.Floor(((double)_chainInfoSingleton.currentChainInfo.Blocks / (double)43200) + 1) * 43200;
+                    _chainInfoSingleton.CurrentChainInfo = blockchainInfo.Result;
+                    if (_chainInfoSingleton.CurrentChainInfo != null)
+                        _chainInfoSingleton.CurrentChainInfo.Next_super_block = (uint)Math.Floor(((double)_chainInfoSingleton.CurrentChainInfo.Blocks / (double)43200) + 1) * 43200;
                 }
                 else
                     _logger.LogWarning("BlockChainInfo is null");
 
                 if (chainalgoStats != null && chainalgoStats.Result != null)
-                    _chainInfoSingleton.currentChainAlgoStats = chainalgoStats.Result;
+                    _chainInfoSingleton.CurrentChainAlgoStats = chainalgoStats.Result;
                 else
                     _logger.LogWarning("ChainalgoStats is null");
 

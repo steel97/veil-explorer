@@ -224,7 +224,7 @@ public class BlocksWorker : BackgroundService
 
                             try
                             {
-                                _chainInfoSingleton.currentSyncedBlock = targetBlock.height;
+                                _chainInfoSingleton.CurrentSyncedBlock = targetBlock.height;
                                 await _hubContext.Clients.Group("blocksupdate").SendAsync("BlocksUpdated", new SimplifiedBlock
                                 {
                                     Height = targetBlock.height,
