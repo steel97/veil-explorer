@@ -41,6 +41,43 @@ public class TransactionsRepository : BaseRepository, ITransactionsRepository
         }
     }
 
+
+    public async Task<TransactionExtended?> GetTransactionFullByIdAsync(string txid)
+    {
+        using var conn = Connection;
+        await conn.OpenAsync();
+
+        using (var cmd = new NpgsqlCommand($@"SELECT t.txid, t.hash, t.""version"", t.""size"", t.vsize, t.weight, t.locktime, t.block_height, r.""data"" FROM transactions as t INNER JOIN rawtxs r ON t.txid = r.txid  WHERE t.txid = {TransformHex(txid)};", conn))
+        {
+            await using (var reader = await cmd.ExecuteReaderAsync())
+            {
+
+                var success = await reader.ReadAsync();
+                if (!success) return null;
+                var rt = await ReadTransaction(reader);
+                if (rt != null)
+                {
+                    var tx = new TransactionExtended
+                    {
+                        txid_hex = rt.txid_hex,
+                        hash_hex = rt.hash_hex,
+                        version = rt.version,
+                        size = rt.size,
+                        vsize = rt.vsize,
+                        weight = rt.weight,
+                        locktime = rt.locktime,
+                        block_height = rt.block_height
+                    };
+                    tx.data = await ReadBytea(reader, 8);
+                    return tx;
+                }
+
+
+                return null;
+            }
+        }
+    }
+
     public async Task<List<TransactionExtended>?> GetTransactionsForBlockAsync(int blockHeight, int offset, int count)
     {
         using var conn = Connection;

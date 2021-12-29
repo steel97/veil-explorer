@@ -1,4 +1,17 @@
 {
+    "Title": "Транзакция",
+    "Meta": {
+        "Title": "Veil Explorer - Транзакция {txid}",
+        "Description": "Просмотр транзакции {txid}"
+    },
+    "InputsOutputs": "Входы и выходы",
+    "Unconfirmed": "Не подтверждена",
+    "BlockHeight": "Блок",
+    "Timestamp": "Время",
+    "Version": "Версия",
+    "Locktime": "Время разблокировки",
+    "SpendableInBlock": "Можно тратить с",
+    "Confirmations": "Подтверждения",
     "Coinbase": "Coinbase",
     "NoInputs": "Нет входов (Сгенерированые монеты)",
     "Zerocoin": "Zerocoin",

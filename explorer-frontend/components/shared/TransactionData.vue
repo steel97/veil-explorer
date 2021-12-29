@@ -5,7 +5,7 @@
         <div
           v-for="(input, inputId) in props.tx.inputs"
           :key="'input-' + inputId"
-          :id="'input-' + inputId"
+          :id="'input-' + (inputId + 1).toString()"
           class="p-3 bg-gray-200 dark:bg-gray-700 rounded"
           :class="inputId == props.tx.inputs.length - 1 ? '' : 'mb-4'"
         >
@@ -127,9 +127,7 @@
               >
                 via&nbsp;
                 <RouterLink
-                  :to="
-                    '/tx/' + input.prevOutAddresses[0] + '#' + input.prevOutNum
-                  "
+                  :to="'/tx/' + input.prevOutTx + '#output-' + input.prevOutNum"
                   class="
                     text-sky-700
                     dark:text-sky-400
@@ -175,7 +173,7 @@
         <div
           v-for="(output, outputId) in props.tx.outputs"
           :key="'output-' + outputId"
-          :id="'output-' + outputId"
+          :id="'output-' + (outputId + 1).toString()"
           class="p-3 bg-gray-200 dark:bg-gray-700 rounded"
           :class="outputId == props.tx.outputs.length - 1 ? '' : 'mb-4'"
         >
