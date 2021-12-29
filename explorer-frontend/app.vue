@@ -32,10 +32,6 @@
 import "@/assets/css/tailwind.css";
 import "@/assets/css/common.css";
 import "toastify-js/src/toastify.css";
-import AppHeader from "@/components/AppHeader";
-import SyncNotice from "@/components/SyncNotice";
-import SearchBox from "@/components/SearchBox";
-import AppFooter from "@/components/AppFooter";
 import { useConfigs } from "@/composables/Configs";
 import { useThemeState, useChainInfo } from "@/composables/States";
 import { useNetworkManager } from "@/composables/NetworkManager";
