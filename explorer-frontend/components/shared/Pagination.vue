@@ -84,7 +84,10 @@ const elements = computed(() => {
     interactable: props.currentPage > 1,
     current: props.currentPage == 1,
     text: "«",
-    link: props.linkTemplate.replace("{page}", props.currentPage - 1),
+    link: props.linkTemplate.replace(
+      "{page}",
+      (props.currentPage - 1).toString()
+    ),
     targetPage: props.currentPage - 1,
   });
 
@@ -92,7 +95,7 @@ const elements = computed(() => {
     interactable: props.currentPage > 1,
     current: props.currentPage == 1,
     text: "1",
-    link: props.linkTemplate.replace("{page}", 1),
+    link: props.linkTemplate.replace("{page}", "1"),
     targetPage: 1,
   });
 
@@ -101,7 +104,7 @@ const elements = computed(() => {
       interactable: false,
       current: false,
       text: "...",
-      link: props.linkTemplate.replace("{page}", 1),
+      link: props.linkTemplate.replace("{page}", "1"),
       targetPage: 1,
     });
 
@@ -121,8 +124,8 @@ const elements = computed(() => {
       targetElements.push({
         interactable: true,
         current: i == props.currentPage,
-        text: i,
-        link: props.linkTemplate.replace("{page}", i),
+        text: i.toString(),
+        link: props.linkTemplate.replace("{page}", i.toString()),
         targetPage: i,
       });
       if (i < props.currentPage) renderedEntriesBefore++;
@@ -137,15 +140,15 @@ const elements = computed(() => {
       interactable: false,
       current: false,
       text: "...",
-      link: props.linkTemplate.replace("{page}", maxPages),
+      link: props.linkTemplate.replace("{page}", maxPages.toString()),
       targetPage: maxPages,
     });
 
   targetElements.push({
     interactable: props.currentPage < maxPages,
     current: props.currentPage == maxPages,
-    text: maxPages,
-    link: props.linkTemplate.replace("{page}", maxPages),
+    text: maxPages.toString(),
+    link: props.linkTemplate.replace("{page}", maxPages.toString()),
     targetPage: maxPages,
   });
 
@@ -153,7 +156,10 @@ const elements = computed(() => {
     interactable: props.currentPage < maxPages,
     current: false,
     text: "»",
-    link: props.linkTemplate.replace("{page}", props.currentPage + 1),
+    link: props.linkTemplate.replace(
+      "{page}",
+      (props.currentPage + 1).toString()
+    ),
     targetPage: props.currentPage + 1,
   });
 

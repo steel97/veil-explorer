@@ -233,7 +233,7 @@ watch(reactivityWatcher, () => {
   if (props.data.length == 0) return;
 
   const el = document.getElementById(`block-${latestBlock.value}`);
-  if (el != null) el.style.opacity = 1.0;
+  if (el != null) el.style.opacity = "1.0";
 
   latestBlock.value = props.data[0].height;
   targetOpacity = 0;
@@ -268,12 +268,12 @@ const blockAppearAnimator = (timestamp: number) => {
   let currentOpacity = targetOpacity + 0.001 * elapsed;
   if (currentOpacity > 1.0) {
     targetOpacity = 1.0;
-    if (el != null) el.style.opacity = targetOpacity;
+    if (el != null) el.style.opacity = targetOpacity.toString();
     return;
   }
   targetOpacity = currentOpacity;
 
-  if (el != null) el.style.opacity = targetOpacity;
+  if (el != null) el.style.opacity = targetOpacity.toString();
   requestAnimationFrame(blockAppearAnimator);
 };
 

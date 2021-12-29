@@ -71,10 +71,13 @@ const chainInfoDataState = useChainInfo();
 
 const route = useRoute();
 
-const page = (route.params.page > 0 ? route.params.page : 1) - 1;
+const page =
+  ((route.params.page as any as number) > 0
+    ? (route.params.page as any as number)
+    : 1) - 1;
 const currentPage = ref(page + 1);
 
-const sort: string = route.params.sort ?? "desc";
+const sort: string = (route.params.sort as string) ?? "desc";
 const targetSort = ref(sort.toLowerCase() == "asc" ? 0 : 1);
 
 const buildRouteSort = (target: string) =>
@@ -96,7 +99,7 @@ const selectPage = async (pg: number) => {
 
   scrollToAnimated(document.documentElement, 0, 150);
 
-  const link = buildRouteTemplate().replace("{page}", pg);
+  const link = buildRouteTemplate().replace("{page}", pg.toString());
   currentPage.value = pg;
   window.history.replaceState({}, null, link);
   const blocksInfoLocal = await fetchBlocks();
@@ -140,7 +143,7 @@ const meta = computed(() => {
         name: "og:url",
         content: `${config.BASE_URL}${buildRouteTemplate().replace(
           "{page}",
-          currentPage.value
+          currentPage.value.toString()
         )}`,
       },
     ],

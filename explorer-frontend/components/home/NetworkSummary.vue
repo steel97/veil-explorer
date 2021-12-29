@@ -197,7 +197,7 @@
             "
             >{{ calculateZerocoinTotal() }} ({{
               (
-                (calculateZerocoinTotal() /
+                (parseInt(calculateZerocoinTotal()) /
                   (data?.chainInfo?.moneysupply / supplyDelimiter)) *
                 100
               ).toFixed(2)
@@ -229,7 +229,8 @@
           <div class="text-right">
             {{ (val.amount / supplyDelimiter).toFixed(2) }} ({{
               (
-                ((val.amount / supplyDelimiter).toFixed(2) /
+                (val.amount /
+                  supplyDelimiter /
                   (data?.chainInfo?.moneysupply / supplyDelimiter)) *
                 100
               ).toFixed(2)
@@ -268,12 +269,13 @@ const { t } = useI18n();
 const { formatDateTimeLocal } = useFormatting();
 const data = useChainInfo();
 
-const supplyDelimiter = COIN;
+const supplyDelimiter = ref(COIN);
 
 const getSize = () => {
   let size = data.value?.chainInfo?.size_on_disk ?? t("Core.NoData");
   if (data.value != null && data.value.chainInfo != null) {
-    size = (size / 1024 / 1024 / 1024).toFixed(2) + " GB";
+    size =
+      ((size as number) / 1024 / 1024 / 1024).toFixed(2).toString() + " GB";
   }
   return size;
 };
@@ -291,7 +293,7 @@ const calculateZerocoinTotal = () =>
   (
     data.value?.chainInfo.zerocoinsupply.filter(
       (filter) => filter.denom == "total"
-    )[0].amount / supplyDelimiter
+    )[0].amount / supplyDelimiter.value
   ).toFixed(2);
 </script>
 

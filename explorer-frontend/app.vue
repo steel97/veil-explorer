@@ -57,7 +57,7 @@ const themeState = useThemeState();
 const theme = useCookie("theme").value ?? "";
 const lang = useCookie("lang").value ?? getClientLocale();
 
-let currentLang = lang;
+let currentLang = lang.toString();
 let currentTheme = theme;
 
 let usedMedia = false;
@@ -79,7 +79,7 @@ if (process.client && currentTheme == "") {
 }
 
 if (availableLocales.indexOf(currentLang) == -1) {
-  currentLang = fallbackLocale.value;
+  currentLang = fallbackLocale.value.toString();
 }
 
 locale.value = currentLang;
@@ -87,7 +87,7 @@ themeState.value = currentTheme == "dark" ? "dark" : "";
 
 onMounted(() => {
   if (usedMedia) {
-    document.getElementById("clfix").classList = "dark";
+    document.getElementById("clfix").classList.toggle("dark");
   }
 });
 

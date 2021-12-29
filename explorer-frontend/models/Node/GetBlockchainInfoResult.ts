@@ -11,6 +11,7 @@ export interface GetBlockchainInfoResult {
     difficulty_pos: number;
     mediantime: number;
     size_on_disk: number;
+    next_super_block: number;
 }
 
 export interface ZerocoinSupply {

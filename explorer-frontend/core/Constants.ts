@@ -1,1 +1,1 @@
-export const COIN = 100000000;
+export const COIN: number = 100000000;

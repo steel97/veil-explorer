@@ -55,7 +55,10 @@ const { scrollToAnimated } = useUI();
 const route = useRoute();
 const config = useRuntimeConfig();
 
-const page = (route.params.page > 0 ? route.params.page : 1) - 1;
+const page =
+  ((route.params.page as any as number) > 0
+    ? (route.params.page as any as number)
+    : 1) - 1;
 const currentPage = ref(page + 1);
 
 const fetchBlock = async () =>
@@ -77,14 +80,14 @@ const blockHash = computed(
 );
 
 const buildRouteTemplate = () =>
-  `/block-height/${route.params.blockheight}/{page}/`;
+  `/block-height/${route.params.blockheight as string}/{page}/`;
 
 const selectPage = async (pg: number) => {
   if (pg == currentPage.value) return;
 
   scrollToAnimated(document.documentElement, 0, 150);
 
-  const link = buildRouteTemplate().replace("{page}", pg);
+  const link = buildRouteTemplate().replace("{page}", pg.toString());
   currentPage.value = pg;
   window.history.replaceState({}, null, link);
   const blockInfoLocal = await fetchBlock();
@@ -109,7 +112,7 @@ const meta = computed(() => {
         name: "og:url",
         content: `${config.BASE_URL}${buildRouteTemplate().replace(
           "{page}",
-          currentPage.value
+          currentPage.value.toString()
         )}`,
       },
     ],

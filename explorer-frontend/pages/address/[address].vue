@@ -215,7 +215,7 @@ const { getApiPath } = useConfigs();
 const route = useRoute();
 const config = useRuntimeConfig();
 
-const address: string = route.params.address;
+const address: string = route.params.address as string;
 const addressReactive = ref(address);
 const reloadingBalance = ref(false);
 

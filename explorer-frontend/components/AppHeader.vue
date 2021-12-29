@@ -291,6 +291,17 @@ const menuLocaleOpened = ref(false);
 
 const themeSwitch = ref(themeState.value == "dark" ? true : false);
 
+export interface ILocale {
+  code: string;
+  name: string;
+}
+
+export interface ILink {
+  locale: string;
+  name: string;
+  link: string;
+}
+
 watch(themeSwitch, (nval) => {
   const now = new Date();
   now.setDate(now.getDate() + config.COOKIE_SAVE_DAYS);
@@ -306,7 +317,7 @@ watch(themeSwitch, (nval) => {
 onMounted(() => (initialized.value = true));
 
 const getLinks = () => {
-  return [
+  const ret: Array<ILink> = [
     {
       locale: t("Header.Links.Home"),
       name: "index",
@@ -319,13 +330,16 @@ const getLinks = () => {
     },
     {
       locale: t("Header.Links.TxStats"),
+      name: "tx-stats",
       link: "/tx-stats",
     },
     {
       locale: t("Header.Links.UTxs"),
+      name: "unconfirmed-tx",
       link: "/unconfirmed-tx",
     },
   ];
+  return ret;
 };
 
 const getCurrentLocale = () => {
@@ -336,13 +350,14 @@ const getCurrentLocale = () => {
 };
 
 const getLocales = () => {
-  const locales = [];
+  const locales: Array<ILocale> = [];
   availableLocales.forEach((lang) => {
     if (lang == getCurrentLocale().code) return;
-    locales.push({
+    const link: ILocale = {
       code: lang,
-      name: config.locales[lang],
-    });
+      name: config.locales[lang] as any as string,
+    };
+    locales.push(link);
   });
   return locales;
 };
@@ -350,7 +365,7 @@ const getLocales = () => {
 const switchLang = (lang: string) => {
   let targetLang = lang;
   if (availableLocales.indexOf(targetLang) == -1) {
-    targetLang = fallbackLocale.value;
+    targetLang = fallbackLocale.value.toString();
   }
 
   const now = new Date();
@@ -369,7 +384,7 @@ const switchLang = (lang: string) => {
 const computeClasses = (link: ILink) => {
   if (
     (link.name == route.name && route.name == "") ||
-    route.name.startsWith(link.name)
+    (route.name as any as string).startsWith(link.name)
   )
     return ["underline", "text-sky-700", "dark:text-sky-400"];
   return ["text-gray-600", "dark:text-gray-300"];

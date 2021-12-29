@@ -63,7 +63,7 @@ const meta = computed(() => {
       },
       {
         name: "og:url",
-        content: `${config.BASE_URL}/${route.name}`,
+        content: `${config.BASE_URL}/${route.name as string}`,
       },
     ],
   };
@@ -74,7 +74,7 @@ useMeta(meta);
 if (process.server) {
   const nuxtApp = useNuxtApp();
   const error = new Error();
-  error.statusCode = parseInt(route.name);
+  error.statusCode = parseInt(route.name as any as string);
   error.nuxtApp.ssrContext.error = error;
 }
 </script>
