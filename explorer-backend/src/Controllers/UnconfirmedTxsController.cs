@@ -3,8 +3,8 @@ using Microsoft.Extensions.Options;
 using ExplorerBackend.VeilStructs;
 using ExplorerBackend.Models.API;
 using ExplorerBackend.Configs;
-using ExplorerBackend.Models.Data;
 using ExplorerBackend.Services.Core;
+using ExplorerBackend.Services.Caching;
 using ExplorerBackend.Persistence.Repositories;
 
 namespace ExplorerBackend.Controllers;
@@ -12,88 +12,52 @@ namespace ExplorerBackend.Controllers;
 [ApiController]
 [Route("/api/[controller]")]
 [Produces("application/json")]
-public class BlockController : ControllerBase
+public class UnconfirmedTransactions : ControllerBase
 {
 
     private readonly ILogger _logger;
     private readonly IOptions<APIConfig> _apiConfig;
-    private readonly IBlocksRepository _blocksRepository;
-    private readonly ITransactionsRepository _transactionsRepository;
+    private readonly ChaininfoSingleton _chaininfoSingleton;
     private readonly IRawTxsRepository _rawTxsRepository;
     private readonly IUtilityService _utilityService;
 
-    public BlockController(ILogger<BlockController> logger, IOptions<APIConfig> apiConfig, IBlocksRepository blocksRepository, ITransactionsRepository transactionsRepository, IRawTxsRepository rawTxsRepository, IUtilityService utilityService)
+    public UnconfirmedTransactions(ILogger<UnconfirmedTransactions> logger, IOptions<APIConfig> apiConfig, ChaininfoSingleton chaininfoSingleton, IRawTxsRepository rawTxsRepository, IUtilityService utilityService)
     {
         _logger = logger;
         _apiConfig = apiConfig;
-        _blocksRepository = blocksRepository;
-        _transactionsRepository = transactionsRepository;
+        _chaininfoSingleton = chaininfoSingleton;
         _rawTxsRepository = rawTxsRepository;
         _utilityService = utilityService;
     }
 
-    [HttpPost(Name = "GetBlock")]
+    [HttpGet(Name = "UnconfirmedTransactions")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(List<BlockResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> Get(BlockRequest body)
+    [ProducesResponseType(typeof(UnconfirmedTxResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> Get(int offset, int count)
     {
-        if (body.Offset < 0)
+        if (offset < 0)
             return Problem("offset should be higher or equal to zero", statusCode: 400);
-        if (body.Count < 1)
+        if (count < 1)
             return Problem("count should be more or equal to one", statusCode: 400);
-        if (body.Count > _apiConfig.Value.MaxTransactionsPullCount)
+        if (count > _apiConfig.Value.MaxTransactionsPullCount)
             return Problem($"count should be less or equal than {_apiConfig.Value.MaxBlocksPullCount}", statusCode: 400);
 
-        var response = new BlockResponse
+        var txncount = _chaininfoSingleton.UnconfirmedTxs?.Count() ?? 0;
+
+        List<TransactionSimpleDecoded>? txs = null;
+
+        if (_chaininfoSingleton.UnconfirmedTxs != null)
         {
-            Found = false
-        };
-
-        Block? block = null;
-        if (body.Hash != null && _utilityService.VerifyHex(body.Hash))
-            block = await _blocksRepository.GetBlockByHashAsync(body.Hash);
-        else if (body.Height != null)
-            block = await _blocksRepository.GetBlockByHeightAsync(body.Height.Value);
-        else
-            return Problem($"count should be less or equal than {_apiConfig.Value.MaxBlocksPullCount}", statusCode: 400);
-
-        if (block != null)
-        {
-            var nextBlockHash = await _blocksRepository.ProbeHashByHeight(block.height + 1);
-            var prevBlockHash = await _blocksRepository.ProbeHashByHeight(block.height - 1);
-
-            response.Found = true;
-            response.Block = block;
-            response.TxnCount = block.txnCount;
-
-            var verHex = BitConverter.GetBytes(block.version);
-            verHex = verHex.Reverse().ToArray();
-            response.VersionHex = _utilityService.ToHex(verHex);
-
-            if (nextBlockHash != null)
-                response.NextBlock = new BlockBasicData
-                {
-                    Hash = nextBlockHash,
-                    Height = block.height + 1
-                };
-
-            if (prevBlockHash != null)
-                response.PrevBlock = new BlockBasicData
-                {
-                    Hash = prevBlockHash,
-                    Height = block.height - 1
-                };
-
-            response.Transactions = new List<TransactionSimpleDecoded>();
-            var rtxs = await _transactionsRepository.GetTransactionsForBlockAsync(block.height, body.Offset, body.Count);
-            if (rtxs != null)
+            if (_chaininfoSingleton.UnconfirmedTxs.Count() > offset)
             {
-                var dict = new Dictionary<string, VeilTransaction>();
+                txs = new List<TransactionSimpleDecoded>();
+                var reqTxs = _chaininfoSingleton.UnconfirmedTxs.Skip(offset).Take(count);
                 var requiredTxs = new List<string>();
-                foreach (var rawTx in rtxs)
+                var dict = new Dictionary<string, VeilTransaction>();
+                foreach (var txdata in reqTxs)
                 {
-                    if (rawTx.data == null) continue;
-                    var tx = VeilSerialization.Deserialize<VeilTransaction>(rawTx.data, 0);
+                    if (txdata == null || txdata.hex == null) continue;
+                    var tx = VeilSerialization.Deserialize<VeilTransaction>(_utilityService.HexToByteArray(txdata.hex), 0);
                     // collect required previous txs
                     tx.TxIn?.ForEach(ntxin =>
                     {
@@ -103,7 +67,7 @@ public class BlockController : ControllerBase
                             if (!requiredTxs.Contains(prevTxHex)) requiredTxs.Add(prevTxHex);
                         }
                     });
-                    dict.Add(rawTx.txid_hex ?? "", tx);
+                    dict.Add(txdata.txid ?? "", tx);
                 }
 
                 // fetch prevout txs
@@ -120,13 +84,16 @@ public class BlockController : ControllerBase
                         }
                 }
 
-                foreach (var rawTx in rtxs)
+
+                foreach (var rawTx in reqTxs)
                 {
-                    if (rawTx.data == null) continue;
-                    var tx = dict[rawTx.txid_hex ?? ""];
+                    if (rawTx == null || rawTx.hex == null) continue;
+                    var data = _utilityService.HexToByteArray(rawTx.hex);
+                    if (data == null) continue;
+                    var tx = dict[rawTx.txid ?? ""];
 
                     var txsimple = new TransactionSimpleDecoded();
-                    txsimple.TxId = rawTx.txid_hex;
+                    txsimple.TxId = rawTx.txid;
                     txsimple.IsZerocoinSpend = tx.IsZerocoinSpend();
                     txsimple.IsZerocoinMint = tx.IsZerocoinMint();
                     txsimple.IsCoinStake = tx.IsCoinStake();
@@ -169,7 +136,7 @@ public class BlockController : ControllerBase
                             if (tx.IsBasecoin())
                             {
                                 long reward;
-                                Budget.GetBlockRewards(block.height, out reward, out _, out _, out _);
+                                Budget.GetBlockRewards((int)((_chaininfoSingleton.currentChainInfo?.Blocks ?? 0) + 1), out reward, out _, out _, out _);
                                 txinsimple.PrevOutAmount = reward;
                             }
 
@@ -210,11 +177,16 @@ public class BlockController : ControllerBase
                         }
                     }
 
-                    response.Transactions.Add(txsimple);
+                    txs.Add(txsimple);
                 }
+
             }
         }
 
-        return Ok(response);
+        return Ok(new UnconfirmedTxResponse
+        {
+            TxnCount = txncount,
+            Transactions = txs
+        });
     }
 }

@@ -32,7 +32,8 @@
     />
 
     <Pagination
-      :overallEntries="blockData != null && blockData.txnCount"
+      v-if="blockData != null && blockData.transactions != null"
+      :overallEntries="blockData.txnCount"
       :entriesPerPage="config.TXS_PER_PAGE"
       :currentPage="currentPage"
       :linkTemplate="buildRouteTemplate()"

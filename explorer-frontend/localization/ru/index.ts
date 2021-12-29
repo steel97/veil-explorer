@@ -10,6 +10,7 @@ import Search from "./search.json";
 import Address from "./address.json";
 import Block from "./block.json";
 import Tx from "./tx.json";
+import UnconfirmedTx from "./unconfirmedtx.json";
 
 const locale: any = {
     Core: Core,
@@ -23,7 +24,8 @@ const locale: any = {
     Search: Search,
     Address: Address,
     Block: Block,
-    Tx: Tx
+    Tx: Tx,
+    UnconfirmedTx: UnconfirmedTx
 }
 
 export default locale;

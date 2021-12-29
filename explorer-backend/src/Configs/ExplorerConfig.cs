@@ -8,6 +8,7 @@ public class ExplorerConfig
     public int PullBlockchainInfoDelay { get; set; }
     public int NodeWorkersPullDelay { get; set; }
     public int SupplyPullDelay { get; set; }
+    public int PullMempoolDelay { get; set; }
     public int BlocksPerBatch { get; set; }
     public string? BudgetAddress { get; set; }
     public string? FoundationAddress { get; set; }
