@@ -30,17 +30,28 @@
       v-if="blockData != null && blockData.transactions != null"
       :txdata="blockData.transactions"
     />
+
+    <Pagination
+      :overallEntries="blockData != null && blockData.txnCount"
+      :entriesPerPage="config.TXS_PER_PAGE"
+      :currentPage="currentPage"
+      :linkTemplate="buildRouteTemplate()"
+      @pageSelected="selectPage"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import BlockView from "@/components/block/BlockView";
 import TransactionsView from "@/components/block/TransactionsView";
+import Pagination from "@/components/shared/Pagination";
 import { BlockResponse } from "@/models/API/BlockResponse";
+import { useUI } from "@/composables/UI";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
 const { getApiPath } = useConfigs();
+const { scrollToAnimated } = useUI();
 const route = useRoute();
 const config = useRuntimeConfig();
 
@@ -66,6 +77,20 @@ const blockHash = computed(
 );
 
 const pageAddition = route.params.page != "" ? `/${route.params.page}` : "";
+const buildRouteTemplate = () =>
+  `/block-height/${route.params.blockheight}/{page}/`;
+
+const selectPage = async (pg: number) => {
+  if (pg == currentPage.value) return;
+
+  scrollToAnimated(document.documentElement, 0, 150);
+
+  const link = buildRouteTemplate().replace("{page}", pg);
+  currentPage.value = pg;
+  window.history.replaceState({}, null, link);
+  const blockInfoLocal = await fetchBlock();
+  blockData.value = blockInfoLocal.data.value;
+};
 
 const meta = computed(() => {
   return {
@@ -83,7 +108,10 @@ const meta = computed(() => {
       },
       {
         name: "og:url",
-        content: `${config.BASE_URL}/block-height/${route.params.blockheight}${currentPage.value}`,
+        content: `${config.BASE_URL}${buildRouteTemplate().replace(
+          "{page}",
+          currentPage.value
+        )}`,
       },
     ],
   };

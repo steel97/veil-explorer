@@ -9,6 +9,7 @@ public class BlockResponse
     public BlockBasicData? NextBlock { get; set; }
     public BlockBasicData? PrevBlock { get; set; }
     public string? VersionHex { get; set; }
+    public int TxnCount { get; set; }
     public Block? Block { get; set; }
     public List<TransactionSimpleDecoded>? Transactions { get; set; }
 }

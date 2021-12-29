@@ -114,14 +114,18 @@ public class BlocksRepository : BaseRepository, IBlocksRepository
         using var conn = Connection;
         await conn.OpenAsync();
 
-        using (var cmd = new NpgsqlCommand($"SELECT * FROM blocks WHERE height = {height}", conn))
+        using (var cmd = new NpgsqlCommand($@"SELECT b.height, b.hash, b.strippedsize, b.""size"", b.weight, b.proof_type, b.proofofstakehash , b.progproofofworkhash, b.progpowmixhash ,b.randomxproofofworkhash ,b.sha256dproofofworkhash , b.proofofworkhash, b.""version"", b.merkleroot ,b.""time"", b.mediantime,b.nonce ,b.nonce64 ,b.mixhash , b.bits ,b.difficulty ,b.chainwork ,b.anon_index ,b.veil_data_hash ,b.prog_header_hash ,b.prog_header_hex , b.epoch_number , b.synced,  (SELECT COUNT(t.txid) as txn from transactions t where t.block_height = b.height) FROM blocks b WHERE b.height = {height};", conn))
         {
             await using (var reader = await cmd.ExecuteReaderAsync())
             {
                 var success = await reader.ReadAsync();
                 if (!success) return null;
 
-                return await ReadBlock(reader);
+                var block = await ReadBlock(reader);
+                if (block != null)
+                    block.txnCount = reader.GetInt32(28);
+
+                return block;
             }
         }
     }
@@ -148,14 +152,17 @@ public class BlocksRepository : BaseRepository, IBlocksRepository
         using var conn = Connection;
         await conn.OpenAsync();
 
-        using (var cmd = new NpgsqlCommand($"SELECT * FROM blocks WHERE hash = {TransformHex(hash)}", conn))
+        using (var cmd = new NpgsqlCommand($@"SELECT b.height, b.hash, b.strippedsize, b.""size"", b.weight, b.proof_type, b.proofofstakehash , b.progproofofworkhash, b.progpowmixhash ,b.randomxproofofworkhash ,b.sha256dproofofworkhash , b.proofofworkhash, b.""version"", b.merkleroot ,b.""time"", b.mediantime,b.nonce ,b.nonce64 ,b.mixhash , b.bits ,b.difficulty ,b.chainwork ,b.anon_index ,b.veil_data_hash ,b.prog_header_hash ,b.prog_header_hex , b.epoch_number , b.synced,  (SELECT COUNT(t.txid) as txn from transactions t where t.block_height = b.height) FROM blocks b WHERE b.hash = {TransformHex(hash)};", conn))
         {
             await using (var reader = await cmd.ExecuteReaderAsync())
             {
                 var success = await reader.ReadAsync();
                 if (!success) return null;
 
-                return await ReadBlock(reader);
+                var block = await ReadBlock(reader);
+                if (block != null)
+                    block.txnCount = reader.GetInt32(28);
+                return block;
             }
         }
     }

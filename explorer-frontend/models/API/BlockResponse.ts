@@ -83,6 +83,7 @@ export interface BlockResponse {
     nextBlock: BlockBasicData;
     prevBlock: BlockBasicData;
     versionHex: string | null;
+    txnCount: number;
     block: Block;
     transactions: TransactionSimpleDecoded;
 }

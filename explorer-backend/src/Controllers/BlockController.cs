@@ -64,6 +64,7 @@ public class BlockController : ControllerBase
 
             response.Found = true;
             response.Block = block;
+            response.TxnCount = block.txnCount;
 
             var verHex = BitConverter.GetBytes(block.version);
             verHex = verHex.Reverse().ToArray();
@@ -84,7 +85,7 @@ public class BlockController : ControllerBase
                 };
 
             response.Transactions = new List<TransactionSimpleDecoded>();
-            var rtxs = await _transactionsRepository.GetTransactionsForBlockAsync(block.height);
+            var rtxs = await _transactionsRepository.GetTransactionsForBlockAsync(block.height, body.Offset, body.Count);
             if (rtxs != null)
             {
                 var dict = new Dictionary<string, VeilTransaction>();

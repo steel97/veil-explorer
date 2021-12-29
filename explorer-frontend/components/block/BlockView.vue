@@ -97,7 +97,7 @@
       <div class="grid grid-cols-2 gap-0.5 w-full py-4 border-b">
         <div>{{ t("Block.Txs") }}</div>
         <div class="text-right">
-          {{ props.block.transactions.length }}
+          {{ props.block.txnCount }}
         </div>
       </div>
 

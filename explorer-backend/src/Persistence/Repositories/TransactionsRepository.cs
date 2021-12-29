@@ -41,12 +41,12 @@ public class TransactionsRepository : BaseRepository, ITransactionsRepository
         }
     }
 
-    public async Task<List<TransactionExtended>?> GetTransactionsForBlockAsync(int blockHeight)
+    public async Task<List<TransactionExtended>?> GetTransactionsForBlockAsync(int blockHeight, int offset, int count)
     {
         using var conn = Connection;
         await conn.OpenAsync();
 
-        using (var cmd = new NpgsqlCommand($@"SELECT t.txid, t.hash, t.""version"", t.""size"", t.vsize, t.weight, t.locktime, t.block_height, r.""data"" FROM transactions as t INNER JOIN rawtxs r ON t.txid = r.txid  WHERE t.block_height = {blockHeight};", conn))
+        using (var cmd = new NpgsqlCommand($@"SELECT t.txid, t.hash, t.""version"", t.""size"", t.vsize, t.weight, t.locktime, t.block_height, r.""data"" FROM transactions as t INNER JOIN rawtxs r ON t.txid = r.txid  WHERE t.block_height = {blockHeight} OFFSET {offset} LIMIT {count};", conn))
         {
             await using (var reader = await cmd.ExecuteReaderAsync())
             {

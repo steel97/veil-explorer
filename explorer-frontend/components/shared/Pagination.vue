@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-center flex-wrap mt-4">
+  <div class="flex justify-center flex-wrap mt-4" v-show="localMaxPages > 1">
     <div v-for="(element, index) in elements" :key="'pagination-' + index">
       <a
         v-if="element.interactable"
@@ -64,6 +64,8 @@ const emit = defineEmits<{
   (e: "pageSelected", value: number): void;
 }>();
 
+const localMaxPages = ref(0);
+
 interface NavElement {
   interactable: boolean;
   current: boolean;
@@ -104,6 +106,7 @@ const elements = computed(() => {
     });
 
   const maxPages = Math.ceil(props.overallEntries / props.entriesPerPage);
+  localMaxPages.value = maxPages;
 
   let renderedEntriesBefore = 0;
   let renderedEntriesAfter = 0;

@@ -30,6 +30,7 @@ public class Block
     public string? prog_header_hex { get; set; }
     public int epoch_number { get; set; }
     public bool synced { get; set; }
+    public int txnCount { get; set; }
 }
 
 public enum BlockType : short

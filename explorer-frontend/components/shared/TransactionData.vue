@@ -122,6 +122,7 @@
                   lg:max-w-xs
                   overflow-x-hidden
                   text-ellipsis
+                  height-offset-fix
                 "
               >
                 via&nbsp;
