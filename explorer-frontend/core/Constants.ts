@@ -1,0 +1,1 @@
+export const COIN = 100000000;

@@ -113,7 +113,9 @@ public class BlockController : ControllerBase
                         foreach (var rawTx in outTxs)
                         {
                             var tx = VeilSerialization.Deserialize<VeilTransaction>(rawTx.Value, 0);
-                            dict.Add(rawTx.Key, tx);
+
+                            if (!dict.ContainsKey(rawTx.Key))
+                                dict.Add(rawTx.Key, tx);
                         }
                 }
 
@@ -121,12 +123,6 @@ public class BlockController : ControllerBase
                 {
                     if (rawTx.data == null) continue;
                     var tx = dict[rawTx.txid_hex ?? ""];
-                    /*Console.WriteLine(tx.TxOut?.Count);
-                    if (tx?.TxOut != null)
-                        foreach (var txout in tx.TxOut)
-                        {
-                            Console.WriteLine(txout.Amount);
-                        }*/
 
                     var txsimple = new TransactionSimpleDecoded();
                     txsimple.TxId = rawTx.txid_hex;
@@ -160,9 +156,22 @@ public class BlockController : ControllerBase
                                         txinsimple.PrevOutAddresses = prevTx?.TxOut[(int)txinsimple.PrevOutNum].GetAddresses();
                                     }
                                     else
+                                    {
+                                        txinsimple.PrevOutAddresses = prevTx?.TxOut[(int)txinsimple.PrevOutNum].GetAddresses();
                                         txinsimple.PrevOutAmount = -1;
+                                    }
                                 }
                             }
+                            if (txin.IsZerocoinSpend())
+                                txinsimple.PrevOutAmount = txin.ZeroCoinSpend;
+
+                            if (tx.IsBasecoin())
+                            {
+                                long reward;
+                                Budget.GetBlockRewards(block.height, out reward, out _, out _, out _);
+                                txinsimple.PrevOutAmount = reward;
+                            }
+
 
                             txsimple.Inputs.Add(txinsimple);
                         }

@@ -26,10 +26,11 @@ public class Converters
                 benc.Encode()
             }*/
 
-            var data = new List<byte>(m_params.Base58Prefix(Base58Type.PUBKEY_ADDRESS));
+            var data = new List<byte>();
+            data.Add(m_params.Base58Prefix(Base58Type.PUBKEY_ADDRESS)[1]);
+
             var id = (KeyId)value;
 
-            //data.insert(data.end(), id.begin(), id.end());
             data.AddRange(id.ToBytes());
             return b58check.EncodeData(data.ToArray());
         }
@@ -44,12 +45,15 @@ public class Converters
                 return bech32::Encode(sHrp, data);
             }*/
 
-            var data = new List<byte>(m_params.Base58Prefix(Base58Type.SCRIPT_ADDRESS));
+            var data = new List<byte>();
+            data.Add(m_params.Base58Prefix(Base58Type.SCRIPT_ADDRESS)[1]);
+
             var id = (ScriptId)value;
 
             data.AddRange(id.ToBytes());
             return b58check.EncodeData(data.ToArray());
         }
+
         if (value is WitKeyId)
         {
             var bech = new Bech32Encoder(m_params.bech32_hrp_base);
@@ -60,6 +64,7 @@ public class Converters
             var id = (WitKeyId)value;
             return bech.Encode(0, id.ToBytes());
         }
+
         if (value is WitScriptId)
         {
             var bech = new Bech32Encoder(m_params.bech32_hrp_base);

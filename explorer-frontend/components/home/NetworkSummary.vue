@@ -262,12 +262,13 @@ import { BlockchainInfo } from "@/models/API/BlockchainInfo";
 import { useFormatting } from "@/composables/Formatting";
 import { useChainInfo } from "@/composables/States";
 import { useI18n } from "vue-i18n";
+import { COIN } from "@/core/Constants";
 
 const { t } = useI18n();
 const { formatDateTimeLocal } = useFormatting();
 const data = useChainInfo();
 
-const supplyDelimiter = 100000000;
+const supplyDelimiter = COIN;
 
 const getSize = () => {
   let size = data.value?.chainInfo?.size_on_disk ?? t("Core.NoData");

@@ -95,6 +95,12 @@ const searchInner = async (retry = 0) => {
     else router.replace(`/search/notfound`);
     return;
   }
+
+  if (data.query != query && retry < 2) {
+    await searchInner(retry + 1);
+    return;
+  }
+
   switch (data.type) {
     case EntityType.UNKNOWN:
       router.replace(`/search/notfound`);

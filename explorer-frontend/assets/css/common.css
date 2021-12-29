@@ -94,3 +94,11 @@ html, body {
 .tooltip[data-popper-placement^='right'] > #arrow {
     left: -4px;
 }
+
+.height-offset-fix {
+    height: 1.1rem;
+}
+
+.max-width-hack {
+    max-width: calc(90% - 16px);
+}

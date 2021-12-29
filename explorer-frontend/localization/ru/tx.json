@@ -1,0 +1,13 @@
+{
+    "Coinbase": "Coinbase",
+    "NoInputs": "Нет входов (Сгенерированые монеты)",
+    "Zerocoin": "Zerocoin",
+    "ZerocoinSpend": "Расход",
+    "RingCT": "RingCT",
+    "RingCTInput": "Анонимный вход",
+    "OpReturn": "OpReturn",
+    "ZerocoinMint": "Mint",
+    "CoinStake": "CoinStake",
+    "HiddenAmount": "Скрыто",
+    "RangeProof": "RangeProof"
+}

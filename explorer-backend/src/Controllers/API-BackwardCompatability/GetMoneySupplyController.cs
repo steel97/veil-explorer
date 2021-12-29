@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Mvc;
-using ExplorerBackend.Core;
+using ExplorerBackend.VeilStructs;
 using ExplorerBackend.Configs;
 using ExplorerBackend.Models.API;
 using ExplorerBackend.Services.Caching;
@@ -29,7 +29,7 @@ public class GetMoneySupplyController : ControllerBase
     public MoneySupplyResponse? Get()
     {
         var totalSupply = _chainInfoSingleton.currentChainInfo?.Moneysupply ?? 0;
-        var totalSupplyPrepared = (double)totalSupply / Constants.MoneyConvert;
+        var totalSupplyPrepared = (double)totalSupply / Constants.COIN;
         var circulatingSupply = totalSupplyPrepared - (_chainInfoSingleton.BudgetWalletAmount + _chainInfoSingleton.FoundationWalletAmmount);
 
         return new MoneySupplyResponse

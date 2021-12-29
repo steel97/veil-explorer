@@ -22,13 +22,13 @@
       :block="blockData"
     />
 
-    <h1 class="font-semibold pt-4 uppercase">
+    <h1 class="font-semibold pt-5 uppercase">
       {{ t("Block.Transactions") }}
     </h1>
 
     <TransactionsView
       v-if="blockData != null && blockData.transactions != null"
-      :block="blockData"
+      :txdata="blockData.transactions"
     />
   </div>
 </template>

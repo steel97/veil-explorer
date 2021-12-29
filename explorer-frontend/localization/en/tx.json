@@ -1,0 +1,13 @@
+{
+    "Coinbase": "Coinbase",
+    "NoInputs": "No Inputs (Newly Generated Coins)",
+    "Zerocoin": "Zerocoin",
+    "ZerocoinSpend": "Spend",
+    "RingCT": "RingCT",
+    "RingCTInput": "Anon input",
+    "OpReturn": "OpReturn",
+    "ZerocoinMint": "Mint",
+    "CoinStake": "CoinStake",
+    "HiddenAmount": "Hidden",
+    "RangeProof": "RangeProof"
+}

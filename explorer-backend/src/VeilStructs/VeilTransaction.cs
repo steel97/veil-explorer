@@ -356,6 +356,9 @@ public class WitnessScript
 
 public class VeilTxIn
 {
+    const uint SEQUENCE_LOCKTIME_MASK = 0x0000ffff;
+
+    public long ZeroCoinSpend { get; set; }
     public OutPoint? PrevOut { get; set; }
     public Script? Script { get; set; }
     public uint NSequence { get; set; }
@@ -379,6 +382,9 @@ public class VeilTxIn
             ScriptData = new WitnessScript();
             ScriptData.Deserialize(serializationContext, mode);
         }
+
+        if (IsZerocoinSpend())
+            ZeroCoinSpend = (NSequence & SEQUENCE_LOCKTIME_MASK) * (long)Constants.COIN;
     }
 
     public bool IsAnonInput() => PrevOut?.IsAnonInput() ?? false;
@@ -402,7 +408,7 @@ public class VeilTxOut
     {
         var ret = new List<string>();
         if (ScriptPubKey == null) return ret;
-        if (OutputType == OutputTypes.OUTPUT_STANDARD)
+        if (OutputType == OutputTypes.OUTPUT_STANDARD || OutputType == OutputTypes.OUTPUT_CT)
         {
             var nrr = 0;
             txnouttype ctype;
@@ -497,7 +503,7 @@ public enum OutputTypes : byte
     OUTPUT_CT = 2,
     OUTPUT_RINGCT = 3,
     OUTPUT_DATA = 4,
-};
+}
 
 public enum opcodetype : byte
 {
