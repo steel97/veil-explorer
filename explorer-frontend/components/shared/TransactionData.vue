@@ -181,12 +181,13 @@
         >
           <div class="block lg:flex justify-between">
             <div v-if="output.addresses != null && output.addresses.length > 0">
+              <div class="mr-2 block lg:inline-block">#{{ outputId + 1 }}</div>
               <RouterLink
                 :to="'/address/' + output.addresses[0]"
                 class="
                   inline-block
                   align-middle
-                  lg:block lg:align-baseline lg:max-w-none
+                  lg:align-bottom lg:max-w-none
                   text-sky-700
                   dark:text-sky-400
                   hover:underline
