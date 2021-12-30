@@ -16,5 +16,5 @@ public class GetChainalgoStatsResult
     public int Progpow { get; set; }
     public int Randomx { get; set; }
     public int Sha256d { get; set; }
-    //public int x16rt { get; set; }
+    public int X16rt { get; set; } // for compatability
 }
