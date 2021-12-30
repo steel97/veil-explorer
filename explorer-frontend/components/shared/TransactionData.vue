@@ -5,7 +5,7 @@
         <div
           v-for="(input, inputId) in props.tx.inputs"
           :key="'input-' + inputId"
-          :id="'input-' + (inputId + 1).toString()"
+          :id="'input-' + (inputId + 0).toString()"
           class="p-3 bg-gray-200 dark:bg-gray-700 rounded"
           :class="inputId == props.tx.inputs.length - 1 ? '' : 'mb-4'"
         >
@@ -173,13 +173,13 @@
         <div
           v-for="(output, outputId) in props.tx.outputs"
           :key="'output-' + outputId"
-          :id="'output-' + (outputId + 1).toString()"
+          :id="'output-' + (outputId + 0).toString()"
           class="p-3 bg-gray-200 dark:bg-gray-700 rounded"
           :class="outputId == props.tx.outputs.length - 1 ? '' : 'mb-4'"
         >
           <div class="block lg:flex justify-between">
             <div v-if="output.addresses != null && output.addresses.length > 0">
-              <div class="mr-2 block lg:inline-block">#{{ outputId + 1 }}</div>
+              <div class="mr-2 block lg:inline-block">#{{ outputId + 0 }}</div>
               <RouterLink
                 :to="'/address/' + output.addresses[0]"
                 class="
@@ -206,7 +206,7 @@
               v-if="output.isOpreturn"
               class="flex flex-wrap basis-0 flex-grow items-center"
             >
-              <div class="mr-2">#{{ outputId + 1 }}</div>
+              <div class="mr-2">#{{ outputId + 0 }}</div>
               <div
                 class="
                   bg-sky-700
@@ -231,7 +231,7 @@
               "
               class="flex flex-wrap basis-0 flex-grow items-center"
             >
-              <div class="mr-2">#{{ outputId + 1 }}</div>
+              <div class="mr-2">#{{ outputId + 0 }}</div>
               <div
                 class="
                   bg-sky-700
@@ -258,7 +258,7 @@
               "
               class="flex flex-wrap basis-0 flex-grow items-center"
             >
-              <div class="mr-2">#{{ outputId + 1 }}</div>
+              <div class="mr-2">#{{ outputId + 0 }}</div>
               <div
                 class="
                   bg-sky-700
@@ -283,7 +283,7 @@
               "
               class="flex flex-wrap basis-0 flex-grow items-center"
             >
-              <div class="mr-2">#{{ outputId + 1 }}</div>
+              <div class="mr-2">#{{ outputId + 0 }}</div>
               <div
                 class="
                   bg-sky-700
@@ -305,7 +305,7 @@
               v-if="output.type == OutputTypes.OUTPUT_DATA"
               class="flex flex-wrap basis-0 flex-grow items-center"
             >
-              <div class="mr-2">#{{ outputId + 1 }}</div>
+              <div class="mr-2">#{{ outputId + 0 }}</div>
               <div
                 class="
                   bg-sky-700
@@ -327,7 +327,7 @@
               v-if="output.type == OutputTypes.OUTPUT_RINGCT"
               class="flex flex-wrap basis-0 flex-grow items-center"
             >
-              <div class="mr-2">#{{ outputId + 1 }}</div>
+              <div class="mr-2">#{{ outputId + 0 }}</div>
               <div
                 class="
                   bg-sky-700
