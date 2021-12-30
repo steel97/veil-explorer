@@ -2,10 +2,7 @@ namespace ExplorerBackend.Models.API;
 
 public class TxStatsComposite
 {
-    public TxStatsEntry? TxStats { get; set; }
-    public TxStatsEntry? TxStatsDay { get; set; }
-    public TxStatsEntry? TxStatsWeek { get; set; }
-    public TxStatsEntry? TxStatsMonth { get; set; }
+    public Dictionary<string, TxStatsEntry>? TxStats { get; set; }
 }
 
 public class TxStatsEntry

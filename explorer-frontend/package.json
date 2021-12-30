@@ -18,6 +18,7 @@
     "@popperjs/core": "^2.11.0",
     "@types/js-cookie": "^3.0.1",
     "@types/toastify-js": "^1.11.0",
+    "chart.js": "^3.7.0",
     "js-cookie": "^3.0.1",
     "ohmyfetch": "^0.4.11",
     "qrcode.vue": "^3.3.3",

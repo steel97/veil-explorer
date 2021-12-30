@@ -3,14 +3,60 @@
     <h1 class="uppercase font-semibold">
       {{ t("TxStats.Title") }}
     </h1>
+    <div class="rounded bg-gray-50 dark:bg-gray-800 mb-4 mt-4">
+      <div class="block md:grid grid-cols-2" v-if="pageReady">
+        <LineChart :data="getData('day')" class="my-2 md:mx-2" />
+        <LineChart :data="getData('week')" class="my-2 md:mx-2" />
+        <LineChart :data="getData('month')" class="my-2 md:mx-2" />
+        <LineChart :data="getData('overall')" class="my-2 md:mx-2" />
 
-    <div class="grid grid-cols-2">
-      <ClientOnly> </ClientOnly>
+        <LineChart :data="getData('day', true)" class="my-2 md:mx-2" />
+        <LineChart :data="getData('week', true)" class="my-2 md:mx-2" />
+        <LineChart :data="getData('month', true)" class="my-2 md:mx-2" />
+        <LineChart :data="getData('overall', true)" class="my-2 md:mx-2" />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
+import { TxStatsResponse, TxStatsEntry } from "@/models/API/TxStatsResponse";
+import { GraphData } from "@/models/System/GraphData";
+import LineChart from "@/components/charts/LineChart";
+
+const { t } = useI18n();
+const { getApiPath } = useConfigs();
+const config = useRuntimeConfig();
+const pageReady = ref(false);
+
+const fetchStats = async () =>
+  await useFetch<string, TxStatsResponse>(`${getApiPath()}/txstats`);
+
+const stats = ref((await fetchStats()).data);
+
+const getData = (key: string, rate = false) => {
+  if (!pageReady.value) return;
+
+  const cdataval = stats.value.txStats[key] as TxStatsEntry;
+
+  const blocaleKey = `TxStats.Charts.${key}.${rate ? "Rates" : "Counts"}.`;
+  const ret: GraphData = {
+    data: rate ? cdataval.txRates : cdataval.txCounts,
+    labels: cdataval.labels,
+    title: t(blocaleKey + "Title"),
+    xaxisTitle: t(blocaleKey + "XAxis"),
+    xaxisStep: 5,
+    yaxisTitle: t(blocaleKey + "YAxis"),
+  };
+  return ret;
+};
+
+onMounted(() => {
+  if (!process.client) return; // should never happend?
+  pageReady.value = true;
+});
+
 const meta = computed(() => {
   return {
     title: t("TxStats.Meta.Title"),

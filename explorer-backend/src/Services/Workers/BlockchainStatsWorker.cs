@@ -49,17 +49,20 @@ public class BlockchainStatsWorker : BackgroundService
             try
             {
 
-                var txStats = await GetTxStats(httpClient, _explorerConfig.CurrentValue.StatsPointsCount, 0);
                 var txStatsDay = await GetTxStats(httpClient, targetBlocksPerDay / 4, -144);
                 var txStatsWeek = await GetTxStats(httpClient, targetBlocksPerDay / 4, -144 * 7);
                 var txStatsMonth = await GetTxStats(httpClient, targetBlocksPerDay / 4, -144 * 30);
+                var txStatsOverall = await GetTxStats(httpClient, _explorerConfig.CurrentValue.StatsPointsCount, 0);
+
+                var finalDict = new Dictionary<string, TxStatsEntry>();
+                finalDict.Add("day", txStatsDay);
+                finalDict.Add("week", txStatsWeek);
+                finalDict.Add("month", txStatsMonth);
+                finalDict.Add("overall", txStatsOverall);
 
                 _chainInfoSingleton.CurrentChainStats = new TxStatsComposite
                 {
-                    TxStats = txStats,
-                    TxStatsDay = txStatsDay,
-                    TxStatsWeek = txStatsWeek,
-                    TxStatsMonth = txStatsMonth
+                    TxStats = finalDict
                 };
 
                 // TimeSpan not reuired here since we use milliseconds, still put it there to change in future if required
@@ -111,10 +114,18 @@ public class BlockchainStatsWorker : BackgroundService
             Labels = new List<string>()
         };
 
+        var chainTxStatsIntervals = new List<int>();
         for (var i = 0; i < points; i++)
         {
             var target = (int)Math.Max(10.0, (double)count - (double)offset - (double)i * (double)(count - offset) / (double)(points - 1.0d) - 1.0d);
-            var res = await GetChainTxStats(httpClient, target);
+            chainTxStatsIntervals.Add(target);
+        }
+
+        for (var i = chainTxStatsIntervals.Count() - 1; i >= 0; i--)
+        {
+            var res = await GetChainTxStats(httpClient, chainTxStatsIntervals[i]);
+
+            if (res.window_tx_count == 0) continue;
 
             txStatsEntry.TxCounts.Add(new TxStatsDataPoint
             {

@@ -17,8 +17,13 @@ export default defineNuxtConfig({
         }
     },
     css: ["~/assets/css/tailwind.css"],
+    alias: {
+        "chart.js": "chart.js/dist/chart.esm.js",
+    },
     build: {
-        transpile: ["@heroicons/vue"],
+        transpile: [
+            "@heroicons/vue", "chart.js"
+        ],
         postcss: {
             postcssOptions: require("./postcss.config.js"),
         },
