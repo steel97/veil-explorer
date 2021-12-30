@@ -77,7 +77,7 @@ public class BlocksWorker : BackgroundService
 
                             if (blockHash == null || blockHash.Result == null)
                             {
-                                _logger.LogInformation("Can't pull block hash");
+                                //_logger.LogInformation("Can't pull block hash");
                                 break;
                             }
 
