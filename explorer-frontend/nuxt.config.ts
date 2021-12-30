@@ -16,6 +16,10 @@ export default defineNuxtConfig({
             "ru": "Русский"
         }
     },
+    privateRuntimeConfig: {
+        BASE_URL: process.env.BASE_URL,
+        CHAIN_APIS: process.env.CHAIN_APIS
+    },
     css: ["~/assets/css/tailwind.css"],
     alias: {
         "chart.js": "chart.js/dist/chart.esm.js",
