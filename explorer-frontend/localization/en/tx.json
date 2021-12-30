@@ -9,6 +9,7 @@
     "BlockHeight": "Block",
     "Timestamp": "Time",
     "Version": "Version",
+    "Size": "Size",
     "Locktime": "Locktime",
     "SpendableInBlock": "Spendable in block",
     "Confirmations": "Confirmations",

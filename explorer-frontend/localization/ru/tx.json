@@ -9,6 +9,7 @@
     "BlockHeight": "Блок",
     "Timestamp": "Время",
     "Version": "Версия",
+    "Size": "Размер",
     "Locktime": "Время разблокировки",
     "SpendableInBlock": "Можно тратить с",
     "Confirmations": "Подтверждения",

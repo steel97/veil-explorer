@@ -60,6 +60,15 @@
           {{ tx.version }}
         </div>
 
+        <!-- size -->
+        <div class="border-b py-4">
+          {{ t("Tx.Size") }}
+        </div>
+        <div class="border-b py-4">
+          <span>{{ tx.size }} B</span>
+          <span v-if="size != vSize">&nbsp;({{ tx.size }} vB)</span>
+        </div>
+
         <!-- locktime -->
         <div class="border-b py-4" v-if="tx.locktime > 0">
           {{ t("Tx.Locktime") }}
