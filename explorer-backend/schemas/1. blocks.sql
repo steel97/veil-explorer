@@ -15,8 +15,8 @@ CREATE TABLE public.blocks (
 	merkleroot bytea NULL,
 	"time" bigint NOT NULL,
 	mediantime bigint NOT NULL,
-	nonce bigint NOT NULL,
-	nonce64 bigint NOT NULL,
+	nonce numeric NOT NULL,
+	nonce64 numeric NOT NULL,
 	mixhash bytea NULL,
 	bits bytea NOT NULL,
 	difficulty bytea NOT NULL,
@@ -30,7 +30,3 @@ CREATE TABLE public.blocks (
 	CONSTRAINT blocks_pk PRIMARY KEY (height)
 );
 CREATE INDEX blocks_hash_idx ON public.blocks (hash);
-
-/* fix for nonce64, for some reason it's unsigned */
-ALTER TABLE public.blocks ALTER COLUMN nonce64 TYPE numeric USING nonce64::numeric;
-ALTER TABLE public.blocks ALTER COLUMN nonce TYPE numeric USING nonce::numeric;
