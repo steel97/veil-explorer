@@ -45,10 +45,10 @@
         </div>
 
         <!-- timestamp -->
-        <div class="border-b py-4">
+        <div class="border-b py-4" v-if="tx.timestamp > 0">
           {{ t("Tx.Timestamp") }}
         </div>
-        <div class="border-b py-4">
+        <div class="border-b py-4" v-if="tx.timestamp > 0">
           {{ formatDateTimeLocal(tx.timestamp) }}
         </div>
 
