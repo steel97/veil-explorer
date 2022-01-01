@@ -16,9 +16,9 @@ See [docs/api-compatability.md](/docs/api-compatability.md)
 
 # Compiling from sources
 ## Backend
-See [docs/compiling/backend.md](/docs/compiling/README.md)
+See [docs/compiling/backend.md](/docs/compiling/backend.md)
 ## Frontend
-See [docs/compiling/frontend.md](/docs/compiling/README.md)
+See [docs/compiling/frontend.md](/docs/compiling/frontend.md)
 
 # Getting started
 ## Tested OSes
