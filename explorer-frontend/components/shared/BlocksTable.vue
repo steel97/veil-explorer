@@ -113,17 +113,33 @@ import { useBlockchain } from "@/composables/Blockchain";
 import locale from "@/localization/en";
 
 const config = useRuntimeConfig();
+const watcher = ref(0);
+let isActive = true;
 
 const props = defineProps<{
   data: Array<SimplifiedBlock>;
   reactivityFix: number;
 }>();
 
+onMounted(() => {
+  setTimeout(watcherTimer, 0);
+});
+
+onBeforeUnmount(() => (isActive = false));
+
+const watcherTimer = () => {
+  if (!isActive) return;
+  watcher.value++;
+  setTimeout(watcherTimer, 1000);
+};
+
 const { getPow } = useBlockchain();
 const { formatDateLocal, formatTimeLocal } = useFormatting();
 const { t } = useI18n();
 
 const getAge = (block: SimplifiedBlock) => {
+  // 0 / watcher - reactivity trigger
+  const reactivity = 0 / watcher.value;
   const diff = Date.now() / 1000 - block.time;
 
   const minuteCheck = 60;
@@ -167,16 +183,19 @@ const getAge = (block: SimplifiedBlock) => {
   let resp = "";
   for (let index = 0; index < allChecks.length; index++) {
     const check = allChecks[index];
-    if (diff < check.val) continue;
+    if (diff <= check.val) continue;
 
-    const infFormatted = diff / check.val;
+    const infFormatted = diff / (check.val > 0 ? check.val : 1);
     if (Math.floor(infFormatted) == 0) continue;
     let secondaryInfFormatted = 0;
     let secondaryInfFloor = 0;
     if (index + 1 < allChecks.length) {
       let scheck = allChecks[index + 1];
-      let previnf = (Math.floor(infFormatted) * check.val) / scheck.val;
-      secondaryInfFormatted = diff / scheck.val - previnf;
+      let previnf =
+        (Math.floor(infFormatted) * check.val) /
+        (scheck.val > 0 ? scheck.val : 1);
+      secondaryInfFormatted =
+        diff / (scheck.val > 0 ? scheck.val : 1) - previnf;
       secondaryInfFloor = Math.floor(secondaryInfFormatted);
     }
     switch (check.locale) {
@@ -211,11 +230,14 @@ const getAge = (block: SimplifiedBlock) => {
           resp += `, ${secondaryInfFloor} ${t("Core.Ages.Second")}`;
         break;
       case "Second":
-        resp = `${secondaryInfFloor} ${t("Core.Ages.Second")}`;
+        let sec = Math.floor(infFormatted);
+        if (Number.isFinite(sec) && !Number.isNaN(sec))
+          resp = `${sec} ${t("Core.Ages.Second")}`;
         break;
     }
     break;
   }
+  if (resp == "") resp = `0 ${t("Core.Ages.Second")}`;
   return resp;
 };
 
