@@ -1,4 +1,5 @@
-# Frontend compiling
+# Frontend building
+[NodeJS 16 and npm](https://nodejs.org/en/) required to build frontend.
 
 ## Setup
 
