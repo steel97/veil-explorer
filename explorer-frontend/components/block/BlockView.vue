@@ -206,9 +206,11 @@ const confirmationsTooltipEl = ref<HTMLElement>(null);
 const config = useRuntimeConfig();
 const data = useChainInfo();
 
-const calculateConfirmations = computed(
-  () => data.value.chainInfo.blocks - props.block.block.height + 1
-);
+const calculateConfirmations = computed(() => {
+  const confirmations =
+    data.value.chainInfo.blocks - props.block.block.height + 1;
+  return confirmations > 0 ? confirmations : 0;
+});
 
 const getConfirmationClass = computed(() => {
   const confirmations = calculateConfirmations.value;
