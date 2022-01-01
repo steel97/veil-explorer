@@ -1,4 +1,4 @@
-# Veil Explorer frontend
+# Frontend compiling
 
 ## Setup
 

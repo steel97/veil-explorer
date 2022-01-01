@@ -38,7 +38,7 @@ There are basic setup guide that suitable for all supported environments and ful
 1. Unpack latest veil node release
 2. Run bin/veild -txindex
 #### Database
-1. Create new database
+1. Create new **postgresql** database
 2. Restore SQL files from [explorer-backend/schemas](/explorer-backend/schemas)
 #### Backend
 1. Unpack **veil-explorer-backend.zip**

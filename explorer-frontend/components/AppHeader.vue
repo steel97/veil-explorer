@@ -111,7 +111,7 @@
                 ><img
                   class="locale-icon"
                   :alt="getCurrentLocale().name"
-                  :src="'/images/langs/' + getCurrentLocale().code + '.png'"
+                  :src="'/images/locales/' + getCurrentLocale().code + '.png'"
               /></span>
               <span class="grow cursor-default uppercase">{{
                 getCurrentLocale().name
@@ -144,7 +144,7 @@
                   ><img
                     class="locale-icon"
                     :alt="val.name"
-                    :src="'/images/langs/' + val.code + '.png'"
+                    :src="'/images/locales/' + val.code + '.png'"
                 /></span>
                 <span class="grow uppercase">{{ val.name }}</span>
               </div>
@@ -226,7 +226,7 @@
               <span class="mr-2"
                 ><img
                   class="locale-icon"
-                  :src="'/images/langs/' + getCurrentLocale().code + '.png'"
+                  :src="'/images/locales/' + getCurrentLocale().code + '.png'"
               /></span>
               <span class="grow cursor-default uppercase">{{
                 getCurrentLocale().name
@@ -258,7 +258,7 @@
                 <span class="mr-2"
                   ><img
                     class="locale-icon"
-                    :src="'/images/langs/' + valm.code + '.png'"
+                    :src="'/images/locales/' + valm.code + '.png'"
                 /></span>
                 <span class="grow uppercase">{{ valm.name }}</span>
               </div>
