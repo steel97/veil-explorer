@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Update="output\**\*.*" CopyToPublishDirectory="Never" CopyToOutputDirectory="Never" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="NBitcoin" Version="6.0.18" />
     <PackageReference Include="Npgsql" Version="6.0.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
