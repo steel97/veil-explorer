@@ -11,7 +11,7 @@ dotnet restore
 ## Development
 Copy settings template **appsettings.json.tpl** to **appsettings.json**
 
-Change **postgresql** connection string in **appsettings.json**
+Change **postgresql** connection string and other settings in **appsettings.json** for local development
 
 Start the development server on http://localhost:5000
 
@@ -20,6 +20,9 @@ dotnet run
 ```
 
 ## Production
+Copy settings template **appsettings.json.tpl** to **appsettings.Production.json**
+
+Change **postgresql** connection string and other settings in **appsettings.Production.json** for production environment
 
 Build the application for production:
 
