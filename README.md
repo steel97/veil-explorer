@@ -23,6 +23,7 @@ See [docs/compiling/frontend.md](/docs/compiling/frontend.md)
 # Getting started
 ## Tested OSes
 Both of frontend and backend tested on **Windows 11** and **Ubuntu 20.04**
+
 On production environment it is recommended to use the latest version of the LTS **Ubuntu**
 
 ## Required software
@@ -43,7 +44,7 @@ There are basic setup guide that suitable for all supported environments and ful
 #### Backend
 1. Unpack **veil-explorer-backend.zip**
 2. Copy [explorer-backend/appsettings.json.tpl](/explorer-backend/appsettings.json.tpl) to \[server directory\]/appsettings.json
-3. Change postgresql connection string inside **appsettings.json**, change other parameters
+3. Change **postgresql** connection string inside **appsettings.json**, change other parameters
 4. Run server executable (explorer-backend)
 #### Frontend
 1. Unpack **veil-explorer-frontend.zip**
