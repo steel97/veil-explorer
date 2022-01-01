@@ -9,6 +9,8 @@
 
   <ItemGroup>
     <Content Update="output\**\*.*" CopyToPublishDirectory="Never" CopyToOutputDirectory="Never" />
+    <Content Update="appsettings.json" CopyToPublishDirectory="Never" CopyToOutputDirectory="Always" />
+    <Content Update="appsettings.Production.json" CopyToPublishDirectory="Always" CopyToOutputDirectory="Never" />
   </ItemGroup>
 
   <ItemGroup>

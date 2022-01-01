@@ -3,5 +3,6 @@ obj
 output
 internal
 appsettings.json
+appsettings.production.json
 *.cfg
 *.rsa
