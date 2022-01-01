@@ -12,7 +12,7 @@ Example: https://explorer.veil-project.com
 - search by transaction, address, block hash or height
 
 # API compatibility
-See [docs/api-compatability.md](/docs/api-compatability.md)
+See [docs/api-compatibility.md](/docs/api-compatibility.md)
 
 # Compiling from sources
 ## Backend

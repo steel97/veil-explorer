@@ -1,4 +1,4 @@
-# Compatability
+# Compatibility
 Notes about compatibility of this explorer with previous version:
 1. /api/getblockchaininfo
 * added next_super_block field
