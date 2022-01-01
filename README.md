@@ -42,7 +42,7 @@ There are basic setup guide that suitable for all supported environments and ful
 2. Restore SQL files from [explorer-backend/schemas](/explorer-backend/schemas)
 #### Backend
 1. Unpack **veil-explorer-backend.zip**
-2. Copy [explorer-backend/appsettings.json.tpl](/explorer-backend/appsettings.json.tpl) to <server directory>/appsettings.json
+2. Copy [explorer-backend/appsettings.json.tpl](/explorer-backend/appsettings.json.tpl) to \[server directory\]/appsettings.json
 3. Change postgresql connection string inside **appsettings.json**, change other parameters
 4. Run server executable (explorer-backend)
 #### Frontend
