@@ -20,7 +20,7 @@
   },
   "Explorer": {
     "TxScopeTimeout": 600,
-    "HubNotifyDelay": 5000,
+    "HubNotifyDelay": 1000,
     "PullBlocksDelay": 500,
     "PullBlockchainInfoDelay": 500,
     "PullBlockchainStatsDelay": 1800000,
