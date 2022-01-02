@@ -71,7 +71,7 @@ Backend configured in **appsettings.json**
       "Authorization": ""
     },
     "ScanTxOutsetQueue": {
-      # capacity of balances cache
+      # capacity of balances queue
       "Capacity": 50,
       # see https://docs.microsoft.com/en-us/dotnet/api/system.threading.channels.boundedchannelfullmode?view=net-6.0
       "Mode": 2
