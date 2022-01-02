@@ -58,7 +58,7 @@ export PORT=3000
 # url on which frontend available, used for SEO, meta tags etc.
 export BASE_URL=http://<ip>:3000
 # JSON formatted configuration to connect frontend with backend
-# For now you should only change value of "path", so just replace <ip> and <backend_port>
+# for now you should only change value of "path", so just replace <ip> and <backend_port>
 export CHAIN_APIS="[{\"name\": \"main\", \"path\": \"http://<ip>:<backend_port>/api\"}]"
 export RECENT_BLOCKS_COUNT=5
 export BLOCKS_PER_PAGE=15
@@ -67,6 +67,7 @@ export MAX_BLOCK_WEIGHT=4000000
 export SYNC_NOTICE_CASE=15
 export COOKIE_SAVE_DAYS=90
 ```
+See: [docs/frontend-configuration.md](/docs/frontend-configuration.md)
 
 ## Change permissions and test frontend
 ```bash

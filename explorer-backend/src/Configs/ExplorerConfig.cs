@@ -17,7 +17,6 @@ public class ExplorerConfig
     public MemoryCache? MemoryCache { get; set; }
     public Node? Node { get; set; }
     public QueueConfig? ScanTxOutsetQueue { get; set; }
-    public QueueConfig? ValidateAddressQueue { get; set; }
 }
 
 public class MemoryCache

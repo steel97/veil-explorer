@@ -42,10 +42,6 @@
     "ScanTxOutsetQueue": {
       "Capacity": 50,
       "Mode": 2
-    },
-    "ValidateAddressQueue": {
-      "Capacity": 50,
-      "Mode": 2
     }
   },
   "AllowedHosts": "*",

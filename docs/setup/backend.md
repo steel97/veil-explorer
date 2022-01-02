@@ -38,6 +38,8 @@ sudo cp /home/explorer-backend/server/appsettings.json.tpl /home/explorer-backen
 # Edit configuration
 sudo nano /home/explorer-backend/server/appsettings.json
 ```
+See: [docs/backend-configuration.md](/docs/backend-configuration.md)
+
 Now you can test backend:
 ```bash
 su explorer-backend
