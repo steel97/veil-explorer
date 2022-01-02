@@ -36,7 +36,8 @@ sudo chown -R node:node /home/node/veil/data
 ```
 ## Generate **rpcauth** value with:
 ```
-rpcauth.py [username]
+wget https://raw.githubusercontent.com/Veil-Project/veil/master/share/rpcauth/rpcauth.py
+python3 rpcauth.py [noderpc_username] [noderpc_password]
 ```
 rpcauth.py: https://github.com/Veil-Project/veil/blob/master/share/rpcauth/rpcauth.py
 ## Create config default.conf

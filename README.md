@@ -39,7 +39,7 @@ There are basic setup guide that suitable for all supported environments and ful
 1. Unpack latest veil node release
 2. Generate **rpcauth** value with:
 ```
-rpcauth.py [username]
+python3 rpcauth.py [username] [noderpc_password]
 ```
 rpcauth.py: https://github.com/Veil-Project/veil/blob/master/share/rpcauth/rpcauth.py
 

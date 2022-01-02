@@ -67,7 +67,10 @@ Backend configured in **appsettings.json**
     "Node": {
       # veil node api address
       "Url": "http://127.0.0.1:5050/",
-      # veil node basic-authorization password
+      # veil node basic-authorization credentials
+      # generated as base64([noderpc_username]:[noderpc_password])
+      # on linux this you can get this string by executing in console next command:
+      # echo '[noderpc_username]:[noderpc_password]' | base64
       "Authorization": ""
     },
     "ScanTxOutsetQueue": {
