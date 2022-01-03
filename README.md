@@ -65,6 +65,7 @@ txindex=1
 See: [docs/backend-configuration.md](/docs/backend-configuration.md)
 
 4. Run server executable (explorer-backend)
+5. It will take some time to synchronize backend database with node.
 #### Frontend
 1. Unpack **veil-explorer-frontend.zip**
 2. Create start script which should export environment variables used as explorer-frontend config:

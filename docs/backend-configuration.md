@@ -78,7 +78,8 @@ Backend configured in **appsettings.json**
       "Mode": 2
     }
   },
-  # configuration below is kestrel server configuration, described here: https://docs.microsoft.com/en-us/aspnet/core/fundamentals/servers/kestrel/endpoints?view=aspnetcore-6.0
+  # configuration below is kestrel server configuration
+  # see https://docs.microsoft.com/en-us/aspnet/core/fundamentals/servers/kestrel/endpoints?view=aspnetcore-6.0
   "AllowedHosts": "*",
   "Kestrel": {
     "EndPointDefaults": {

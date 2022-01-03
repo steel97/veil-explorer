@@ -81,4 +81,4 @@ sudo systemctl start explorer-backend.service
 sudo systemctl status explorer-backend.service
 ```
 
-Done, now explorer backend is running as a background service.
+Done, now explorer backend is running as a background service. It will take some time to synchronize backend database with node.
