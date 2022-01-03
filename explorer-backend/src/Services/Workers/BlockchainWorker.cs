@@ -80,18 +80,13 @@ public class BlockchainWorker : BackgroundService
 
                     var sendUpdate = false;
                     await _chainInfoSingleton.BlockchainDataSemaphore.WaitAsync();
-                    try
-                    {
-                        if (_chainInfoSingleton.BlockchainDataShouldBroadcast)
-                        {
-                            _chainInfoSingleton.BlockchainDataShouldBroadcast = false;
-                            sendUpdate = true;
-                        }
-                    }
-                    catch
-                    {
 
+                    if (_chainInfoSingleton.BlockchainDataShouldBroadcast)
+                    {
+                        _chainInfoSingleton.BlockchainDataShouldBroadcast = false;
+                        sendUpdate = true;
                     }
+
                     _chainInfoSingleton.BlockchainDataSemaphore.Release();
 
                     if (sendUpdate)
