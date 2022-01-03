@@ -153,8 +153,8 @@
                   p-1
                   whitespace-nowrap
                 "
-                v-if="input.prevOutAmount > -1"
-                >{{ formatAmount(input.prevOutAmount) }} VEIL</span
+                v-if="shouldRenderInputAmount(input)"
+                >{{ getAmountForInput(input) }} VEIL</span
               >
             </div>
           </div>
@@ -389,6 +389,7 @@ import {
   TxInType,
   OutputTypes,
   txnouttype,
+  TxVinSimpleDecoded,
 } from "@/models/API/BlockResponse";
 import { useI18n } from "vue-i18n";
 import { COIN } from "@/core/Constants";
@@ -402,5 +403,26 @@ const props = defineProps<{
 
 const formatAmount = (amount: number) => {
   return amount / COIN;
+};
+
+const computeTotalInputsAmount = (tx: TransactionSimpleDecoded) => {
+  let result = 0;
+  props.tx.inputs.forEach((tx) => (result += tx.prevOutAmount));
+  return result;
+};
+
+const computeTotalOutputsAmount = (tx: TransactionSimpleDecoded) => {
+  let result = 0;
+  props.tx.outputs.forEach((tx) => (result += tx.amount));
+  return result;
+};
+
+const shouldRenderInputAmount = (input: TxVinSimpleDecoded) =>
+  input.prevOutAmount > -1;
+const getAmountForInput = (input: TxVinSimpleDecoded) => {
+  let amount = input.prevOutAmount;
+  if (input.type == TxInType.ANON)
+    amount = computeTotalOutputsAmount() - computeTotalInputsAmount();
+  return formatAmount(amount);
 };
 </script>
