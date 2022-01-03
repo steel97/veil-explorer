@@ -2,7 +2,7 @@
     "BlockTitle": "Просмотр блока",
     "Transactions": "Транзакции",
     "Meta": {
-        "Title": "Veil Explorer - просмотр блока {block}",
+        "Title": "Veil Explorer - Просмотр блока {block}",
         "Description": "Просмотр информации о блоке {block}"
     },
     "LatestBlock": "Нет (последний блок)",

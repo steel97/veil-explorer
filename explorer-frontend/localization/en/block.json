@@ -2,7 +2,7 @@
     "BlockTitle": "Viewing block",
     "Transactions": "Transactions",
     "Meta": {
-        "Title": "Veil Explorer - viewing block {block}",
+        "Title": "Veil Explorer - Viewing block {block}",
         "Description": "Viewing information about block {block}"
     },
     "LatestBlock": "None (latest block)",

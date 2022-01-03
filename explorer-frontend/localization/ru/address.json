@@ -4,7 +4,7 @@
     "CopySuccess": "Адрес скопирован",
     "QrCode": "QR код",
     "Meta": {
-        "Title": "Veil Explorer - просмотр адреса {address}",
+        "Title": "Veil Explorer - Просмотр адреса {address}",
         "Description": "Просмотр информации о адресе {address}"
     },
     "Hash160": "Hash 160",
