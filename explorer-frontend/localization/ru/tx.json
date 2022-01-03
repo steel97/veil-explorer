@@ -16,7 +16,7 @@
     "Coinbase": "Coinbase",
     "NoInputs": "Нет входов (Сгенерированые монеты)",
     "Zerocoin": "Zerocoin",
-    "ZerocoinSpend": "Расход",
+    "ZerocoinSpend": "Spend",
     "RingCT": "RingCT",
     "RingCTInput": "Анонимный вход",
     "OpReturn": "OpReturn",
