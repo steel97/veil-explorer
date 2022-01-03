@@ -28,7 +28,8 @@ public class MemoryCache
 public class Node
 {
     public string? Url { get; set; }
-    public string? Authorization { get; set; }
+    public string? Username { get; set; }
+    public string? Password { get; set; }
 }
 
 public class QueueConfig

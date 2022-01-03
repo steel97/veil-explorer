@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using System.Transactions;
 using System.Net.Http.Headers;
@@ -39,10 +40,11 @@ public class BlocksWorker : BackgroundService
 
         ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node);
         ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Url);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Authorization);
+        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Username);
+        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Password);
 
         httpClient.BaseAddress = new Uri(_explorerConfig.CurrentValue.Node.Url);
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", _explorerConfig.CurrentValue.Node.Authorization);
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_explorerConfig.CurrentValue.Node.Username}:{_explorerConfig.CurrentValue.Node.Password}")));
 
         var options = new JsonSerializerOptions
         {

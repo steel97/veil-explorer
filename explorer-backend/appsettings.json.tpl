@@ -37,7 +37,8 @@
     },
     "Node": {
       "Url": "http://127.0.0.1:5050/",
-      "Authorization": ""
+      "Username": "[noderpc_username]",
+      "Password": "[noderpc_password]"
     },
     "ScanTxOutsetQueue": {
       "Capacity": 50,
