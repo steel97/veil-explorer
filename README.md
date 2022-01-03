@@ -11,7 +11,10 @@ Example: https://explorer.veil-project.com
 - block and transactions information
 - search by transaction, address, block hash or height
 
-# API compatibility
+# API
+## Documentation
+See [docs/api.md](/docs/api.md)
+## Compatibility
 See [docs/api-compatibility.md](/docs/api-compatibility.md)
 
 # Compiling from sources
