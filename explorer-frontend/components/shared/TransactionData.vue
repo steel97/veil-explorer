@@ -172,10 +172,12 @@
       <div class="col-span-5">
         <div
           v-for="(output, outputId) in props.tx.outputs"
-          :key="'output-' + outputId"
+          :key="
+            'output-' + outputId.toString() + '-' + reactivityFix.toString()
+          "
           :id="'output-' + (outputId + 0).toString()"
           class="p-3 bg-gray-200 dark:bg-gray-700 rounded"
-          :class="outputId == props.tx.outputs.length - 1 ? '' : 'mb-4'"
+          :class="getOutputClasses(outputId + 0, output)"
         >
           <div class="block lg:flex justify-between">
             <div v-if="output.addresses != null && output.addresses.length > 0">
@@ -390,6 +392,7 @@ import {
   OutputTypes,
   txnouttype,
   TxVinSimpleDecoded,
+  TxVoutSimpleDecoded,
 } from "@/models/API/BlockResponse";
 import { useI18n } from "vue-i18n";
 import { COIN } from "@/core/Constants";
@@ -400,6 +403,8 @@ const { t } = useI18n();
 const props = defineProps<{
   tx: TransactionSimpleDecoded;
 }>();
+
+const reactivityFix = ref(0);
 
 const formatAmount = (amount: number) => {
   return amount / COIN;
@@ -419,10 +424,30 @@ const computeTotalOutputsAmount = (tx: TransactionSimpleDecoded) => {
 
 const shouldRenderInputAmount = (input: TxVinSimpleDecoded) =>
   input.prevOutAmount > -1;
+
 const getAmountForInput = (input: TxVinSimpleDecoded) => {
   let amount = input.prevOutAmount;
   if (input.type == TxInType.ANON)
     amount = computeTotalOutputsAmount() - computeTotalInputsAmount();
   return formatAmount(amount);
 };
+
+const getOutputClasses = (outputId: number, output: TxVoutSimpleDecoded) => {
+  let classes = [outputId == props.tx.outputs.length - 1 ? "" : "mb-4"];
+
+  if (process.client) {
+    if (
+      window.location.hash &&
+      (window.location.hash as any as string) == `#output-${outputId}`
+    ) {
+      classes.push(
+        ...["outline", "outline-1", "outline-sky-700", "dark:outline-sky-400"]
+      );
+    }
+  }
+
+  return classes;
+};
+
+onMounted(() => reactivityFix.value++);
 </script>
