@@ -80,14 +80,15 @@ public class BlockchainWorker : BackgroundService
                     if (_chainInfoSingleton.LastSyncedBlockOnNode < _chainInfoSingleton.CurrentChainInfo?.Blocks)
                     {
                         _chainInfoSingleton.LastSyncedBlockOnNode = (int)(_chainInfoSingleton.CurrentChainInfo?.Blocks ?? 0);
-                        try
+                        // temporaly commented, moved to blocksworker
+                        /*try
                         {
                             await _hubContext.Clients.Group(EventsHub.BackgroundDataChannel).SendAsync("blockchainInfoUpdated", _chainInfoSingleton.CurrentChainInfo);
                         }
                         catch
                         {
 
-                        }
+                        }*/
                     }
                 }
                 else

@@ -237,6 +237,7 @@ public class BlocksWorker : BackgroundService
                                     MedianTime = targetBlock.mediantime,
                                     TxCount = pulledTxs.Count()
                                 });
+                                await _hubContext.Clients.Group(EventsHub.BackgroundDataChannel).SendAsync("blockchainInfoUpdated", _chainInfoSingleton.CurrentChainInfo);
                             }
                             catch
                             {
