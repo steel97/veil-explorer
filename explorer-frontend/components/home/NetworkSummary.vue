@@ -10,7 +10,7 @@
           <span>{{ t("NetworkSummary.LastIndexedBlock") }}</span>
         </div>
         <div class="text-right">
-          {{ data?.chainInfo?.blocks ?? t("Core.NoData") }}
+          {{ blockchainData?.blocks ?? t("Core.NoData") }}
         </div>
       </div>
       <div class="flex justify-between mb-2">
@@ -20,7 +20,7 @@
           /><span>{{ t("NetworkSummary.BestBlockHash") }}</span>
         </div>
         <div class="text-right overflow-hidden text-ellipsis max-right-width">
-          {{ data?.chainInfo?.bestblockhash ?? t("Core.NoData") }}
+          {{ blockchainData?.bestblockhash ?? t("Core.NoData") }}
         </div>
       </div>
       <div class="flex justify-between mb-2">
@@ -30,8 +30,8 @@
           /><span>{{ t("NetworkSummary.LastBlockUpdate") }}</span>
         </div>
         <div class="text-right overflow-hidden text-ellipsis max-right-width">
-          <span v-if="data != null && data.chainInfo != null">{{
-            formatDateTimeLocal(data?.chainInfo?.mediantime)
+          <span v-if="blockchainData != null">{{
+            formatDateTimeLocal(blockchainData?.mediantime)
           }}</span>
           <span v-else>{{ t("Core.NoData") }}</span>
         </div>
@@ -49,7 +49,7 @@
           <span>{{ t("NetworkSummary.NextSuperblock") }}</span>
         </div>
         <div class="text-right max-right-width">
-          {{ data?.chainInfo?.next_super_block ?? t("Core.NoData") }}
+          {{ blockchainData?.next_super_block ?? t("Core.NoData") }}
         </div>
       </div>
     </div>
@@ -63,7 +63,7 @@
           <span>PoS</span>
         </div>
         <div class="text-right">
-          {{ data?.chainInfo?.difficulty_pos ?? t("Core.NoData") }}
+          {{ blockchainData?.difficulty_pos ?? t("Core.NoData") }}
         </div>
       </div>
       <div class="flex justify-between mb-2">
@@ -73,7 +73,7 @@
           >
         </div>
         <div class="text-right">
-          {{ data?.chainInfo?.difficulty_progpow ?? t("Core.NoData") }}
+          {{ blockchainData?.difficulty_progpow ?? t("Core.NoData") }}
         </div>
       </div>
       <div class="flex justify-between mb-2">
@@ -83,7 +83,7 @@
           /><span>RandomX</span>
         </div>
         <div class="text-right">
-          {{ data?.chainInfo?.difficulty_randomx ?? t("Core.NoData") }}
+          {{ blockchainData?.difficulty_randomx ?? t("Core.NoData") }}
         </div>
       </div>
       <div class="flex justify-between mb-2">
@@ -92,7 +92,7 @@
           <span>SHA256D</span>
         </div>
         <div class="text-right">
-          {{ data?.chainInfo?.difficulty_sha256d ?? t("Core.NoData") }}
+          {{ blockchainData?.difficulty_sha256d ?? t("Core.NoData") }}
         </div>
       </div>
     </div>
@@ -107,9 +107,13 @@
         </div>
         <div class="text-right">
           <span
-            v-if="data != null && data.algoStats != null && data.algoStats.pos"
-            >{{ data?.algoStats?.pos }} ({{
-              calculateBlocksplit(data?.algoStats?.pos)
+            v-if="
+              backgroundData != null &&
+              backgroundData.algoStats != null &&
+              backgroundData.algoStats.pos
+            "
+            >{{ backgroundData?.algoStats?.pos }} ({{
+              calculateBlocksplit(backgroundData?.algoStats?.pos)
             }}%)</span
           >
           <span v-else>{{ t("Core.NoData") }}</span>
@@ -124,10 +128,12 @@
         <div class="text-right">
           <span
             v-if="
-              data != null && data.algoStats != null && data.algoStats.progpow
+              backgroundData != null &&
+              backgroundData.algoStats != null &&
+              backgroundData.algoStats.progpow
             "
-            >{{ data?.algoStats?.progpow }} ({{
-              calculateBlocksplit(data?.algoStats?.progpow)
+            >{{ backgroundData?.algoStats?.progpow }} ({{
+              calculateBlocksplit(backgroundData?.algoStats?.progpow)
             }}%)</span
           >
           <span v-else>{{ t("Core.NoData") }}</span>
@@ -142,10 +148,12 @@
         <div class="text-right">
           <span
             v-if="
-              data != null && data.algoStats != null && data.algoStats.randomx
+              backgroundData != null &&
+              backgroundData.algoStats != null &&
+              backgroundData.algoStats.randomx
             "
-            >{{ data?.algoStats?.randomx }} ({{
-              calculateBlocksplit(data?.algoStats?.randomx)
+            >{{ backgroundData?.algoStats?.randomx }} ({{
+              calculateBlocksplit(backgroundData?.algoStats?.randomx)
             }}%)</span
           >
           <span v-else>{{ t("Core.NoData") }}</span>
@@ -157,9 +165,10 @@
           <span>SHA256D</span>
         </div>
         <div class="text-right">
-          <span v-if="data != null && data.algoStats != null"
-            >{{ data?.algoStats?.sha256d }} ({{
-              calculateBlocksplit(data?.algoStats?.sha256d)
+          <span
+            v-if="backgroundData != null && backgroundData.algoStats != null"
+            >{{ backgroundData?.algoStats?.sha256d }} ({{
+              calculateBlocksplit(backgroundData?.algoStats?.sha256d)
             }}%)</span
           >
           <span v-else>{{ t("Core.NoData") }}</span>
@@ -176,8 +185,8 @@
           <span>{{ t("NetworkSummary.Total") }}</span>
         </div>
         <div class="text-right">
-          <span v-if="data != null && data.chainInfo != null">
-            {{ data?.chainInfo?.moneysupply / supplyDelimiter }}
+          <span v-if="blockchainData != null">
+            {{ blockchainData?.moneysupply / supplyDelimiter }}
           </span>
           <span v-else>{{ t("Core.NoData") }}</span>
         </div>
@@ -191,14 +200,12 @@
         <div class="text-right">
           <span
             v-if="
-              data != null &&
-              data.chainInfo != null &&
-              data.chainInfo.zerocoinsupply != null
+              blockchainData != null && blockchainData.zerocoinsupply != null
             "
             >{{ calculateZerocoinTotal() }} ({{
               (
                 (parseInt(calculateZerocoinTotal()) /
-                  (data?.chainInfo?.moneysupply / supplyDelimiter)) *
+                  (blockchainData.moneysupply / supplyDelimiter)) *
                 100
               ).toFixed(2)
             }}%)</span
@@ -207,17 +214,13 @@
         </div>
       </div>
       <div
-        v-if="
-          data != null &&
-          data.chainInfo != null &&
-          data.chainInfo.zerocoinsupply != null
-        "
+        v-if="blockchainData != null && blockchainData.zerocoinsupply != null"
       >
         <div
           class="flex justify-between mb-2"
-          v-for="(val, index) in data.chainInfo.zerocoinsupply.slice(
+          v-for="(val, index) in blockchainData.zerocoinsupply.slice(
             0,
-            data.chainInfo.zerocoinsupply.length - 1
+            blockchainData.zerocoinsupply.length - 1
           )"
           :key="'denom-' + index"
         >
@@ -231,7 +234,7 @@
               (
                 (val.amount /
                   supplyDelimiter /
-                  (data?.chainInfo?.moneysupply / supplyDelimiter)) *
+                  (blockchainData?.moneysupply / supplyDelimiter)) *
                 100
               ).toFixed(2)
             }}%)
@@ -261,19 +264,20 @@ import {
 } from "@heroicons/vue/solid";
 import { BlockchainInfo } from "@/models/API/BlockchainInfo";
 import { useFormatting } from "@/composables/Formatting";
-import { useChainInfo } from "@/composables/States";
+import { useBackgroundInfo, useBlockchainInfo } from "@/composables/States";
 import { useI18n } from "vue-i18n";
 import { COIN } from "@/core/Constants";
 
 const { t } = useI18n();
 const { formatDateTimeLocal } = useFormatting();
-const data = useChainInfo();
+const blockchainData = useBlockchainInfo();
+const backgroundData = useBackgroundInfo();
 
 const supplyDelimiter = ref(COIN);
 
 const getSize = () => {
-  let size = data.value?.chainInfo?.size_on_disk ?? t("Core.NoData");
-  if (data.value != null && data.value.chainInfo != null) {
+  let size = blockchainData.value?.size_on_disk ?? t("Core.NoData");
+  if (blockchainData.value != null) {
     size =
       ((size as number) / 1024 / 1024 / 1024).toFixed(2).toString() + " GB";
   }
@@ -282,16 +286,16 @@ const getSize = () => {
 
 const calculateBlocksplit = (val) => {
   const overall =
-    data.value?.algoStats?.pos +
-    data.value?.algoStats?.progpow +
-    data.value?.algoStats?.randomx +
-    data.value?.algoStats?.sha256d;
+    backgroundData.value?.algoStats?.pos +
+    backgroundData.value?.algoStats?.progpow +
+    backgroundData.value?.algoStats?.randomx +
+    backgroundData.value?.algoStats?.sha256d;
   return ((val / overall) * 100).toFixed(2);
 };
 
 const calculateZerocoinTotal = () =>
   (
-    data.value?.chainInfo.zerocoinsupply.filter(
+    blockchainData.value?.zerocoinsupply.filter(
       (filter) => filter.denom == "total"
     )[0].amount / supplyDelimiter.value
   ).toFixed(2);

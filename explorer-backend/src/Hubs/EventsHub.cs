@@ -5,6 +5,9 @@ namespace ExplorerBackend.Hubs;
 
 public class EventsHub : Hub
 {
+    public const string BackgroundDataChannel = "background_data";
+    public const string BlocksDataChannel = "blocks_update";
+
     private readonly ChaininfoSingleton _chainInfoSingleton;
     private readonly ILogger _logger;
 
@@ -16,7 +19,7 @@ public class EventsHub : Hub
 
     public override async Task OnConnectedAsync()
     {
-        await Groups.AddToGroupAsync(Context.ConnectionId, "chaininfo");
-        await Groups.AddToGroupAsync(Context.ConnectionId, "blocksupdate");
+        await Groups.AddToGroupAsync(Context.ConnectionId, BackgroundDataChannel);
+        await Groups.AddToGroupAsync(Context.ConnectionId, BlocksDataChannel);
     }
 }

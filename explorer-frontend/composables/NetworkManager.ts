@@ -1,13 +1,14 @@
 import * as signalR from "@microsoft/signalr";
 import { useConfigs } from "@/composables/Configs";
-import { useChainInfo, useLatestBlockInfo } from "@/composables/States";
+import { useBackgroundInfo, useBlockchainInfo, useLatestBlockInfo } from "@/composables/States";
 import { GetBlockchainInfoResult } from "@/models/Node/GetBlockchainInfoResult";
 import { GetChainalgoStatsResult } from "@/models/Node/GetChainalgoStatsResult";
 import { SimplifiedBlock } from "@/models/API/SimplifiedBlock";
 
 export const useNetworkManager = () => {
     const { getApiPath } = useConfigs();
-    const chainInfoDataState = useChainInfo();
+    const backgroundInfoDataState = useBackgroundInfo();
+    const blockchainInfoDataState = useBlockchainInfo();
     const latestBlockState = useLatestBlockInfo();
 
     const connect = () => {
@@ -21,17 +22,14 @@ export const useNetworkManager = () => {
             .configureLogging(signalR.LogLevel.Error)
             .build();
 
-        connection.on("BlockchainInfoUpdated", (currentSyncedBlock: number, chainInfo: GetBlockchainInfoResult, algoStats: GetChainalgoStatsResult) => {
-            chainInfoDataState.value = {
+        connection.on("blockchainInfoUpdated", (chainInfo: GetBlockchainInfoResult) => blockchainInfoDataState.value = chainInfo);
+        connection.on("backgroundInfoUpdated", (currentSyncedBlock: number, algoStats: GetChainalgoStatsResult) =>
+            backgroundInfoDataState.value = {
                 currentSyncedBlock: currentSyncedBlock,
-                chainInfo: chainInfo,
                 algoStats: algoStats
-            };
-        });
-
-        connection.on("BlocksUpdated", (simplifiedBlock: SimplifiedBlock) => {
-            latestBlockState.value = simplifiedBlock;
-        });
+            }
+        );
+        connection.on("blocksUpdated", (simplifiedBlock: SimplifiedBlock) => latestBlockState.value = simplifiedBlock);
 
         connection.start().catch(err => console.log(err));
     }

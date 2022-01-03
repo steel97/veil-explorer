@@ -37,7 +37,11 @@ import SyncNotice from "@/components/SyncNotice";
 import SearchBox from "@/components/SearchBox";
 import AppFooter from "@/components/AppFooter";
 import { useConfigs } from "@/composables/Configs";
-import { useThemeState, useChainInfo } from "@/composables/States";
+import {
+  useThemeState,
+  useBackgroundInfo,
+  useBlockchainInfo,
+} from "@/composables/States";
 import { useNetworkManager } from "@/composables/NetworkManager";
 import { useLocalization } from "@/composables/Localization";
 import { BlockchainInfo } from "@/models/API/BlockchainInfo";
@@ -52,7 +56,8 @@ const { getApiPath } = useConfigs();
 const { connect } = useNetworkManager();
 const { getClientLocale } = useLocalization();
 const { t, availableLocales, fallbackLocale, locale } = useI18n();
-const chainInfoDataState = useChainInfo();
+const backgroundInfoDataState = useBackgroundInfo();
+const blockchaininfoDataState = useBlockchainInfo();
 const themeState = useThemeState();
 const theme = useCookie("theme").value ?? "";
 const lang = useCookie("lang").value ?? getClientLocale();
@@ -141,18 +146,23 @@ const chainInfo = await useFetch<string, BlockchainInfo>(
   `${getApiPath()}/blockchaininfo`
 );
 
-chainInfoDataState.value = chainInfo.data.value;
+backgroundInfoDataState.value = {
+  currentSyncedBlock: chainInfo.data.value.currentSyncedBlock,
+  algoStats: chainInfo.data.value.algoStats,
+};
+blockchaininfoDataState.value = chainInfo.data.value.chainInfo;
 
 const isSynchronizing = computed(() => {
   if (
-    chainInfoDataState.value == null ||
-    chainInfoDataState.value.chainInfo == null
+    backgroundInfoDataState.value == null ||
+    blockchaininfoDataState.value == null
   )
     return false;
 
   const shouldSync =
-    chainInfoDataState.value.chainInfo.blocks - config.SYNC_NOTICE_CASE >
-    chainInfoDataState.value.currentSyncedBlock;
+    blockchaininfoDataState.value.blocks -
+      (config.SYNC_NOTICE_CASE as any as number) >
+    backgroundInfoDataState.value.currentSyncedBlock;
 
   return shouldSync;
 });

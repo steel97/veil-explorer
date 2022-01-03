@@ -24,7 +24,7 @@
           </div>
           <div class="border-l">
             <span class="pl-2 font-base uppercase text-sm">{{
-              data?.chainInfo?.chain ?? t("Core.NoData")
+              data?.chain ?? t("Core.NoData")
             }}</span>
           </div>
         </NuxtLink>
@@ -273,13 +273,13 @@
 import { ref } from "@vue/reactivity";
 import { SunIcon, MoonIcon } from "@heroicons/vue/solid";
 import { MenuIcon } from "@heroicons/vue/outline";
-import { useThemeState, useChainInfo } from "@/composables/States";
+import { useThemeState, useBlockchainInfo } from "@/composables/States";
 import { useI18n } from "vue-i18n";
 import Cookie from "js-cookie";
 
 const { t, availableLocales, getLocaleMessage, locale, fallbackLocale } =
   useI18n();
-const data = useChainInfo();
+const data = useBlockchainInfo();
 const themeState = useThemeState();
 const route = useRoute();
 const config = useRuntimeConfig();

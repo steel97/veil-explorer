@@ -37,7 +37,7 @@ Backend configured in **appsettings.json**
     # database transaction timeout in ms
     "TxScopeTimeout": 600,
     # realtime notification interval in ms
-    "HubNotifyDelay": 1000,
+    "HubNotifyDelay": 5000,
     # delay beween blocks pulling batch in ms
     "PullBlocksDelay": 500,
     # delay between blockchain info pulling in ms

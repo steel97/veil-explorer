@@ -21,20 +21,22 @@
 </template>
 
 <script setup lang="ts">
-import { useChainInfo } from "@/composables/States";
+import { useBackgroundInfo, useBlockchainInfo } from "@/composables/States";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
-const chainInfoDataState = useChainInfo();
+const backgroundInfoDataState = useBackgroundInfo();
+const blockchaininfoDataState = useBlockchainInfo();
+
 const syncState = computed(() => {
   if (
-    chainInfoDataState.value == null ||
-    chainInfoDataState.value.chainInfo == null
+    backgroundInfoDataState.value == null ||
+    blockchaininfoDataState.value == null
   )
     return 0;
   return (
-    (chainInfoDataState.value.currentSyncedBlock /
-      chainInfoDataState.value.chainInfo.blocks) *
+    (backgroundInfoDataState.value.currentSyncedBlock /
+      blockchaininfoDataState.value.blocks) *
     100
   );
 });

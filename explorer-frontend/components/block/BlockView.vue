@@ -184,7 +184,7 @@
 import { BlockResponse } from "@/models/API/BlockResponse";
 import { useBlockchain } from "@/composables/Blockchain";
 import { useFormatting } from "@/composables/Formatting";
-import { useChainInfo } from "@/composables/States";
+import { useBlockchainInfo } from "@/composables/States";
 import { LockClosedIcon } from "@heroicons/vue/solid";
 import { useI18n } from "vue-i18n";
 import {
@@ -204,11 +204,10 @@ const { formatDateLocal, formatTimeLocal } = useFormatting();
 const confirmationsEl = ref<HTMLElement>(null);
 const confirmationsTooltipEl = ref<HTMLElement>(null);
 const config = useRuntimeConfig();
-const data = useChainInfo();
+const data = useBlockchainInfo();
 
 const calculateConfirmations = computed(() => {
-  const confirmations =
-    data.value.chainInfo.blocks - props.block.block.height + 1;
+  const confirmations = data.value.blocks - props.block.block.height + 1;
   return confirmations > 0 ? confirmations : 0;
 });
 

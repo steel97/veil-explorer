@@ -101,7 +101,7 @@
 <script setup lang="ts">
 import TransactionData from "@/components/shared/TransactionData";
 import { useFormatting } from "@/composables/Formatting";
-import { useChainInfo } from "@/composables/States";
+import { useBlockchainInfo } from "@/composables/States";
 import { TxRequest } from "@/models/API/TxRequest";
 import { TxResponse } from "@/models/API/TxResponse";
 import { LockClosedIcon } from "@heroicons/vue/solid";
@@ -110,7 +110,7 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 const { getApiPath } = useConfigs();
 const { formatDateTimeLocal } = useFormatting();
-const data = useChainInfo();
+const data = useBlockchainInfo();
 const route = useRoute();
 const router = useRouter();
 const config = useRuntimeConfig();
@@ -139,7 +139,7 @@ const getConfirmationClass = computed(() => {
 
 const calculateConfirmations = computed(() => {
   if (!tx.value.confirmed) return 0;
-  return data.value.chainInfo.blocks - tx.value.blockHeight + 1;
+  return data.value.blocks - tx.value.blockHeight + 1;
 });
 
 const meta = computed(() => {

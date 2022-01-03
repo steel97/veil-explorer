@@ -6,6 +6,7 @@ namespace ExplorerBackend.Services.Caching;
 public class ChaininfoSingleton
 {
     public int CurrentSyncedBlock { get; set; }
+    public int LastSyncedBlockOnNode { get; set; }
     public GetBlockchainInfoResult? CurrentChainInfo { get; set; }
     public GetChainalgoStatsResult? CurrentChainAlgoStats { get; set; }
     public List<GetRawTransactionResult>? UnconfirmedTxs { get; set; }

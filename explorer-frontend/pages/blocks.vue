@@ -39,9 +39,9 @@
     </div>
     <Pagination
       :overallEntries="
-        chainInfoDataState != null &&
-        chainInfoDataState.currentSyncedBlock != null
-          ? chainInfoDataState.currentSyncedBlock
+        backgroundInfoDataState != null &&
+        backgroundInfoDataState.currentSyncedBlock != null
+          ? backgroundInfoDataState.currentSyncedBlock
           : 0
       "
       :entriesPerPage="config.BLOCKS_PER_PAGE"
@@ -59,7 +59,7 @@ import { useI18n } from "vue-i18n";
 import { reactive } from "@vue/reactivity";
 import { useLatestBlockInfo } from "@/composables/States";
 import { useConfigs } from "@/composables/Configs";
-import { useChainInfo } from "@/composables/States";
+import { useBackgroundInfo } from "@/composables/States";
 import { useUI } from "@/composables/UI";
 import { SimplifiedBlock } from "@/models/API/SimplifiedBlock";
 
@@ -67,7 +67,7 @@ const { getApiPath } = useConfigs();
 const { scrollToAnimated } = useUI();
 const config = useRuntimeConfig();
 const latestBlock = useLatestBlockInfo();
-const chainInfoDataState = useChainInfo();
+const backgroundInfoDataState = useBackgroundInfo();
 
 const route = useRoute();
 
