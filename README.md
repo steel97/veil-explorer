@@ -1,5 +1,5 @@
 # veil-explorer
-Veil blockchain explorer developed with asp.net core and nuxt3
+[Veil Blockchain](https://github.com/Veil-Project/veil) explorer developed with asp.net core and nuxt3
 
 Example: https://explorer.veil-project.com
 
