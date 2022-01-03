@@ -14,4 +14,7 @@ public class ChaininfoSingleton
 
     public double BudgetWalletAmount { get; set; }
     public double FoundationWalletAmmount { get; set; }
+
+    public SemaphoreSlim BlockchainDataSemaphore = new(1, 1);
+    public bool BlockchainDataShouldBroadcast = false;
 }

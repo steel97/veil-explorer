@@ -74,21 +74,36 @@ public class BlockchainWorker : BackgroundService
                 if (blockchainInfo != null && blockchainInfo.Result != null)
                 {
                     _chainInfoSingleton.CurrentChainInfo = blockchainInfo.Result;
-                    if (_chainInfoSingleton.CurrentChainInfo != null)
-                        _chainInfoSingleton.CurrentChainInfo.Next_super_block = (uint)Math.Floor(((double)_chainInfoSingleton.CurrentChainInfo.Blocks / (double)43200) + 1) * 43200;
-
+                    _chainInfoSingleton.CurrentChainInfo.Next_super_block = (uint)Math.Floor(((double)_chainInfoSingleton.CurrentChainInfo.Blocks / (double)43200) + 1) * 43200;
                     if (_chainInfoSingleton.LastSyncedBlockOnNode < _chainInfoSingleton.CurrentChainInfo?.Blocks)
-                    {
                         _chainInfoSingleton.LastSyncedBlockOnNode = (int)(_chainInfoSingleton.CurrentChainInfo?.Blocks ?? 0);
-                        // temporaly commented, moved to blocksworker
-                        /*try
+
+                    var sendUpdate = false;
+                    await _chainInfoSingleton.BlockchainDataSemaphore.WaitAsync();
+                    try
+                    {
+                        if (_chainInfoSingleton.BlockchainDataShouldBroadcast)
+                        {
+                            _chainInfoSingleton.BlockchainDataShouldBroadcast = false;
+                            sendUpdate = true;
+                        }
+                    }
+                    catch
+                    {
+
+                    }
+                    _chainInfoSingleton.BlockchainDataSemaphore.Release();
+
+                    if (sendUpdate)
+                    {
+                        try
                         {
                             await _hubContext.Clients.Group(EventsHub.BackgroundDataChannel).SendAsync("blockchainInfoUpdated", _chainInfoSingleton.CurrentChainInfo);
                         }
                         catch
                         {
 
-                        }*/
+                        }
                     }
                 }
                 else
