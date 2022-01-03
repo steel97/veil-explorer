@@ -21,5 +21,20 @@ public class EventsHub : Hub
     {
         await Groups.AddToGroupAsync(Context.ConnectionId, BackgroundDataChannel);
         await Groups.AddToGroupAsync(Context.ConnectionId, BlocksDataChannel);
+
+        await base.OnConnectedAsync();
+
+        // send initial data
+        try
+        {
+            if (_chainInfoSingleton.CurrentChainAlgoStats != null)
+                await Clients.Caller.SendAsync("backgroundInfoUpdated", _chainInfoSingleton.CurrentSyncedBlock, _chainInfoSingleton.CurrentChainAlgoStats);
+            if (_chainInfoSingleton.CurrentChainInfo != null)
+                await Clients.Caller.SendAsync("blockchainInfoUpdated", _chainInfoSingleton.CurrentChainInfo);
+        }
+        catch
+        {
+
+        }
     }
 }
