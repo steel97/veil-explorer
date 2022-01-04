@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ExplorerBackend.Models.API;
 using ExplorerBackend.Services.Core;
+using ExplorerBackend.Services.Caching;
 using ExplorerBackend.Persistence.Repositories;
 
 namespace ExplorerBackend.Controllers;
@@ -13,13 +14,15 @@ public class SearchController : ControllerBase
     private readonly ILogger _logger;
     private readonly IBlocksRepository _blocksRepository;
     private readonly ITransactionsRepository _transactionsRepository;
+    private readonly ChaininfoSingleton _chaininfoSingleton;
     private readonly IUtilityService _utilityService;
 
-    public SearchController(ILogger<SearchController> logger, IBlocksRepository blocksRepository, ITransactionsRepository transactionsRepository, IUtilityService utilityService)
+    public SearchController(ILogger<SearchController> logger, IBlocksRepository blocksRepository, ITransactionsRepository transactionsRepository, ChaininfoSingleton chaininfoSingleton, IUtilityService utilityService)
     {
         _logger = logger;
         _blocksRepository = blocksRepository;
         _transactionsRepository = transactionsRepository;
+        _chaininfoSingleton = chaininfoSingleton;
         _utilityService = utilityService;
     }
 
@@ -48,6 +51,14 @@ public class SearchController : ControllerBase
                 }
                 else if (body.Query.Length == 64 && _utilityService.VerifyHex(body.Query))
                 {
+                    var probeTx = _chaininfoSingleton.UnconfirmedTxs?.Where(tx => tx.txid == body.Query).FirstOrDefault();
+                    if (probeTx != null)
+                    {
+                        response.Found = true;
+                        response.Type = EntityType.TRANSACTION_HASH;
+                        return Ok(response);
+                    }
+
                     var tx = await _transactionsRepository.ProbeTransactionByHashAsync(body.Query);
                     if (tx != null)
                     {
