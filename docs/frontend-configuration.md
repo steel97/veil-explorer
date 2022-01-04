@@ -27,14 +27,14 @@ CHAIN_APIS="[{\"name\": \"main\", \"path\": \"http://<ip>:<backend_port>/api\"}]
 # amount of blocks shown on main page in "Recent blocks" section
 RECENT_BLOCKS_COUNT=5
 # amount of blocks shown on blocks list page
-export BLOCKS_PER_PAGE=15
+BLOCKS_PER_PAGE=15
 # amount of transactions on block page
-export TXS_PER_PAGE=15
+TXS_PER_PAGE=15
 # variable to calculate block fullness percent, taken from veil node source code
 # https://github.com/Veil-Project/veil/search?q=4000000
-export MAX_BLOCK_WEIGHT=4000000
+MAX_BLOCK_WEIGHT=4000000
 # how much blocks should be database behind veil node to display "synchronizing" notice
-export SYNC_NOTICE_CASE=15
+SYNC_NOTICE_CASE=15
 # user preferences store time
-export COOKIE_SAVE_DAYS=90
+COOKIE_SAVE_DAYS=90
 ```

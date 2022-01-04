@@ -3,6 +3,7 @@
 Backend configured in **appsettings.json**
 
 ## Available parameters
+It's recommended to use appsettings.json.tpl as configuration template, configuration below contains commentaries prefixed with #, which is incorrect in **json** and added only for information.
 ```bash
 {
   "ConnectionStrings": {

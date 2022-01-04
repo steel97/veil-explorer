@@ -29,7 +29,7 @@ sudo mkdir /home/node/veil/data
 ```
 ## Download and unpack blockchain data
 ```bash
-# replace 20210121-veil-snapshot-1055961 with actual version
+# replace 20210121-veil-snapshot-1055961 with actual snapshot version
 sudo wget https://mirror-eu2.veil.tools/20210121-veil-snapshot-1055961.zip
 sudo unzip 20210121-veil-snapshot-1055961.zip -d /home/node/veil/data
 sudo chown -R node:node /home/node/veil/data
