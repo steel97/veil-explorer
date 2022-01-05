@@ -87,6 +87,27 @@ public class VeilSerialization
         return narr;
     }
 
+    public void ReadVarInt(out ulong val)
+    {
+        // taken from NBitcoin: https://github.com/MetacoSA/NBitcoin/blob/5acf3861b33d562fece430e15be0a90e9e8dfdc9/NBitcoin/Protocol/VarInt.cs
+        // modified to suit code
+        var n = 0ul;
+        while (true)
+        {
+            byte chData = 0;
+            ReadByte(out chData);
+            ulong a = (n << 7);
+            byte b = (byte)(chData & 0x7F);
+            n = (a | b);
+            if ((chData & 0x80) != 0)
+                n++;
+            else
+                break;
+        }
+
+        val = n;
+    }
+
     public void ReadCompactSize(out ulong nSizeRet)
     {
         byte chSize;

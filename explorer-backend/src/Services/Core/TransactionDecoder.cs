@@ -119,7 +119,7 @@ public class TransactionsDecoder : ITransactionDecoder
                 {
                     var txoutsimple = new TxVoutSimpleDecoded();
 
-                    txnouttype scriptType = txnouttype.TX_NONSTANDARD;
+                    var scriptType = txnouttype.TX_NONSTANDARD;
 
                     if (txout.ScriptPubKey != null)
                     {
@@ -137,6 +137,12 @@ public class TransactionsDecoder : ITransactionDecoder
                     txoutsimple.Amount = txout.Amount;
                     txoutsimple.Type = txout.OutputType;
                     txoutsimple.ScriptPubKeyType = scriptType;
+                    txoutsimple.CTFee = null;
+
+                    if (txout.OutputType == OutputTypes.OUTPUT_DATA)
+                    {
+                        txoutsimple.CTFee = ((VeilTxOutData)txout).CTFee;
+                    }
 
                     txsimple.Outputs.Add(txoutsimple);
 

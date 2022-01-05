@@ -19,7 +19,7 @@ export interface TxVoutSimpleDecoded {
     amount: number;
     type: OutputTypes;
     scriptPubKeyType: txnouttype;
-
+    cTFee: number | null;
 }
 
 export interface RingCTInput {

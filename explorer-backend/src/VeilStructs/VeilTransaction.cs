@@ -485,6 +485,7 @@ public class VeilTxOutRingCT : VeilTxOut
 public class VeilTxOutData : VeilTxOut
 {
     public byte[]? Data { get; set; }
+    public ulong? CTFee { get; set; }
 
     public VeilTxOutData() => base.OutputType = OutputTypes.OUTPUT_DATA;
 
@@ -493,6 +494,19 @@ public class VeilTxOutData : VeilTxOut
         var size = 0UL;
         serializationContext.ReadCompactSize(out size);
         Data = serializationContext.ReadByteArray(size);
+
+        CTFee = null;
+
+        if (Data.Length < 2 || Data[0] != (byte)DataOutputTypes.DO_FEE)
+            return;
+
+        var serializationSubContext = new VeilSerialization(Data);
+        serializationSubContext.ReadByte(out _); // skip first byte as we used it above
+
+        var ctfeelocal = 0ul;
+        serializationSubContext.ReadVarInt(out ctfeelocal);
+
+        CTFee = ctfeelocal;
     }
 }
 
@@ -646,4 +660,17 @@ public enum opcodetype : byte
     OP_ZEROCOINSPEND = 0xc2,
 
     OP_INVALIDOPCODE = 0xff,
+}
+
+public enum DataOutputTypes : byte
+{
+    DO_NULL = 0, // reserved
+    DO_NARR_PLAIN = 1,
+    DO_NARR_CRYPT = 2,
+    DO_STEALTH = 3,
+    DO_STEALTH_PREFIX = 4,
+    DO_VOTE = 5,
+    DO_FEE = 6,
+    DO_DEV_FUND_CFWD = 7,
+    DO_FUND_MSG = 8,
 }
