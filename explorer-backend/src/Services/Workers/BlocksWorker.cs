@@ -51,6 +51,16 @@ public class BlocksWorker : BackgroundService
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
 
+        // set initial state, this fixes issue when after restart blocks not retrieved correctly from API before new block come from node
+        using (var scope = _serviceProvider.CreateAsyncScope())
+        {
+            var blocksRepository = scope.ServiceProvider.GetRequiredService<IBlocksRepository>();
+            var latestSyncedBlock = await blocksRepository.GetLatestBlockAsync(true);
+
+            if (latestSyncedBlock != null)
+                _chainInfoSingleton.CurrentSyncedBlock = latestSyncedBlock.height;
+        }
+
         while (!stopToken.IsCancellationRequested)
         {
             try
@@ -62,6 +72,7 @@ public class BlocksWorker : BackgroundService
                     var rawTxsRepository = scope.ServiceProvider.GetRequiredService<IRawTxsRepository>();
 
                     var latestSyncedBlock = await blocksRepository.GetLatestBlockAsync(true);
+
                     var currentIndexedBlock = (latestSyncedBlock != null ? latestSyncedBlock.height : 0) + 1;
                     for (var i = currentIndexedBlock; i < currentIndexedBlock + _explorerConfig.CurrentValue.BlocksPerBatch; i++)
                     {
