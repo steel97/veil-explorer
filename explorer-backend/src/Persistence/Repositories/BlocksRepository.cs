@@ -56,7 +56,7 @@ public class BlocksRepository : BaseRepository, IBlocksRepository
         using var conn = Connection;
         await conn.OpenAsync();
 
-        //using (var cmd = new NpgsqlCommand($@"SELECT blocks.height, blocks.""size"", blocks.weight, blocks.proof_type, blocks.""time"", blocks.mediantime, COUNT(transactions.block_height) FROM blocks LEFT JOIN transactions ON blocks.height = transactions.block_height WHERE blocks.synced = true GROUP BY blocks.height ORDER BY height {(sort == SortDirection.ASC ? "ASC" : "DESC")} OFFSET {offset} LIMIT {count};", conn))
+        //using (var cmd = new NpgsqlCommand($"SELECT blocks.height, blocks.\"size\", blocks.weight, blocks.proof_type, blocks.\"time\", blocks.mediantime, COUNT(transactions.block_height) FROM blocks LEFT JOIN transactions ON blocks.height = transactions.block_height WHERE blocks.synced = true GROUP BY blocks.height ORDER BY height {(sort == SortDirection.ASC ? "ASC" : "DESC")} OFFSET {offset} LIMIT {count};", conn))
         /*
         
         b.height > 
@@ -64,7 +64,7 @@ public class BlocksRepository : BaseRepository, IBlocksRepository
         */
         var offsetQuery = sort == SortDirection.DESC ? $"b.height < {_chainInfoSingleton.CurrentSyncedBlock + 1 - offset}" : $"b.height > {offset}";
 
-        using (var cmd = new NpgsqlCommand($@"SELECT b.height, b.""size"", b.weight, b.proof_type, b.""time"", b.mediantime, (SELECT COUNT(t.txid) as txn from transactions t where t.block_height = b.height) FROM blocks b WHERE {offsetQuery} AND b.synced = true ORDER BY b.height {(sort == SortDirection.ASC ? "ASC" : "DESC")} limit {count};", conn))
+        using (var cmd = new NpgsqlCommand($"SELECT b.height, b.\"size\", b.weight, b.proof_type, b.\"time\", b.mediantime, (SELECT COUNT(t.txid) as txn from transactions t where t.block_height = b.height) FROM blocks b WHERE {offsetQuery} AND b.synced = true ORDER BY b.height {(sort == SortDirection.ASC ? "ASC" : "DESC")} limit {count};", conn))
         {
             await using (var reader = await cmd.ExecuteReaderAsync())
             {
@@ -114,7 +114,7 @@ public class BlocksRepository : BaseRepository, IBlocksRepository
         using var conn = Connection;
         await conn.OpenAsync();
 
-        using (var cmd = new NpgsqlCommand($@"SELECT b.height, b.hash, b.strippedsize, b.""size"", b.weight, b.proof_type, b.proofofstakehash , b.progproofofworkhash, b.progpowmixhash ,b.randomxproofofworkhash ,b.sha256dproofofworkhash , b.proofofworkhash, b.""version"", b.merkleroot ,b.""time"", b.mediantime,b.nonce ,b.nonce64 ,b.mixhash , b.bits ,b.difficulty ,b.chainwork ,b.anon_index ,b.veil_data_hash ,b.prog_header_hash ,b.prog_header_hex , b.epoch_number , b.synced,  (SELECT COUNT(t.txid) as txn from transactions t where t.block_height = b.height) FROM blocks b WHERE b.height = {height};", conn))
+        using (var cmd = new NpgsqlCommand($"SELECT b.height, b.hash, b.strippedsize, b.\"size\", b.weight, b.proof_type, b.proofofstakehash , b.progproofofworkhash, b.progpowmixhash ,b.randomxproofofworkhash ,b.sha256dproofofworkhash , b.proofofworkhash, b.\"version\", b.merkleroot ,b.\"time\", b.mediantime,b.nonce ,b.nonce64 ,b.mixhash , b.bits ,b.difficulty ,b.chainwork ,b.anon_index ,b.veil_data_hash ,b.prog_header_hash ,b.prog_header_hex , b.epoch_number , b.synced,  (SELECT COUNT(t.txid) as txn from transactions t where t.block_height = b.height) FROM blocks b WHERE b.height = {height};", conn))
         {
             await using (var reader = await cmd.ExecuteReaderAsync())
             {
@@ -152,7 +152,7 @@ public class BlocksRepository : BaseRepository, IBlocksRepository
         using var conn = Connection;
         await conn.OpenAsync();
 
-        using (var cmd = new NpgsqlCommand($@"SELECT b.height, b.hash, b.strippedsize, b.""size"", b.weight, b.proof_type, b.proofofstakehash , b.progproofofworkhash, b.progpowmixhash ,b.randomxproofofworkhash ,b.sha256dproofofworkhash , b.proofofworkhash, b.""version"", b.merkleroot ,b.""time"", b.mediantime,b.nonce ,b.nonce64 ,b.mixhash , b.bits ,b.difficulty ,b.chainwork ,b.anon_index ,b.veil_data_hash ,b.prog_header_hash ,b.prog_header_hex , b.epoch_number , b.synced,  (SELECT COUNT(t.txid) as txn from transactions t where t.block_height = b.height) FROM blocks b WHERE b.hash = {TransformHex(hash)};", conn))
+        using (var cmd = new NpgsqlCommand($"SELECT b.height, b.hash, b.strippedsize, b.\"size\", b.weight, b.proof_type, b.proofofstakehash , b.progproofofworkhash, b.progpowmixhash ,b.randomxproofofworkhash ,b.sha256dproofofworkhash , b.proofofworkhash, b.\"version\", b.merkleroot, b.\"time\", b.mediantime,b.nonce ,b.nonce64 ,b.mixhash , b.bits ,b.difficulty ,b.chainwork ,b.anon_index ,b.veil_data_hash ,b.prog_header_hash ,b.prog_header_hex , b.epoch_number , b.synced,  (SELECT COUNT(t.txid) as txn from transactions t where t.block_height = b.height) FROM blocks b WHERE b.hash = {TransformHex(hash)};", conn))
         {
             await using (var reader = await cmd.ExecuteReaderAsync())
             {
@@ -190,9 +190,9 @@ public class BlocksRepository : BaseRepository, IBlocksRepository
         using var conn = Connection;
         await conn.OpenAsync();
 
-        using (var cmd = new NpgsqlCommand(@"INSERT INTO blocks (height,hash,strippedsize,""size"",weight,proof_type,proofofstakehash,progproofofworkhash,progpowmixhash," +
-                                            @"randomxproofofworkhash,sha256dproofofworkhash,proofofworkhash,""version"",merkleroot,""time"",mediantime,nonce,nonce64,mixhash," +
-                                            @"bits,difficulty,chainwork,anon_index,veil_data_hash,prog_header_hash,prog_header_hex,epoch_number,synced) VALUES (" +
+        using (var cmd = new NpgsqlCommand("INSERT INTO blocks (height,hash,strippedsize,\"size\",weight,proof_type,proofofstakehash,progproofofworkhash,progpowmixhash," +
+                                            "randomxproofofworkhash,sha256dproofofworkhash,proofofworkhash,\"version\",merkleroot,\"time\",mediantime,nonce,nonce64,mixhash," +
+                                            "bits,difficulty,chainwork,anon_index,veil_data_hash,prog_header_hash,prog_header_hex,epoch_number,synced) VALUES (" +
                                             $"{blockTemplate.height}, {TransformHex(blockTemplate.hash_hex)}, {blockTemplate.strippedsize}, {blockTemplate.size}, {blockTemplate.weight}, {(short)blockTemplate.proof_type}, {TransformHex(blockTemplate.proofofstakehash_hex)}, {TransformHex(blockTemplate.progproofofworkhash_hex)}, {TransformHex(blockTemplate.progpowmixhash_hex)}," +
                                             $"{TransformHex(blockTemplate.randomxproofofworkhash_hex)}, {TransformHex(blockTemplate.sha256dproofofworkhash_hex)}, {TransformHex(blockTemplate.proofofworkhash_hex)}, {blockTemplate.version}, {TransformHex(blockTemplate.merkleroot_hex)}, {blockTemplate.time}, {blockTemplate.mediantime}, {blockTemplate.nonce}, {blockTemplate.nonce64}, {TransformHex(blockTemplate.mixhash_hex)}," +
                                             $"{TransformHex(blockTemplate.bits_hex)}, {TransformDouble(blockTemplate.difficulty)}, {TransformHex(blockTemplate.chainwork_hex)}, {blockTemplate.anon_index}, {TransformHex(blockTemplate.veil_data_hash_hex)}, {TransformHex(blockTemplate.prog_header_hash_hex)}, {TransformHex(blockTemplate.prog_header_hex)}, {blockTemplate.epoch_number}, 'false'" +

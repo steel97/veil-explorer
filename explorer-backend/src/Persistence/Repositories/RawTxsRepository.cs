@@ -53,7 +53,7 @@ public class RawTxsRepository : BaseRepository, IRawTxsRepository
         using var conn = Connection;
         await conn.OpenAsync();
 
-        using (var cmd = new NpgsqlCommand(@$"INSERT INTO rawtxs (txid,""data"") VALUES ({TransformHex(txid_hex)}, {TransformHex(data_hex)});", conn))
+        using (var cmd = new NpgsqlCommand($"INSERT INTO rawtxs (txid,\"data\") VALUES ({TransformHex(txid_hex)}, {TransformHex(data_hex)});", conn))
         {
             await cmd.PrepareAsync();
             return await cmd.ExecuteNonQueryAsync() > 0;

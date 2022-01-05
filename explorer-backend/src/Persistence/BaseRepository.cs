@@ -30,7 +30,7 @@ public class BaseRepository
         if (string.IsNullOrEmpty(hexInput)) return "NULL";
         if (!_utilityService.VerifyHex(hexInput)) throw new Exception("HEX value is wrong");
 
-        return hexInput != null ? $@"'\x{hexInput}'::bytea" : "NULL";
+        return $@"'\x{hexInput}'::bytea";
     }
 
     protected async Task<double> ReadDoubleFromBytea(NpgsqlDataReader reader, int ordinal)

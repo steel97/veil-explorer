@@ -47,7 +47,7 @@ public class TransactionsRepository : BaseRepository, ITransactionsRepository
         using var conn = Connection;
         await conn.OpenAsync();
 
-        using (var cmd = new NpgsqlCommand($@"SELECT t.txid, t.hash, t.""version"", t.""size"", t.vsize, t.weight, t.locktime, t.block_height, r.""data"" FROM transactions as t INNER JOIN rawtxs r ON t.txid = r.txid  WHERE t.txid = {TransformHex(txid)};", conn))
+        using (var cmd = new NpgsqlCommand($"SELECT t.txid, t.hash, t.\"version\", t.\"size\", t.vsize, t.weight, t.locktime, t.block_height, r.\"data\" FROM transactions as t INNER JOIN rawtxs r ON t.txid = r.txid  WHERE t.txid = {TransformHex(txid)};", conn))
         {
             await using (var reader = await cmd.ExecuteReaderAsync())
             {
@@ -83,7 +83,7 @@ public class TransactionsRepository : BaseRepository, ITransactionsRepository
         using var conn = Connection;
         await conn.OpenAsync();
 
-        using (var cmd = new NpgsqlCommand($@"SELECT t.txid, t.hash, t.""version"", t.""size"", t.vsize, t.weight, t.locktime, t.block_height, r.""data"" FROM transactions as t INNER JOIN rawtxs r ON t.txid = r.txid  WHERE t.block_height = {blockHeight} OFFSET {offset} LIMIT {count};", conn))
+        using (var cmd = new NpgsqlCommand($"SELECT t.txid, t.hash, t.\"version\", t.\"size\", t.vsize, t.weight, t.locktime, t.block_height, r.\"data\" FROM transactions as t INNER JOIN rawtxs r ON t.txid = r.txid  WHERE t.block_height = {blockHeight} OFFSET {offset} LIMIT {count};", conn))
         {
             await using (var reader = await cmd.ExecuteReaderAsync())
             {
@@ -137,7 +137,7 @@ public class TransactionsRepository : BaseRepository, ITransactionsRepository
         using var conn = Connection;
         await conn.OpenAsync();
 
-        using (var cmd = new NpgsqlCommand(@"INSERT INTO transactions (txid,hash,""version"",""size"",vsize,weight,locktime,block_height) VALUES (" +
+        using (var cmd = new NpgsqlCommand("INSERT INTO transactions (txid,hash,\"version\",\"size\",vsize,weight,locktime,block_height) VALUES (" +
                                             $"{TransformHex(txTemplate.txid_hex)}, {TransformHex(txTemplate.hash_hex)}, {txTemplate.version}, {txTemplate.size}, {txTemplate.vsize}, {txTemplate.weight}, {txTemplate.locktime}, {txTemplate.block_height});", conn))
         {
             await cmd.PrepareAsync();

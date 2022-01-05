@@ -72,8 +72,8 @@ public class BlocksWorker : BackgroundService
                     var rawTxsRepository = scope.ServiceProvider.GetRequiredService<IRawTxsRepository>();
 
                     var latestSyncedBlock = await blocksRepository.GetLatestBlockAsync(true);
-
                     var currentIndexedBlock = (latestSyncedBlock != null ? latestSyncedBlock.height : 0) + 1;
+
                     for (var i = currentIndexedBlock; i < currentIndexedBlock + _explorerConfig.CurrentValue.BlocksPerBatch; i++)
                     {
                         try
