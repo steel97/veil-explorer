@@ -54,6 +54,19 @@
               >Veil Tools</a
             >
           </div>
+          <div class="mx-2 my-2 md:my-0">
+            <a
+              href="https://github.com/steel97/veil-explorer"
+              target="blank"
+              class="
+                text-sky-700
+                dark:text-sky-400
+                hover:underline
+                underline-offset-4
+              "
+              >Github</a
+            >
+          </div>
         </div>
         <div class="text-left mx-2 mt-4 md:mt-0 md:flex-center">
           &copy; VEIL-PROJECT 2022
