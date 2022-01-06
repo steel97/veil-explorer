@@ -21,6 +21,8 @@ HOST=0.0.0.0
 PORT=3000
 # url on which frontend available, used for SEO, meta tags etc.
 BASE_URL=http://<ip>:3000
+# which chain should be selected from CHAIN_APIS by default
+CHAIN_DEFAULT=main
 # JSON formatted configuration to connect frontend with backend
 # for now you should only change value of "path", so just replace <ip> and <backend_port>
 CHAIN_APIS="[{\"name\": \"main\", \"path\": \"http://<ip>:<backend_port>/api\"}]"

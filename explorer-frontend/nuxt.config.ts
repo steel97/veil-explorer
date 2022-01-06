@@ -3,6 +3,7 @@ import { defineNuxtConfig } from "nuxt3";
 // https://v3.nuxtjs.org/docs/directory-structure/nuxt.config
 export default defineNuxtConfig({
     publicRuntimeConfig: {
+        CHAIN_DEFAULT: process.env.CHAIN_DEFAULT,
         CHAIN_APIS: JSON.parse(process.env.CHAIN_APIS),
         BASE_URL: process.env.BASE_URL,
         RECENT_BLOCKS_COUNT: process.env.RECENT_BLOCKS_COUNT,
