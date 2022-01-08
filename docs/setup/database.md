@@ -38,7 +38,7 @@ sudo -i -u postgres
 
 ## Create postgres user and database
 ```bash
-# not superuser
+# not superuser, you will be asked to type "veilusr" password
 createuser --interactive -e veilusr -D -P -R
 createdb veilexplorer -O veilusr -E UTF8
 ```
@@ -69,6 +69,17 @@ sudo service postgresql restart
 ```
 
 ## Import sql scripts to newly created database
-SQL scripts located at [explorer-backend/schemas](/explorer-backend/schemas) directory.
+SQL scripts located at [/explorer-backend/schemas](/explorer-backend/schemas) directory.
+Upload this sql scripts to **postgres** user root: */var/lib/postgresql*
+```bash
+sudo -i -u postgres
+cd ~
+# after each psql call you will be asked to type "veilusr" password
+psql -h localhost -U veilusr -d veilexplorer -f "1. blocks.sql"
+psql -h localhost -U veilusr -d veilexplorer -f "2. transactions.sql"
+psql -h localhost -U veilusr -d veilexplorer -f "3. rawtxs.sql"
+# if there other SQL files under /explorer-backend/schemas, they should be imported same way as shown above
+...
+```
 
 Done, now database is ready.

@@ -42,7 +42,7 @@ sudo chown -R explorer-frontend /home/explorer-frontend/server/
 ```
 
 ## Create startup script
-*variables starting from CHAIN_APIS are public, so dont use sensetive data here*
+*variables starting from CHAIN_DEFAULT are public, so dont use sensetive data here*
 ```bash
 su explorer-frontend
 cd /home/explorer-frontend/server/
@@ -69,7 +69,7 @@ export MAX_BLOCK_WEIGHT=4000000
 export SYNC_NOTICE_CASE=15
 export COOKIE_SAVE_DAYS=90
 ```
-See: [docs/frontend-configuration.md](/docs/frontend-configuration.md)
+See: [/docs/frontend-configuration.md](/docs/frontend-configuration.md)
 
 ## Change permissions and test frontend
 ```bash

@@ -5,7 +5,7 @@ Example: https://explorer.veil-project.com
 
 # Features
 - light/dark theme
-- multilingual UI (see [docs/localization.md](/docs/localization.md))
+- multilingual UI (see [/docs/localization.md](/docs/localization.md))
 - real-time updates of blockchain info, algo stats, recent blocks and first page of blocks browser
 - blocks list
 - block and transactions information
@@ -13,15 +13,15 @@ Example: https://explorer.veil-project.com
 
 # API
 ## Documentation
-See [docs/api.md](/docs/api.md)
+See [/docs/api.md](/docs/api.md)
 ## Compatibility
-See [docs/api-compatibility.md](/docs/api-compatibility.md)
+See [/docs/api-compatibility.md](/docs/api-compatibility.md)
 
 # Compiling from sources
 ## Backend
-See [docs/compiling/backend.md](/docs/compiling/backend.md)
+See [/docs/compiling/backend.md](/docs/compiling/backend.md)
 ## Frontend
-See [docs/compiling/frontend.md](/docs/compiling/frontend.md)
+See [/docs/compiling/frontend.md](/docs/compiling/frontend.md)
 
 # Getting started
 ## Tested OSes
@@ -59,13 +59,13 @@ txindex=1
 3. Run bin/veild -txindex
 #### Database
 1. Create new **postgresql** database
-2. Restore SQL files from [explorer-backend/schemas](/explorer-backend/schemas)
+2. Restore SQL files from [/explorer-backend/schemas](/explorer-backend/schemas)
 #### Backend
 1. Unpack **veil-explorer-backend-\[arch\]-\[os\].zip**
-2. Copy [explorer-backend/appsettings.json.tpl](/explorer-backend/appsettings.json.tpl) to \[server directory\]/appsettings.json
+2. Copy [/explorer-backend/appsettings.json.tpl](/explorer-backend/appsettings.json.tpl) to \[server directory\]/appsettings.json
 3. Change **postgresql** connection string inside **appsettings.json**, change other parameters.
 
-See: [docs/backend-configuration.md](/docs/backend-configuration.md)
+See: [/docs/backend-configuration.md](/docs/backend-configuration.md)
 
 4. Run server executable (explorer-backend)
 5. It will take some time to synchronize backend database with node.
@@ -90,17 +90,17 @@ MAX_BLOCK_WEIGHT=4000000
 SYNC_NOTICE_CASE=15
 COOKIE_SAVE_DAYS=90
 ```
-See: [docs/frontend-configuration.md](/docs/frontend-configuration.md)
+See: [/docs/frontend-configuration.md](/docs/frontend-configuration.md)
 
 3. Run start script
 
 
 ### Full setup tutorial
 #### Node
-see [docs/setup/node.md](/docs/setup/node.md)
+see [/docs/setup/node.md](/docs/setup/node.md)
 #### Database
-see [docs/setup/database.md](/docs/setup/database.md)
+see [/docs/setup/database.md](/docs/setup/database.md)
 #### Backend
-see [docs/setup/backend.md](/docs/setup/backend.md)
+see [/docs/setup/backend.md](/docs/setup/backend.md)
 #### Frontend
-see [docs/setup/frontend.md](/docs/setup/frontend.md)
+see [/docs/setup/frontend.md](/docs/setup/frontend.md)

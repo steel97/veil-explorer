@@ -1,7 +1,9 @@
 # Localization
-Localization files located at [explorer-frontend/localization](/explorer-frontend/localization)
+Localization files located at [/explorer-frontend/localization](/explorer-frontend/localization)
 
 Each folder there should match language code, logical lingual blocks defined in **localization/\[locale_code\]/index.ts**
+
+**RTL** is currently not supported.
 
 ## Adding new locale
 1. Copy **localization/en** directory to **localization/\[locale_code\]**
@@ -15,3 +17,5 @@ locales: {
 }
 ```
 4. Add **png** locale icon to **public/images/locales/\[lang_code\].png**
+
+width of icon should be **64px**, height can vary (country flags can be in different aspect ratios)

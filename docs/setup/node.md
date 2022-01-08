@@ -12,11 +12,15 @@ Required Software:
 sudo apt update
 sudo apt upgrade
 ```
+## Install packages
+```bash
+sudo apt install python3
+```
 ## Create user which will be used to run node
 ```bash
 sudo adduser --disabled-password --gecos "" node
 ```
-## Download and unpack veil node
+## Download and unpack veil node (change node version in link and command to actual)
 ```bash
 sudo wget https://github.com/Veil-Project/veil/releases/download/v1.2.2.1/veil-1.2.2.1-x86_64-linux-gnu.tar.gz
 sudo mkdir /home/node/veil
