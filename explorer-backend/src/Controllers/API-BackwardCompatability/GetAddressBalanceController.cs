@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using ExplorerBackend.Core;
 using ExplorerBackend.VeilStructs;
-using ExplorerBackend.Models.System;
 using ExplorerBackend.Models.Node.Response;
 using ExplorerBackend.Configs;
 using ExplorerBackend.Services.Queues;

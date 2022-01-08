@@ -1,5 +1,4 @@
 using NBitcoin;
-using NBitcoin.BouncyCastle.Utilities;
 
 namespace ExplorerBackend.VeilStructs;
 
