@@ -72,7 +72,13 @@ const buildRouteTemplate = () => `/unconfirmed-tx/{page}/`;
 const selectPage = async (pg: number) => {
   if (pg == currentPage.value) return;
 
-  scrollToAnimated(document.documentElement, 0, 150);
+  scrollToAnimated(
+    document.documentElement,
+    document.documentElement.scrollTop,
+    0,
+    150,
+    150
+  );
 
   const link = buildRouteTemplate().replace("{page}", pg.toString());
   currentPage.value = pg;

@@ -250,7 +250,7 @@ const getBlockWeight = (block: SimplifiedBlock) =>
 const reactivityWatcher = computed(() => props.reactivityFix);
 
 let targetOpacity = 1.0;
-var latestBlock = ref<number>(0);
+let latestBlock = ref<number>(0);
 watch(reactivityWatcher, () => {
   if (props.data.length == 0) return;
 
