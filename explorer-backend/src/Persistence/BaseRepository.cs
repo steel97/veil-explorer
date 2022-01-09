@@ -33,19 +33,19 @@ public class BaseRepository
         return $@"'\x{hexInput}'::bytea";
     }
 
-    protected async Task<double> ReadDoubleFromBytea(NpgsqlDataReader reader, int ordinal)
+    protected async Task<double> ReadDoubleFromByteaAsync(NpgsqlDataReader reader, int ordinal, CancellationToken cancellationToken = default(CancellationToken))
     {
-        if (await reader.IsDBNullAsync(ordinal)) return 0;
+        if (await reader.IsDBNullAsync(ordinal, cancellationToken)) return 0;
 
-        var hash_array = await ReadBytea(reader, ordinal);
+        var hash_array = await ReadByteaAsync(reader, ordinal, cancellationToken);
         if (hash_array == null) return 0;
 
         return BitConverter.ToDouble(hash_array, 0);
     }
 
-    protected async Task<byte[]?> ReadBytea(NpgsqlDataReader reader, int ordinal)
+    protected async Task<byte[]?> ReadByteaAsync(NpgsqlDataReader reader, int ordinal, CancellationToken cancellationToken = default(CancellationToken))
     {
-        if (await reader.IsDBNullAsync(ordinal)) return null;
+        if (await reader.IsDBNullAsync(ordinal, cancellationToken)) return null;
         var hash_size = reader.GetBytes(ordinal, 0, null, 0, 0);
         var hash_array = new byte[hash_size];
         reader.GetBytes(ordinal, 0, hash_array, 0, (int)hash_size);
@@ -53,9 +53,9 @@ public class BaseRepository
         return hash_array;
     }
 
-    protected async Task<string?> ReadHexFromBytea(NpgsqlDataReader reader, int ordinal)
+    protected async Task<string?> ReadHexFromByteaAsync(NpgsqlDataReader reader, int ordinal, CancellationToken cancellationToken = default(CancellationToken))
     {
-        var hash_array = await ReadBytea(reader, ordinal);
+        var hash_array = await ReadByteaAsync(reader, ordinal, cancellationToken);
         if (hash_array == null) return null;
 
         return BitConverter.ToString(hash_array).Replace("-", "").ToLowerInvariant();

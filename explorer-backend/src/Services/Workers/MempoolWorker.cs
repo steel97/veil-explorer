@@ -24,7 +24,7 @@ public class MempoolWorker : BackgroundService
         _chainInfoSingleton = chaininfoSingleton;
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stopToken)
+    protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         using var httpClient = _httpClientFactory.CreateClient();
 
@@ -41,7 +41,7 @@ public class MempoolWorker : BackgroundService
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
 
-        while (!stopToken.IsCancellationRequested)
+        while (!cancellationToken.IsCancellationRequested)
         {
             try
             {
@@ -52,8 +52,8 @@ public class MempoolWorker : BackgroundService
                     Method = "getrawmempool",
                     Params = new List<object>(new object[] { false })
                 };
-                var getRawMempoolResult = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", getRawMempoolRequest, options);
-                var mempoolInfo = await getRawMempoolResult.Content.ReadFromJsonAsync<GetRawMempool>(options);
+                var getRawMempoolResult = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", getRawMempoolRequest, options, cancellationToken);
+                var mempoolInfo = await getRawMempoolResult.Content.ReadFromJsonAsync<GetRawMempool>(options, cancellationToken);
                 // get chainalgo stats
 
                 if (mempoolInfo != null && mempoolInfo.Result != null)
@@ -67,8 +67,8 @@ public class MempoolWorker : BackgroundService
                             Method = "getrawtransaction",
                             Params = new List<object>(new object[] { txId, true })
                         };
-                        var getRawTransactionResponse = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", getRawTransactionRequest, options);
-                        var rawTransaction = await getRawTransactionResponse.Content.ReadFromJsonAsync<GetRawTransaction>(options);
+                        var getRawTransactionResponse = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", getRawTransactionRequest, options, cancellationToken);
+                        var rawTransaction = await getRawTransactionResponse.Content.ReadFromJsonAsync<GetRawTransaction>(options, cancellationToken);
                         if (rawTransaction != null && rawTransaction.Result != null)
                             unconfirmedTxs.Add(rawTransaction.Result);
                     }
@@ -79,7 +79,7 @@ public class MempoolWorker : BackgroundService
                 }
 
                 // TimeSpan not reuired here since we use milliseconds, still put it there to change in future if required
-                await Task.Delay(TimeSpan.FromMilliseconds(_explorerConfig.CurrentValue.PullMempoolDelay));
+                await Task.Delay(TimeSpan.FromMilliseconds(_explorerConfig.CurrentValue.PullMempoolDelay), cancellationToken);
             }
             catch (OperationCanceledException)
             {

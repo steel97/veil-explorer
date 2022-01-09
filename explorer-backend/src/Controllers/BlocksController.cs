@@ -27,7 +27,7 @@ public class BlocksController : ControllerBase
     [HttpGet(Name = "GetBlocks")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(List<SimplifiedBlock>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> Get(int offset, int count, SortDirection sort)
+    public async Task<IActionResult> Get(int offset, int count, SortDirection sort, CancellationToken cancellationToken)
     {
         if (offset < 0)
             return Problem("offset should be higher or equal to zero", statusCode: 400);
@@ -36,6 +36,6 @@ public class BlocksController : ControllerBase
         if (count > _apiConfig.Value.MaxBlocksPullCount)
             return Problem($"count should be less or equal than {_apiConfig.Value.MaxBlocksPullCount}", statusCode: 400);
 
-        return Ok(await _blocksRepository.GetSimplifiedBlocks(offset, count, sort));
+        return Ok(await _blocksRepository.GetSimplifiedBlocksAsync(offset, count, sort, cancellationToken));
     }
 }

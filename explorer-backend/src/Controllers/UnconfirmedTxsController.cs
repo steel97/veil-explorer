@@ -32,7 +32,7 @@ public class UnconfirmedTransactions : ControllerBase
     [HttpGet(Name = "UnconfirmedTransactions")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(UnconfirmedTxResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> Get(int offset, int count)
+    public async Task<IActionResult> Get(int offset, int count, CancellationToken cancellationToken)
     {
         if (offset < 0)
             return Problem("offset should be higher or equal to zero", statusCode: 400);
@@ -60,7 +60,7 @@ public class UnconfirmedTransactions : ControllerBase
                     Data = _utilityService.HexToByteArray(rtx.hex!)
                 }));
 
-                txs = await _transactionDecoder.DecodeTransactions(txTargets, (int)((_chaininfoSingleton.CurrentChainInfo?.Blocks ?? 0) + 1));
+                txs = await _transactionDecoder.DecodeTransactionsAsync(txTargets, (int)((_chaininfoSingleton.CurrentChainInfo?.Blocks ?? 0) + 1), cancellationToken);
 
             }
         }

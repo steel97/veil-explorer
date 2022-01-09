@@ -35,7 +35,7 @@ public class BlockController : ControllerBase
     [HttpPost(Name = "GetBlock")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(List<BlockResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> Get(BlockRequest body)
+    public async Task<IActionResult> Get(BlockRequest body, CancellationToken cancellationToken)
     {
         if (body.Offset < 0)
             return Problem("offset should be higher or equal to zero", statusCode: 400);
@@ -51,16 +51,16 @@ public class BlockController : ControllerBase
 
         Block? block = null;
         if (body.Hash != null && _utilityService.VerifyHex(body.Hash))
-            block = await _blocksRepository.GetBlockByHashAsync(body.Hash);
+            block = await _blocksRepository.GetBlockByHashAsync(body.Hash, cancellationToken);
         else if (body.Height != null)
-            block = await _blocksRepository.GetBlockByHeightAsync(body.Height.Value);
+            block = await _blocksRepository.GetBlockByHeightAsync(body.Height.Value, cancellationToken);
         else
             return Problem($"count should be less or equal than {_apiConfig.Value.MaxBlocksPullCount}", statusCode: 400);
 
         if (block != null)
         {
-            var nextBlockHash = await _blocksRepository.ProbeHashByHeight(block.height + 1);
-            var prevBlockHash = await _blocksRepository.ProbeHashByHeight(block.height - 1);
+            var nextBlockHash = await _blocksRepository.ProbeHashByHeightAsync(block.height + 1, cancellationToken);
+            var prevBlockHash = await _blocksRepository.ProbeHashByHeightAsync(block.height - 1, cancellationToken);
 
             response.Found = true;
             response.Block = block;
@@ -85,7 +85,7 @@ public class BlockController : ControllerBase
                 };
 
 
-            var rtxs = await _transactionsRepository.GetTransactionsForBlockAsync(block.height, body.Offset, body.Count);
+            var rtxs = await _transactionsRepository.GetTransactionsForBlockAsync(block.height, body.Offset, body.Count, cancellationToken);
             if (rtxs != null)
             {
                 var txTargets = new List<TxDecodeTarget>();
@@ -96,7 +96,7 @@ public class BlockController : ControllerBase
                     Data = rtx.data
                 }));
 
-                response.Transactions = await _transactionDecoder.DecodeTransactions(txTargets, block.height);
+                response.Transactions = await _transactionDecoder.DecodeTransactionsAsync(txTargets, block.height, cancellationToken);
             }
         }
 

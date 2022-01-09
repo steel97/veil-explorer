@@ -17,7 +17,7 @@ public class TransactionsDecoder : ITransactionDecoder
         _utilityService = utilityService;
     }
 
-    public async Task<List<TransactionSimpleDecoded>?> DecodeTransactions(List<TxDecodeTarget> targets, int blockHeight)
+    public async Task<List<TransactionSimpleDecoded>?> DecodeTransactionsAsync(List<TxDecodeTarget> targets, int blockHeight, CancellationToken cancellationToken)
     {
         var txs = new List<TransactionSimpleDecoded>();
 
@@ -43,7 +43,7 @@ public class TransactionsDecoder : ITransactionDecoder
         // fetch prevout txs
         if (requiredTxs.Count() > 0)
         {
-            var outTxs = await _rawTxsRepository.GetTransactionsByIdsAsync(requiredTxs);
+            var outTxs = await _rawTxsRepository.GetTransactionsByIdsAsync(requiredTxs, cancellationToken);
             if (outTxs != null)
                 foreach (var rawTx in outTxs)
                 {

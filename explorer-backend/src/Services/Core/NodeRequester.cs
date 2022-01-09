@@ -31,7 +31,7 @@ public class NodeRequester : INodeRequester
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_explorerConfig.CurrentValue.Node.Username}:{_explorerConfig.CurrentValue.Node.Password}")));
     }
 
-    public async ValueTask ScanTxOutsetAndCacheAsync(string target, CancellationToken token)
+    public async ValueTask ScanTxOutsetAndCacheAsync(string target, CancellationToken cancellationToken)
     {
         try
         {
@@ -49,8 +49,8 @@ public class NodeRequester : INodeRequester
                 Method = "scantxoutset",
                 Params = new List<object>(new object[] { "start", new object[] { $"addr({target})" } })
             };
-            var response = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", request, options);
-            var data = await response.Content.ReadFromJsonAsync<ScanTxOutset>(options);
+            var response = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", request, options, cancellationToken);
+            var data = await response.Content.ReadFromJsonAsync<ScanTxOutset>(options, cancellationToken);
             if (data != null)
                 _nodeApiCacheSingleton.SetApiCache($"scantxoutset-{target}", data);
         }

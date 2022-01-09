@@ -28,7 +28,7 @@ public class SearchController : ControllerBase
 
     [HttpPost(Name = "Search")]
     [ProducesResponseType(typeof(SearchResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> Get(SearchRequest body)
+    public async Task<IActionResult> Get(SearchRequest body, CancellationToken cancellationToken)
     {
         var response = new SearchResponse();
         response.Found = false;
@@ -59,7 +59,7 @@ public class SearchController : ControllerBase
                         return Ok(response);
                     }
 
-                    var tx = await _transactionsRepository.ProbeTransactionByHashAsync(body.Query);
+                    var tx = await _transactionsRepository.ProbeTransactionByHashAsync(body.Query, cancellationToken);
                     if (tx != null)
                     {
                         response.Found = true;
@@ -67,7 +67,7 @@ public class SearchController : ControllerBase
                     }
                     else
                     {
-                        var block = await _blocksRepository.ProbeBlockByHashAsync(body.Query);
+                        var block = await _blocksRepository.ProbeBlockByHashAsync(body.Query, cancellationToken);
                         if (block != null)
                         {
                             response.Found = true;

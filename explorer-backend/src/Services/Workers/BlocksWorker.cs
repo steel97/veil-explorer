@@ -34,7 +34,7 @@ public class BlocksWorker : BackgroundService
         _chainInfoSingleton = chaininfoSingleton;
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stopToken)
+    protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         using var httpClient = _httpClientFactory.CreateClient();
 
@@ -61,7 +61,7 @@ public class BlocksWorker : BackgroundService
                 _chainInfoSingleton.CurrentSyncedBlock = latestSyncedBlock.height;
         }
 
-        while (!stopToken.IsCancellationRequested)
+        while (!cancellationToken.IsCancellationRequested)
         {
             try
             {
@@ -71,7 +71,7 @@ public class BlocksWorker : BackgroundService
                     var transactionsRepository = scope.ServiceProvider.GetRequiredService<ITransactionsRepository>();
                     var rawTxsRepository = scope.ServiceProvider.GetRequiredService<IRawTxsRepository>();
 
-                    var latestSyncedBlock = await blocksRepository.GetLatestBlockAsync(true);
+                    var latestSyncedBlock = await blocksRepository.GetLatestBlockAsync(true, cancellationToken);
                     var currentIndexedBlock = (latestSyncedBlock != null ? latestSyncedBlock.height : 0) + 1;
 
                     for (var i = currentIndexedBlock; i < currentIndexedBlock + _explorerConfig.CurrentValue.BlocksPerBatch; i++)
@@ -85,8 +85,8 @@ public class BlocksWorker : BackgroundService
                                 Method = "getblockhash",
                                 Params = new List<object>(new object[] { i })
                             };
-                            var getBlockHashResponse = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", getBlockHashRequest, options);
-                            var blockHash = await getBlockHashResponse.Content.ReadFromJsonAsync<GetBlockHash>(options);
+                            var getBlockHashResponse = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", getBlockHashRequest, options, cancellationToken);
+                            var blockHash = await getBlockHashResponse.Content.ReadFromJsonAsync<GetBlockHash>(options, cancellationToken);
 
                             if (blockHash == null || blockHash.Result == null)
                             {
@@ -101,8 +101,8 @@ public class BlocksWorker : BackgroundService
                                 Method = "getblock",
                                 Params = new List<object>(new object[] { blockHash.Result })
                             };
-                            var getBlockResponse = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", getBlockRequest, options);
-                            var block = await getBlockResponse.Content.ReadFromJsonAsync<GetBlock>(options);
+                            var getBlockResponse = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", getBlockRequest, options, cancellationToken);
+                            var block = await getBlockResponse.Content.ReadFromJsonAsync<GetBlock>(options, cancellationToken);
 
                             if (block == null || block.Result == null)
                             {
@@ -121,8 +121,8 @@ public class BlocksWorker : BackgroundService
                                         Method = "getrawtransaction",
                                         Params = new List<object>(new object[] { txId, true })
                                     };
-                                    var getTxResponse = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", getTxRequest, options);
-                                    var tx = await getTxResponse.Content.ReadFromJsonAsync<GetRawTransaction>(options);
+                                    var getTxResponse = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", getTxRequest, options, cancellationToken);
+                                    var tx = await getTxResponse.Content.ReadFromJsonAsync<GetRawTransaction>(options, cancellationToken);
 
                                     if (tx == null || tx.Result == null)
                                     {
@@ -135,7 +135,7 @@ public class BlocksWorker : BackgroundService
 
                             // save data to db
                             // check if block already exists in DB
-                            var targetBlock = await blocksRepository.GetBlockByHeightAsync(i);
+                            var targetBlock = await blocksRepository.GetBlockByHeightAsync(i, cancellationToken);
                             // transform block rpc to block data
                             if (targetBlock == null)
                             {
@@ -178,7 +178,7 @@ public class BlocksWorker : BackgroundService
                                 targetBlock.synced = false;
 
                                 // save block
-                                if (!await blocksRepository.InsertBlockAsync(targetBlock))
+                                if (!await blocksRepository.InsertBlockAsync(targetBlock, cancellationToken))
                                 {
                                     _logger.LogError(null, $"Can't save block #{i}");
                                     break;
@@ -192,7 +192,7 @@ public class BlocksWorker : BackgroundService
                                 ArgumentNullException.ThrowIfNull(tx.txid);
                                 ArgumentNullException.ThrowIfNull(tx.hex);
 
-                                var targetTx = await transactionsRepository.GetTransactionByIdAsync(tx.txid);
+                                var targetTx = await transactionsRepository.GetTransactionByIdAsync(tx.txid, cancellationToken);
                                 if (targetTx != null) continue;
 
                                 try
@@ -209,8 +209,8 @@ public class BlocksWorker : BackgroundService
                                         targetTx.locktime = tx.locktime;
                                         targetTx.block_height = i;
 
-                                        var txCompleted = await transactionsRepository.InsertTransactionAsync(targetTx);
-                                        var txRawCompleted = await rawTxsRepository.InsertTransactionAsync(tx.txid, tx.hex);
+                                        var txCompleted = await transactionsRepository.InsertTransactionAsync(targetTx, cancellationToken);
+                                        var txRawCompleted = await rawTxsRepository.InsertTransactionAsync(tx.txid, tx.hex, cancellationToken);
 
                                         if (txCompleted && txRawCompleted)
                                             txscope.Complete();
@@ -229,7 +229,7 @@ public class BlocksWorker : BackgroundService
 
                             if (txFailed) break;
 
-                            if (!await blocksRepository.SetBlockSyncStateAsync(i, true))
+                            if (!await blocksRepository.SetBlockSyncStateAsync(i, true, cancellationToken))
                             {
                                 _logger.LogError(null, $"Can't update block #{i}");
                                 break;
@@ -247,7 +247,7 @@ public class BlocksWorker : BackgroundService
                                     Time = targetBlock.time,
                                     MedianTime = targetBlock.mediantime,
                                     TxCount = pulledTxs.Count()
-                                });
+                                }, cancellationToken);
 
                                 await _chainInfoSingleton.BlockchainDataSemaphore.WaitAsync();
                                 _chainInfoSingleton.BlockchainDataShouldBroadcast = true;
@@ -267,7 +267,7 @@ public class BlocksWorker : BackgroundService
                     }
                 }
                 // TimeSpan not reuired here since we use milliseconds, still put it there to change in future if required
-                await Task.Delay(TimeSpan.FromMilliseconds(_explorerConfig.CurrentValue.PullBlocksDelay));
+                await Task.Delay(TimeSpan.FromMilliseconds(_explorerConfig.CurrentValue.PullBlocksDelay), cancellationToken);
             }
             catch (OperationCanceledException)
             {

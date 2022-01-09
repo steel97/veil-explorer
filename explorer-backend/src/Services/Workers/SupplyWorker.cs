@@ -33,12 +33,12 @@ public class SupplyWorker : BackgroundService
         _nodeApiCacheSingleton = nodeApiCacheSingleton;
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stopToken)
+    protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.BudgetAddress);
         ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.FoundationAddress);
 
-        while (!stopToken.IsCancellationRequested)
+        while (!cancellationToken.IsCancellationRequested)
         {
             try
             {
@@ -72,7 +72,7 @@ public class SupplyWorker : BackgroundService
                                 if (scanTxOutsetFlag != null)
                                     scanTxOutsetFlag.State = true;
                             });
-                            await AsyncUtils.WaitUntilAsync(stopToken, () => scanTxOutsetFlag.State, _apiConfig.CurrentValue.ApiQueueSpinDelay, _apiConfig.CurrentValue.ApiQueueSystemWaitTimeout);
+                            await AsyncUtils.WaitUntilAsync(cancellationToken, () => scanTxOutsetFlag.State, _apiConfig.CurrentValue.ApiQueueSpinDelay, _apiConfig.CurrentValue.ApiQueueSystemWaitTimeout);
                             scanTxOutsetBudgetRes = _nodeApiCacheSingleton.GetApiCache<ScanTxOutset>($"scantxoutset-{_explorerConfig.CurrentValue.BudgetAddress}");
                         }
                     }
@@ -114,7 +114,7 @@ public class SupplyWorker : BackgroundService
                                 if (scanTxOutsetFlag != null)
                                     scanTxOutsetFlag.State = true;
                             });
-                            await AsyncUtils.WaitUntilAsync(stopToken, () => scanTxOutsetFlag.State, _apiConfig.CurrentValue.ApiQueueSpinDelay, _apiConfig.CurrentValue.ApiQueueSystemWaitTimeout);
+                            await AsyncUtils.WaitUntilAsync(cancellationToken, () => scanTxOutsetFlag.State, _apiConfig.CurrentValue.ApiQueueSpinDelay, _apiConfig.CurrentValue.ApiQueueSystemWaitTimeout);
                             scanTxOutsetFoundationRes = _nodeApiCacheSingleton.GetApiCache<ScanTxOutset>($"scantxoutset-{_explorerConfig.CurrentValue.FoundationAddress}");
                         }
                     }
@@ -130,7 +130,7 @@ public class SupplyWorker : BackgroundService
                 if (scanTxOutsetFoundationRes != null && scanTxOutsetFoundationRes.Result != null)
                     _chainInfoSingleton.FoundationWalletAmmount = scanTxOutsetFoundationRes.Result.total_amount;
 
-                await Task.Delay(TimeSpan.FromMilliseconds(_explorerConfig.CurrentValue.SupplyPullDelay));
+                await Task.Delay(TimeSpan.FromMilliseconds(_explorerConfig.CurrentValue.SupplyPullDelay), cancellationToken);
             }
             catch (OperationCanceledException)
             {

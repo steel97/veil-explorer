@@ -25,7 +25,7 @@ public class ScanTxOutsetWorker : BackgroundService
         _taskQueue = taskQueue;
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stopToken)
+    protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         using var httpClient = _httpClientFactory.CreateClient();
 
@@ -42,14 +42,14 @@ public class ScanTxOutsetWorker : BackgroundService
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
 
-        while (!stopToken.IsCancellationRequested)
+        while (!cancellationToken.IsCancellationRequested)
         {
             try
             {
-                Func<CancellationToken, ValueTask>? workItem = await _taskQueue.DequeueAsync(stopToken);
-                await workItem(stopToken);
+                Func<CancellationToken, ValueTask>? workItem = await _taskQueue.DequeueAsync(cancellationToken);
+                await workItem(cancellationToken);
 
-                await Task.Delay(TimeSpan.FromMilliseconds(_explorerConfig.CurrentValue.NodeWorkersPullDelay));
+                await Task.Delay(TimeSpan.FromMilliseconds(_explorerConfig.CurrentValue.NodeWorkersPullDelay), cancellationToken);
             }
             catch (OperationCanceledException)
             {

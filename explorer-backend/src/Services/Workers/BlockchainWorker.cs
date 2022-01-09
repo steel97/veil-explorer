@@ -28,7 +28,7 @@ public class BlockchainWorker : BackgroundService
         _chainInfoSingleton = chaininfoSingleton;
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stopToken)
+    protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         using var httpClient = _httpClientFactory.CreateClient();
 
@@ -45,7 +45,7 @@ public class BlockchainWorker : BackgroundService
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
 
-        while (!stopToken.IsCancellationRequested)
+        while (!cancellationToken.IsCancellationRequested)
         {
             try
             {
@@ -56,8 +56,8 @@ public class BlockchainWorker : BackgroundService
                     Method = "getblockchaininfo",
                     Params = new List<object>(new object[] { })
                 };
-                var getBlockchainInfoResponse = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", getBlockchainInfoRequest, options);
-                var blockchainInfo = await getBlockchainInfoResponse.Content.ReadFromJsonAsync<GetBlockchainInfo>(options);
+                var getBlockchainInfoResponse = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", getBlockchainInfoRequest, options, cancellationToken);
+                var blockchainInfo = await getBlockchainInfoResponse.Content.ReadFromJsonAsync<GetBlockchainInfo>(options, cancellationToken);
 
                 // get chainalgo stats
                 var getChainalgoStatsRequest = new JsonRPCRequest
@@ -66,8 +66,8 @@ public class BlockchainWorker : BackgroundService
                     Method = "getchainalgostats",
                     Params = new List<object>(new object[] { })
                 };
-                var getChainalgoStatsResponse = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", getChainalgoStatsRequest, options);
-                var chainalgoStats = await getChainalgoStatsResponse.Content.ReadFromJsonAsync<GetChainalgoStats>(options);
+                var getChainalgoStatsResponse = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", getChainalgoStatsRequest, options, cancellationToken);
+                var chainalgoStats = await getChainalgoStatsResponse.Content.ReadFromJsonAsync<GetChainalgoStats>(options, cancellationToken);
 
                 // updating cache
 
@@ -79,7 +79,7 @@ public class BlockchainWorker : BackgroundService
                         _chainInfoSingleton.LastSyncedBlockOnNode = (int)(_chainInfoSingleton.CurrentChainInfo?.Blocks ?? 0);
 
                     var sendUpdate = false;
-                    await _chainInfoSingleton.BlockchainDataSemaphore.WaitAsync();
+                    await _chainInfoSingleton.BlockchainDataSemaphore.WaitAsync(cancellationToken);
 
                     if (_chainInfoSingleton.BlockchainDataShouldBroadcast)
                     {
@@ -93,7 +93,7 @@ public class BlockchainWorker : BackgroundService
                     {
                         try
                         {
-                            await _hubContext.Clients.Group(EventsHub.BackgroundDataChannel).SendAsync("blockchainInfoUpdated", _chainInfoSingleton.CurrentChainInfo);
+                            await _hubContext.Clients.Group(EventsHub.BackgroundDataChannel).SendAsync("blockchainInfoUpdated", _chainInfoSingleton.CurrentChainInfo, cancellationToken);
                         }
                         catch
                         {
@@ -110,7 +110,7 @@ public class BlockchainWorker : BackgroundService
                     _logger.LogWarning("ChainalgoStats is null");
 
                 // TimeSpan not reuired here since we use milliseconds, still put it there to change in future if required
-                await Task.Delay(TimeSpan.FromMilliseconds(_explorerConfig.CurrentValue.PullBlockchainInfoDelay));
+                await Task.Delay(TimeSpan.FromMilliseconds(_explorerConfig.CurrentValue.PullBlockchainInfoDelay), cancellationToken);
             }
             catch (OperationCanceledException)
             {

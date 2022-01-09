@@ -21,15 +21,15 @@ public class HubBackgroundWorker : BackgroundService
         _chainInfoSingleton = chaininfoSingleton;
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stopToken)
+    protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
-        while (!stopToken.IsCancellationRequested)
+        while (!cancellationToken.IsCancellationRequested)
         {
             try
             {
                 try
                 {
-                    await _hubContext.Clients.Group(EventsHub.BackgroundDataChannel).SendAsync("backgroundInfoUpdated", _chainInfoSingleton.CurrentSyncedBlock, _chainInfoSingleton.CurrentChainAlgoStats);
+                    await _hubContext.Clients.Group(EventsHub.BackgroundDataChannel).SendAsync("backgroundInfoUpdated", _chainInfoSingleton.CurrentSyncedBlock, _chainInfoSingleton.CurrentChainAlgoStats, cancellationToken);
                 }
                 catch
                 {
@@ -37,7 +37,7 @@ public class HubBackgroundWorker : BackgroundService
                 }
 
                 // TimeSpan not reuired here since we use milliseconds, still put it there to change in future if required
-                await Task.Delay(TimeSpan.FromMilliseconds(_explorerConfig.CurrentValue.HubNotifyDelay));
+                await Task.Delay(TimeSpan.FromMilliseconds(_explorerConfig.CurrentValue.HubNotifyDelay), cancellationToken);
             }
             catch (OperationCanceledException)
             {

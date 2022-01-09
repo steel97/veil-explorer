@@ -37,7 +37,7 @@ public class TxController : ControllerBase
     [HttpPost(Name = "GetTx")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(List<TxResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> Get(TxRequest body)
+    public async Task<IActionResult> Get(TxRequest body, CancellationToken cancellationToken)
     {
         if (body.Hash == null) return Problem("hash can't be null", statusCode: 400);
         if (!_utilityService.VerifyHex(body.Hash)) return Problem("hash is not valid hex string", statusCode: 400);
@@ -67,10 +67,10 @@ public class TxController : ControllerBase
         }
         else
         {
-            var dbtx = await _transactionsRepository.GetTransactionFullByIdAsync(body.Hash);
+            var dbtx = await _transactionsRepository.GetTransactionFullByIdAsync(body.Hash, cancellationToken);
             if (dbtx == null) return Problem("can't find tx", statusCode: 400);
 
-            var block = await _blocksRepository.GetBlockByHeightAsync(dbtx.block_height);
+            var block = await _blocksRepository.GetBlockByHeightAsync(dbtx.block_height, cancellationToken);
 
             txTargets.Add(new TxDecodeTarget
             {
@@ -90,7 +90,7 @@ public class TxController : ControllerBase
 
 
 
-        response.Transaction = (await _transactionDecoder.DecodeTransactions(txTargets, response.BlockHeight))![0];
+        response.Transaction = (await _transactionDecoder.DecodeTransactionsAsync(txTargets, response.BlockHeight, cancellationToken))![0];
 
 
 

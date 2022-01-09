@@ -15,62 +15,56 @@ public class BlocksRepository : BaseRepository, IBlocksRepository
         _chainInfoSingleton = chainInfoSingleton;
     }
 
-    protected async Task<Block?> ReadBlock(NpgsqlDataReader reader)
+    protected async Task<Block?> ReadBlockAsync(NpgsqlDataReader reader, CancellationToken cancellationToken = default(CancellationToken))
     {
         var block = new Block();
 
         block.height = reader.GetInt32(0);
-        block.hash_hex = await ReadHexFromBytea(reader, 1);
+        block.hash_hex = await ReadHexFromByteaAsync(reader, 1, cancellationToken);
         block.strippedsize = reader.GetInt32(2);
         block.size = reader.GetInt32(3);
         block.weight = reader.GetInt32(4);
         block.proof_type = (BlockType)reader.GetInt16(5);
-        block.proofofstakehash_hex = await ReadHexFromBytea(reader, 6);
-        block.progproofofworkhash_hex = await ReadHexFromBytea(reader, 7);
-        block.progpowmixhash_hex = await ReadHexFromBytea(reader, 8);
-        block.randomxproofofworkhash_hex = await ReadHexFromBytea(reader, 9);
-        block.sha256dproofofworkhash_hex = await ReadHexFromBytea(reader, 10);
-        block.proofofworkhash_hex = await ReadHexFromBytea(reader, 11);
+        block.proofofstakehash_hex = await ReadHexFromByteaAsync(reader, 6, cancellationToken);
+        block.progproofofworkhash_hex = await ReadHexFromByteaAsync(reader, 7, cancellationToken);
+        block.progpowmixhash_hex = await ReadHexFromByteaAsync(reader, 8, cancellationToken);
+        block.randomxproofofworkhash_hex = await ReadHexFromByteaAsync(reader, 9, cancellationToken);
+        block.sha256dproofofworkhash_hex = await ReadHexFromByteaAsync(reader, 10, cancellationToken);
+        block.proofofworkhash_hex = await ReadHexFromByteaAsync(reader, 11, cancellationToken);
         block.version = reader.GetInt32(12);
-        block.merkleroot_hex = await ReadHexFromBytea(reader, 13);
+        block.merkleroot_hex = await ReadHexFromByteaAsync(reader, 13, cancellationToken);
         block.time = reader.GetInt64(14);
         block.mediantime = reader.GetInt64(15);
         block.nonce = (ulong)reader.GetDecimal(16);
         block.nonce64 = (ulong)reader.GetDecimal(17);
-        block.mixhash_hex = await ReadHexFromBytea(reader, 18);
-        block.bits_hex = await ReadHexFromBytea(reader, 19);
-        block.difficulty = await ReadDoubleFromBytea(reader, 20);
-        block.chainwork_hex = await ReadHexFromBytea(reader, 21);
+        block.mixhash_hex = await ReadHexFromByteaAsync(reader, 18, cancellationToken);
+        block.bits_hex = await ReadHexFromByteaAsync(reader, 19, cancellationToken);
+        block.difficulty = await ReadDoubleFromByteaAsync(reader, 20, cancellationToken);
+        block.chainwork_hex = await ReadHexFromByteaAsync(reader, 21, cancellationToken);
         block.anon_index = reader.GetInt64(22);
-        block.veil_data_hash_hex = await ReadHexFromBytea(reader, 23);
-        block.prog_header_hash_hex = await ReadHexFromBytea(reader, 24);
-        block.prog_header_hex = await ReadHexFromBytea(reader, 25);
+        block.veil_data_hash_hex = await ReadHexFromByteaAsync(reader, 23, cancellationToken);
+        block.prog_header_hash_hex = await ReadHexFromByteaAsync(reader, 24, cancellationToken);
+        block.prog_header_hex = await ReadHexFromByteaAsync(reader, 25, cancellationToken);
         block.epoch_number = reader.GetInt32(26);
         block.synced = reader.GetBoolean(27);
 
         return block;
     }
 
-    public async Task<List<SimplifiedBlock>> GetSimplifiedBlocks(int offset, int count, SortDirection sort)
+    public async Task<List<SimplifiedBlock>> GetSimplifiedBlocksAsync(int offset, int count, SortDirection sort, CancellationToken cancellationToken = default(CancellationToken))
     {
         using var conn = Connection;
-        await conn.OpenAsync();
+        await conn.OpenAsync(cancellationToken);
 
-        //using (var cmd = new NpgsqlCommand($"SELECT blocks.height, blocks.\"size\", blocks.weight, blocks.proof_type, blocks.\"time\", blocks.mediantime, COUNT(transactions.block_height) FROM blocks LEFT JOIN transactions ON blocks.height = transactions.block_height WHERE blocks.synced = true GROUP BY blocks.height ORDER BY height {(sort == SortDirection.ASC ? "ASC" : "DESC")} OFFSET {offset} LIMIT {count};", conn))
-        /*
-        
-        b.height > 
-        
-        */
         var offsetQuery = sort == SortDirection.DESC ? $"b.height < {_chainInfoSingleton.CurrentSyncedBlock + 1 - offset}" : $"b.height > {offset}";
 
         using (var cmd = new NpgsqlCommand($"SELECT b.height, b.\"size\", b.weight, b.proof_type, b.\"time\", b.mediantime, (SELECT COUNT(t.txid) as txn from transactions t where t.block_height = b.height) FROM blocks b WHERE {offsetQuery} AND b.synced = true ORDER BY b.height {(sort == SortDirection.ASC ? "ASC" : "DESC")} limit {count};", conn))
         {
-            await using (var reader = await cmd.ExecuteReaderAsync())
+            await using (var reader = await cmd.ExecuteReaderAsync(cancellationToken))
             {
                 var simplifiedBlocks = new List<SimplifiedBlock>();
 
-                while (await reader.ReadAsync())
+                while (await reader.ReadAsync(cancellationToken))
                 {
 
                     var simplifiedBlock = new SimplifiedBlock
@@ -91,37 +85,37 @@ public class BlocksRepository : BaseRepository, IBlocksRepository
         }
     }
 
-    public async Task<Block?> GetLatestBlockAsync(bool onlySynced = false)
+    public async Task<Block?> GetLatestBlockAsync(bool onlySynced = false, CancellationToken cancellationToken = default(CancellationToken))
     {
         using var conn = Connection;
-        await conn.OpenAsync();
+        await conn.OpenAsync(cancellationToken);
 
         var whereAddition = onlySynced ? "WHERE synced = 'true'" : "";
         using (var cmd = new NpgsqlCommand($"SELECT * FROM blocks {whereAddition} ORDER BY height DESC LIMIT 1;", conn))
         {
-            await using (var reader = await cmd.ExecuteReaderAsync())
+            await using (var reader = await cmd.ExecuteReaderAsync(cancellationToken))
             {
-                var success = await reader.ReadAsync();
+                var success = await reader.ReadAsync(cancellationToken);
                 if (!success) return null;
 
-                return await ReadBlock(reader);
+                return await ReadBlockAsync(reader, cancellationToken);
             }
         }
     }
 
-    public async Task<Block?> GetBlockByHeightAsync(int height)
+    public async Task<Block?> GetBlockByHeightAsync(int height, CancellationToken cancellationToken = default(CancellationToken))
     {
         using var conn = Connection;
-        await conn.OpenAsync();
+        await conn.OpenAsync(cancellationToken);
 
         using (var cmd = new NpgsqlCommand($"SELECT b.height, b.hash, b.strippedsize, b.\"size\", b.weight, b.proof_type, b.proofofstakehash , b.progproofofworkhash, b.progpowmixhash ,b.randomxproofofworkhash ,b.sha256dproofofworkhash , b.proofofworkhash, b.\"version\", b.merkleroot ,b.\"time\", b.mediantime,b.nonce ,b.nonce64 ,b.mixhash , b.bits ,b.difficulty ,b.chainwork ,b.anon_index ,b.veil_data_hash ,b.prog_header_hash ,b.prog_header_hex , b.epoch_number , b.synced,  (SELECT COUNT(t.txid) as txn from transactions t where t.block_height = b.height) FROM blocks b WHERE b.height = {height};", conn))
         {
-            await using (var reader = await cmd.ExecuteReaderAsync())
+            await using (var reader = await cmd.ExecuteReaderAsync(cancellationToken))
             {
-                var success = await reader.ReadAsync();
+                var success = await reader.ReadAsync(cancellationToken);
                 if (!success) return null;
 
-                var block = await ReadBlock(reader);
+                var block = await ReadBlockAsync(reader, cancellationToken);
                 if (block != null)
                     block.txnCount = reader.GetInt32(28);
 
@@ -130,36 +124,36 @@ public class BlocksRepository : BaseRepository, IBlocksRepository
         }
     }
 
-    public async Task<string?> ProbeHashByHeight(int height)
+    public async Task<string?> ProbeHashByHeightAsync(int height, CancellationToken cancellationToken = default(CancellationToken))
     {
         using var conn = Connection;
-        await conn.OpenAsync();
+        await conn.OpenAsync(cancellationToken);
 
         using (var cmd = new NpgsqlCommand($"SELECT hash FROM blocks WHERE height = {height}", conn))
         {
-            await using (var reader = await cmd.ExecuteReaderAsync())
+            await using (var reader = await cmd.ExecuteReaderAsync(cancellationToken))
             {
-                var success = await reader.ReadAsync();
+                var success = await reader.ReadAsync(cancellationToken);
                 if (!success) return null;
 
-                return await ReadHexFromBytea(reader, 0);
+                return await ReadHexFromByteaAsync(reader, 0, cancellationToken);
             }
         }
     }
 
-    public async Task<Block?> GetBlockByHashAsync(string hash)
+    public async Task<Block?> GetBlockByHashAsync(string hash, CancellationToken cancellationToken = default(CancellationToken))
     {
         using var conn = Connection;
-        await conn.OpenAsync();
+        await conn.OpenAsync(cancellationToken);
 
         using (var cmd = new NpgsqlCommand($"SELECT b.height, b.hash, b.strippedsize, b.\"size\", b.weight, b.proof_type, b.proofofstakehash , b.progproofofworkhash, b.progpowmixhash ,b.randomxproofofworkhash ,b.sha256dproofofworkhash , b.proofofworkhash, b.\"version\", b.merkleroot, b.\"time\", b.mediantime,b.nonce ,b.nonce64 ,b.mixhash , b.bits ,b.difficulty ,b.chainwork ,b.anon_index ,b.veil_data_hash ,b.prog_header_hash ,b.prog_header_hex , b.epoch_number , b.synced,  (SELECT COUNT(t.txid) as txn from transactions t where t.block_height = b.height) FROM blocks b WHERE b.hash = {TransformHex(hash)};", conn))
         {
-            await using (var reader = await cmd.ExecuteReaderAsync())
+            await using (var reader = await cmd.ExecuteReaderAsync(cancellationToken))
             {
-                var success = await reader.ReadAsync();
+                var success = await reader.ReadAsync(cancellationToken);
                 if (!success) return null;
 
-                var block = await ReadBlock(reader);
+                var block = await ReadBlockAsync(reader, cancellationToken);
                 if (block != null)
                     block.txnCount = reader.GetInt32(28);
                 return block;
@@ -168,16 +162,16 @@ public class BlocksRepository : BaseRepository, IBlocksRepository
     }
 
 
-    public async Task<int?> ProbeBlockByHashAsync(string hash)
+    public async Task<int?> ProbeBlockByHashAsync(string hash, CancellationToken cancellationToken = default(CancellationToken))
     {
         using var conn = Connection;
-        await conn.OpenAsync();
+        await conn.OpenAsync(cancellationToken);
 
         using (var cmd = new NpgsqlCommand($"SELECT height FROM blocks WHERE hash = {TransformHex(hash)}", conn))
         {
-            await using (var reader = await cmd.ExecuteReaderAsync())
+            await using (var reader = await cmd.ExecuteReaderAsync(cancellationToken))
             {
-                var success = await reader.ReadAsync();
+                var success = await reader.ReadAsync(cancellationToken);
                 if (!success) return null;
 
                 return reader.GetInt32(0);
@@ -185,10 +179,10 @@ public class BlocksRepository : BaseRepository, IBlocksRepository
         }
     }
 
-    public async Task<bool> InsertBlockAsync(Block blockTemplate)
+    public async Task<bool> InsertBlockAsync(Block blockTemplate, CancellationToken cancellationToken = default(CancellationToken))
     {
         using var conn = Connection;
-        await conn.OpenAsync();
+        await conn.OpenAsync(cancellationToken);
 
         using (var cmd = new NpgsqlCommand("INSERT INTO blocks (height,hash,strippedsize,\"size\",weight,proof_type,proofofstakehash,progproofofworkhash,progpowmixhash," +
                                             "randomxproofofworkhash,sha256dproofofworkhash,proofofworkhash,\"version\",merkleroot,\"time\",mediantime,nonce,nonce64,mixhash," +
@@ -198,20 +192,20 @@ public class BlocksRepository : BaseRepository, IBlocksRepository
                                             $"{TransformHex(blockTemplate.bits_hex)}, {TransformDouble(blockTemplate.difficulty)}, {TransformHex(blockTemplate.chainwork_hex)}, {blockTemplate.anon_index}, {TransformHex(blockTemplate.veil_data_hash_hex)}, {TransformHex(blockTemplate.prog_header_hash_hex)}, {TransformHex(blockTemplate.prog_header_hex)}, {blockTemplate.epoch_number}, 'false'" +
                                             ");", conn))
         {
-            await cmd.PrepareAsync();
-            return await cmd.ExecuteNonQueryAsync() > 0;
+            await cmd.PrepareAsync(cancellationToken);
+            return await cmd.ExecuteNonQueryAsync(cancellationToken) > 0;
         }
     }
 
-    public async Task<bool> SetBlockSyncStateAsync(int height, bool state)
+    public async Task<bool> SetBlockSyncStateAsync(int height, bool state, CancellationToken cancellationToken = default(CancellationToken))
     {
         using var conn = Connection;
-        await conn.OpenAsync();
+        await conn.OpenAsync(cancellationToken);
 
         using (var cmd = new NpgsqlCommand($"UPDATE blocks SET synced='true' WHERE height={height};", conn))
         {
-            await cmd.PrepareAsync();
-            return await cmd.ExecuteNonQueryAsync() > 0;
+            await cmd.PrepareAsync(cancellationToken);
+            return await cmd.ExecuteNonQueryAsync(cancellationToken) > 0;
         }
     }
 }

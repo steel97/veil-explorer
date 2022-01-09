@@ -30,7 +30,7 @@ public class BlockchainStatsWorker : BackgroundService
         _chainInfoSingleton = chaininfoSingleton;
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stopToken)
+    protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         using var httpClient = _httpClientFactory.CreateClient();
 
@@ -44,17 +44,17 @@ public class BlockchainStatsWorker : BackgroundService
 
         var targetBlocksPerDay = 24 * 60 * 60 / Constants.BLOCK_TIME;
 
-        await Task.Delay(TimeSpan.FromSeconds(5)); // let other services warm up, this allows us not to wait PullBlockchainStatsDelay if some data is unavailable at beginning
+        await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken); // let other services warm up, this allows us not to wait PullBlockchainStatsDelay if some data is unavailable at beginning
 
-        while (!stopToken.IsCancellationRequested)
+        while (!cancellationToken.IsCancellationRequested)
         {
             try
             {
 
-                var txStatsDay = await GetTxStats(httpClient, targetBlocksPerDay / 4, -144);
-                var txStatsWeek = await GetTxStats(httpClient, targetBlocksPerDay / 4, -144 * 7);
-                var txStatsMonth = await GetTxStats(httpClient, targetBlocksPerDay / 4, -144 * 30);
-                var txStatsOverall = await GetTxStats(httpClient, _explorerConfig.CurrentValue.StatsPointsCount, 0);
+                var txStatsDay = await GetTxStatsAsync(httpClient, targetBlocksPerDay / 4, -144, cancellationToken);
+                var txStatsWeek = await GetTxStatsAsync(httpClient, targetBlocksPerDay / 4, -144 * 7, cancellationToken);
+                var txStatsMonth = await GetTxStatsAsync(httpClient, targetBlocksPerDay / 4, -144 * 30, cancellationToken);
+                var txStatsOverall = await GetTxStatsAsync(httpClient, _explorerConfig.CurrentValue.StatsPointsCount, 0, cancellationToken);
 
                 var finalDict = new Dictionary<string, TxStatsEntry>();
                 finalDict.Add("day", txStatsDay);
@@ -68,7 +68,7 @@ public class BlockchainStatsWorker : BackgroundService
                 };
 
                 // TimeSpan not reuired here since we use milliseconds, still put it there to change in future if required
-                await Task.Delay(TimeSpan.FromMilliseconds(_explorerConfig.CurrentValue.PullBlockchainStatsDelay));
+                await Task.Delay(TimeSpan.FromMilliseconds(_explorerConfig.CurrentValue.PullBlockchainStatsDelay), cancellationToken);
             }
             catch (OperationCanceledException)
             {
@@ -83,7 +83,7 @@ public class BlockchainStatsWorker : BackgroundService
 
 
 
-    private async Task<GetChainTxStatsResult> GetChainTxStats(HttpClient? httpClient, long ctxInterval)
+    private async Task<GetChainTxStatsResult> GetChainTxStatsAsync(HttpClient? httpClient, long ctxInterval, CancellationToken cancellationToken = default(CancellationToken))
     {
         if (httpClient == null) throw new Exception();
         // get blockchain info
@@ -93,14 +93,14 @@ public class BlockchainStatsWorker : BackgroundService
             Method = "getchaintxstats",
             Params = new List<object>(new object[] { ctxInterval })
         };
-        var getChainTxStatsResponse = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", getChainTxStatsRequest, options);
-        var chainTxStats = await getChainTxStatsResponse.Content.ReadFromJsonAsync<GetChainTxStats>(options);
+        var getChainTxStatsResponse = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", getChainTxStatsRequest, options, cancellationToken);
+        var chainTxStats = await getChainTxStatsResponse.Content.ReadFromJsonAsync<GetChainTxStats>(options, cancellationToken);
 
         if (chainTxStats == null || chainTxStats.Result == null) throw new Exception();
         return chainTxStats.Result;
     }
 
-    private async Task<TxStatsEntry> GetTxStats(HttpClient? httpClient, int points, int offset)
+    private async Task<TxStatsEntry> GetTxStatsAsync(HttpClient? httpClient, int points, int offset, CancellationToken cancellationToken = default(CancellationToken))
     {
         var count = (int)(_chainInfoSingleton?.CurrentChainInfo?.Blocks ?? 1);
         if (offset > count)
@@ -125,7 +125,7 @@ public class BlockchainStatsWorker : BackgroundService
 
         for (var i = chainTxStatsIntervals.Count() - 1; i >= 0; i--)
         {
-            var res = await GetChainTxStats(httpClient, chainTxStatsIntervals[i]);
+            var res = await GetChainTxStatsAsync(httpClient, chainTxStatsIntervals[i], cancellationToken);
 
             if (res.window_tx_count == 0) continue;
 
