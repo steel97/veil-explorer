@@ -30,7 +30,39 @@ Build the application for production:
 ```bash
 dotnet publish ./explorer-backend.csproj -c Release -o ./output/linux-x64 --self-contained -r linux-x64
 ```
-Or use **windows** batch script:
+## VSCode
+For development/publishing [vscode](https://code.visualstudio.com/) IDE can be used. There are convinient commands predefined. For backend, make sure to open **explorer-backend** folder in **vscode** (it should be project-root) **or** open **workspace** via:
+
+*veil-explorer.code-workspace*
+
+### Tasks
+
+Use next hotkey:
 ```bash
-./create-sc-build.bat
+CTRL+SHIFT+ P
+#or
+F1
+# than press
+backspace
+# than type word
+task
+# than press
+space
+# below actions will open tasks list dropdown menu
 ```
+This actions can also be opened via: *Terminal > Run task*
+
+Available actions:
+```bash
+# run application
+run
+# run with hot-reload (useful for development)
+watch
+# publish application
+publish
+# publish self-contained build for linux-x86_64 platform
+publish linux-x86_64 (self-contained)
+```
+
+### Debugging
+Press **F5** to start debugging. Addition configs can be configured in *.vscode/launch.json*
