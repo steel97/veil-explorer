@@ -35,8 +35,9 @@ jobs:
         echo $PWD
         pwd
         echo cd ./explorer-backend/output/linux-x86_64.self-contained.release-${{ steps.version.outputs.version }}
-        bash cd ./explorer-backend/output/linux-x86_64.self-contained.release-${{ steps.version.outputs.version }}
-        bash tar -czf explorer-backend.linux-x86_64.self-contained.release-${{ steps.version.outputs.version }}.tar.gz *
+        cd ./explorer-backend/output/linux-x86_64.self-contained.release-${{ steps.version.outputs.version }}
+        ls -la
+        tar -czf explorer-backend.linux-x86_64.self-contained.release-${{ steps.version.outputs.version }}.tar.gz *
     - uses: actions/upload-artifact@v2
       with:
         name: explorer-backend_linux-x86_64.self-contained.release-${{ steps.version.outputs.version }}
