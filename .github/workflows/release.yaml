@@ -196,7 +196,4 @@ jobs:
             LICENSE.md
             README.md
             VERSION.md
-            ./artifacts/*
             ./artifacts/**
-            ./artifacts/**.tar.gz
-            ./artifacts/explorer-frontend.universal-1.1.0.tar.gz
