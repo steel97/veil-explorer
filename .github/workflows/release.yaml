@@ -32,6 +32,8 @@ jobs:
     - name: Publish linux-x86_64 (self-contained) release
       run: |
         dotnet publish ./explorer-backend/explorer-backend.csproj -c Release -o ./explorer-backend/output/linux-x86_64.self-contained.release-${{ steps.version.outputs.version }} --self-contained -r linux-x64 /property:GenerateFullPaths=true /consoleloggerparameters:NoSummary
+        echo $PWD
+        pwd
         bash cd ./explorer-backend/output/linux-x86_64.self-contained.release-${{ steps.version.outputs.version }} && tar -czf explorer-backend.linux-x86_64.self-contained.release-${{ steps.version.outputs.version }}.tar.gz *
     - uses: actions/upload-artifact@v2
       with:
