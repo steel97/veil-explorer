@@ -13,8 +13,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: version
-        run: echo "::set-output name=version::$(cat VERSION.md)"
-        id: version
+      run: echo "::set-output name=version::$(cat VERSION.md)"
+      id: version
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
@@ -104,6 +104,9 @@ jobs:
       with:
         node-version: 16.x
         cache: "npm"
+    - name: version
+      run: echo "::set-output name=version::$(cat VERSION.md)"
+      id: version
     - run: cd ./explorer-frontend/ && npm ci
     - name: Publish universal release
       run: cd ./explorer-frontend/ && npm run build --if-present
@@ -125,8 +128,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: version
-          run: echo "::set-output name=version::$(cat VERSION.md)"
-          id: version
+        run: echo "::set-output name=version::$(cat VERSION.md)"
+        id: version
 
       - uses: actions/download-artifact@master
         with:
