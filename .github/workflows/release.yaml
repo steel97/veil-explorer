@@ -2,7 +2,7 @@ name: Create release
 
 on:
   push:
-    branches:    
+    tags:    
       - "release/**"
 
 jobs:
@@ -195,5 +195,6 @@ jobs:
           files: |
             LICENSE.md
             README.md
-            VERSION.md
-            artifacts/*.tar.gz
+            VERSION.md            
+            ./artifacts/*.tar.gz
+            ./artifacts/explorer-frontend.universal-1.1.0.tar.gz
