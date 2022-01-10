@@ -116,9 +116,9 @@ jobs:
     - name: version
       run: echo "::set-output name=version::$(cat VERSION.md)"
       id: version
-    - run: npm ci
+    - run: cd ./explorer-frontend/ && npm ci
     - name: Publish universal release
-      run: npm run build --if-present
+      run: cd ./explorer-frontend/ && npm run build --if-present
     # no tests for now...
 #    - run: npm test
 
