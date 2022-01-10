@@ -43,7 +43,7 @@
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "publish linux-x86_64 (self-contained)",
+            "label": "publish release linux-x86_64 (self-contained)",
             "command": "dotnet",
             "type": "process",
             "options": {
@@ -55,7 +55,7 @@
                 "-c",
                 "Release",
                 "-o",
-                "./output/linux-x64",
+                "./output/linux-x86_64.self-contained.release",
                 "--self-contained",
                 "-r",
                 "linux-x64",
