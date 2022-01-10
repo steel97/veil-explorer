@@ -34,7 +34,6 @@ jobs:
         dotnet publish ./explorer-backend/explorer-backend.csproj -c Release -o ./explorer-backend/output/linux-x86_64.self-contained.release-${{ steps.version.outputs.version }} --self-contained -r linux-x64 /property:GenerateFullPaths=true /consoleloggerparameters:NoSummary
         echo $PWD
         pwd
-        ./explorer-backend/output/linux-x86_64.self-contained.release-${{ steps.version.outputs.version }}
         echo cd ./explorer-backend/output/linux-x86_64.self-contained.release-${{ steps.version.outputs.version }}
         bash cd ./explorer-backend/output/linux-x86_64.self-contained.release-${{ steps.version.outputs.version }}
         bash tar -czf explorer-backend.linux-x86_64.self-contained.release-${{ steps.version.outputs.version }}.tar.gz *
