@@ -410,15 +410,15 @@ const formatAmount = (amount: number) => {
   return amount / COIN;
 };
 
-const computeTotalInputsAmount = (tx: TransactionSimpleDecoded) => {
+const computeTotalInputsAmount = () => {
   let result = 0;
-  props.tx.inputs.forEach((tx) => (result += tx.prevOutAmount));
+  props.tx.inputs.forEach((input) => (result += input.prevOutAmount));
   return result;
 };
 
-const computeTotalOutputsAmount = (tx: TransactionSimpleDecoded) => {
+const computeTotalOutputsAmount = () => {
   let result = 0;
-  props.tx.outputs.forEach((tx) => (result += tx.amount));
+  props.tx.outputs.forEach((out) => (result += out.amount));
   return result;
 };
 

@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "http";
-import { parseApiString, ApiEntry } from "~~/composables/Configs";
+import { parseApiString, ApiEntry } from "~/composables/Configs";
 
 export default async (req: IncomingMessage, res: ServerResponse) => {
     const defaultChain = process.env.CHAIN_DEFAULT;

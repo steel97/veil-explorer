@@ -21,6 +21,7 @@ export default defineNuxtConfig({
         BASE_URL: process.env.BASE_URL,
         CHAIN_APIS: process.env.CHAIN_APIS
     },
+    srcDir: "src/",
     css: ["~/assets/css/tailwind.css"],
     alias: {
         "chart.js": "chart.js/dist/chart.esm.js",

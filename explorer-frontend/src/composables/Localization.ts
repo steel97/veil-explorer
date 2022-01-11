@@ -1,5 +1,5 @@
 import { useI18n } from "vue-i18n";
-import locale from "~~/localization/en";
+import locale from "@/localization/en";
 
 export const useLocalization = () => {
 

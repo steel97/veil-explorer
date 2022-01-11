@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 import { GraphData } from "@/models/System/GraphData";
-import { Chart } from "chart.js";
+import { Chart, ChartOptions } from "chart.js";
 
 const ctxRef = ref<HTMLCanvasElement>(null);
 
@@ -21,7 +21,7 @@ watch(props, (np) => {
 });
 
 let chart: Chart | null = null;
-const getChartOptions = () => {
+const getChartOptions = (): ChartOptions => {
   return {
     responsive: true,
     maintainAspectRatio: true,
@@ -59,10 +59,12 @@ const getChartOptions = () => {
         },
         ticks: {
           callback: function (value, index, values) {
-            if (value > 1000000) {
-              return (value / 1000000).toLocaleString() + "M";
+            const numValue =
+              typeof value == "string" ? parseFloat(value) : value;
+            if (numValue > 1000000) {
+              return (numValue / 1000000).toLocaleString() + "M";
             } else {
-              return parseFloat(parseFloat(value).toFixed(3));
+              return parseFloat(numValue.toFixed(3)).toString();
             }
           },
         },

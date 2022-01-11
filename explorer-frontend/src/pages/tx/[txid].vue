@@ -66,7 +66,7 @@
         </div>
         <div class="border-b py-4">
           <span>{{ tx.size }} B</span>
-          <span v-if="size != vSize">&nbsp;({{ tx.size }} vB)</span>
+          <span v-if="tx.size != tx.vSize">&nbsp;({{ tx.size }} vB)</span>
         </div>
 
         <!-- locktime -->

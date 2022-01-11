@@ -61,7 +61,7 @@ txindex=1
 1. Create new **postgresql** database
 2. Restore SQL files from [/explorer-backend/schemas](/explorer-backend/schemas)
 #### Backend
-1. Unpack **veil-explorer-backend-\[arch\]-\[os\].zip**
+1. Unpack **explorer-backend.\[os\]-\[arch\].self-contained.release-\[version\].tar.gz**
 2. Copy [/explorer-backend/appsettings.json.tpl](/explorer-backend/appsettings.json.tpl) to \[server directory\]/appsettings.json
 3. Change **postgresql** connection string inside **appsettings.json**, change other parameters.
 
@@ -70,7 +70,7 @@ See: [/docs/backend-configuration.md](/docs/backend-configuration.md)
 4. Run server executable (explorer-backend)
 5. It will take some time to synchronize backend database with node.
 #### Frontend
-1. Unpack **veil-explorer-frontend.zip**
+1. Unpack **explorer-frontend.universal-\[version\].tar.gz**
 2. Create start script which should export environment variables used as explorer-frontend config:
 ```bash
 # listen address
