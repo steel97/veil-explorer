@@ -5,15 +5,18 @@
     </h1>
     <div class="rounded bg-gray-50 dark:bg-gray-800 mb-4 mt-4">
       <div class="block md:grid grid-cols-2" v-if="pageReady">
-        <LineChart :data="getData('day')" class="my-2 md:mx-2" />
-        <LineChart :data="getData('week')" class="my-2 md:mx-2" />
-        <LineChart :data="getData('month')" class="my-2 md:mx-2" />
-        <LineChart :data="getData('overall')" class="my-2 md:mx-2" />
+        <ChartsLineChart :data="getData('day')" class="my-2 md:mx-2" />
+        <ChartsLineChart :data="getData('week')" class="my-2 md:mx-2" />
+        <ChartsLineChart :data="getData('month')" class="my-2 md:mx-2" />
+        <ChartsLineChart :data="getData('overall')" class="my-2 md:mx-2" />
 
-        <LineChart :data="getData('day', true)" class="my-2 md:mx-2" />
-        <LineChart :data="getData('week', true)" class="my-2 md:mx-2" />
-        <LineChart :data="getData('month', true)" class="my-2 md:mx-2" />
-        <LineChart :data="getData('overall', true)" class="my-2 md:mx-2" />
+        <ChartsLineChart :data="getData('day', true)" class="my-2 md:mx-2" />
+        <ChartsLineChart :data="getData('week', true)" class="my-2 md:mx-2" />
+        <ChartsLineChart :data="getData('month', true)" class="my-2 md:mx-2" />
+        <ChartsLineChart
+          :data="getData('overall', true)"
+          class="my-2 md:mx-2"
+        />
       </div>
     </div>
   </div>
@@ -23,7 +26,6 @@
 import { useI18n } from "vue-i18n";
 import { TxStatsResponse, TxStatsEntry } from "@/models/API/TxStatsResponse";
 import { GraphData } from "@/models/System/GraphData";
-import LineChart from "@/components/charts/LineChart";
 
 const { t } = useI18n();
 const { getApiPath } = useConfigs();

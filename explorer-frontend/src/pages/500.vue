@@ -2,6 +2,8 @@
   <Error />
 </template>
 
-<script setup lang="ts">
-import Error from "@/layouts/error";
+<script>
+export default {
+  layout: "error",
+};
 </script>

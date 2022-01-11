@@ -26,12 +26,12 @@
       {{ t("Block.Transactions") }}
     </h1>
 
-    <TransactionsView
+    <BlockTransactionsView
       v-if="blockData != null && blockData.transactions != null"
       :txdata="blockData.transactions"
     />
 
-    <Pagination
+    <SharedPagination
       v-if="blockData != null && blockData.transactions != null"
       :overallEntries="blockData.txnCount"
       :entriesPerPage="config.TXS_PER_PAGE"
@@ -43,9 +43,6 @@
 </template>
 
 <script setup lang="ts">
-import BlockView from "@/components/block/BlockView";
-import TransactionsView from "@/components/block/TransactionsView";
-import Pagination from "@/components/shared/Pagination";
 import { BlockResponse } from "@/models/API/BlockResponse";
 import { useUI } from "@/composables/UI";
 import { useI18n } from "vue-i18n";

@@ -73,8 +73,9 @@ useMeta(meta);
 
 if (process.server) {
   const nuxtApp = useNuxtApp();
-  const error = new Error();
-  error.statusCode = parseInt(route.name as any as string);
-  error.nuxtApp.ssrContext.error = error;
+  // eslint-ignore-next-line
+  nuxtApp.ssrContext.nuxt.error = {
+    statusCode: parseInt(route.name as any as string),
+  };
 }
 </script>

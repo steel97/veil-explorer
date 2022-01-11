@@ -35,9 +35,9 @@
       </div>
     </div>
     <div class="rounded p-4 bg-gray-50 dark:bg-gray-800">
-      <BlocksTable :data="blocks" :reactivityFix="reactivityFix" />
+      <SharedBlocksTable :data="blocks" :reactivityFix="reactivityFix" />
     </div>
-    <Pagination
+    <SharedPagination
       :overallEntries="
         backgroundInfoDataState != null &&
         backgroundInfoDataState.currentSyncedBlock != null
@@ -53,8 +53,6 @@
 </template>
 
 <script setup lang="ts">
-import BlocksTable from "@/components/shared/BlocksTable";
-import Pagination from "@/components/shared/Pagination";
 import { useI18n } from "vue-i18n";
 import { reactive } from "@vue/reactivity";
 import { useLatestBlockInfo } from "@/composables/States";
