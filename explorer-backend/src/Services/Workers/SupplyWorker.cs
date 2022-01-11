@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Options;
 using ExplorerBackend.Core;
 using ExplorerBackend.Configs;
+using ExplorerBackend.Models.System;
 using ExplorerBackend.Services.Caching;
 using ExplorerBackend.Services.Queues;
 using ExplorerBackend.Services.Core;
@@ -16,12 +17,10 @@ public class SupplyWorker : BackgroundService
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ChaininfoSingleton _chainInfoSingleton;
     private readonly ScanTxOutsetBackgroundTaskQueue _scanTxOutsetBackgroundTaskQueue;
-    private readonly INodeRequester _nodeRequester;
     private readonly NodeApiCacheSingleton _nodeApiCacheSingleton;
 
     public SupplyWorker(ILogger<SupplyWorker> logger, IOptionsMonitor<ExplorerConfig> explorerConfig, IOptionsMonitor<APIConfig> apiConfig, IHttpClientFactory httpClientFactory, ChaininfoSingleton chaininfoSingleton,
-        ScanTxOutsetBackgroundTaskQueue scanTxOutsetBackgroundTaskQueue,
-        INodeRequester nodeRequester, NodeApiCacheSingleton nodeApiCacheSingleton)
+        ScanTxOutsetBackgroundTaskQueue scanTxOutsetBackgroundTaskQueue, NodeApiCacheSingleton nodeApiCacheSingleton)
     {
         _logger = logger;
         _explorerConfig = explorerConfig;
@@ -29,7 +28,6 @@ public class SupplyWorker : BackgroundService
         _httpClientFactory = httpClientFactory;
         _chainInfoSingleton = chaininfoSingleton;
         _scanTxOutsetBackgroundTaskQueue = scanTxOutsetBackgroundTaskQueue;
-        _nodeRequester = nodeRequester;
         _nodeApiCacheSingleton = nodeApiCacheSingleton;
     }
 
@@ -56,18 +54,16 @@ public class SupplyWorker : BackgroundService
                             {
                                 State = false
                             };
-                            await _scanTxOutsetBackgroundTaskQueue.QueueBackgroundWorkItemAsync(async token =>
+                            await _scanTxOutsetBackgroundTaskQueue.QueueBackgroundWorkItemAsync(async (input, token) =>
                             {
-                                try
-                                {
-                                    await _nodeRequester.ScanTxOutsetAndCacheAsync(_explorerConfig.CurrentValue.BudgetAddress, token);
-                                }
-                                catch
-                                {
+                                var bridge = (ScanTxOutsetBridge)input;
+                                if (bridge == null || bridge.NodeApiCacheLink == null || bridge.NodeRequesterLink == null) return;
 
+                                if (await bridge.NodeApiCacheLink.PutInQueueAsync($"scantxoutset-{_explorerConfig.CurrentValue.BudgetAddress}"))
+                                {
+                                    await bridge.NodeRequesterLink.ScanTxOutsetAndCacheAsync(_explorerConfig.CurrentValue.BudgetAddress, token);
+                                    await bridge.NodeApiCacheLink.RemoveFromQueueAsync($"scantxoutset-{_explorerConfig.CurrentValue.BudgetAddress}");
                                 }
-
-                                await _nodeApiCacheSingleton.RemoveFromQueueAsync($"scantxoutset-{_explorerConfig.CurrentValue.BudgetAddress}");
 
                                 if (scanTxOutsetFlag != null)
                                     scanTxOutsetFlag.State = true;
@@ -98,18 +94,16 @@ public class SupplyWorker : BackgroundService
                             {
                                 State = false
                             };
-                            await _scanTxOutsetBackgroundTaskQueue.QueueBackgroundWorkItemAsync(async token =>
+                            await _scanTxOutsetBackgroundTaskQueue.QueueBackgroundWorkItemAsync(async (input, token) =>
                             {
-                                try
-                                {
-                                    await _nodeRequester.ScanTxOutsetAndCacheAsync(_explorerConfig.CurrentValue.FoundationAddress, token);
-                                }
-                                catch
-                                {
+                                var bridge = (ScanTxOutsetBridge)input;
+                                if (bridge == null || bridge.NodeApiCacheLink == null || bridge.NodeRequesterLink == null) return;
 
+                                if (await bridge.NodeApiCacheLink.PutInQueueAsync($"scantxoutset-{_explorerConfig.CurrentValue.FoundationAddress}"))
+                                {
+                                    await bridge.NodeRequesterLink.ScanTxOutsetAndCacheAsync(_explorerConfig.CurrentValue.FoundationAddress, token);
+                                    await bridge.NodeApiCacheLink.RemoveFromQueueAsync($"scantxoutset-{_explorerConfig.CurrentValue.FoundationAddress}");
                                 }
-
-                                await _nodeApiCacheSingleton.RemoveFromQueueAsync($"scantxoutset-{_explorerConfig.CurrentValue.FoundationAddress}");
 
                                 if (scanTxOutsetFlag != null)
                                     scanTxOutsetFlag.State = true;

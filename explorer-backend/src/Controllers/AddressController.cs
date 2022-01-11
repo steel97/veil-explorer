@@ -5,6 +5,7 @@ using NBitcoin.DataEncoders;
 using ExplorerBackend.Core;
 using ExplorerBackend.VeilStructs;
 using ExplorerBackend.Models.API;
+using ExplorerBackend.Models.System;
 using ExplorerBackend.Models.Node.Response;
 using ExplorerBackend.Configs;
 using ExplorerBackend.Services.Queues;
@@ -23,18 +24,15 @@ public class AddressController : ControllerBase
     private readonly IOptions<APIConfig> _apiConfig;
     private readonly IUtilityService _utilityService;
     private readonly ScanTxOutsetBackgroundTaskQueue _scanTxOutsetBackgroundTaskQueue;
-    private readonly INodeRequester _nodeRequester;
     private readonly NodeApiCacheSingleton _nodeApiCacheSingleton;
 
     public AddressController(ILogger<AddressController> logger, IOptions<APIConfig> apiConfig, IUtilityService utilityService,
-        ScanTxOutsetBackgroundTaskQueue scanTxOutsetBackgroundTaskQueue,
-        INodeRequester nodeRequester, NodeApiCacheSingleton nodeApiCacheSingleton)
+        ScanTxOutsetBackgroundTaskQueue scanTxOutsetBackgroundTaskQueue, NodeApiCacheSingleton nodeApiCacheSingleton)
     {
         _logger = logger;
         _apiConfig = apiConfig;
         _utilityService = utilityService;
         _scanTxOutsetBackgroundTaskQueue = scanTxOutsetBackgroundTaskQueue;
-        _nodeRequester = nodeRequester;
         _nodeApiCacheSingleton = nodeApiCacheSingleton;
     }
 
@@ -70,24 +68,19 @@ public class AddressController : ControllerBase
                     {
                         State = false
                     };
-                    await _scanTxOutsetBackgroundTaskQueue.QueueBackgroundWorkItemAsync(async token =>
+                    await _scanTxOutsetBackgroundTaskQueue.QueueBackgroundWorkItemAsync(async (input, token) =>
                     {
-                        if (await _nodeApiCacheSingleton.PutInQueueAsync($"scantxoutset-{reqAddr}"))
+                        var bridge = (ScanTxOutsetBridge)input;
+                        if (bridge == null || bridge.NodeApiCacheLink == null || bridge.NodeRequesterLink == null) return;
+
+                        if (await bridge.NodeApiCacheLink.PutInQueueAsync($"scantxoutset-{reqAddr}"))
                         {
-                            try
-                            {
-                                await _nodeRequester.ScanTxOutsetAndCacheAsync(reqAddr, token);
-                            }
-                            catch
-                            {
-
-                            }
-
-                            await _nodeApiCacheSingleton.RemoveFromQueueAsync($"scantxoutset-{reqAddr}");
-
-                            if (scanTxOutsetFlag != null)
-                                scanTxOutsetFlag.State = true;
+                            await bridge.NodeRequesterLink.ScanTxOutsetAndCacheAsync(reqAddr, token);
+                            await bridge.NodeApiCacheLink.RemoveFromQueueAsync($"scantxoutset-{reqAddr}");
                         }
+
+                        if (scanTxOutsetFlag != null)
+                            scanTxOutsetFlag.State = true;
                     });
                     await AsyncUtils.WaitUntilAsync(cancellationToken, () => scanTxOutsetFlag.State, _apiConfig.Value.ApiQueueSpinDelay, _apiConfig.Value.ApiQueueWaitTimeout);
                     scanTxOutsetRes = _nodeApiCacheSingleton.GetApiCache<ScanTxOutset>($"scantxoutset-{reqAddr}");

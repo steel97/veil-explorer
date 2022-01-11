@@ -39,7 +39,7 @@ For development/publishing [vscode](https://code.visualstudio.com/) IDE can be u
 
 Use next hotkey:
 ```bash
-CTRL+SHIFT+ P
+CTRL+SHIFT+P
 #or
 F1
 # than press

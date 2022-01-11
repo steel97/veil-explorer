@@ -1,10 +1,9 @@
-using System.Text;
-using System.Text.Json;
-using System.Net.Http.Headers;
 using Microsoft.Extensions.Options;
 using ExplorerBackend.Configs;
-using ExplorerBackend.Services.Caching;
+using ExplorerBackend.Models.System;
+using ExplorerBackend.Services.Core;
 using ExplorerBackend.Services.Queues;
+using ExplorerBackend.Services.Caching;
 
 namespace ExplorerBackend.Services.Workers;
 
@@ -12,42 +11,33 @@ public class ScanTxOutsetWorker : BackgroundService
 {
     private readonly ILogger _logger;
     private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly NodeApiCacheSingleton _nodeApiCacheSingleton;
     private readonly IBackgroundTaskQueue _taskQueue;
+    private readonly NodeApiCacheSingleton _nodeApiCacheSingleton;
+    private readonly INodeRequester _nodeRequester;
 
-    public ScanTxOutsetWorker(ILogger<ScanTxOutsetWorker> logger, IOptionsMonitor<ExplorerConfig> explorerConfig, IHttpClientFactory httpClientFactory, NodeApiCacheSingleton nodeApiCacheSingleton, ScanTxOutsetBackgroundTaskQueue taskQueue)
+    public ScanTxOutsetWorker(ILogger<ScanTxOutsetWorker> logger, IOptionsMonitor<ExplorerConfig> explorerConfig, ScanTxOutsetBackgroundTaskQueue taskQueue, NodeApiCacheSingleton nodeApiCacheSingleton, INodeRequester nodeRequester)
     {
         _logger = logger;
         _explorerConfig = explorerConfig;
-        _httpClientFactory = httpClientFactory;
-        _nodeApiCacheSingleton = nodeApiCacheSingleton;
         _taskQueue = taskQueue;
+        _nodeApiCacheSingleton = nodeApiCacheSingleton;
+        _nodeRequester = nodeRequester;
     }
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
-        using var httpClient = _httpClientFactory.CreateClient();
-
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Url);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Username);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Password);
-
-        httpClient.BaseAddress = new Uri(_explorerConfig.CurrentValue.Node.Url);
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_explorerConfig.CurrentValue.Node.Username}:{_explorerConfig.CurrentValue.Node.Password}")));
-
-        var options = new JsonSerializerOptions
+        var scanTxOutsetBridge = new ScanTxOutsetBridge
         {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            NodeApiCacheLink = _nodeApiCacheSingleton,
+            NodeRequesterLink = _nodeRequester
         };
 
         while (!cancellationToken.IsCancellationRequested)
         {
             try
             {
-                Func<CancellationToken, ValueTask>? workItem = await _taskQueue.DequeueAsync(cancellationToken);
-                await workItem(cancellationToken);
+                Func<object, CancellationToken, ValueTask>? workItem = await _taskQueue.DequeueAsync(cancellationToken);
+                await workItem(scanTxOutsetBridge, cancellationToken);
 
                 await Task.Delay(TimeSpan.FromMilliseconds(_explorerConfig.CurrentValue.NodeWorkersPullDelay), cancellationToken);
             }
