@@ -1,0 +1,131 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-explorer-backend:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: version
+      run: echo "::set-output name=version::$(cat VERSION.md)"
+      id: version
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: dotnet restore ./explorer-backend/explorer-backend.csproj
+    - name: Build
+      run: dotnet build ./explorer-backend/explorer-backend.csproj --no-restore
+    
+    # no tests for now...
+#    - name: Test
+#      run: dotnet test --no-build --verbosity normal
+    
+    # linux builds
+    - name: Publish linux-x86_64 (self-contained) release
+      run: |
+        dotnet publish ./explorer-backend/explorer-backend.csproj -c Release -o ./explorer-backend/output/linux-x86_64.self-contained.release-${{ steps.version.outputs.version }} --self-contained -r linux-x64 /property:GenerateFullPaths=true /consoleloggerparameters:NoSummary
+        cd ./explorer-backend/output/linux-x86_64.self-contained.release-${{ steps.version.outputs.version }} && tar -czf explorer-backend.linux-x86_64.self-contained.release-${{ steps.version.outputs.version }}.tar.gz *
+    - uses: actions/upload-artifact@v2
+      with:
+        name: explorer-backend_linux-x86_64.self-contained.release-${{ steps.version.outputs.version }}
+        path: ./explorer-backend/output/linux-x86_64.self-contained.release-${{ steps.version.outputs.version }}/explorer-backend.linux-x86_64.self-contained.release-${{ steps.version.outputs.version }}.tar.gz
+
+    - name: Publish linux-x86_64 (self-contained) debug
+      run: |
+        dotnet publish ./explorer-backend/explorer-backend.csproj -c Debug -o ./explorer-backend/output/linux-x86_64.self-contained.debug-${{ steps.version.outputs.version }} --self-contained -r linux-x64 /property:GenerateFullPaths=true /consoleloggerparameters:NoSummary
+        cd ./explorer-backend/output/linux-x86_64.self-contained.debug-${{ steps.version.outputs.version }} && tar -czf explorer-backend.linux-x86_64.self-contained.debug-${{ steps.version.outputs.version }}.tar.gz *
+    - uses: actions/upload-artifact@v2
+      with:
+        name: explorer-backend_linux-x86_64.self-contained.debug-${{ steps.version.outputs.version }}
+        path: ./explorer-backend/output/linux-x86_64.self-contained.debug-${{ steps.version.outputs.version }}/explorer-backend.linux-x86_64.self-contained.debug-${{ steps.version.outputs.version }}.tar.gz
+
+    - name: Publish linux-x86_64 release
+      run: |
+        dotnet publish ./explorer-backend/explorer-backend.csproj -c Release -o ./explorer-backend/output/linux-x86_64.release-${{ steps.version.outputs.version }} --no-self-contained -r linux-x64 /property:GenerateFullPaths=true /consoleloggerparameters:NoSummary
+        cd ./explorer-backend/output/linux-x86_64.release-${{ steps.version.outputs.version }} && tar -czf explorer-backend.linux-x86_64.release-${{ steps.version.outputs.version }}.tar.gz *
+    - uses: actions/upload-artifact@v2
+      with:
+        name: explorer-backend_linux-x86_64.release-${{ steps.version.outputs.version }}
+        path: ./explorer-backend/output/linux-x86_64.release-${{ steps.version.outputs.version }}/explorer-backend.linux-x86_64.release-${{ steps.version.outputs.version }}.tar.gz
+
+    - name: Publish linux-x86_64 debug
+      run: |
+        dotnet publish ./explorer-backend/explorer-backend.csproj -c Debug -o ./explorer-backend/output/linux-x86_64.debug-${{ steps.version.outputs.version }} --no-self-contained -r linux-x64 /property:GenerateFullPaths=true /consoleloggerparameters:NoSummary
+        cd ./explorer-backend/output/linux-x86_64.debug-${{ steps.version.outputs.version }} && tar -czf explorer-backend.linux-x86_64.debug-${{ steps.version.outputs.version }}.tar.gz *
+    - uses: actions/upload-artifact@v2
+      with:
+        name: explorer-backend_linux-x86_64.debug-${{ steps.version.outputs.version }}
+        path: ./explorer-backend/output/linux-x86_64.debug-${{ steps.version.outputs.version }}/explorer-backend.linux-x86_64.debug-${{ steps.version.outputs.version }}.tar.gz
+    
+    # windows builds
+    - name: Publish windows-x86_64 (self-contained) release
+      run: |
+        dotnet publish ./explorer-backend/explorer-backend.csproj -c Release -o ./explorer-backend/output/windows-x86_64.self-contained.release-${{ steps.version.outputs.version }} --self-contained -r win-x64 /property:GenerateFullPaths=true /consoleloggerparameters:NoSummary
+        cd ./explorer-backend/output/windows-x86_64.self-contained.release-${{ steps.version.outputs.version }} && tar -czf explorer-backend.windows-x86_64.self-contained.release-${{ steps.version.outputs.version }}.tar.gz *
+    - uses: actions/upload-artifact@v2
+      with:
+        name: explorer-backend_windows-x86_64.self-contained.release-${{ steps.version.outputs.version }}
+        path: ./explorer-backend/output/windows-x86_64.self-contained.release-${{ steps.version.outputs.version }}/explorer-backend.windows-x86_64.self-contained.release-${{ steps.version.outputs.version }}.tar.gz
+
+    - name: Publish windows-x86_64 (self-contained) debug
+      run: |
+        dotnet publish ./explorer-backend/explorer-backend.csproj -c Debug -o ./explorer-backend/output/windows-x86_64.self-contained.debug-${{ steps.version.outputs.version }} --self-contained -r win-x64 /property:GenerateFullPaths=true /consoleloggerparameters:NoSummary
+        cd ./explorer-backend/output/windows-x86_64.self-contained.debug-${{ steps.version.outputs.version }} && tar -czf explorer-backend.windows-x86_64.self-contained.debug-${{ steps.version.outputs.version }}.tar.gz *
+    - uses: actions/upload-artifact@v2
+      with:
+        name: explorer-backend_windows-x86_64.self-contained.debug-${{ steps.version.outputs.version }}
+        path: ./explorer-backend/output/windows-x86_64.self-contained.debug-${{ steps.version.outputs.version }}/explorer-backend.windows-x86_64.self-contained.debug-${{ steps.version.outputs.version }}.tar.gz
+
+    - name: Publish windows-x86_64 release
+      run: |
+        dotnet publish ./explorer-backend/explorer-backend.csproj -c Release -o ./explorer-backend/output/windows-x86_64.release-${{ steps.version.outputs.version }} --no-self-contained -r win-x64 /property:GenerateFullPaths=true /consoleloggerparameters:NoSummary
+        cd ./explorer-backend/output/windows-x86_64.release-${{ steps.version.outputs.version }} && tar -czf explorer-backend.windows-x86_64.release-${{ steps.version.outputs.version }}.tar.gz *
+    - uses: actions/upload-artifact@v2
+      with:
+        name: explorer-backend_windows-x86_64.release-${{ steps.version.outputs.version }}
+        path: ./explorer-backend/output/windows-x86_64.release-${{ steps.version.outputs.version }}/explorer-backend.windows-x86_64.release-${{ steps.version.outputs.version }}.tar.gz
+
+    - name: Publish windows-x86_64 debug
+      run: |
+        dotnet publish ./explorer-backend/explorer-backend.csproj -c Debug -o ./explorer-backend/output/windows-x86_64.debug-${{ steps.version.outputs.version }} --no-self-contained -r win-x64 /property:GenerateFullPaths=true /consoleloggerparameters:NoSummary
+        cd ./explorer-backend/output/windows-x86_64.debug-${{ steps.version.outputs.version }} && tar -czf explorer-backend.windows-x86_64.debug-${{ steps.version.outputs.version }}.tar.gz *
+    - uses: actions/upload-artifact@v2
+      with:
+        name: explorer-backend_windows-x86_64.debug-${{ steps.version.outputs.version }}
+        path: ./explorer-backend/output/windows-x86_64.debug-${{ steps.version.outputs.version }}/explorer-backend.windows-x86_64.debug-${{ steps.version.outputs.version }}.tar.gz
+
+  build-explorer-frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js 16.x
+      uses: actions/setup-node@v2
+      with:
+        node-version: 16.x
+        cache: "npm"
+        cache-dependency-path: explorer-frontend/package-lock.json
+    - name: version
+      run: echo "::set-output name=version::$(cat VERSION.md)"
+      id: version
+    - run: cd ./explorer-frontend/ && npm ci
+    - name: Publish universal release
+      run: cd ./explorer-frontend/ && npm run build --if-present
+    # no tests for now...
+#    - run: npm test
+
+    # universal builds
+    - name: Publish universal
+      run: cd ./explorer-frontend/.output/ && tar -czf explorer-frontend.universal-${{ steps.version.outputs.version }}.tar.gz *
+    - uses: actions/upload-artifact@v2
+      with:
+        name: explorer-frontend.universal-${{ steps.version.outputs.version }}
+        path: ./explorer-frontend/.output/explorer-frontend.universal-${{ steps.version.outputs.version }}.tar.gz
