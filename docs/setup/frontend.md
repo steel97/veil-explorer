@@ -32,8 +32,11 @@ sudo usermod -aG sudo explorer-frontend
 sudo mkdir /home/explorer-frontend/server/
 ```
 
-## Upload frontend build
-Frontend build should be uploaded to **/home/explorer-frontend/server/**
+## Download and unpack frontend build (change version in link and command to actual)
+```bash
+sudo wget https://github.com/steel97/veil-explorer/releases/download/latest/explorer-frontend.universal-1.1.0.tar.gz
+sudo tar -xzf explorer-frontend.universal-1.1.0.tar.gz -C /home/explorer-frontend/server/
+```
 
 ## Issue permissions for frontend
 ```bash

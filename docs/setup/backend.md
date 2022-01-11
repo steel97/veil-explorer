@@ -21,8 +21,11 @@ sudo usermod -aG sudo explorer-backend
 sudo mkdir /home/explorer-backend/server/
 ```
 
-## Upload backend build
-Backend build should be uploaded to **/home/explorer-backend/server/**
+## Download and unpack backend build (change version in link and command to actual)
+```bash
+sudo wget https://github.com/steel97/veil-explorer/releases/download/latest/explorer-backend.linux-x86_64.self-contained.release-1.1.0.tar.gz
+sudo tar -xzf explorer-backend.linux-x86_64.self-contained.release-1.1.0.tar.gz -C /home/explorer-backend/server/
+```
 
 ## Issue permissions for backend
 ```bash
@@ -34,7 +37,9 @@ sudo chown -R explorer-backend /home/explorer-backend/server/
 ## Edit backend configuration
 ```bash
 # Create configuration from template
-sudo cp /home/explorer-backend/server/appsettings.json.tpl /home/explorer-backend/server/ appsettings.json
+sudo cd /home/explorer-backend/server/
+sudo wget https://raw.githubusercontent.com/steel97/veil-explorer/master/explorer-backend/appsettings.json.tpl
+sudo mv /home/explorer-backend/server/appsettings.json.tpl /home/explorer-backend/server/appsettings.json
 # Edit configuration
 sudo nano /home/explorer-backend/server/appsettings.json
 ```

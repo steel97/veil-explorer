@@ -3,6 +3,8 @@
 
 Example: https://explorer.veil-project.com
 
+[![Build](https://github.com/steel97/veil-explorer/actions/workflows/build.yaml/badge.svg)](https://github.com/steel97/veil-explorer/actions/workflows/build.yaml)
+
 # Features
 - light/dark theme
 - multilingual UI (see [/docs/localization.md](/docs/localization.md))
