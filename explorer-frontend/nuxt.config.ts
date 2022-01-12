@@ -14,7 +14,7 @@ declare module "@nuxt/schema" {
 export default defineNuxtConfig({
     publicRuntimeConfig: {
         CHAIN_DEFAULT: process.env.CHAIN_DEFAULT,
-        CHAIN_APIS: JSON.parse(process.env.CHAIN_APIS),
+        CHAIN_APIS: JSON.parse(process.env.CHAIN_APIS!),
         BASE_URL: process.env.BASE_URL,
         RECENT_BLOCKS_COUNT: process.env.RECENT_BLOCKS_COUNT,
         BLOCKS_PER_PAGE: process.env.BLOCKS_PER_PAGE,
@@ -43,6 +43,9 @@ export default defineNuxtConfig({
         postcss: {
             postcssOptions: require("./postcss.config.js"),
         },
+    },
+    typescript: {
+        strict: true
     },
     buildModules: ["@intlify/nuxt3"],
     intlify: {

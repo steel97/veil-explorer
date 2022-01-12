@@ -1,5 +1,5 @@
-import { defineNuxtPlugin } from '#app'
-import { Chart, registerables } from 'chart.js';
+import { defineNuxtPlugin } from "#app"
+import { Chart, registerables } from "chart.js";
 
 Chart.register(...registerables);
 

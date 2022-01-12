@@ -9,6 +9,16 @@ Make sure to install the dependencies
 npm install
 ```
 
+## Upgrade nuxt3 to latest version
+```bash
+npx nuxi upgrade
+```
+
+## Check typings
+```bash
+npx nuxi typecheck
+```
+
 ## Development
 
 Start the development server on http://localhost:3000
