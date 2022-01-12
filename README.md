@@ -106,3 +106,5 @@ see [/docs/setup/database.md](/docs/setup/database.md)
 see [/docs/setup/backend.md](/docs/setup/backend.md)
 #### Frontend
 see [/docs/setup/frontend.md](/docs/setup/frontend.md)
+#### NGINX as reverse proxy *(optional)* 
+see [/docs/setup/nginx.md](/docs/setup/nginx.md)

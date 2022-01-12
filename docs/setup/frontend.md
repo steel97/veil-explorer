@@ -1,5 +1,8 @@
 # Frontend setup guide
+## Notes
+*To save file and close nano editor* press **CTRL+X** than **SHIFT+Y** than **ENTER**
 
+## Setup
 Required OS: **ubuntu 20.04+**
 
 Recommended OS: **ubuntu 20.04.3 LTS**

@@ -41,82 +41,75 @@ public class SupplyWorker : BackgroundService
             try
             {
                 ScanTxOutset? scanTxOutsetBudgetRes = null;
-
-
                 if (!_nodeApiCacheSingleton.IsInQueue($"scantxoutset-{_explorerConfig.CurrentValue.BudgetAddress}"))
                 {
                     try
                     {
-                        if (await _nodeApiCacheSingleton.PutInQueueAsync($"scantxoutset-{_explorerConfig.CurrentValue.BudgetAddress}"))
+
+                        // try get balance
+                        var scanTxOutsetFlag = new AsyncFlag
                         {
-                            // try get balance
-                            var scanTxOutsetFlag = new AsyncFlag
-                            {
-                                State = false
-                            };
-                            await _scanTxOutsetBackgroundTaskQueue.QueueBackgroundWorkItemAsync(async (input, token) =>
-                            {
-                                var bridge = (ScanTxOutsetBridge)input;
-                                if (bridge == null || bridge.NodeApiCacheLink == null || bridge.NodeRequesterLink == null) return;
+                            State = false
+                        };
+                        await _scanTxOutsetBackgroundTaskQueue.QueueBackgroundWorkItemAsync(async (input, token) =>
+                        {
+                            var bridge = (ScanTxOutsetBridge)input;
+                            if (bridge == null || bridge.NodeApiCacheLink == null || bridge.NodeRequesterLink == null) return;
 
-                                if (await bridge.NodeApiCacheLink.PutInQueueAsync($"scantxoutset-{_explorerConfig.CurrentValue.BudgetAddress}"))
-                                {
-                                    await bridge.NodeRequesterLink.ScanTxOutsetAndCacheAsync(_explorerConfig.CurrentValue.BudgetAddress, token);
-                                    await bridge.NodeApiCacheLink.RemoveFromQueueAsync($"scantxoutset-{_explorerConfig.CurrentValue.BudgetAddress}");
-                                }
+                            if (await bridge.NodeApiCacheLink.PutInQueueAsync($"scantxoutset-{_explorerConfig.CurrentValue.BudgetAddress}"))
+                            {
+                                await bridge.NodeRequesterLink.ScanTxOutsetAndCacheAsync(_explorerConfig.CurrentValue.BudgetAddress, token);
+                                await bridge.NodeApiCacheLink.RemoveFromQueueAsync($"scantxoutset-{_explorerConfig.CurrentValue.BudgetAddress}");
+                            }
 
-                                if (scanTxOutsetFlag != null)
-                                    scanTxOutsetFlag.State = true;
-                            });
-                            await AsyncUtils.WaitUntilAsync(cancellationToken, () => scanTxOutsetFlag.State, _apiConfig.CurrentValue.ApiQueueSpinDelay, _apiConfig.CurrentValue.ApiQueueSystemWaitTimeout);
-                            scanTxOutsetBudgetRes = _nodeApiCacheSingleton.GetApiCache<ScanTxOutset>($"scantxoutset-{_explorerConfig.CurrentValue.BudgetAddress}");
-                        }
+                            if (scanTxOutsetFlag != null)
+                                scanTxOutsetFlag.State = true;
+                        });
+                        await AsyncUtils.WaitUntilAsync(cancellationToken, () => scanTxOutsetFlag.State, _apiConfig.CurrentValue.ApiQueueSpinDelay, _apiConfig.CurrentValue.ApiQueueSystemWaitTimeout);
                     }
                     catch (TimeoutException)
                     {
 
                     }
                 }
+
+                scanTxOutsetBudgetRes = _nodeApiCacheSingleton.GetApiCache<ScanTxOutset>($"scantxoutset-{_explorerConfig.CurrentValue.BudgetAddress}");
 
 
 
                 ScanTxOutset? scanTxOutsetFoundationRes = null;
-
-
                 if (!_nodeApiCacheSingleton.IsInQueue($"scantxoutset-{_explorerConfig.CurrentValue.FoundationAddress}"))
                 {
                     try
                     {
-                        if (await _nodeApiCacheSingleton.PutInQueueAsync($"scantxoutset-{_explorerConfig.CurrentValue.FoundationAddress}"))
+                        // try get balance
+                        var scanTxOutsetFlag = new AsyncFlag
                         {
-                            // try get balance
-                            var scanTxOutsetFlag = new AsyncFlag
-                            {
-                                State = false
-                            };
-                            await _scanTxOutsetBackgroundTaskQueue.QueueBackgroundWorkItemAsync(async (input, token) =>
-                            {
-                                var bridge = (ScanTxOutsetBridge)input;
-                                if (bridge == null || bridge.NodeApiCacheLink == null || bridge.NodeRequesterLink == null) return;
+                            State = false
+                        };
+                        await _scanTxOutsetBackgroundTaskQueue.QueueBackgroundWorkItemAsync(async (input, token) =>
+                        {
+                            var bridge = (ScanTxOutsetBridge)input;
+                            if (bridge == null || bridge.NodeApiCacheLink == null || bridge.NodeRequesterLink == null) return;
 
-                                if (await bridge.NodeApiCacheLink.PutInQueueAsync($"scantxoutset-{_explorerConfig.CurrentValue.FoundationAddress}"))
-                                {
-                                    await bridge.NodeRequesterLink.ScanTxOutsetAndCacheAsync(_explorerConfig.CurrentValue.FoundationAddress, token);
-                                    await bridge.NodeApiCacheLink.RemoveFromQueueAsync($"scantxoutset-{_explorerConfig.CurrentValue.FoundationAddress}");
-                                }
+                            if (await bridge.NodeApiCacheLink.PutInQueueAsync($"scantxoutset-{_explorerConfig.CurrentValue.FoundationAddress}"))
+                            {
+                                await bridge.NodeRequesterLink.ScanTxOutsetAndCacheAsync(_explorerConfig.CurrentValue.FoundationAddress, token);
+                                await bridge.NodeApiCacheLink.RemoveFromQueueAsync($"scantxoutset-{_explorerConfig.CurrentValue.FoundationAddress}");
+                            }
 
-                                if (scanTxOutsetFlag != null)
-                                    scanTxOutsetFlag.State = true;
-                            });
-                            await AsyncUtils.WaitUntilAsync(cancellationToken, () => scanTxOutsetFlag.State, _apiConfig.CurrentValue.ApiQueueSpinDelay, _apiConfig.CurrentValue.ApiQueueSystemWaitTimeout);
-                            scanTxOutsetFoundationRes = _nodeApiCacheSingleton.GetApiCache<ScanTxOutset>($"scantxoutset-{_explorerConfig.CurrentValue.FoundationAddress}");
-                        }
+                            if (scanTxOutsetFlag != null)
+                                scanTxOutsetFlag.State = true;
+                        });
+                        await AsyncUtils.WaitUntilAsync(cancellationToken, () => scanTxOutsetFlag.State, _apiConfig.CurrentValue.ApiQueueSpinDelay, _apiConfig.CurrentValue.ApiQueueSystemWaitTimeout);
                     }
                     catch (TimeoutException)
                     {
 
                     }
                 }
+
+                scanTxOutsetFoundationRes = _nodeApiCacheSingleton.GetApiCache<ScanTxOutset>($"scantxoutset-{_explorerConfig.CurrentValue.FoundationAddress}");
 
 
                 if (scanTxOutsetBudgetRes != null && scanTxOutsetBudgetRes.Result != null)
