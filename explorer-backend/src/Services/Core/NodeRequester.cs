@@ -51,7 +51,7 @@ public class NodeRequester : INodeRequester
             };
             var response = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", request, options, cancellationToken);
             var data = await response.Content.ReadFromJsonAsync<ScanTxOutset>(options, cancellationToken);
-            if (data != null)
+            if (data != null && data.Result != null)
                 _nodeApiCacheSingleton.SetApiCache($"scantxoutset-{target}", data);
         }
         catch
