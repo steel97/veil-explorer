@@ -125,8 +125,6 @@ onMounted(() => {
   setTimeout(watcherTimer, 0);
 });
 
-onBeforeUnmount(() => (isActive = false));
-
 const watcherTimer = () => {
   if (!isActive) return;
   watcher.value++;
@@ -299,5 +297,8 @@ const blockAppearAnimator = (timestamp: number) => {
   requestAnimationFrame(blockAppearAnimator);
 };
 
-onBeforeUnmount(() => (stopUpdates = true));
+onBeforeUnmount(() => {
+  isActive = false;
+  stopUpdates = true;
+});
 </script>

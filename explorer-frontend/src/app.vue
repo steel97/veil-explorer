@@ -86,12 +86,6 @@ if (availableLocales.indexOf(currentLang) == -1) {
 locale.value = currentLang;
 themeState.value = currentTheme == "dark" ? "dark" : "";
 
-onMounted(() => {
-  if (usedMedia) {
-    document.getElementById("clfix").classList.toggle("dark");
-  }
-});
-
 const meta = computed(() => {
   return {
     meta: [
@@ -164,6 +158,10 @@ const isSynchronizing = computed(() => {
 });
 
 onMounted(() => {
+  if (usedMedia) {
+    document.getElementById("clfix").classList.toggle("dark");
+  }
+
   connect();
 });
 </script>

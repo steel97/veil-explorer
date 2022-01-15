@@ -77,7 +77,9 @@
         <div class="flex justify-start md:justify-end mt-4 md:mt-0">
           <!-- QR section -->
           <div>
+            <!-- TO-DO, use <client-only/> when nuxt3 implement it -->
             <QrcodeVue
+              v-if="renderQR"
               :value="addressReactive"
               :size="180"
               :margin="2"
@@ -184,6 +186,7 @@ const config = useRuntimeConfig();
 const address: string = route.params.address as string;
 const addressReactive = ref(address);
 const reloadingBalance = ref(false);
+const renderQR = ref(false);
 const router = useRouter();
 
 const getAddressDetails = computed(() => {
@@ -326,6 +329,7 @@ if (addressInfo.value != null && !addressInfo.value.fetched)
   router.push("/search/notfound");
 
 onMounted(() => {
+  if (process.client) renderQR.value = true;
   setTimeout(checkLoad, 500);
 });
 
