@@ -284,20 +284,20 @@ const getSize = () => {
   return size;
 };
 
-const calculateBlocksplit = (val) => {
+const calculateBlocksplit = (val: number) => {
   const overall =
-    backgroundData.value?.algoStats?.pos +
-    backgroundData.value?.algoStats?.progpow +
-    backgroundData.value?.algoStats?.randomx +
-    backgroundData.value?.algoStats?.sha256d;
+    backgroundData.value?.algoStats?.pos! +
+    backgroundData.value?.algoStats?.progpow! +
+    backgroundData.value?.algoStats?.randomx! +
+    backgroundData.value?.algoStats?.sha256d!;
   return ((val / overall) * 100).toFixed(2);
 };
 
 const calculateZerocoinTotal = () =>
   (
-    blockchainData.value?.zerocoinsupply.filter(
+    blockchainData.value?.zerocoinsupply?.filter(
       (filter) => filter.denom == "total"
-    )[0].amount / supplyDelimiter.value
+    )[0].amount ?? 0 / supplyDelimiter.value
   ).toFixed(2);
 </script>
 

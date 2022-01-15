@@ -159,7 +159,7 @@ const isSynchronizing = computed(() => {
 
 onMounted(() => {
   if (usedMedia) {
-    document.getElementById("clfix").classList.toggle("dark");
+    document.getElementById("clfix")?.classList.toggle("dark");
   }
 
   connect();

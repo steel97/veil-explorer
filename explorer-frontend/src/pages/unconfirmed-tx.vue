@@ -80,7 +80,7 @@ const selectPage = async (pg: number) => {
 
   const link = buildRouteTemplate().replace("{page}", pg.toString());
   currentPage.value = pg;
-  window.history.replaceState({}, null, link);
+  window.history.replaceState({}, "", link);
   const unconfirmedTxDataLocal = await fetchUnconfirmedTx();
   unconfirmedTxData.value = unconfirmedTxDataLocal.data.value;
 };

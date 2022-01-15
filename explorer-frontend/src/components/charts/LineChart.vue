@@ -8,7 +8,7 @@
 import { GraphData } from "@/models/System/GraphData";
 import { Chart, ChartOptions } from "chart.js";
 
-const ctxRef = ref<HTMLCanvasElement>(null);
+const ctxRef = ref<HTMLCanvasElement | null>(null);
 
 const props = defineProps<{
   data: GraphData;
@@ -73,10 +73,10 @@ const getChartOptions = (): ChartOptions => {
   };
 };
 
-onBeforeUnmount(() => chart.destroy());
+onBeforeUnmount(() => chart?.destroy());
 onMounted(() => {
-  const ctx = ctxRef.value.getContext("2d");
-  chart = new Chart(ctx, {
+  const ctx = ctxRef.value?.getContext("2d");
+  chart = new Chart(ctx!, {
     type: "scatter",
     data: {
       labels: props.data.labels,

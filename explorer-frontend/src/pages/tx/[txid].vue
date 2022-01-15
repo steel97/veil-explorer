@@ -138,7 +138,7 @@ const getConfirmationClass = computed(() => {
 
 const calculateConfirmations = computed(() => {
   if (!tx.value.confirmed) return 0;
-  return data.value.blocks - tx.value.blockHeight + 1;
+  return (data.value?.blocks ?? 0) - tx.value.blockHeight + 1;
 });
 
 const meta = computed(() => {

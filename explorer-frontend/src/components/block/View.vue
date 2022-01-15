@@ -201,13 +201,14 @@ const props = defineProps<{
 const { t } = useI18n();
 const { getPow } = useBlockchain();
 const { formatDateLocal, formatTimeLocal } = useFormatting();
-const confirmationsEl = ref<HTMLElement>(null);
-const confirmationsTooltipEl = ref<HTMLElement>(null);
+const confirmationsEl = ref<HTMLElement | null>(null);
+const confirmationsTooltipEl = ref<HTMLElement | null>(null);
 const config = useRuntimeConfig();
 const data = useBlockchainInfo();
 
 const calculateConfirmations = computed(() => {
-  const confirmations = data.value.blocks - props.block.block.height + 1;
+  const confirmations =
+    (data.value?.blocks ?? 0) - props.block.block.height + 1;
   return confirmations > 0 ? confirmations : 0;
 });
 
@@ -231,11 +232,11 @@ const getBlockWeight = (weight: number) =>
   `width: ${getBlockWeightRaw(weight)}%`;
 
 const showTooltip = () => {
-  confirmationsTooltipEl.value.setAttribute("data-show", "");
+  confirmationsTooltipEl.value?.setAttribute("data-show", "");
 };
 
 const hideTooltip = () => {
-  confirmationsTooltipEl.value.removeAttribute("data-show");
+  confirmationsTooltipEl.value?.removeAttribute("data-show");
 };
 
 const tooltipState = ref(false);
@@ -247,7 +248,7 @@ const toggleTooltip = () => {
 };
 
 onMounted(() => {
-  createPopper(confirmationsEl.value, confirmationsTooltipEl.value, {
+  createPopper(confirmationsEl.value!, confirmationsTooltipEl.value!, {
     placement: "top",
   });
 });

@@ -5,7 +5,6 @@
 </template>
 
 <script setup lang="ts">
-import { reactive } from "@vue/reactivity";
 import { useLatestBlockInfo } from "@/composables/States";
 import { useConfigs } from "@/composables/Configs";
 import { SimplifiedBlock } from "@/models/API/SimplifiedBlock";
@@ -23,6 +22,7 @@ const recentBlocks = reactive<Array<SimplifiedBlock>>(
 const reactivityFix = ref(0);
 
 watch(latestBlock, (nval) => {
+  if (nval == null) return;
   recentBlocks.pop();
   recentBlocks.unshift(nval);
   reactivityFix.value++;

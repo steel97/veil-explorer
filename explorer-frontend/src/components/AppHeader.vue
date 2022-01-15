@@ -270,7 +270,6 @@
   </header>
 </template>
 <script setup lang="ts">
-import { ref } from "@vue/reactivity";
 import { SunIcon, MoonIcon } from "@heroicons/vue/solid";
 import { MenuIcon } from "@heroicons/vue/outline";
 import { useThemeState, useBlockchainInfo } from "@/composables/States";

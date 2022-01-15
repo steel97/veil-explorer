@@ -54,7 +54,6 @@
 
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
-import { reactive } from "@vue/reactivity";
 import { useLatestBlockInfo } from "@/composables/States";
 import { useConfigs } from "@/composables/Configs";
 import { useBackgroundInfo } from "@/composables/States";
@@ -83,7 +82,7 @@ const buildRouteSort = (target: string) =>
 
 const changeSort = async (target: string) => {
   targetSort.value = target == "asc" ? 0 : 1;
-  window.history.replaceState({}, null, buildRouteSort(target));
+  window.history.replaceState({}, "", buildRouteSort(target));
   const blocksInfoLocal = await fetchBlocks();
   blocks.value = blocksInfoLocal.data.value;
   reactivityFix.value++;
@@ -105,7 +104,7 @@ const selectPage = async (pg: number) => {
 
   const link = buildRouteTemplate().replace("{page}", pg.toString());
   currentPage.value = pg;
-  window.history.replaceState({}, null, link);
+  window.history.replaceState({}, "", link);
   const blocksInfoLocal = await fetchBlocks();
   blocks.value = blocksInfoLocal.data.value;
   reactivityFix.value++;
@@ -123,6 +122,7 @@ const blocks = ref<Array<SimplifiedBlock>>(blocksInfo.data.value);
 const reactivityFix = ref(0);
 
 watch(latestBlock, (nval) => {
+  if (nval == null) return;
   if (currentPage.value > 1 || targetSort.value == 0) return;
   blocks.value.pop();
   blocks.value.unshift(nval);

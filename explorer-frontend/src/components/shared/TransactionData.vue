@@ -7,7 +7,7 @@
           :key="'input-' + inputId"
           :id="'input-' + (inputId + 0).toString()"
           class="p-3 bg-gray-200 dark:bg-gray-700 rounded"
-          :class="inputId == props.tx.inputs.length - 1 ? '' : 'mb-4'"
+          :class="inputId == (props.tx.inputs?.length ?? 0) - 1 ? '' : 'mb-4'"
         >
           <div class="block lg:flex justify-between">
             <div
@@ -412,13 +412,13 @@ const formatAmount = (amount: number) => {
 
 const computeTotalInputsAmount = () => {
   let result = 0;
-  props.tx.inputs.forEach((input) => (result += input.prevOutAmount));
+  props.tx.inputs?.forEach((input) => (result += input.prevOutAmount));
   return result;
 };
 
 const computeTotalOutputsAmount = () => {
   let result = 0;
-  props.tx.outputs.forEach((out) => (result += out.amount));
+  props.tx.outputs?.forEach((out) => (result += out.amount));
   return result;
 };
 
@@ -433,7 +433,7 @@ const getAmountForInput = (input: TxVinSimpleDecoded) => {
 };
 
 const getOutputClasses = (outputId: number, output: TxVoutSimpleDecoded) => {
-  let classes = [outputId == props.tx.outputs.length - 1 ? "" : "mb-4"];
+  let classes = [outputId == props.tx.outputs!.length - 1 ? "" : "mb-4"];
 
   if (process.client) {
     if (
