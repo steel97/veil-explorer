@@ -18,9 +18,8 @@ export const useLocalization = () => {
             }
         }
 
-        if (targetLocale != null) return targetLocale;
-        if (process.client) return navigator.language ?? "en-US";
-        return "en-US";
+        const retLocale = targetLocale ?? (process.client ? navigator.language ?? "en-US" : "en-US");
+        return retLocale == "*" ? "en-US" : retLocale;
     };
 
     const getClientLocale = () => {

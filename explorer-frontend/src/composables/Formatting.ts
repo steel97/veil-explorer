@@ -14,6 +14,7 @@ export const useFormatting = () => {
         try {
             return date.toLocaleDateString(getClientLocaleIgnoreCheck());
         } catch {
+            console.log(`[locale failed] is server: ${process.server}, locale: ${getClientLocaleIgnoreCheck()}`);
             return date.toLocaleDateString(fallbackLocale.value.toString());
         }
     };
@@ -25,6 +26,7 @@ export const useFormatting = () => {
         try {
             return date.toLocaleDateString(getClientLocaleIgnoreCheck()) + " " + date.toLocaleTimeString(getClientLocaleIgnoreCheck());
         } catch {
+            console.log(`[locale failed] server: ${process.server}, locale: ${getClientLocaleIgnoreCheck()}`);
             return date.toLocaleDateString(fallbackLocale.value.toString());
         }
     };
@@ -34,6 +36,7 @@ export const useFormatting = () => {
         try {
             return date.toLocaleTimeString(getClientLocaleIgnoreCheck());
         } catch {
+            console.log(`[locale failed] server: ${process.server}, locale: ${getClientLocaleIgnoreCheck()}`);
             return date.toLocaleDateString(fallbackLocale.value.toString());
         }
     };
