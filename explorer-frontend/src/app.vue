@@ -136,11 +136,13 @@ const chainInfo = await useFetch<string, BlockchainInfo>(
   `${getApiPath()}/blockchaininfo`
 );
 
-backgroundInfoDataState.value = {
-  currentSyncedBlock: chainInfo.data.value.currentSyncedBlock,
-  algoStats: chainInfo.data.value.algoStats,
-};
-blockchaininfoDataState.value = chainInfo.data.value.chainInfo;
+if (chainInfo.data.value != null) {
+  backgroundInfoDataState.value = {
+    currentSyncedBlock: chainInfo.data.value.currentSyncedBlock,
+    algoStats: chainInfo.data.value.algoStats,
+  };
+  blockchaininfoDataState.value = chainInfo.data.value.chainInfo;
+}
 
 const isSynchronizing = computed(() => {
   if (
