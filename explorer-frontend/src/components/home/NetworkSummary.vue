@@ -295,9 +295,9 @@ const calculateBlocksplit = (val: number) => {
 
 const calculateZerocoinTotal = () =>
   (
-    blockchainData.value?.zerocoinsupply?.filter(
+    (blockchainData.value?.zerocoinsupply?.filter(
       (filter) => filter.denom == "total"
-    )[0].amount ?? 0 / supplyDelimiter.value
+    )[0].amount ?? 0) / supplyDelimiter.value
   ).toFixed(2);
 </script>
 
