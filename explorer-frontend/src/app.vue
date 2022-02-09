@@ -42,7 +42,6 @@ import { useNetworkManager } from "@/composables/NetworkManager";
 import { useLocalization } from "@/composables/Localization";
 import { BlockchainInfo } from "@/models/API/BlockchainInfo";
 import { useI18n } from "vue-i18n";
-import { useRoute } from "#imports";
 import Cookie from "js-cookie";
 
 const config = useRuntimeConfig();

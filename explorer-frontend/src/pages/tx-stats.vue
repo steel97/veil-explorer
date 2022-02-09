@@ -38,7 +38,15 @@ const fetchStats = async () =>
 const stats = ref((await fetchStats()).data);
 
 const getData = (key: string, rate = false) => {
-  if (!pageReady.value) return;
+  const emptyData: GraphData = {
+    data: [],
+    labels: [],
+    title: "unknown",
+    xaxisTitle: "unknown",
+    xaxisStep: 5,
+    yaxisTitle: "unknown",
+  };
+  if (!pageReady.value) return emptyData;
 
   const cdataval = stats.value.txStats[key] as TxStatsEntry;
 

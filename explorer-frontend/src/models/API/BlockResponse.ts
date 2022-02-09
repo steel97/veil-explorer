@@ -85,5 +85,5 @@ export interface BlockResponse {
     versionHex: string | null;
     txnCount: number;
     block: Block;
-    transactions: TransactionSimpleDecoded;
+    transactions: Array<TransactionSimpleDecoded>;
 }

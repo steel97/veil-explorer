@@ -74,12 +74,14 @@ export TXS_PER_PAGE=15
 export MAX_BLOCK_WEIGHT=4000000
 export SYNC_NOTICE_CASE=15
 export COOKIE_SAVE_DAYS=90
+
+node server/index.mjs
 ```
 See: [/docs/frontend-configuration.md](/docs/frontend-configuration.md)
 
 ## Change permissions and test frontend
 ```bash
-chmod 777 start.sh
+sudo chmod 777 start.sh
 node server/index.mjs
 ```
 If there are no errors, move to next step.
