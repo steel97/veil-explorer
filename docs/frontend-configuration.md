@@ -4,7 +4,7 @@ Frontend take configuration from environment variables.
 
 Default way to run frontend with custom configuration is to create startup script.
 
-On **linux** variables defined int script in this way:
+On **linux** variables defined in script this way:
 ```bash
 export [key]=[value]
 ```

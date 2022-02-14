@@ -13,23 +13,23 @@ declare module "@nuxt/schema" {
 // https://v3.nuxtjs.org/docs/directory-structure/nuxt.config
 export default defineNuxtConfig({
     publicRuntimeConfig: {
-        CHAIN_DEFAULT: process.env.CHAIN_DEFAULT,
-        CHAIN_APIS: JSON.parse(process.env.CHAIN_APIS!),
-        BASE_URL: process.env.BASE_URL,
-        RECENT_BLOCKS_COUNT: process.env.RECENT_BLOCKS_COUNT,
-        BLOCKS_PER_PAGE: process.env.BLOCKS_PER_PAGE,
-        TXS_PER_PAGE: process.env.TXS_PER_PAGE,
-        MAX_BLOCK_WEIGHT: process.env.MAX_BLOCK_WEIGHT,
-        SYNC_NOTICE_CASE: process.env.SYNC_NOTICE_CASE,
-        COOKIE_SAVE_DAYS: process.env.COOKIE_SAVE_DAYS,
+        BASE_URL: process.env.BASE_URL! as string,
+        CHAIN_DEFAULT: process.env.CHAIN_DEFAULT! as string,
+        CHAIN_APIS: JSON.parse(process.env.CHAIN_APIS! as string),
+        RECENT_BLOCKS_COUNT: parseInt(process.env.RECENT_BLOCKS_COUNT!),
+        BLOCKS_PER_PAGE: parseInt(process.env.BLOCKS_PER_PAGE!),
+        TXS_PER_PAGE: parseInt(process.env.TXS_PER_PAGE!),
+        MAX_BLOCK_WEIGHT: parseInt(process.env.MAX_BLOCK_WEIGHT!),
+        SYNC_NOTICE_CASE: parseInt(process.env.SYNC_NOTICE_CASE!),
+        COOKIE_SAVE_DAYS: parseInt(process.env.COOKIE_SAVE_DAYS!),
         locales: {
             "en": "English",
             "ru": "Русский"
         }
     },
     privateRuntimeConfig: {
-        BASE_URL: process.env.BASE_URL,
-        CHAIN_APIS: process.env.CHAIN_APIS
+        BASE_URL: process.env.BASE_URL! as string,
+        CHAIN_APIS: process.env.CHAIN_APIS! as string
     },
     srcDir: "src/",
     css: ["~/assets/css/tailwind.css"],
