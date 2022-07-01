@@ -66,6 +66,7 @@ txindex=1
 1. Unpack **explorer-backend.\[os\]-\[arch\].self-contained.release-\[version\].tar.gz**
 2. Copy [/explorer-backend/appsettings.json.tpl](/explorer-backend/appsettings.json.tpl) to \[server directory\]/appsettings.json
 3. Change **postgresql** connection string inside **appsettings.json**, change other parameters.
+4. Create data dir inside backend folder
 
 See: [/docs/backend-configuration.md](/docs/backend-configuration.md)
 

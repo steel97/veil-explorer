@@ -85,7 +85,7 @@ public class BlockController : ControllerBase
                 };
 
 
-            var rtxs = await _transactionsRepository.GetTransactionsForBlockAsync(block.height, body.Offset, body.Count, cancellationToken);
+            var rtxs = await _transactionsRepository.GetTransactionsForBlockAsync(block.height, body.Offset, body.Count, false, cancellationToken);
             if (rtxs != null)
             {
                 var txTargets = new List<TxDecodeTarget>();

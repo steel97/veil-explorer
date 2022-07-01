@@ -3,6 +3,7 @@
     "DefaultConnection": "Host=/var/run/postgresql/;Port=5432;Database=veilexplorer;Username=<USER>;Password=<PASSWORD>;Pooling=true;Maximum Pool Size=100;Tcp Keepalive=true;Keepalive=60;No Reset On Close=true;Client Encoding=UTF8"
   },
   "Server": {
+    "InternalAccessKey": "",
     "CorsOrigins": [
       "http://localhost:3000"
     ],

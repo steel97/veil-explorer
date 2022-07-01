@@ -32,7 +32,9 @@ sudo tar -xzf explorer-backend.linux-x86_64.self-contained.release-1.1.0.tar.gz 
 
 ## Issue permissions for backend
 ```bash
+mkdir /home/explorer-backend/server/data
 sudo chmod 755 /home/explorer-backend/server
+sudo chmod 755 /home/explorer-backend/server/data
 sudo chmod 777 /home/explorer-backend/server/explorer-backend
 sudo chown -R explorer-backend /home/explorer-backend/server/
 ```
@@ -43,6 +45,7 @@ sudo chown -R explorer-backend /home/explorer-backend/server/
 sudo cd /home/explorer-backend/server/
 sudo wget https://raw.githubusercontent.com/steel97/veil-explorer/master/explorer-backend/appsettings.json.tpl
 sudo mv /home/explorer-backend/server/appsettings.json.tpl /home/explorer-backend/server/appsettings.json
+
 # Edit configuration
 sudo nano /home/explorer-backend/server/appsettings.json
 ```

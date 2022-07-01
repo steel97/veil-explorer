@@ -16,22 +16,20 @@ public class TxController : ControllerBase
 {
 
     private readonly ILogger _logger;
-    private readonly IOptions<APIConfig> _apiConfig;
     private readonly IBlocksRepository _blocksRepository;
     private readonly ITransactionsRepository _transactionsRepository;
     private readonly ITransactionDecoder _transactionDecoder;
-    private readonly ChaininfoSingleton _chaininfoSingleton;
     private readonly IUtilityService _utilityService;
+    private readonly ChaininfoSingleton _chaininfoSingleton;
 
-    public TxController(ILogger<TxController> logger, IOptions<APIConfig> apiConfig, IBlocksRepository blocksRepository, ITransactionsRepository transactionsRepository, ITransactionDecoder transactionDecoder, ChaininfoSingleton chaininfoSingleton, IUtilityService utilityService)
+    public TxController(ILogger<TxController> logger, IBlocksRepository blocksRepository, ITransactionsRepository transactionsRepository, ITransactionDecoder transactionDecoder, IUtilityService utilityService, ChaininfoSingleton chaininfoSingleton)
     {
         _logger = logger;
-        _apiConfig = apiConfig;
         _blocksRepository = blocksRepository;
         _transactionsRepository = transactionsRepository;
         _transactionDecoder = transactionDecoder;
-        _chaininfoSingleton = chaininfoSingleton;
         _utilityService = utilityService;
+        _chaininfoSingleton = chaininfoSingleton;
     }
 
     [HttpPost(Name = "GetTx")]

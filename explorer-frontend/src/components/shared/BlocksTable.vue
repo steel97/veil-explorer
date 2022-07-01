@@ -1,7 +1,5 @@
 <template>
-  <div
-    class="hidden md:grid md:grid-cols-7 p-1 py-4 text-sm gap-3 font-semibold"
-  >
+  <div class="hidden md:grid md:grid-cols-7 p-1 py-4 text-sm gap-3 font-semibold">
     <div>{{ t("Blocks.Height") }}</div>
     <div>{{ t("Blocks.Timestamp") }}</div>
     <div>{{ t("Blocks.Age") }}</div>
@@ -10,37 +8,22 @@
     <div>{{ t("Blocks.Size") }}</div>
     <div>{{ t("Blocks.Weight") }}</div>
   </div>
-  <div
-    class="grid grid-cols-2 md:grid-cols-7 p-1 py-4 text-sm gap-3"
-    v-for="(val, index) in props.data"
-    :key="'block-' + val.height"
-    :class="index < props.data.length - 1 ? 'border-b' : ''"
-    :id="'block-' + val.height"
-  >
+  <div class="grid grid-cols-2 md:grid-cols-7 p-1 py-4 text-sm gap-3" v-for="(val, index) in props.data"
+    :key="'block-' + val.height" :class="index < props.data.length - 1 ? 'border-b' : ''" :id="'block-' + val.height">
     <div>
-      <NuxtLink
-        :to="'/block-height/' + val.height"
-        class="
+      <NuxtLink :to="'/block-height/' + val.height" class="
           text-sky-700
           dark:text-sky-400
           hover:underline
           underline-offset-4
-        "
-        >#{{ val.height }}</NuxtLink
-      >
+        ">#{{ val.height }}</NuxtLink>
     </div>
-    <button
-      :aria-label="t('Blocks.Expand')"
-      class="flex justify-end items-center md:hidden"
-      @click="toggleBlockInfo(val)"
-    >
+    <button :aria-label="t('Blocks.Expand')" class="flex justify-end items-center md:hidden"
+      @click="toggleBlockInfo(val)">
       <span>{{ getAge(val) }}</span>
       <ChevronDownIcon class="h-5 w-5 text-sky-700 dark:text-sky-400" />
     </button>
-    <div
-      class="md:hidden grid grid-cols-2 col-span-2"
-      v-if="openedBlock.indexOf(val.height) > -1"
-    >
+    <div class="md:hidden grid grid-cols-2 col-span-2" v-if="openedBlock.indexOf(val.height) > -1">
       <div>{{ t("Blocks.Timestamp") }}</div>
       <div class="text-right">
         <div>{{ formatDateLocal(val.time) }}</div>
@@ -52,11 +35,8 @@
       <div>{{ t("Blocks.Type") }}</div>
       <div class="text-right">
         <div>{{ getPow(val.proofType)[0] }}</div>
-        <div
-          class="text-xs text-gray-500 dark:text-gray-400 yy"
-          v-if="getPow(val.proofType)[2] != null"
-          v-html="getPow(val.proofType)[1]"
-        ></div>
+        <div class="text-xs text-gray-500 dark:text-gray-400 yy" v-if="getPow(val.proofType)[2] != null"
+          v-html="getPow(val.proofType)[1]"></div>
       </div>
 
       <div>{{ t("Blocks.Transactions") }}</div>
@@ -69,10 +49,7 @@
       <div class="text-right">
         <div>{{ val.weight }} ({{ getBlockWeightRaw(val) }}%)</div>
         <div class="rounded bg-gray-200 dark:bg-gray-600 h-1">
-          <div
-            class="rounded bg-sky-700 dark:bg-sky-400 h-full"
-            :style="getBlockWeight(val)"
-          ></div>
+          <div class="rounded bg-sky-700 dark:bg-sky-400 h-full" :style="getBlockWeight(val)"></div>
         </div>
       </div>
     </div>
@@ -85,20 +62,14 @@
     <div class="hidden md:block">{{ getAge(val) }}</div>
     <div class="hidden md:block">
       <div>{{ getPow(val.proofType)[0] }}</div>
-      <div
-        class="text-xs text-gray-500 dark:text-gray-400"
-        v-html="getPow(val.proofType)[1]"
-      ></div>
+      <div class="text-xs text-gray-500 dark:text-gray-400" v-html="getPow(val.proofType)[1]"></div>
     </div>
     <div class="hidden md:block">{{ val.txCount }}</div>
     <div class="hidden md:block">{{ val.size }}</div>
     <div class="hidden md:block">
       <div>{{ val.weight }} ({{ getBlockWeightRaw(val) }}%)</div>
       <div class="rounded bg-gray-200 dark:bg-gray-600 h-1">
-        <div
-          class="rounded bg-sky-700 dark:bg-sky-400 h-full"
-          :style="getBlockWeight(val)"
-        ></div>
+        <div class="rounded bg-sky-700 dark:bg-sky-400 h-full" :style="getBlockWeight(val)"></div>
       </div>
     </div>
   </div>

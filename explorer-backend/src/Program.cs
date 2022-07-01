@@ -82,6 +82,7 @@ app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
     endpoints.MapHub<EventsHub>("/api/events");
+    endpoints.MapHub<InternalHub>("/api/internal");
 });
 
 app.Run();
