@@ -17,6 +17,7 @@ builder.Services.Configure<ExplorerConfig>(builder.Configuration.GetSection("Exp
 builder.Services.Configure<ServerConfig>(builder.Configuration.GetSection("Server"));
 
 builder.Services.AddSingleton<ChaininfoSingleton>();
+builder.Services.AddSingleton<InternalSingleton>();
 builder.Services.AddSingleton<NodeApiCacheSingleton>();
 builder.Services.AddSingleton<IUtilityService, UtilityService>();
 builder.Services.AddSingleton<INodeRequester, NodeRequester>();

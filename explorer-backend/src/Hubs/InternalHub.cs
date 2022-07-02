@@ -12,6 +12,7 @@ namespace ExplorerBackend.Hubs;
 public class InternalHub : Hub
 {
     private readonly ChaininfoSingleton _chainInfoSingleton;
+    private readonly InternalSingleton _internalSingleton;
     private readonly ILogger _logger;
     private readonly IOptions<ServerConfig> _serverConfig;
     private readonly IBlocksRepository _blocksRepository;
@@ -19,9 +20,10 @@ public class InternalHub : Hub
     private readonly ITransactionDecoder _transactionDecoder;
     private readonly IUtilityService _utilityService;
 
-    public InternalHub(ILogger<EventsHub> logger, ChaininfoSingleton chainInfoSingleton, IOptions<ServerConfig> serverConfig, IBlocksRepository blocksRepository, ITransactionsRepository transactionsRepository, ITransactionDecoder transactionDecoder, IUtilityService utilityService)
+    public InternalHub(ILogger<EventsHub> logger, ChaininfoSingleton chainInfoSingleton, InternalSingleton internalSingleton, IOptions<ServerConfig> serverConfig, IBlocksRepository blocksRepository, ITransactionsRepository transactionsRepository, ITransactionDecoder transactionDecoder, IUtilityService utilityService)
     {
         _chainInfoSingleton = chainInfoSingleton;
+        _internalSingleton = internalSingleton;
         _serverConfig = serverConfig;
         _blocksRepository = blocksRepository;
         _transactionsRepository = transactionsRepository;
@@ -55,165 +57,178 @@ public class InternalHub : Hub
             return;
         }
 
-        var internalId = DateTimeOffset.Now.ToUnixTimeSeconds();
-
-        await Clients.Caller.SendAsync("dllink", internalId, cancellationToken); // end
-
-        var txInputs = new Dictionary<string, Dictionary<string, double>>(); // address, Dict<txid, amount>
-        var txOutputs = new Dictionary<string, Dictionary<string, double>>(); // address, Dict<txid, amount>
-
-        var mBlock = _chainInfoSingleton.CurrentSyncedBlock;
-        var si = 0;
-        for (var i = 1; i <= mBlock; i++)
+        try
         {
-            var rtxs = await _transactionsRepository.GetTransactionsForBlockAsync(i, 0, 0, true, cancellationToken);
-            if (rtxs != null)
+            _internalSingleton.ActiveExportTasks++;
+
+            var internalId = DateTimeOffset.Now.ToUnixTimeSeconds();
+
+            await Clients.Caller.SendAsync("dllink", internalId, cancellationToken); // end
+
+            var txInputs = new Dictionary<string, Dictionary<string, double>>(); // address, Dict<txid, amount>
+            var txOutputs = new Dictionary<string, Dictionary<string, double>>(); // address, Dict<txid, amount>
+
+            var mBlock = _chainInfoSingleton.CurrentSyncedBlock;
+            var si = 0;
+            for (var i = 1; i <= mBlock; i++)
             {
-                var txTargets = new List<TxDecodeTarget>();
-
-                rtxs.ForEach(rtx => txTargets.Add(new TxDecodeTarget
+                var rtxs = await _transactionsRepository.GetTransactionsForBlockAsync(i, 0, 0, true, cancellationToken);
+                if (rtxs != null)
                 {
-                    TxId = rtx.txid_hex!,
-                    Data = rtx.data
-                }));
+                    var txTargets = new List<TxDecodeTarget>();
 
-                var decodedTransactions = await _transactionDecoder.DecodeTransactionsAsync(txTargets, i, cancellationToken);
-
-                if (decodedTransactions != null)
-                    foreach (var dtr in decodedTransactions)
+                    rtxs.ForEach(rtx => txTargets.Add(new TxDecodeTarget
                     {
-                        /* search for address in inputs (send operations) */
-                        if (dtr.Inputs != null)
-                            foreach (var input in dtr.Inputs)
-                            {
-                                input.PrevOutAddresses?.ForEach(addr =>
+                        TxId = rtx.txid_hex!,
+                        Data = rtx.data
+                    }));
+
+                    var decodedTransactions = await _transactionDecoder.DecodeTransactionsAsync(txTargets, i, cancellationToken);
+
+                    if (decodedTransactions != null)
+                        foreach (var dtr in decodedTransactions)
+                        {
+                            /* search for address in inputs (send operations) */
+                            if (dtr.Inputs != null)
+                                foreach (var input in dtr.Inputs)
                                 {
-                                    foreach (var address in addresses)
+                                    input.PrevOutAddresses?.ForEach(addr =>
                                     {
-
-                                        if (addr == address)
+                                        foreach (var address in addresses)
                                         {
-                                            if (!txInputs.ContainsKey(address))
-                                                txInputs.Add(address, new());
 
-                                            if (txInputs[address].ContainsKey(dtr.TxId!))
-                                                txInputs[address][dtr.TxId!] += input.PrevOutAmount / 100000000.0d;
-                                            else
-                                                txInputs[address].Add(dtr.TxId!, input.PrevOutAmount / 100000000.0d);
+                                            if (addr == address)
+                                            {
+                                                if (!txInputs.ContainsKey(address))
+                                                    txInputs.Add(address, new());
+
+                                                if (txInputs[address].ContainsKey(dtr.TxId!))
+                                                    txInputs[address][dtr.TxId!] += input.PrevOutAmount / 100000000.0d;
+                                                else
+                                                    txInputs[address].Add(dtr.TxId!, input.PrevOutAmount / 100000000.0d);
+                                            }
+
                                         }
-
-                                    }
-                                });
-                            }
-                        /* search for address in outputs (receive operations) */
-                        if (dtr.Outputs != null)
-                            foreach (var output in dtr.Outputs)
-                            {
-                                output.Addresses?.ForEach(addr =>
+                                    });
+                                }
+                            /* search for address in outputs (receive operations) */
+                            if (dtr.Outputs != null)
+                                foreach (var output in dtr.Outputs)
                                 {
-                                    foreach (var address in addresses)
+                                    output.Addresses?.ForEach(addr =>
                                     {
-
-                                        if (addr == address)
+                                        foreach (var address in addresses)
                                         {
-                                            if (!txOutputs.ContainsKey(address))
-                                                txOutputs.Add(address, new());
 
-                                            if (txOutputs[address].ContainsKey(dtr.TxId!))
-                                                txOutputs[address][dtr.TxId!] += output.Amount / 100000000.0d;
-                                            else
-                                                txOutputs[address].Add(dtr.TxId!, output.Amount / 100000000.0d);
+                                            if (addr == address)
+                                            {
+                                                if (!txOutputs.ContainsKey(address))
+                                                    txOutputs.Add(address, new());
+
+                                                if (txOutputs[address].ContainsKey(dtr.TxId!))
+                                                    txOutputs[address][dtr.TxId!] += output.Amount / 100000000.0d;
+                                                else
+                                                    txOutputs[address].Add(dtr.TxId!, output.Amount / 100000000.0d);
+                                            }
+
                                         }
+                                    });
+                                }
+                        }
+                }
 
-                                    }
-                                });
-                            }
+                if (si >= 1000)
+                {
+                    si = 0;
+                    try
+                    {
+                        await Clients.Caller.SendAsync("progress", i, mBlock, cancellationToken); // progress
                     }
+                    catch
+                    {
+
+                    }
+                }
+                si++;
             }
 
-            if (si >= 1000)
+            var fileId = "./data/export-txs-" + internalId + ".xlsx";
+
+            var workbook = new Workbook(fileId, "Addr-1");
+            if (addresses.Length > 1)
+                for (var i = 2; i <= addresses.Length; i++)
+                    workbook.AddWorksheet("Addr-" + i);
+
+            var index = 1;
+            foreach (var address in addresses)
             {
-                si = 0;
                 try
                 {
-                    await Clients.Caller.SendAsync("progress", i, mBlock, cancellationToken); // progress
+                    workbook.SetCurrentWorksheet("Addr-" + index);
+                    workbook.CurrentWorksheet.AddNextCell("Address");
+                    workbook.CurrentWorksheet.AddNextCell(address);
+                    workbook.CurrentWorksheet.GoToNextRow();
+
+                    workbook.CurrentWorksheet.AddNextCell("Sent");
+                    workbook.CurrentWorksheet.AddNextCell("");
+                    workbook.CurrentWorksheet.AddNextCell("Received");
+                    workbook.CurrentWorksheet.AddNextCell("");
+                    workbook.CurrentWorksheet.GoToNextRow();
+
+                    workbook.CurrentWorksheet.AddNextCell("Tx ID");
+                    workbook.CurrentWorksheet.AddNextCell("Amount");
+                    workbook.CurrentWorksheet.AddNextCell("Tx ID");
+                    workbook.CurrentWorksheet.AddNextCell("Amount");
+
+                    if (txInputs.ContainsKey(address))
+                    {
+                        var fieldIndex = 0;
+                        foreach (var input in txInputs[address])
+                        {
+                            workbook.CurrentWorksheet.AddCell(input.Key, 0, 3 + fieldIndex); // input tx
+                            workbook.CurrentWorksheet.AddCell(input.Value, 1, 3 + fieldIndex); // input amount
+
+                            fieldIndex++;
+                        }
+                    }
+
+                    if (txOutputs.ContainsKey(address))
+                    {
+                        var fieldIndex = 0;
+                        foreach (var output in txOutputs[address])
+                        {
+                            workbook.CurrentWorksheet.AddCell(output.Key, 2, 3 + fieldIndex); // output tx
+                            workbook.CurrentWorksheet.AddCell(output.Value, 3, 3 + fieldIndex); // output amount
+
+                            fieldIndex++;
+                        }
+                    }
                 }
                 catch
                 {
 
                 }
+
+                index++;
             }
-            si++;
-        }
 
-        var fileId = "./data/export-txs-" + internalId + ".xlsx";
-
-        var workbook = new Workbook(fileId, "Addr-1");
-        if (addresses.Length > 1)
-            for (var i = 2; i <= addresses.Length; i++)
-                workbook.AddWorksheet("Addr-" + i);
-
-        var index = 1;
-        foreach (var address in addresses)
-        {
-            try
+            workbook.Save();
+            /*try
             {
-                workbook.SetCurrentWorksheet("Addr-" + index);
-                workbook.CurrentWorksheet.AddNextCell("Address");
-                workbook.CurrentWorksheet.AddNextCell(address);
-                workbook.CurrentWorksheet.GoToNextRow();
-
-                workbook.CurrentWorksheet.AddNextCell("Sent");
-                workbook.CurrentWorksheet.AddNextCell("");
-                workbook.CurrentWorksheet.AddNextCell("Received");
-                workbook.CurrentWorksheet.AddNextCell("");
-                workbook.CurrentWorksheet.GoToNextRow();
-
-                workbook.CurrentWorksheet.AddNextCell("Tx ID");
-                workbook.CurrentWorksheet.AddNextCell("Amount");
-                workbook.CurrentWorksheet.AddNextCell("Tx ID");
-                workbook.CurrentWorksheet.AddNextCell("Amount");
-
-                if (txInputs.ContainsKey(address))
-                {
-                    var fieldIndex = 0;
-                    foreach (var input in txInputs[address])
-                    {
-                        workbook.CurrentWorksheet.AddCell(input.Key, 0, 3 + fieldIndex); // input tx
-                        workbook.CurrentWorksheet.AddCell(input.Value, 1, 3 + fieldIndex); // input amount
-
-                        fieldIndex++;
-                    }
-                }
-
-                if (txOutputs.ContainsKey(address))
-                {
-                    var fieldIndex = 0;
-                    foreach (var output in txOutputs[address])
-                    {
-                        workbook.CurrentWorksheet.AddCell(output.Key, 2, 3 + fieldIndex); // output tx
-                        workbook.CurrentWorksheet.AddCell(output.Value, 3, 3 + fieldIndex); // output amount
-
-                        fieldIndex++;
-                    }
-                }
+                await Clients.Caller.SendAsync("done", internalId, cancellationToken); // end
             }
             catch
             {
 
-            }
-
-            index++;
+            }*/
         }
-
-        workbook.Save();
-        /*try
+        catch (Exception ex)
         {
-            await Clients.Caller.SendAsync("done", internalId, cancellationToken); // end
+            _logger.LogError(ex, "Error occured at InternalHub/FetchBasecoinTxs");
         }
-        catch
+        finally
         {
-
-        }*/
+            _internalSingleton.ActiveExportTasks--;
+        }
     }
 }
