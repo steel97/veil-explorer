@@ -24,7 +24,7 @@ public class FetchExportedTxs : ControllerBase
     [HttpGet(Name = "FetchExportedTxs")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public IActionResult Get(string accessKey, string internalId, CancellationToken cancellationToken)
+    public IActionResult Get(string accessKey, int internalId, CancellationToken cancellationToken)
     {
         if (accessKey != _serverConfig.Value.InternalAccessKey) return Problem("invalid access key", statusCode: 400);
         if (!System.IO.File.Exists("./data/export-txs-" + internalId + ".xlsx")) return Problem("can't find file", statusCode: 400);
