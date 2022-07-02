@@ -26,7 +26,7 @@ public class BackendState : ControllerBase
     [HttpGet(Name = "BackendState")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public IActionResult Get(string accessKey, long internalId, CancellationToken cancellationToken)
+    public IActionResult Get(string accessKey, CancellationToken cancellationToken)
     {
         if (accessKey != _serverConfig.Value.InternalAccessKey) return Problem("invalid access key", statusCode: 400);
 
