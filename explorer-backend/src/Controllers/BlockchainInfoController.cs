@@ -23,11 +23,35 @@ public class BlockchainInfoController : ControllerBase
     [ProducesResponseType(typeof(BlockchainInfo), StatusCodes.Status200OK)]
     public BlockchainInfo Get()
     {
+        var dict = new Dictionary<string, double>();
+        if (_chainInfoSingleton.CurrentChainInfo != null)
+        {
+            // progpow
+            {
+                var calc = _chainInfoSingleton.CurrentChainInfo.Difficulty_progpow / VeilStructs.VeilChainParams.nProgPowTargetSpacing;
+                calc *= Math.Pow(2, 32);
+                dict.Add("progpow", calc);
+            }
+            // randomx
+            {
+                var calc = _chainInfoSingleton.CurrentChainInfo.Difficulty_randomx / VeilStructs.VeilChainParams.nRandomXTargetSpacing;
+                calc *= Math.Pow(2, 32);
+                dict.Add("randomx", calc);
+            }
+            // sha256d
+            {
+                var calc = _chainInfoSingleton.CurrentChainInfo.Difficulty_sha256d / VeilStructs.VeilChainParams.nRandomXTargetSpacing;
+                calc *= Math.Pow(2, 32);
+                dict.Add("sha256d", calc);
+            }
+        }
+
         return new BlockchainInfo
         {
             CurrentSyncedBlock = _chainInfoSingleton.CurrentSyncedBlock,
             ChainInfo = _chainInfoSingleton.CurrentChainInfo,
-            AlgoStats = _chainInfoSingleton.CurrentChainAlgoStats
+            AlgoStats = _chainInfoSingleton.CurrentChainAlgoStats,
+            NetworkHashrates = dict
         };
     }
 }

@@ -1,3 +1,4 @@
+/* this code is partial port of cpp original code */
 using System.Text;
 
 namespace ExplorerBackend.VeilStructs;
@@ -30,6 +31,15 @@ public class VeilChainParams
 
     public byte[] bech32_hrp_stealth = new byte[] { (byte)'s', (byte)'v' };
     public byte[] bech32_hrp_base = new byte[] { (byte)'b', (byte)'v' };
+
+    /*
+     consensus.nProgPowTargetSpacing = 172;
+     consensus.nRandomXTargetSpacing = 600;
+     consensus.nSha256DTargetSpacing = 1200;
+    */
+    public const int nProgPowTargetSpacing = 172;
+    public const int nRandomXTargetSpacing = 600;
+    public const int nSha256DTargetSpacing = 1200;
 
 
     public VeilChainParams()
