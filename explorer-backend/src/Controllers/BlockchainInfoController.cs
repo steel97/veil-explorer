@@ -40,7 +40,7 @@ public class BlockchainInfoController : ControllerBase
             }
             // sha256d
             {
-                var calc = _chainInfoSingleton.CurrentChainInfo.Difficulty_sha256d / VeilStructs.VeilChainParams.nRandomXTargetSpacing;
+                var calc = _chainInfoSingleton.CurrentChainInfo.Difficulty_sha256d / VeilStructs.VeilChainParams.nSha256DTargetSpacing;
                 calc *= Math.Pow(2, 32);
                 dict.Add("sha256d", calc);
             }
