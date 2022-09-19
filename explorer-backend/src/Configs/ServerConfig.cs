@@ -11,4 +11,5 @@ public class Swagger
 {
     public bool Enabled { get; set; }
     public string? RoutePrefix { get; set; }
+    public bool RedirectFromHomepage { get; set; }
 }
