@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using ExplorerBackend.Models.Node;
 using ExplorerBackend.Models.Node.Response;
 using ExplorerBackend.Configs;
+using ExplorerBackend.Services.Caching;
 using ExplorerBackend.Services.Core;
 
 namespace ExplorerBackend.Controllers;
@@ -14,7 +15,7 @@ public class NodeProxyController : ControllerBase
 {
     private static List<string> NODE_ALLOWED_METHODS = new(new string[] {
         "importlightwalletaddress", "getwatchonlystatus", "getwatchonlytxes", "checkkeyimage", "checkkeyimages", "getanonoutputs",
-        "sendrawtransaction"
+        "sendrawtransaction", "getblockchaininfo"
     });
     private static JsonSerializerOptions serializeOptions = new()
     {
@@ -26,13 +27,15 @@ public class NodeProxyController : ControllerBase
     private readonly IOptions<ServerConfig> _serverConfig;
     private readonly IUtilityService _utilityService;
     private readonly INodeRequester _nodeRequester;
+    private readonly ChaininfoSingleton _chainInfoSingleton;
 
-    public NodeProxyController(ILogger<NodeProxyController> logger, IOptions<ServerConfig> serverConfig, IUtilityService utilityService, INodeRequester nodeRequester)
+    public NodeProxyController(ILogger<NodeProxyController> logger, IOptions<ServerConfig> serverConfig, IUtilityService utilityService, INodeRequester nodeRequester, ChaininfoSingleton chainInfoSingleton)
     {
         _logger = logger;
         _serverConfig = serverConfig;
         _utilityService = utilityService;
         _nodeRequester = nodeRequester;
+        _chainInfoSingleton = chainInfoSingleton;
     }
 
     [HttpGet]
@@ -53,6 +56,7 @@ public class NodeProxyController : ControllerBase
             var error = new GenericResult
             {
                 Result = null,
+                Id = model.Id,
                 Error = new()
                 {
                     Code = -2,
@@ -61,6 +65,15 @@ public class NodeProxyController : ControllerBase
             };
             return Content(JsonSerializer.Serialize<GenericResult>(error, serializeOptions), "application/json");
         }
+
+        if ((model.Method ?? "").ToLowerInvariant() == "getblockchaininfo")
+        {
+            var res1 = new GetBlockchainInfo();
+            res1.Id = model.Id;
+            res1.Result = _chainInfoSingleton.CurrentChainInfo;
+            return Ok(res1);
+        }
+
 
         var res = await _nodeRequester.NodeRequest(model.Method, model.Params, cancellationToken);
         return Content(res, "application/json");
