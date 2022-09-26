@@ -14,7 +14,7 @@ namespace ExplorerBackend.Controllers;
 public class NodeProxyController : ControllerBase
 {
     private static List<string> NODE_ALLOWED_METHODS = new(new string[] {
-        "importlightwalletaddress", "getwatchonlystatus", "getwatchonlytxes", "checkkeyimage", "checkkeyimages", "getanonoutputs",
+        "importlightwalletaddress", "getwatchonlystatus", "getwatchonlytxes", "checkkeyimages", "getanonoutputs",
         "sendrawtransaction", "getblockchaininfo"
     });
     private static JsonSerializerOptions serializeOptions = new()
