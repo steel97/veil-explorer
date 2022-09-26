@@ -7,7 +7,8 @@ using ExplorerBackend.Services.Workers;
 using ExplorerBackend.Services.Queues;
 using ExplorerBackend.Persistence.Repositories;
 
-var baseCorsPolicty = "_baseCorsPolicy";
+var baseCorsPolicy = "_baseCorsPolicy";
+var nodeProxyPolicy = "_nodeProxy";
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,10 +52,14 @@ var corsOrigins = builder.Configuration.GetSection("Server:CorsOrigins").Get<str
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(baseCorsPolicty, corsBuilder =>
+    /*options.AddPolicy(baseCorsPolicy, corsBuilder =>
     {
         corsOrigins.ToList().ForEach(entry => corsBuilder.WithOrigins(entry).AllowAnyHeader().AllowAnyMethod().AllowCredentials());
-    });
+    });*/
+    options.AddPolicy(nodeProxyPolicy, corsBuilder => corsBuilder
+                 .AllowAnyOrigin()
+                 .AllowAnyMethod()
+                 .AllowAnyHeader());
 });
 
 var app = builder.Build();
@@ -71,7 +76,7 @@ if (swaggerConfig.Swagger?.Enabled ?? false)
     });
 }
 
-app.UseCors(baseCorsPolicty);
+app.UseCors(nodeProxyPolicy);
 
 app.UseRouting();
 
