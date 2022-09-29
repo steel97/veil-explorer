@@ -15,12 +15,14 @@ public class NodeProxyController : ControllerBase
 {
     private static List<string> NODE_ALLOWED_METHODS = new(new string[] {
         "importlightwalletaddress", "getwatchonlystatus", "getwatchonlytxes", "checkkeyimages", "getanonoutputs",
-        "sendrawtransaction", "getblockchaininfo"
+        "sendrawtransaction", "getblockchaininfo", "getrawmempool"
     });
     private static JsonSerializerOptions serializeOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
+
+    private static List<string> emptyList = new();
 
 
     private readonly ILogger _logger;
@@ -66,11 +68,19 @@ public class NodeProxyController : ControllerBase
             return Content(JsonSerializer.Serialize<GenericResult>(error, serializeOptions), "application/json");
         }
 
-        if ((model.Method ?? "").ToLowerInvariant() == "getblockchaininfo")
+        if ((model.Method ?? "") == "getblockchaininfo")
         {
             var res1 = new GetBlockchainInfo();
             res1.Id = model.Id;
             res1.Result = _chainInfoSingleton.CurrentChainInfo;
+            return Ok(res1);
+        }
+
+        if ((model.Method ?? "") == "getrawmempool")
+        {
+            var res1 = new GetRawMempool();
+            res1.Id = model.Id;
+            res1.Result = _chainInfoSingleton.UnconfirmedTxs?.Select(a => a.txid ?? "").ToList() ?? emptyList;
             return Ok(res1);
         }
 
