@@ -13,16 +13,13 @@ namespace ExplorerBackend.Controllers;
 [Produces("application/json")]
 public class UnconfirmedTransactions : ControllerBase
 {
-
-    private readonly ILogger _logger;
     private readonly IOptions<APIConfig> _apiConfig;
     private readonly ChaininfoSingleton _chaininfoSingleton;
     private readonly ITransactionDecoder _transactionDecoder;
     private readonly IUtilityService _utilityService;
 
-    public UnconfirmedTransactions(ILogger<UnconfirmedTransactions> logger, IOptions<APIConfig> apiConfig, ChaininfoSingleton chaininfoSingleton, ITransactionDecoder transactionDecoder, IUtilityService utilityService)
+    public UnconfirmedTransactions(IOptions<APIConfig> apiConfig, ChaininfoSingleton chaininfoSingleton, ITransactionDecoder transactionDecoder, IUtilityService utilityService)
     {
-        _logger = logger;
         _apiConfig = apiConfig;
         _chaininfoSingleton = chaininfoSingleton;
         _transactionDecoder = transactionDecoder;
@@ -41,13 +38,13 @@ public class UnconfirmedTransactions : ControllerBase
         if (count > _apiConfig.Value.MaxTransactionsPullCount)
             return Problem($"count should be less or equal than {_apiConfig.Value.MaxBlocksPullCount}", statusCode: 400);
 
-        var txncount = _chaininfoSingleton.UnconfirmedTxs?.Count() ?? 0;
+        var txncount = _chaininfoSingleton.UnconfirmedTxs?.Count ?? 0;
 
         List<TransactionSimpleDecoded>? txs = null;
 
         if (_chaininfoSingleton.UnconfirmedTxs != null)
         {
-            if (_chaininfoSingleton.UnconfirmedTxs.Count() > offset)
+            if (_chaininfoSingleton.UnconfirmedTxs.Count > offset)
             {
                 txs = new List<TransactionSimpleDecoded>();
                 var rtxs = _chaininfoSingleton.UnconfirmedTxs.Skip(offset).Take(count);

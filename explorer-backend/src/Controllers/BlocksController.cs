@@ -12,14 +12,11 @@ namespace ExplorerBackend.Controllers;
 [Produces("application/json")]
 public class BlocksController : ControllerBase
 {
-
-    private readonly ILogger _logger;
     private readonly IOptions<APIConfig> _apiConfig;
     private readonly IBlocksRepository _blocksRepository;
 
-    public BlocksController(ILogger<BlocksController> logger, IOptions<APIConfig> apiConfig, IBlocksRepository blocksRepository)
+    public BlocksController(IOptions<APIConfig> apiConfig, IBlocksRepository blocksRepository)
     {
-        _logger = logger;
         _apiConfig = apiConfig;
         _blocksRepository = blocksRepository;
     }

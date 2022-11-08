@@ -9,13 +9,10 @@ namespace ExplorerBackend.Controllers;
 [Produces("application/json")]
 public class GetChainalgoStatsController : ControllerBase
 {
-
-    private readonly ILogger _logger;
     private readonly ChaininfoSingleton _chainInfoSingleton;
 
-    public GetChainalgoStatsController(ILogger<GetChainalgoStatsController> logger, ChaininfoSingleton chainInfoSingleton)
+    public GetChainalgoStatsController(ChaininfoSingleton chainInfoSingleton)
     {
-        _logger = logger;
         _chainInfoSingleton = chainInfoSingleton;
     }
 

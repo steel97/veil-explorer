@@ -9,12 +9,10 @@ public class EventsHub : Hub
     public const string BlocksDataChannel = "blocks_update";
 
     private readonly ChaininfoSingleton _chainInfoSingleton;
-    private readonly ILogger _logger;
 
-    public EventsHub(ILogger<EventsHub> logger, ChaininfoSingleton chainInfoSingleton)
+    public EventsHub(ChaininfoSingleton chainInfoSingleton)
     {
         _chainInfoSingleton = chainInfoSingleton;
-        _logger = logger;
     }
 
     public override async Task OnConnectedAsync()

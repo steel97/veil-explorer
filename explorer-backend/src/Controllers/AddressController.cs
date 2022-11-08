@@ -19,17 +19,14 @@ namespace ExplorerBackend.Controllers;
 [Produces("application/json")]
 public class AddressController : ControllerBase
 {
-
-    private readonly ILogger _logger;
     private readonly IOptions<APIConfig> _apiConfig;
     private readonly IUtilityService _utilityService;
     private readonly ScanTxOutsetBackgroundTaskQueue _scanTxOutsetBackgroundTaskQueue;
     private readonly NodeApiCacheSingleton _nodeApiCacheSingleton;
 
-    public AddressController(ILogger<AddressController> logger, IOptions<APIConfig> apiConfig, IUtilityService utilityService,
+    public AddressController(IOptions<APIConfig> apiConfig, IUtilityService utilityService,
         ScanTxOutsetBackgroundTaskQueue scanTxOutsetBackgroundTaskQueue, NodeApiCacheSingleton nodeApiCacheSingleton)
     {
-        _logger = logger;
         _apiConfig = apiConfig;
         _utilityService = utilityService;
         _scanTxOutsetBackgroundTaskQueue = scanTxOutsetBackgroundTaskQueue;
@@ -123,7 +120,7 @@ public class AddressController : ControllerBase
 
                         response.Version = version;
                         response.Hash = _utilityService.ToHex(hash);
-                        response.Hash = response.Hash.Substring(0, response.Hash.Length - 8);
+                        response.Hash = response.Hash[0..^8];
                     }
                     catch
                     {

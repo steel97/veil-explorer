@@ -15,17 +15,15 @@ public class InternalHub : Hub
     private readonly InternalSingleton _internalSingleton;
     private readonly ILogger _logger;
     private readonly IOptions<ServerConfig> _serverConfig;
-    private readonly IBlocksRepository _blocksRepository;
     private readonly ITransactionsRepository _transactionsRepository;
     private readonly ITransactionDecoder _transactionDecoder;
     private readonly IUtilityService _utilityService;
 
-    public InternalHub(ILogger<EventsHub> logger, ChaininfoSingleton chainInfoSingleton, InternalSingleton internalSingleton, IOptions<ServerConfig> serverConfig, IBlocksRepository blocksRepository, ITransactionsRepository transactionsRepository, ITransactionDecoder transactionDecoder, IUtilityService utilityService)
+    public InternalHub(ILogger<EventsHub> logger, ChaininfoSingleton chainInfoSingleton, InternalSingleton internalSingleton, IOptions<ServerConfig> serverConfig, ITransactionsRepository transactionsRepository, ITransactionDecoder transactionDecoder, IUtilityService utilityService)
     {
         _chainInfoSingleton = chainInfoSingleton;
         _internalSingleton = internalSingleton;
         _serverConfig = serverConfig;
-        _blocksRepository = blocksRepository;
         _transactionsRepository = transactionsRepository;
         _transactionDecoder = transactionDecoder;
         _utilityService = utilityService;

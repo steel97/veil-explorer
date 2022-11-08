@@ -12,14 +12,11 @@ namespace ExplorerBackend.Controllers;
 [Produces("application/json")]
 public class GetMoneySupplyController : ControllerBase
 {
-
-    private readonly ILogger _logger;
     private readonly IOptions<ExplorerConfig> _apiConfig;
     private readonly ChaininfoSingleton _chainInfoSingleton;
 
-    public GetMoneySupplyController(ILogger<GetMoneySupplyController> logger, IOptions<ExplorerConfig> apiConfig, ChaininfoSingleton chainInfoSingleton)
+    public GetMoneySupplyController(IOptions<ExplorerConfig> apiConfig, ChaininfoSingleton chainInfoSingleton)
     {
-        _logger = logger;
         _apiConfig = apiConfig;
         _chainInfoSingleton = chainInfoSingleton;
     }

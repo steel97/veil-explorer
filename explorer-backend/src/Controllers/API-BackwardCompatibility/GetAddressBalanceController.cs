@@ -16,17 +16,14 @@ namespace ExplorerBackend.Controllers;
 [Produces("application/json")]
 public class GetAddressBalanceController : ControllerBase
 {
-
-    private readonly ILogger _logger;
     private readonly IOptions<APIConfig> _apiConfig;
     private readonly IUtilityService _utilityService;
     private readonly ScanTxOutsetBackgroundTaskQueue _scanTxOutsetBackgroundTaskQueue;
     private readonly NodeApiCacheSingleton _nodeApiCacheSingleton;
 
-    public GetAddressBalanceController(ILogger<GetAddressBalanceController> logger, IOptions<APIConfig> apiConfig, IUtilityService utilityService,
+    public GetAddressBalanceController(IOptions<APIConfig> apiConfig, IUtilityService utilityService,
         ScanTxOutsetBackgroundTaskQueue scanTxOutsetBackgroundTaskQueue, NodeApiCacheSingleton nodeApiCacheSingleton)
     {
-        _logger = logger;
         _apiConfig = apiConfig;
         _utilityService = utilityService;
         _scanTxOutsetBackgroundTaskQueue = scanTxOutsetBackgroundTaskQueue;

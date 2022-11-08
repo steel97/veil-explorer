@@ -9,13 +9,10 @@ namespace ExplorerBackend.Controllers;
 [Produces("application/json")]
 public class GetBlockchainInfoController : ControllerBase
 {
-
-    private readonly ILogger _logger;
     private readonly ChaininfoSingleton _chainInfoSingleton;
 
-    public GetBlockchainInfoController(ILogger<GetBlockchainInfoController> logger, ChaininfoSingleton chainInfoSingleton)
+    public GetBlockchainInfoController(ChaininfoSingleton chainInfoSingleton)
     {
-        _logger = logger;
         _chainInfoSingleton = chainInfoSingleton;
     }
 

@@ -11,15 +11,13 @@ namespace ExplorerBackend.Controllers;
 [Produces("application/json")]
 public class SearchController : ControllerBase
 {
-    private readonly ILogger _logger;
     private readonly IBlocksRepository _blocksRepository;
     private readonly ITransactionsRepository _transactionsRepository;
     private readonly ChaininfoSingleton _chaininfoSingleton;
     private readonly IUtilityService _utilityService;
 
-    public SearchController(ILogger<SearchController> logger, IBlocksRepository blocksRepository, ITransactionsRepository transactionsRepository, ChaininfoSingleton chaininfoSingleton, IUtilityService utilityService)
+    public SearchController(IBlocksRepository blocksRepository, ITransactionsRepository transactionsRepository, ChaininfoSingleton chaininfoSingleton, IUtilityService utilityService)
     {
-        _logger = logger;
         _blocksRepository = blocksRepository;
         _transactionsRepository = transactionsRepository;
         _chaininfoSingleton = chaininfoSingleton;
@@ -30,10 +28,12 @@ public class SearchController : ControllerBase
     [ProducesResponseType(typeof(SearchResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> Get(SearchRequest body, CancellationToken cancellationToken)
     {
-        var response = new SearchResponse();
-        response.Found = false;
-        response.Type = EntityType.UNKNOWN;
-        response.Query = body.Query;
+        var response = new SearchResponse
+        {
+            Found = false,
+            Type = EntityType.UNKNOWN,
+            Query = body.Query
+        };
 
         if (body.Query != null)
         {

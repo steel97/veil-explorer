@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using ExplorerBackend.Models.API;
 using ExplorerBackend.Models.System;
-using ExplorerBackend.Configs;
 using ExplorerBackend.Services.Core;
 using ExplorerBackend.Services.Caching;
 using ExplorerBackend.Persistence.Repositories;
@@ -14,17 +12,14 @@ namespace ExplorerBackend.Controllers;
 [Produces("application/json")]
 public class TxController : ControllerBase
 {
-
-    private readonly ILogger _logger;
     private readonly IBlocksRepository _blocksRepository;
     private readonly ITransactionsRepository _transactionsRepository;
     private readonly ITransactionDecoder _transactionDecoder;
     private readonly IUtilityService _utilityService;
     private readonly ChaininfoSingleton _chaininfoSingleton;
 
-    public TxController(ILogger<TxController> logger, IBlocksRepository blocksRepository, ITransactionsRepository transactionsRepository, ITransactionDecoder transactionDecoder, IUtilityService utilityService, ChaininfoSingleton chaininfoSingleton)
+    public TxController(IBlocksRepository blocksRepository, ITransactionsRepository transactionsRepository, ITransactionDecoder transactionDecoder, IUtilityService utilityService, ChaininfoSingleton chaininfoSingleton)
     {
-        _logger = logger;
         _blocksRepository = blocksRepository;
         _transactionsRepository = transactionsRepository;
         _transactionDecoder = transactionDecoder;

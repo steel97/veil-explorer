@@ -9,13 +9,10 @@ namespace ExplorerBackend.Controllers;
 [Produces("application/json")]
 public class TxStatsController : ControllerBase
 {
-
-    private readonly ILogger _logger;
     private readonly ChaininfoSingleton _chainInfoSingleton;
 
-    public TxStatsController(ILogger<TxStatsController> logger, ChaininfoSingleton chainInfoSingleton)
+    public TxStatsController(ChaininfoSingleton chainInfoSingleton)
     {
-        _logger = logger;
         _chainInfoSingleton = chainInfoSingleton;
     }
 
