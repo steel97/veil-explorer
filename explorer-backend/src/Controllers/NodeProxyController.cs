@@ -6,36 +6,35 @@ using ExplorerBackend.Models.Node.Response;
 using ExplorerBackend.Configs;
 using ExplorerBackend.Services.Caching;
 using ExplorerBackend.Services.Core;
+using Microsoft.AspNetCore.Cors;
+using ExplorerBackend.Core;
 
 namespace ExplorerBackend.Controllers;
 
 [ApiController]
+[EnableCors(CORSPolicies.NodeProxyPolicy)]
 [Route("/")]
 public class NodeProxyController : ControllerBase
 {
-    private static List<string> NODE_ALLOWED_METHODS = new(new string[] {
+    private readonly static List<string> NODE_ALLOWED_METHODS = new(new string[] {
         "importlightwalletaddress", "getwatchonlystatus", "getwatchonlytxes", "checkkeyimages", "getanonoutputs",
         "sendrawtransaction", "getblockchaininfo", "getrawmempool"
     });
-    private static JsonSerializerOptions serializeOptions = new()
+    private readonly static JsonSerializerOptions serializeOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
-    private static List<string> emptyList = new();
+    private readonly static List<string> emptyList = new();
 
 
-    private readonly ILogger _logger;
     private readonly IOptions<ServerConfig> _serverConfig;
-    private readonly IUtilityService _utilityService;
     private readonly INodeRequester _nodeRequester;
     private readonly ChaininfoSingleton _chainInfoSingleton;
 
-    public NodeProxyController(ILogger<NodeProxyController> logger, IOptions<ServerConfig> serverConfig, IUtilityService utilityService, INodeRequester nodeRequester, ChaininfoSingleton chainInfoSingleton)
+    public NodeProxyController(IOptions<ServerConfig> serverConfig, INodeRequester nodeRequester, ChaininfoSingleton chainInfoSingleton)
     {
-        _logger = logger;
         _serverConfig = serverConfig;
-        _utilityService = utilityService;
         _nodeRequester = nodeRequester;
         _chainInfoSingleton = chainInfoSingleton;
     }
@@ -70,17 +69,21 @@ public class NodeProxyController : ControllerBase
 
         if ((model.Method ?? "") == "getblockchaininfo")
         {
-            var res1 = new GetBlockchainInfo();
-            res1.Id = model.Id;
-            res1.Result = _chainInfoSingleton.CurrentChainInfo;
+            var res1 = new GetBlockchainInfo
+            {
+                Id = model.Id,
+                Result = _chainInfoSingleton.CurrentChainInfo
+            };
             return Ok(res1);
         }
 
         if ((model.Method ?? "") == "getrawmempool")
         {
-            var res1 = new GetRawMempool();
-            res1.Id = model.Id;
-            res1.Result = _chainInfoSingleton.UnconfirmedTxs?.Select(a => a.txid ?? "").ToList() ?? emptyList;
+            var res1 = new GetRawMempool
+            {
+                Id = model.Id,
+                Result = _chainInfoSingleton.UnconfirmedTxs?.Select(a => a.txid ?? "").ToList() ?? emptyList
+            };
             return Ok(res1);
         }
 
