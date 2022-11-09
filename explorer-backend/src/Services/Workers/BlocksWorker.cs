@@ -126,7 +126,7 @@ public class BlocksWorker : BackgroundService
 
                                     if (tx == null || tx.Result == null)
                                     {
-                                        _logger.LogInformation($"Can't pull transaction {txId} for block #{i}");
+                                        _logger.LogInformation("Can't pull transaction {txId} for block #{blockNumber}", txId, i);
                                         break;
                                     }
 
@@ -139,48 +139,50 @@ public class BlocksWorker : BackgroundService
                             // transform block rpc to block data
                             if (targetBlock == null)
                             {
-                                targetBlock = new Block();
-                                targetBlock.anon_index = block.Result.Anon_index;
-                                targetBlock.bits_hex = block.Result.Bits;
-                                targetBlock.chainwork_hex = block.Result.Chainwork;
-                                targetBlock.difficulty = block.Result.Difficulty;
-                                targetBlock.epoch_number = block.Result.epoch_number;
-                                targetBlock.hash_hex = block.Result.Hash;
-                                targetBlock.height = block.Result.Height;
-                                targetBlock.mediantime = block.Result.Mediantime;
-                                targetBlock.merkleroot_hex = block.Result.Merkleroot;
-                                targetBlock.mixhash_hex = block.Result.Mixhash;
-                                targetBlock.nonce = block.Result.Nonce;
-                                targetBlock.nonce64 = block.Result.Nonce64;
-                                targetBlock.prog_header_hash_hex = block.Result.prog_header_hash;
-                                targetBlock.prog_header_hex = block.Result.prog_header;
-                                targetBlock.progpowmixhash_hex = block.Result.progpowmixhash;
-                                targetBlock.progproofofworkhash_hex = block.Result.progproofofworkhash;
-                                targetBlock.proofofstakehash_hex = block.Result.Proofofstakehash;
-                                targetBlock.proofofworkhash_hex = block.Result.proofofworkhash;
-                                targetBlock.randomxproofofworkhash_hex = block.Result.randomxproofofworkhash;
-                                targetBlock.sha256dproofofworkhash_hex = block.Result.sha256dproofofworkhash;
-                                targetBlock.size = block.Result.Size;
-                                targetBlock.strippedsize = block.Result.Strippedsize;
-                                targetBlock.time = block.Result.Time;
-                                targetBlock.proof_type = block.Result.Proof_type switch
+                                targetBlock = new Block
                                 {
-                                    "Proof-of-Work (X16RT)" => BlockType.POW_X16RT,
-                                    "Proof-of-work (ProgPow)" => BlockType.POW_ProgPow,
-                                    "Proof-of-work (RandomX)" => BlockType.POW_RandomX,
-                                    "Proof-of-work (Sha256D)" => BlockType.POW_Sha256D,
-                                    "Proof-of-Stake" => BlockType.POS,
-                                    _ => BlockType.UNKNOWN
+                                    anon_index = block.Result.Anon_index,
+                                    bits_hex = block.Result.Bits,
+                                    chainwork_hex = block.Result.Chainwork,
+                                    difficulty = block.Result.Difficulty,
+                                    epoch_number = block.Result.epoch_number,
+                                    hash_hex = block.Result.Hash,
+                                    height = block.Result.Height,
+                                    mediantime = block.Result.Mediantime,
+                                    merkleroot_hex = block.Result.Merkleroot,
+                                    mixhash_hex = block.Result.Mixhash,
+                                    nonce = block.Result.Nonce,
+                                    nonce64 = block.Result.Nonce64,
+                                    prog_header_hash_hex = block.Result.prog_header_hash,
+                                    prog_header_hex = block.Result.prog_header,
+                                    progpowmixhash_hex = block.Result.progpowmixhash,
+                                    progproofofworkhash_hex = block.Result.progproofofworkhash,
+                                    proofofstakehash_hex = block.Result.Proofofstakehash,
+                                    proofofworkhash_hex = block.Result.proofofworkhash,
+                                    randomxproofofworkhash_hex = block.Result.randomxproofofworkhash,
+                                    sha256dproofofworkhash_hex = block.Result.sha256dproofofworkhash,
+                                    size = block.Result.Size,
+                                    strippedsize = block.Result.Strippedsize,
+                                    time = block.Result.Time,
+                                    proof_type = block.Result.Proof_type switch
+                                    {
+                                        "Proof-of-Work (X16RT)" => BlockType.POW_X16RT,
+                                        "Proof-of-work (ProgPow)" => BlockType.POW_ProgPow,
+                                        "Proof-of-work (RandomX)" => BlockType.POW_RandomX,
+                                        "Proof-of-work (Sha256D)" => BlockType.POW_Sha256D,
+                                        "Proof-of-Stake" => BlockType.POS,
+                                        _ => BlockType.UNKNOWN
+                                    },
+                                    veil_data_hash_hex = block.Result.Veil_data_hash,
+                                    version = block.Result.Version,
+                                    weight = block.Result.Weight,
+                                    synced = false
                                 };
-                                targetBlock.veil_data_hash_hex = block.Result.Veil_data_hash;
-                                targetBlock.version = block.Result.Version;
-                                targetBlock.weight = block.Result.Weight;
-                                targetBlock.synced = false;
 
                                 // save block
                                 if (!await blocksRepository.InsertBlockAsync(targetBlock, cancellationToken))
                                 {
-                                    _logger.LogError(null, $"Can't save block #{i}");
+                                    _logger.LogError(null, "Can't save block #{blockNumber}", i);
                                     break;
                                 }
                             }
@@ -197,31 +199,31 @@ public class BlocksWorker : BackgroundService
 
                                 try
                                 {
-                                    using (var txscope = new TransactionScope(TransactionScopeOption.Required, TimeSpan.FromSeconds(_explorerConfig.CurrentValue.TxScopeTimeout), TransactionScopeAsyncFlowOption.Enabled))
+                                    using var txscope = new TransactionScope(TransactionScopeOption.Required, TimeSpan.FromSeconds(_explorerConfig.CurrentValue.TxScopeTimeout), TransactionScopeAsyncFlowOption.Enabled);
+                                    targetTx = new Models.Data.Transaction
                                     {
-                                        targetTx = new Models.Data.Transaction();
-                                        targetTx.txid_hex = tx.txid;
-                                        targetTx.hash_hex = tx.hash;
-                                        targetTx.version = tx.version;
-                                        targetTx.size = tx.size;
-                                        targetTx.vsize = tx.vsize;
-                                        targetTx.weight = tx.weight;
-                                        targetTx.locktime = tx.locktime;
-                                        targetTx.block_height = i;
+                                        txid_hex = tx.txid,
+                                        hash_hex = tx.hash,
+                                        version = tx.version,
+                                        size = tx.size,
+                                        vsize = tx.vsize,
+                                        weight = tx.weight,
+                                        locktime = tx.locktime,
+                                        block_height = i
+                                    };
 
-                                        var txCompleted = await transactionsRepository.InsertTransactionAsync(targetTx, cancellationToken);
-                                        var txRawCompleted = await rawTxsRepository.InsertTransactionAsync(tx.txid, tx.hex, cancellationToken);
+                                    var txCompleted = await transactionsRepository.InsertTransactionAsync(targetTx, cancellationToken);
+                                    var txRawCompleted = await rawTxsRepository.InsertTransactionAsync(tx.txid, tx.hex, cancellationToken);
 
-                                        if (txCompleted && txRawCompleted)
-                                            txscope.Complete();
-                                        else
-                                            txFailed = true;
-                                    }
+                                    if (txCompleted && txRawCompleted)
+                                        txscope.Complete();
+                                    else
+                                        txFailed = true;
                                 }
 
                                 catch (TransactionAbortedException txex)
                                 {
-                                    _logger.LogError(txex, $"Can't save transaction {tx.txid} (insert) for block #{i}");
+                                    _logger.LogError(txex, "Can't save transaction {txId} (insert) for block #{blockNumber}", tx.txid, i);
                                     txFailed = true;
                                     break;
                                 }
@@ -231,7 +233,7 @@ public class BlocksWorker : BackgroundService
 
                             if (!await blocksRepository.SetBlockSyncStateAsync(i, true, cancellationToken))
                             {
-                                _logger.LogError(null, $"Can't update block #{i}");
+                                _logger.LogError(null, "Can't update block #{blockNumber}", i);
                                 break;
                             }
 
@@ -246,10 +248,10 @@ public class BlocksWorker : BackgroundService
                                     ProofType = targetBlock.proof_type,
                                     Time = targetBlock.time,
                                     MedianTime = targetBlock.mediantime,
-                                    TxCount = pulledTxs.Count()
+                                    TxCount = pulledTxs.Count
                                 }, cancellationToken);
 
-                                await _chainInfoSingleton.BlockchainDataSemaphore.WaitAsync();
+                                await _chainInfoSingleton.BlockchainDataSemaphore.WaitAsync(cancellationToken);
                                 _chainInfoSingleton.BlockchainDataShouldBroadcast = true;
                                 _chainInfoSingleton.BlockchainDataSemaphore.Release();
 
@@ -261,7 +263,7 @@ public class BlocksWorker : BackgroundService
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogError(ex, $"Can't process block #{i}");
+                            _logger.LogError(ex, "Can't process block #{blockNumber}", i);
                             break;
                         }
                     }

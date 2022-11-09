@@ -78,11 +78,9 @@ app.UseRouting();
 app.UseCors(CORSPolicies.BaseCorsPolicy);
 app.UseHttpsRedirection();
 app.UseAuthorization();
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
-    endpoints.MapHub<EventsHub>("/api/events");
-    endpoints.MapHub<InternalHub>("/api/internal");
-});
+
+app.MapControllers();
+app.MapHub<EventsHub>("/api/events");
+app.MapHub<InternalHub>("/api/internal");
 
 app.Run();
