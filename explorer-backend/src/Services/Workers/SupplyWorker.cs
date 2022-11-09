@@ -14,18 +14,16 @@ public class SupplyWorker : BackgroundService
     private readonly ILogger _logger;
     private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
     private readonly IOptionsMonitor<APIConfig> _apiConfig;
-    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ChaininfoSingleton _chainInfoSingleton;
     private readonly ScanTxOutsetBackgroundTaskQueue _scanTxOutsetBackgroundTaskQueue;
     private readonly NodeApiCacheSingleton _nodeApiCacheSingleton;
 
-    public SupplyWorker(ILogger<SupplyWorker> logger, IOptionsMonitor<ExplorerConfig> explorerConfig, IOptionsMonitor<APIConfig> apiConfig, IHttpClientFactory httpClientFactory, ChaininfoSingleton chaininfoSingleton,
+    public SupplyWorker(ILogger<SupplyWorker> logger, IOptionsMonitor<ExplorerConfig> explorerConfig, IOptionsMonitor<APIConfig> apiConfig, ChaininfoSingleton chaininfoSingleton,
         ScanTxOutsetBackgroundTaskQueue scanTxOutsetBackgroundTaskQueue, NodeApiCacheSingleton nodeApiCacheSingleton)
     {
         _logger = logger;
         _explorerConfig = explorerConfig;
         _apiConfig = apiConfig;
-        _httpClientFactory = httpClientFactory;
         _chainInfoSingleton = chaininfoSingleton;
         _scanTxOutsetBackgroundTaskQueue = scanTxOutsetBackgroundTaskQueue;
         _nodeApiCacheSingleton = nodeApiCacheSingleton;

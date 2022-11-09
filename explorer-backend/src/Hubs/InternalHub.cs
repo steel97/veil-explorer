@@ -178,10 +178,10 @@ public class InternalHub : Hub
                     workbook.CurrentWorksheet.AddNextCell("Tx ID");
                     workbook.CurrentWorksheet.AddNextCell("Amount");
 
-                    if (txInputs.ContainsKey(address))
+                    if (txInputs.TryGetValue(address, out var value))
                     {
                         var fieldIndex = 0;
-                        foreach (var input in txInputs[address])
+                        foreach (var input in value)
                         {
                             workbook.CurrentWorksheet.AddCell(input.Key, 0, 3 + fieldIndex); // input tx
                             workbook.CurrentWorksheet.AddCell(input.Value, 1, 3 + fieldIndex); // input amount
@@ -190,10 +190,10 @@ public class InternalHub : Hub
                         }
                     }
 
-                    if (txOutputs.ContainsKey(address))
+                    if (txOutputs.TryGetValue(address, out var value2))
                     {
                         var fieldIndex = 0;
-                        foreach (var output in txOutputs[address])
+                        foreach (var output in value2)
                         {
                             workbook.CurrentWorksheet.AddCell(output.Key, 2, 3 + fieldIndex); // output tx
                             workbook.CurrentWorksheet.AddCell(output.Value, 3, 3 + fieldIndex); // output amount

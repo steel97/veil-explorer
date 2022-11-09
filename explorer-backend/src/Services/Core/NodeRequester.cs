@@ -11,17 +11,16 @@ namespace ExplorerBackend.Services.Core;
 
 public class NodeRequester : INodeRequester
 {
-    private readonly ILogger _logger;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
     private readonly NodeApiCacheSingleton _nodeApiCacheSingleton;
-    private JsonSerializerOptions serializerOptions = new()
+    private readonly JsonSerializerOptions serializerOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
-    public NodeRequester(ILogger<NodeRequester> logger, IHttpClientFactory httpClientFactory, IOptionsMonitor<ExplorerConfig> explorerConfig, NodeApiCacheSingleton nodeApiCacheSingleton) =>
-        (_logger, _explorerConfig, _httpClientFactory, _nodeApiCacheSingleton) = (logger, explorerConfig, httpClientFactory, nodeApiCacheSingleton);
+    public NodeRequester(IHttpClientFactory httpClientFactory, IOptionsMonitor<ExplorerConfig> explorerConfig, NodeApiCacheSingleton nodeApiCacheSingleton) =>
+        (_explorerConfig, _httpClientFactory, _nodeApiCacheSingleton) = (explorerConfig, httpClientFactory, nodeApiCacheSingleton);
 
 
     private void ConfigureHttpClient(HttpClient httpClient)

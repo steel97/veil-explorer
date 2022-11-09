@@ -93,20 +93,18 @@ public static class AsyncUtils
             return;
         }
 
-        using (CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(ct))
-        {
-            Task waitTask = WaitWhileAsync(cts.Token, condition, pollDelay);
-            Task timeoutTask = Task.Delay(timeout, cts.Token);
-            Task finishedTask = await Task.WhenAny(waitTask, timeoutTask).ConfigureAwait(true);
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        Task waitTask = WaitWhileAsync(cts.Token, condition, pollDelay);
+        Task timeoutTask = Task.Delay(timeout, cts.Token);
+        Task finishedTask = await Task.WhenAny(waitTask, timeoutTask).ConfigureAwait(true);
 
-            if (!ct.IsCancellationRequested)
+        if (!ct.IsCancellationRequested)
+        {
+            cts.Cancel();                            // Cancel unfinished task
+            await finishedTask.ConfigureAwait(true); // Propagate exceptions
+            if (finishedTask == timeoutTask)
             {
-                cts.Cancel();                            // Cancel unfinished task
-                await finishedTask.ConfigureAwait(true); // Propagate exceptions
-                if (finishedTask == timeoutTask)
-                {
-                    throw new TimeoutException();
-                }
+                throw new TimeoutException();
             }
         }
     }
@@ -139,20 +137,18 @@ public static class AsyncUtils
             return;
         }
 
-        using (CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(ct))
-        {
-            Task waitTask = WaitUntilAsync(cts.Token, condition, pollDelay);
-            Task timeoutTask = Task.Delay(timeout, cts.Token);
-            Task finishedTask = await Task.WhenAny(waitTask, timeoutTask).ConfigureAwait(true);
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        Task waitTask = WaitUntilAsync(cts.Token, condition, pollDelay);
+        Task timeoutTask = Task.Delay(timeout, cts.Token);
+        Task finishedTask = await Task.WhenAny(waitTask, timeoutTask).ConfigureAwait(true);
 
-            if (!ct.IsCancellationRequested)
+        if (!ct.IsCancellationRequested)
+        {
+            cts.Cancel();                            // Cancel unfinished task
+            await finishedTask.ConfigureAwait(true); // Propagate exceptions
+            if (finishedTask == timeoutTask)
             {
-                cts.Cancel();                            // Cancel unfinished task
-                await finishedTask.ConfigureAwait(true); // Propagate exceptions
-                if (finishedTask == timeoutTask)
-                {
-                    throw new TimeoutException();
-                }
+                throw new TimeoutException();
             }
         }
     }

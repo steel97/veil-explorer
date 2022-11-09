@@ -33,7 +33,7 @@ public class TransactionsDecoder : ITransactionDecoder
             {
                 if (ntxin.PrevOut != null && !ntxin.PrevOut.IsNull())
                 {
-                    var prevTxHex = _utilityService.ToHexReversed(ntxin.PrevOut?.Hash ?? new byte[] { });
+                    var prevTxHex = _utilityService.ToHexReversed(ntxin.PrevOut?.Hash ?? Array.Empty<byte>());
                     if (!requiredTxs.Contains(prevTxHex)) requiredTxs.Add(prevTxHex);
                 }
             });
@@ -41,7 +41,7 @@ public class TransactionsDecoder : ITransactionDecoder
         }
 
         // fetch prevout txs
-        if (requiredTxs.Count() > 0)
+        if (requiredTxs.Count > 0)
         {
             var outTxs = await _rawTxsRepository.GetTransactionsByIdsAsync(requiredTxs, cancellationToken);
             if (outTxs != null)
@@ -59,31 +59,35 @@ public class TransactionsDecoder : ITransactionDecoder
             if (rawTx.Data == null) continue;
             var tx = dict[rawTx.TxId ?? ""];
 
-            var txsimple = new TransactionSimpleDecoded();
-            txsimple.TxId = rawTx.TxId;
-            txsimple.IsZerocoinSpend = tx.IsZerocoinSpend();
-            txsimple.IsZerocoinMint = tx.IsZerocoinMint();
-            txsimple.IsCoinStake = tx.IsCoinStake();
-            txsimple.IsBasecoin = tx.IsBasecoin();
-            txsimple.Inputs = new List<TxVinSimpleDecoded>();
-            txsimple.Outputs = new List<TxVoutSimpleDecoded>();
+            var txsimple = new TransactionSimpleDecoded
+            {
+                TxId = rawTx.TxId,
+                IsZerocoinSpend = tx.IsZerocoinSpend(),
+                IsZerocoinMint = tx.IsZerocoinMint(),
+                IsCoinStake = tx.IsCoinStake(),
+                IsBasecoin = tx.IsBasecoin(),
+                Inputs = new List<TxVinSimpleDecoded>(),
+                Outputs = new List<TxVoutSimpleDecoded>()
+            };
 
             if (tx.TxIn != null)
                 foreach (var txin in tx.TxIn)
                 {
-                    var txinsimple = new TxVinSimpleDecoded();
-                    txinsimple.Type = TxInType.DEFAULT;
+                    var txinsimple = new TxVinSimpleDecoded
+                    {
+                        Type = TxInType.DEFAULT
+                    };
                     if (txin.IsAnonInput())
                         txinsimple.Type = TxInType.ANON;
                     if (txin.IsZerocoinSpend())
                         txinsimple.Type = TxInType.ZEROCOIN_SPEND;
 
-                    txinsimple.PrevOutTx = _utilityService.ToHexReversed(txin.PrevOut?.Hash ?? new byte[] { });
+                    txinsimple.PrevOutTx = _utilityService.ToHexReversed(txin.PrevOut?.Hash ?? Array.Empty<byte>());
                     txinsimple.PrevOutNum = txin.PrevOut?.N ?? 0;
-                    if (dict.ContainsKey(txinsimple.PrevOutTx))
+                    if (dict.TryGetValue(txinsimple.PrevOutTx, out VeilTransaction? value))
                     {
-                        var prevTx = dict[txinsimple.PrevOutTx];
-                        if (prevTx != null && prevTx.TxOut != null && prevTx.TxOut.Count() > txinsimple.PrevOutNum)
+                        var prevTx = value;
+                        if (prevTx != null && prevTx.TxOut != null && prevTx.TxOut.Count > txinsimple.PrevOutNum)
                         {
                             if (prevTx.TxOut[(int)txinsimple.PrevOutNum].OutputType == OutputTypes.OUTPUT_STANDARD)
                             {
@@ -102,8 +106,7 @@ public class TransactionsDecoder : ITransactionDecoder
 
                     if (tx.IsBasecoin())
                     {
-                        long reward;
-                        VeilBudget.GetBlockRewards(blockHeight, out reward, out _, out _, out _);
+                        VeilBudget.GetBlockRewards(blockHeight, out long reward, out _, out _, out _);
                         txinsimple.PrevOutAmount = reward;
                     }
 

@@ -52,7 +52,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy(CORSPolicies.BaseCorsPolicy, corsBuilder =>
     {
-        corsOrigins.ToList().ForEach(entry => corsBuilder.WithOrigins(entry).AllowAnyHeader().AllowAnyMethod().AllowCredentials());
+        corsOrigins?.ToList().ForEach(entry => corsBuilder.WithOrigins(entry).AllowAnyHeader().AllowAnyMethod().AllowCredentials());
     });
     options.AddPolicy(CORSPolicies.NodeProxyPolicy, corsBuilder => corsBuilder
                  .AllowAnyOrigin()

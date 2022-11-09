@@ -54,7 +54,7 @@ public class BlockchainWorker : BackgroundService
                 {
                     Id = 1,
                     Method = "getblockchaininfo",
-                    Params = new List<object>(new object[] { })
+                    Params = new List<object>(Array.Empty<object>())
                 };
                 var getBlockchainInfoResponse = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", getBlockchainInfoRequest, options, cancellationToken);
                 var blockchainInfo = await getBlockchainInfoResponse.Content.ReadFromJsonAsync<GetBlockchainInfo>(options, cancellationToken);
@@ -64,7 +64,7 @@ public class BlockchainWorker : BackgroundService
                 {
                     Id = 1,
                     Method = "getchainalgostats",
-                    Params = new List<object>(new object[] { })
+                    Params = new List<object>(Array.Empty<object>())
                 };
                 var getChainalgoStatsResponse = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", getChainalgoStatsRequest, options, cancellationToken);
                 var chainalgoStats = await getChainalgoStatsResponse.Content.ReadFromJsonAsync<GetChainalgoStats>(options, cancellationToken);

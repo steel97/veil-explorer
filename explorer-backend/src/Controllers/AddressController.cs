@@ -101,8 +101,7 @@ public class AddressController : ControllerBase
                     {
                         try
                         {
-                            using var sha256 = SHA256.Create();
-                            var ch = sha256.ComputeHash(_utilityService.HexToByteArray(validateRes.scriptPubKey));
+                            var ch = SHA256.HashData(_utilityService.HexToByteArray(validateRes.scriptPubKey));
                             response.ScriptHash = new String(_utilityService.ToHex(ch).Reverse().ToArray());
                         }
                         catch

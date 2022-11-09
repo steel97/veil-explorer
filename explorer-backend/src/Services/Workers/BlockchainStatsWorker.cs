@@ -17,7 +17,7 @@ public class BlockchainStatsWorker : BackgroundService
     private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ChaininfoSingleton _chainInfoSingleton;
-    private JsonSerializerOptions options = new()
+    private readonly JsonSerializerOptions options = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
@@ -56,11 +56,13 @@ public class BlockchainStatsWorker : BackgroundService
                 var txStatsMonth = await GetTxStatsAsync(httpClient, targetBlocksPerDay / 4, -144 * 30, cancellationToken);
                 var txStatsOverall = await GetTxStatsAsync(httpClient, _explorerConfig.CurrentValue.StatsPointsCount, 0, cancellationToken);
 
-                var finalDict = new Dictionary<string, TxStatsEntry>();
-                finalDict.Add("day", txStatsDay);
-                finalDict.Add("week", txStatsWeek);
-                finalDict.Add("month", txStatsMonth);
-                finalDict.Add("overall", txStatsOverall);
+                var finalDict = new Dictionary<string, TxStatsEntry>()
+                {
+                    {"day", txStatsDay},
+                    {"week", txStatsWeek},
+                    {"month", txStatsMonth},
+                    {"overall", txStatsOverall}
+                };
 
                 _chainInfoSingleton.CurrentChainStats = new TxStatsComposite
                 {
@@ -83,7 +85,7 @@ public class BlockchainStatsWorker : BackgroundService
 
 
 
-    private async Task<GetChainTxStatsResult> GetChainTxStatsAsync(HttpClient? httpClient, long ctxInterval, CancellationToken cancellationToken = default(CancellationToken))
+    private async Task<GetChainTxStatsResult> GetChainTxStatsAsync(HttpClient? httpClient, long ctxInterval, CancellationToken cancellationToken = default)
     {
         if (httpClient == null) throw new Exception();
         // get blockchain info
@@ -100,7 +102,7 @@ public class BlockchainStatsWorker : BackgroundService
         return chainTxStats.Result;
     }
 
-    private async Task<TxStatsEntry> GetTxStatsAsync(HttpClient? httpClient, int points, int offset, CancellationToken cancellationToken = default(CancellationToken))
+    private async Task<TxStatsEntry> GetTxStatsAsync(HttpClient? httpClient, int points, int offset, CancellationToken cancellationToken = default)
     {
         var count = (int)(_chainInfoSingleton?.CurrentChainInfo?.Blocks ?? 1);
         if (offset > count)
@@ -123,7 +125,7 @@ public class BlockchainStatsWorker : BackgroundService
             chainTxStatsIntervals.Add(target);
         }
 
-        for (var i = chainTxStatsIntervals.Count() - 1; i >= 0; i--)
+        for (var i = chainTxStatsIntervals.Count - 1; i >= 0; i--)
         {
             var res = await GetChainTxStatsAsync(httpClient, chainTxStatsIntervals[i], cancellationToken);
 

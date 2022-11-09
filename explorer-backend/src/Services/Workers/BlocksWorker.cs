@@ -55,7 +55,7 @@ public class BlocksWorker : BackgroundService
         using (var scope = _serviceProvider.CreateAsyncScope())
         {
             var blocksRepository = scope.ServiceProvider.GetRequiredService<IBlocksRepository>();
-            var latestSyncedBlock = await blocksRepository.GetLatestBlockAsync(true);
+            var latestSyncedBlock = await blocksRepository.GetLatestBlockAsync(true, cancellationToken);
 
             if (latestSyncedBlock != null)
                 _chainInfoSingleton.CurrentSyncedBlock = latestSyncedBlock.height;

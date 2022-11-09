@@ -9,8 +9,8 @@ public class NodeApiCacheSingleton
 {
     private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
     private MemoryCache Cache { get; set; }
-    private List<string> ApisInQueue = new();
-    private SemaphoreSlim ApisQueueSemaphore = new(1, 1);
+    private readonly List<string> ApisInQueue = new();
+    private readonly SemaphoreSlim ApisQueueSemaphore = new(1, 1);
 
     public NodeApiCacheSingleton(IOptionsMonitor<ExplorerConfig> explorerConfig)
     {
@@ -86,9 +86,8 @@ public class NodeApiCacheSingleton
 
     public T? GetApiCache<T>(string key)
     {
-        T res;
-        if (!Cache.TryGetValue<T>(key, out res))
-            return default(T);
+        if (!Cache.TryGetValue<T>(key, out var res))
+            return default;
         return res;
     }
 }

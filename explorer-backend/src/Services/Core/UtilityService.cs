@@ -4,14 +4,14 @@ namespace ExplorerBackend.Services.Core;
 
 public class UtilityService : IUtilityService
 {
-    private static Regex hexRegex = new("^[A-Fa-f0-9]+$", RegexOptions.Compiled);
-    private static Regex numericRegex = new("^(0|[1-9][0-9]*)$", RegexOptions.Compiled);
-    private static Regex addressCleanupRegex = new("/[^a-zA-Z0-9=&]/g", RegexOptions.Compiled);
+    private readonly static Regex hexRegex = new("^[A-Fa-f0-9]+$", RegexOptions.Compiled);
+    private readonly static Regex numericRegex = new("^(0|[1-9][0-9]*)$", RegexOptions.Compiled);
+    private readonly static Regex addressCleanupRegex = new("/[^a-zA-Z0-9=&]/g", RegexOptions.Compiled);
 
     public bool VerifyHex(string? hex) => hexRegex.IsMatch(hex ?? "") && hex?.Length % 2 == 0;
     public bool IsNumeric(string? val) => numericRegex.IsMatch(val ?? "");
     //sv1qqpqrgc5rgd9xd4pmm05wrya44kfg50gpr9nhuxrnq9qczyt4jvxn8qpqwpdhshlhrx3y7yp2m9ehc4ljkfa42kvym2vlyj38fzahg25rgwcsqqqglz679
-    public bool VerifyAddress(string? val) => val != null ? val.Length == 34 || val.Length == 42 || val.Length == 121 || val.Length == 103 : false;
+    public bool VerifyAddress(string? val) => val != null && (val.Length == 34 || val.Length == 42 || val.Length == 121 || val.Length == 103);
     public string CleanupAddress(string? val) => addressCleanupRegex.Replace(val ?? "", "");
 
     // https://stackoverflow.com/a/321404
