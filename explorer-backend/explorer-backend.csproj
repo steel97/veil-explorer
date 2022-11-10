@@ -16,7 +16,7 @@
   <ItemGroup>
     <PackageReference Include="NanoXLSX" Version="2.1.0" />
     <PackageReference Include="NBitcoin" Version="7.0.17" />
-    <PackageReference Include="Npgsql" Version="7.0.0-rc.2" />
+    <PackageReference Include="Npgsql" Version="7.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 
