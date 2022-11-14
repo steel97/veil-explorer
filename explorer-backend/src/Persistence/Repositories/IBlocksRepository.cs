@@ -12,5 +12,6 @@ public interface IBlocksRepository
     Task<int?> ProbeBlockByHashAsync(string hash, CancellationToken cancellationToken = default);
     Task<Block?> GetBlockByHashAsync(string hash, CancellationToken cancellationToken = default);
     Task<bool> InsertBlockAsync(Block blockTemplate, CancellationToken cancellationToken = default);
+    Task<bool> UpdateBlockAsync(int height, Block blockTemplate, CancellationToken cancellationToken = default);
     Task<bool> SetBlockSyncStateAsync(int height, bool state, CancellationToken cancellationToken = default);
 }

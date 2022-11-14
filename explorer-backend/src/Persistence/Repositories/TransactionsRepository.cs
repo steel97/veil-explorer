@@ -106,6 +106,15 @@ public class TransactionsRepository : BaseRepository, ITransactionsRepository
         return txs;
     }
 
+    public async Task<bool> RemoveTransactionsForBlockAsync(int blockHeight, CancellationToken cancellationToken = default)
+    {
+        using var conn = Connection;
+        await conn.OpenAsync(cancellationToken);
+
+        using var cmd = new NpgsqlCommand($"DELETE FROM transactions WHERE block_height = {blockHeight};", conn);
+        return await cmd.ExecuteNonQueryAsync(cancellationToken) > 0;
+    }
+
     public async Task<string?> ProbeTransactionByHashAsync(string txid, CancellationToken cancellationToken = default)
     {
         using var conn = Connection;

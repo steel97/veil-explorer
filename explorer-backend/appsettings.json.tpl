@@ -30,6 +30,7 @@
     "PullMempoolDelay": 1000,
     "StatsPointsCount": 50,
     "BlocksPerBatch": 10,
+    "BlocksOrphanCheck": 12,
     "BudgetAddress": "35uS99ZnfaYB293sJ8ptUEXkUTQXH8WnDe",
     "FoundationAddress": "38J8RGLetRUNEXycBMPg8oZqLt4bB9hCbt",
     "MemoryCache": {
@@ -57,11 +58,78 @@
       }
     }
   },
-  "Logging": {
-    "LogLevel": {
+  "Serilog": {
+    "MinimumLevel": {
       "Default": "Information",
-      "Microsoft.AspNetCore": "Warning",
-      "System.Net.Http.HttpClient": "None"
-    }
+      "Override": {
+        "Microsoft": "Warning",
+        "Microsoft.AspNetCore": "Warning",
+        "Microsoft.Hosting.Lifetime": "Information",
+        "System.Net.Http.HttpClient": "Error"
+        "Microsoft": "Warning",
+        "Microsoft.Hosting.Lifetime": "Information"
+      }
+    },
+    "Enrich": [
+      "FromLogContext",
+      "WithMachineName",
+      "WithThreadId"
+    ],
+    "Destructure": [
+      {
+        "Name": "ToMaximumDepth",
+        "Args": {
+          "maximumDestructuringDepth": 4
+        }
+      },
+      {
+        "Name": "ToMaximumStringLength",
+        "Args": {
+          "maximumStringLength": 100
+        }
+      },
+      {
+        "Name": "ToMaximumCollectionCount",
+        "Args": {
+          "maximumCollectionCount": 10
+        }
+      }
+    ],
+    "Properties": {
+      "Application": "VeilExplorerBackend"
+    },
+    "WriteTo": [
+      {
+        "Name": "Async",
+        "Args": {
+          "configure": [
+            {
+              "Name": "Console"
+            }
+          ]
+        }
+      },
+      {
+        "Name": "Async",
+        "Args": {
+          "configure": [
+            {
+              "Name": "File",
+              "Path": "./logs/log-.txt",
+              "BufferSize": 4096,
+              "BlockWhenFull": true
+            }
+          ]
+        }
+      },
+      {
+        "Name": "File",
+        "Args": {
+          "path": "./logs/log-.log",
+          "rollingInterval": "Day",
+          "formatter": "Serilog.Formatting.Compact.CompactJsonFormatter, Serilog.Formatting.Compact"
+        }
+      }
+    ]
   }
 }

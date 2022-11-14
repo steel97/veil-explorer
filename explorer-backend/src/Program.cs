@@ -7,8 +7,22 @@ using ExplorerBackend.Services.Workers;
 using ExplorerBackend.Services.Queues;
 using ExplorerBackend.Persistence.Repositories;
 using ExplorerBackend.Core;
+using ExplorerBackend.Services;
+using Serilog;
+using Serilog.Events;
+using ExplorerBackend.Services.Workers.Patches;
+
+Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+            .WriteTo.Async(a => a.Console())
+            .WriteTo.File(new Serilog.Formatting.Compact.CompactJsonFormatter(), "")
+            .CreateBootstrapLogger();
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Host.UseSerilog((context, services, configuration) => configuration
+                    .ReadFrom.Configuration(context.Configuration)
+                    .ReadFrom.Services(services)
+                    .Enrich.FromLogContext());
 
 // Add services to the container.
 builder.Services.Configure<APIConfig>(builder.Configuration.GetSection("API"));
@@ -18,8 +32,10 @@ builder.Services.Configure<ServerConfig>(builder.Configuration.GetSection("Serve
 builder.Services.AddSingleton<ChaininfoSingleton>();
 builder.Services.AddSingleton<InternalSingleton>();
 builder.Services.AddSingleton<NodeApiCacheSingleton>();
+builder.Services.AddSingleton<ScanTxOutsetBackgroundTaskQueue>();
 builder.Services.AddSingleton<IUtilityService, UtilityService>();
 builder.Services.AddSingleton<INodeRequester, NodeRequester>();
+builder.Services.AddSingleton<IBlocksService, BlocksService>();
 
 builder.Services.AddHostedService<BlocksWorker>();
 builder.Services.AddHostedService<BlockchainWorker>();
@@ -28,10 +44,12 @@ builder.Services.AddHostedService<HubBackgroundWorker>();
 builder.Services.AddHostedService<ScanTxOutsetWorker>();
 builder.Services.AddHostedService<SupplyWorker>();
 builder.Services.AddHostedService<MempoolWorker>();
-
-builder.Services.AddSingleton<ScanTxOutsetBackgroundTaskQueue>();
-
 builder.Services.AddHostedService<ScanTxOutsetWorker>();
+if (args.Length > 1 && args[0] == "--fixorphans")
+{
+    OrphanFixWorker.StartingBlock = int.Parse(args[1]);
+    builder.Services.AddHostedService<OrphanFixWorker>();
+}
 
 builder.Services.AddTransient<IBlocksRepository, BlocksRepository>();
 builder.Services.AddTransient<ITransactionsRepository, TransactionsRepository>();

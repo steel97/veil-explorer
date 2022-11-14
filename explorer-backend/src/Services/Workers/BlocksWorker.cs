@@ -1,6 +1,5 @@
 using System.Text;
 using System.Text.Json;
-using System.Transactions;
 using System.Net.Http.Headers;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.SignalR;
@@ -9,7 +8,6 @@ using ExplorerBackend.Configs;
 using ExplorerBackend.Services.Caching;
 using ExplorerBackend.Persistence.Repositories;
 using ExplorerBackend.Models.API;
-using ExplorerBackend.Models.Data;
 using ExplorerBackend.Models.Node;
 using ExplorerBackend.Models.Node.Response;
 
@@ -23,8 +21,12 @@ public class BlocksWorker : BackgroundService
     private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ChaininfoSingleton _chainInfoSingleton;
+    private readonly IBlocksService _blocksService;
 
-    public BlocksWorker(ILogger<BlocksWorker> logger, IHubContext<EventsHub> hubContext, IServiceProvider serviceProvider, IOptionsMonitor<ExplorerConfig> explorerConfig, IHttpClientFactory httpClientFactory, ChaininfoSingleton chaininfoSingleton)
+    public BlocksWorker(ILogger<BlocksWorker> logger, IHubContext<EventsHub> hubContext,
+        IServiceProvider serviceProvider, IOptionsMonitor<ExplorerConfig> explorerConfig,
+        IHttpClientFactory httpClientFactory, ChaininfoSingleton chaininfoSingleton,
+        IBlocksService blocksService)
     {
         _logger = logger;
         _hubContext = hubContext;
@@ -32,6 +34,7 @@ public class BlocksWorker : BackgroundService
         _explorerConfig = explorerConfig;
         _httpClientFactory = httpClientFactory;
         _chainInfoSingleton = chaininfoSingleton;
+        _blocksService = blocksService;
     }
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -85,7 +88,7 @@ public class BlocksWorker : BackgroundService
                                 Method = "getblockhash",
                                 Params = new List<object>(new object[] { i })
                             };
-                            var getBlockHashResponse = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", getBlockHashRequest, options, cancellationToken);
+                            var getBlockHashResponse = await httpClient.PostAsJsonAsync("", getBlockHashRequest, options, cancellationToken);
                             var blockHash = await getBlockHashResponse.Content.ReadFromJsonAsync<GetBlockHash>(options, cancellationToken);
 
                             if (blockHash == null || blockHash.Result == null)
@@ -95,13 +98,14 @@ public class BlocksWorker : BackgroundService
                             }
 
                             // get block by hash
+                            //blockHash.Result
                             var getBlockRequest = new JsonRPCRequest
                             {
                                 Id = 1,
                                 Method = "getblock",
                                 Params = new List<object>(new object[] { blockHash.Result })
                             };
-                            var getBlockResponse = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", getBlockRequest, options, cancellationToken);
+                            var getBlockResponse = await httpClient.PostAsJsonAsync("", getBlockRequest, options, cancellationToken);
                             var block = await getBlockResponse.Content.ReadFromJsonAsync<GetBlock>(options, cancellationToken);
 
                             if (block == null || block.Result == null)
@@ -110,74 +114,13 @@ public class BlocksWorker : BackgroundService
                                 break;
                             }
 
-                            // get block's transactions
-                            var pulledTxs = new List<GetRawTransactionResult>();
-                            if (block.Result.Tx != null)
-                                foreach (var txId in block.Result.Tx)
-                                {
-                                    var getTxRequest = new JsonRPCRequest
-                                    {
-                                        Id = 1,
-                                        Method = "getrawtransaction",
-                                        Params = new List<object>(new object[] { txId, true })
-                                    };
-                                    var getTxResponse = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", getTxRequest, options, cancellationToken);
-                                    var tx = await getTxResponse.Content.ReadFromJsonAsync<GetRawTransaction>(options, cancellationToken);
-
-                                    if (tx == null || tx.Result == null)
-                                    {
-                                        _logger.LogInformation("Can't pull transaction {txId} for block #{blockNumber}", txId, i);
-                                        break;
-                                    }
-
-                                    pulledTxs.Add(tx.Result);
-                                }
-
                             // save data to db
                             // check if block already exists in DB
                             var targetBlock = await blocksRepository.GetBlockByHeightAsync(i, cancellationToken);
                             // transform block rpc to block data
                             if (targetBlock == null)
                             {
-                                targetBlock = new Block
-                                {
-                                    anon_index = block.Result.Anon_index,
-                                    bits_hex = block.Result.Bits,
-                                    chainwork_hex = block.Result.Chainwork,
-                                    difficulty = block.Result.Difficulty,
-                                    epoch_number = block.Result.epoch_number,
-                                    hash_hex = block.Result.Hash,
-                                    height = block.Result.Height,
-                                    mediantime = block.Result.Mediantime,
-                                    merkleroot_hex = block.Result.Merkleroot,
-                                    mixhash_hex = block.Result.Mixhash,
-                                    nonce = block.Result.Nonce,
-                                    nonce64 = block.Result.Nonce64,
-                                    prog_header_hash_hex = block.Result.prog_header_hash,
-                                    prog_header_hex = block.Result.prog_header,
-                                    progpowmixhash_hex = block.Result.progpowmixhash,
-                                    progproofofworkhash_hex = block.Result.progproofofworkhash,
-                                    proofofstakehash_hex = block.Result.Proofofstakehash,
-                                    proofofworkhash_hex = block.Result.proofofworkhash,
-                                    randomxproofofworkhash_hex = block.Result.randomxproofofworkhash,
-                                    sha256dproofofworkhash_hex = block.Result.sha256dproofofworkhash,
-                                    size = block.Result.Size,
-                                    strippedsize = block.Result.Strippedsize,
-                                    time = block.Result.Time,
-                                    proof_type = block.Result.Proof_type switch
-                                    {
-                                        "Proof-of-Work (X16RT)" => BlockType.POW_X16RT,
-                                        "Proof-of-work (ProgPow)" => BlockType.POW_ProgPow,
-                                        "Proof-of-work (RandomX)" => BlockType.POW_RandomX,
-                                        "Proof-of-work (Sha256D)" => BlockType.POW_Sha256D,
-                                        "Proof-of-Stake" => BlockType.POS,
-                                        _ => BlockType.UNKNOWN
-                                    },
-                                    veil_data_hash_hex = block.Result.Veil_data_hash,
-                                    version = block.Result.Version,
-                                    weight = block.Result.Weight,
-                                    synced = false
-                                };
+                                targetBlock = _blocksService.RPCBlockToDb(block.Result);
 
                                 // save block
                                 if (!await blocksRepository.InsertBlockAsync(targetBlock, cancellationToken))
@@ -187,48 +130,8 @@ public class BlocksWorker : BackgroundService
                                 }
                             }
 
-                            var txFailed = false;
-                            foreach (var tx in pulledTxs)
-                            {
-                                ArgumentNullException.ThrowIfNull(tx);
-                                ArgumentNullException.ThrowIfNull(tx.txid);
-                                ArgumentNullException.ThrowIfNull(tx.hex);
-
-                                var targetTx = await transactionsRepository.GetTransactionByIdAsync(tx.txid, cancellationToken);
-                                if (targetTx != null) continue;
-
-                                try
-                                {
-                                    using var txscope = new TransactionScope(TransactionScopeOption.Required, TimeSpan.FromSeconds(_explorerConfig.CurrentValue.TxScopeTimeout), TransactionScopeAsyncFlowOption.Enabled);
-                                    targetTx = new Models.Data.Transaction
-                                    {
-                                        txid_hex = tx.txid,
-                                        hash_hex = tx.hash,
-                                        version = tx.version,
-                                        size = tx.size,
-                                        vsize = tx.vsize,
-                                        weight = tx.weight,
-                                        locktime = tx.locktime,
-                                        block_height = i
-                                    };
-
-                                    var txCompleted = await transactionsRepository.InsertTransactionAsync(targetTx, cancellationToken);
-                                    var txRawCompleted = await rawTxsRepository.InsertTransactionAsync(tx.txid, tx.hex, cancellationToken);
-
-                                    if (txCompleted && txRawCompleted)
-                                        txscope.Complete();
-                                    else
-                                        txFailed = true;
-                                }
-
-                                catch (TransactionAbortedException txex)
-                                {
-                                    _logger.LogError(txex, "Can't save transaction {txId} (insert) for block #{blockNumber}", tx.txid, i);
-                                    txFailed = true;
-                                    break;
-                                }
-                            }
-
+                            // get block's transactions
+                            var txFailed = await _blocksService.InsertTransactionsAsync(i, block.Result.Tx, cancellationToken);
                             if (txFailed) break;
 
                             if (!await blocksRepository.SetBlockSyncStateAsync(i, true, cancellationToken))
@@ -248,7 +151,7 @@ public class BlocksWorker : BackgroundService
                                     ProofType = targetBlock.proof_type,
                                     Time = targetBlock.time,
                                     MedianTime = targetBlock.mediantime,
-                                    TxCount = pulledTxs.Count
+                                    TxCount = block.Result.Tx?.Count ?? 0
                                 }, cancellationToken);
 
                                 await _chainInfoSingleton.BlockchainDataSemaphore.WaitAsync(cancellationToken);
@@ -259,6 +162,37 @@ public class BlocksWorker : BackgroundService
                             catch
                             {
 
+                            }
+
+                            // check orphans
+                            // make sense to set BlocksOrphanCheck to zero on initial sync                                                  
+                            for (var j = targetBlock.height; j > targetBlock.height - _explorerConfig.CurrentValue.BlocksOrphanCheck && j > 0; j--)
+                            {
+                                // get hash by height
+                                var getBlockHashCheckRequest = new JsonRPCRequest
+                                {
+                                    Id = 1,
+                                    Method = "getblockhash",
+                                    Params = new List<object>(new object[] { j })
+                                };
+                                var getBlockHashCheckResponse = await httpClient.PostAsJsonAsync("", getBlockHashCheckRequest, options, cancellationToken);
+                                var blockHashCheck = await getBlockHashCheckResponse.Content.ReadFromJsonAsync<GetBlockHash>(options, cancellationToken);
+
+                                if (blockHashCheck == null || blockHashCheck.Result == null)
+                                {
+                                    //_logger.LogInformation("Can't pull block hash");
+                                    continue;
+                                }
+
+                                // better to get blocks from db in single query, however this is not "hot path" so...
+                                var blockFromDB = await blocksRepository.GetBlockByHeightAsync(j, cancellationToken);
+                                if (blockFromDB?.hash_hex == blockHashCheck.Result)
+                                    continue;
+
+                                if (!await _blocksService.UpdateDbBlockAsync(j, blockHashCheck.Result, cancellationToken))
+                                {
+                                    _logger.LogError("Can't update orphan block #{blockNumber}", j);
+                                }
                             }
                         }
                         catch (Exception ex)

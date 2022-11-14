@@ -172,6 +172,21 @@ public class BlocksRepository : BaseRepository, IBlocksRepository
         return await cmd.ExecuteNonQueryAsync(cancellationToken) > 0;
     }
 
+    public async Task<bool> UpdateBlockAsync(int height, Block blockTemplate, CancellationToken cancellationToken = default)
+    {
+        using var conn = Connection;
+        await conn.OpenAsync(cancellationToken);
+
+        using var cmd = new NpgsqlCommand("UPDATE blocks " +
+                                            "SET " +
+                                            $"hash={TransformHex(blockTemplate.hash_hex)}, strippedsize={blockTemplate.strippedsize}, \"size\"={blockTemplate.size}, weight={blockTemplate.weight}, proof_type={(short)blockTemplate.proof_type}, proofofstakehash={TransformHex(blockTemplate.proofofstakehash_hex)}, progproofofworkhash={TransformHex(blockTemplate.progproofofworkhash_hex)}, progpowmixhash={TransformHex(blockTemplate.progpowmixhash_hex)}," +
+                                            $"randomxproofofworkhash={TransformHex(blockTemplate.randomxproofofworkhash_hex)}, sha256dproofofworkhash={TransformHex(blockTemplate.sha256dproofofworkhash_hex)}, proofofworkhash={TransformHex(blockTemplate.proofofworkhash_hex)}, \"version\"={blockTemplate.version}, merkleroot={TransformHex(blockTemplate.merkleroot_hex)}, \"time\"={blockTemplate.time}, mediantime={blockTemplate.mediantime}, nonce={blockTemplate.nonce}, nonce64={blockTemplate.nonce64}, mixhash={TransformHex(blockTemplate.mixhash_hex)}," +
+                                            $"bits={TransformHex(blockTemplate.bits_hex)}, difficulty={TransformDouble(blockTemplate.difficulty)}, chainwork={TransformHex(blockTemplate.chainwork_hex)}, anon_index={blockTemplate.anon_index}, veil_data_hash={TransformHex(blockTemplate.veil_data_hash_hex)}, prog_header_hash={TransformHex(blockTemplate.prog_header_hash_hex)}, prog_header_hex={TransformHex(blockTemplate.prog_header_hex)}, epoch_number={blockTemplate.epoch_number}" +
+                                            $" WHERE height = '{height}';", conn);
+        await cmd.PrepareAsync(cancellationToken);
+        return await cmd.ExecuteNonQueryAsync(cancellationToken) > 0;
+    }
+
     public async Task<bool> SetBlockSyncStateAsync(int height, bool state, CancellationToken cancellationToken = default)
     {
         using var conn = Connection;

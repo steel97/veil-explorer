@@ -56,7 +56,7 @@ public class BlockchainWorker : BackgroundService
                     Method = "getblockchaininfo",
                     Params = new List<object>(Array.Empty<object>())
                 };
-                var getBlockchainInfoResponse = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", getBlockchainInfoRequest, options, cancellationToken);
+                var getBlockchainInfoResponse = await httpClient.PostAsJsonAsync("", getBlockchainInfoRequest, options, cancellationToken);
                 var blockchainInfo = await getBlockchainInfoResponse.Content.ReadFromJsonAsync<GetBlockchainInfo>(options, cancellationToken);
 
                 // get chainalgo stats
@@ -66,7 +66,7 @@ public class BlockchainWorker : BackgroundService
                     Method = "getchainalgostats",
                     Params = new List<object>(Array.Empty<object>())
                 };
-                var getChainalgoStatsResponse = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", getChainalgoStatsRequest, options, cancellationToken);
+                var getChainalgoStatsResponse = await httpClient.PostAsJsonAsync("", getChainalgoStatsRequest, options, cancellationToken);
                 var chainalgoStats = await getChainalgoStatsResponse.Content.ReadFromJsonAsync<GetChainalgoStats>(options, cancellationToken);
 
                 // updating cache
@@ -74,7 +74,7 @@ public class BlockchainWorker : BackgroundService
                 if (blockchainInfo != null && blockchainInfo.Result != null)
                 {
                     _chainInfoSingleton.CurrentChainInfo = blockchainInfo.Result;
-                    _chainInfoSingleton.CurrentChainInfo.Next_super_block = (uint)Math.Floor(((double)_chainInfoSingleton.CurrentChainInfo.Blocks / (double)43200) + 1) * 43200;
+                    _chainInfoSingleton.CurrentChainInfo.Next_super_block = (uint)Math.Floor((_chainInfoSingleton.CurrentChainInfo.Blocks / (double)43200) + 1) * 43200;
                     if (_chainInfoSingleton.LastSyncedBlockOnNode < _chainInfoSingleton.CurrentChainInfo?.Blocks)
                         _chainInfoSingleton.LastSyncedBlockOnNode = (int)(_chainInfoSingleton.CurrentChainInfo?.Blocks ?? 0);
 
