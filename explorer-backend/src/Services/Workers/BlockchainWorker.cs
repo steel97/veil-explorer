@@ -101,13 +101,13 @@ public class BlockchainWorker : BackgroundService
                         }
                     }
                 }
-                else
-                    _logger.LogWarning("BlockChainInfo is null");
+                //else
+                //    _logger.LogWarning("BlockChainInfo is null");
 
                 if (chainalgoStats != null && chainalgoStats.Result != null)
                     _chainInfoSingleton.CurrentChainAlgoStats = chainalgoStats.Result;
-                else
-                    _logger.LogWarning("ChainalgoStats is null");
+                //else
+                //    _logger.LogWarning("ChainalgoStats is null");
 
                 // TimeSpan not reuired here since we use milliseconds, still put it there to change in future if required
                 await Task.Delay(TimeSpan.FromMilliseconds(_explorerConfig.CurrentValue.PullBlockchainInfoDelay), cancellationToken);
