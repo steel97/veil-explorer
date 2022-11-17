@@ -105,7 +105,7 @@ public class OrphanFixWorker : BackgroundService
 
                 foundOrphans++;
 
-                if (await _blocksService.UpdateDbBlockAsync(i, blockHashCheck.Result, cancellationToken)) // true = txfailed
+                if (!await _blocksService.UpdateDbBlockAsync(i, blockHashCheck.Result, cancellationToken))
                 {
                     _logger.LogError("Can't update orphan block #{blockNumber}", i);
                 }

@@ -105,7 +105,7 @@ public class BlocksService : IBlocksService
 
         await transactionsRepository.RemoveTransactionsForBlockAsync(height, cancellationToken);
         await blocksRepository.UpdateBlockAsync(height, RPCBlockToDb(validBlock.Result), cancellationToken);
-        return await InsertTransactionsAsync(height, validBlock.Result.Tx, cancellationToken);
+        return !await InsertTransactionsAsync(height, validBlock.Result.Tx, cancellationToken);
     }
 
     public async Task<bool> InsertTransactionsAsync(int blockId, List<string>? txIds, CancellationToken cancellationToken)
