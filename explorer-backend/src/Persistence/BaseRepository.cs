@@ -5,22 +5,13 @@ namespace ExplorerBackend.Persistence;
 
 public class BaseRepository
 {
-    private readonly IConfiguration _config;
     private readonly IUtilityService _utilityService;
 
-    public BaseRepository(IConfiguration config, IUtilityService utilityService)
+    public BaseRepository(IUtilityService utilityService)
     {
-        _config = config;
         _utilityService = utilityService;
     }
 
-    protected NpgsqlConnection Connection
-    {
-        get
-        {
-            return new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
-        }
-    }
 
     protected string? TransformDouble(double input) => TransformHex(BitConverter.ToString(BitConverter.GetBytes(input)).Replace("-", "").ToLowerInvariant());
 

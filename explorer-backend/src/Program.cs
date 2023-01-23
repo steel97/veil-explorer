@@ -24,11 +24,13 @@ builder.Host.UseSerilog((context, services, configuration) => configuration
                     .ReadFrom.Services(services)
                     .Enrich.FromLogContext());
 
-// Add services to the container.
+// Configuration
 builder.Services.Configure<APIConfig>(builder.Configuration.GetSection("API"));
 builder.Services.Configure<ExplorerConfig>(builder.Configuration.GetSection("Explorer"));
 builder.Services.Configure<ServerConfig>(builder.Configuration.GetSection("Server"));
 
+// Add services to the container.
+builder.Services.AddNpgsqlDataSource(builder.Configuration.GetConnectionString("DefaultConnection") ?? "");
 builder.Services.AddSingleton<ChaininfoSingleton>();
 builder.Services.AddSingleton<InternalSingleton>();
 builder.Services.AddSingleton<NodeApiCacheSingleton>();

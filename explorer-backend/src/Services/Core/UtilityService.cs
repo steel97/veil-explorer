@@ -2,11 +2,11 @@ using System.Text.RegularExpressions;
 
 namespace ExplorerBackend.Services.Core;
 
-public class UtilityService : IUtilityService
+public partial class UtilityService : IUtilityService
 {
-    private readonly static Regex hexRegex = new("^[A-Fa-f0-9]+$", RegexOptions.Compiled);
-    private readonly static Regex numericRegex = new("^(0|[1-9][0-9]*)$", RegexOptions.Compiled);
-    private readonly static Regex addressCleanupRegex = new("/[^a-zA-Z0-9=&]/g", RegexOptions.Compiled);
+    private readonly static Regex hexRegex = HexRegex();
+    private readonly static Regex numericRegex = NumericRegex();
+    private readonly static Regex addressCleanupRegex = AddressCleanupRegex();
 
     public bool VerifyHex(string? hex) => hexRegex.IsMatch(hex ?? "") && hex?.Length % 2 == 0;
     public bool IsNumeric(string? val) => numericRegex.IsMatch(val ?? "");
@@ -22,4 +22,10 @@ public class UtilityService : IUtilityService
 
     public string ToHex(byte[] val) => BitConverter.ToString(val).Replace("-", "").ToLowerInvariant();
     public string ToHexReversed(byte[] val) => ToHex(val.Reverse().ToArray());
+    [GeneratedRegex("/[^a-zA-Z0-9=&]/g", RegexOptions.Compiled)]
+    private static partial Regex AddressCleanupRegex();
+    [GeneratedRegex("^(0|[1-9][0-9]*)$", RegexOptions.Compiled)]
+    private static partial Regex NumericRegex();
+    [GeneratedRegex("^[A-Fa-f0-9]+$", RegexOptions.Compiled)]
+    private static partial Regex HexRegex();
 }

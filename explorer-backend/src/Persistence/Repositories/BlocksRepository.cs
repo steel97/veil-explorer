@@ -8,10 +8,12 @@ namespace ExplorerBackend.Persistence.Repositories;
 
 public class BlocksRepository : BaseRepository, IBlocksRepository
 {
+    private readonly NpgsqlDataSource _dataSource;
     private readonly ChaininfoSingleton _chainInfoSingleton;
 
-    public BlocksRepository(IConfiguration config, IUtilityService utilityService, ChaininfoSingleton chainInfoSingleton) : base(config, utilityService)
+    public BlocksRepository(NpgsqlDataSource dataSource, IUtilityService utilityService, ChaininfoSingleton chainInfoSingleton) : base(utilityService)
     {
+        _dataSource = dataSource;
         _chainInfoSingleton = chainInfoSingleton;
     }
 
@@ -54,12 +56,11 @@ public class BlocksRepository : BaseRepository, IBlocksRepository
 
     public async Task<List<SimplifiedBlock>> GetSimplifiedBlocksAsync(int offset, int count, SortDirection sort, CancellationToken cancellationToken = default)
     {
-        using var conn = Connection;
-        await conn.OpenAsync(cancellationToken);
+        await using var conn = await _dataSource.OpenConnectionAsync(cancellationToken);
 
         var offsetQuery = sort == SortDirection.DESC ? $"b.height < {_chainInfoSingleton.CurrentSyncedBlock + 1 - offset}" : $"b.height > {offset}";
 
-        using var cmd = new NpgsqlCommand($"SELECT b.height, b.\"size\", b.weight, b.proof_type, b.\"time\", b.mediantime, (SELECT COUNT(t.txid) as txn from transactions t where t.block_height = b.height) FROM blocks b WHERE {offsetQuery} AND b.synced = true ORDER BY b.height {(sort == SortDirection.ASC ? "ASC" : "DESC")} limit {count};", conn);
+        await using var cmd = new NpgsqlCommand($"SELECT b.height, b.\"size\", b.weight, b.proof_type, b.\"time\", b.mediantime, (SELECT COUNT(t.txid) as txn from transactions t where t.block_height = b.height) FROM blocks b WHERE {offsetQuery} AND b.synced = true ORDER BY b.height {(sort == SortDirection.ASC ? "ASC" : "DESC")} limit {count};", conn);
         await using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
         var simplifiedBlocks = new List<SimplifiedBlock>();
 
@@ -84,11 +85,10 @@ public class BlocksRepository : BaseRepository, IBlocksRepository
 
     public async Task<Block?> GetLatestBlockAsync(bool onlySynced = false, CancellationToken cancellationToken = default)
     {
-        using var conn = Connection;
-        await conn.OpenAsync(cancellationToken);
+        await using var conn = await _dataSource.OpenConnectionAsync(cancellationToken);
 
         var whereAddition = onlySynced ? "WHERE synced = 'true'" : "";
-        using var cmd = new NpgsqlCommand($"SELECT * FROM blocks {whereAddition} ORDER BY height DESC LIMIT 1;", conn);
+        await using var cmd = new NpgsqlCommand($"SELECT * FROM blocks {whereAddition} ORDER BY height DESC LIMIT 1;", conn);
         await using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
         var success = await reader.ReadAsync(cancellationToken);
         if (!success) return null;
@@ -98,10 +98,9 @@ public class BlocksRepository : BaseRepository, IBlocksRepository
 
     public async Task<Block?> GetBlockByHeightAsync(int height, CancellationToken cancellationToken = default)
     {
-        using var conn = Connection;
-        await conn.OpenAsync(cancellationToken);
+        await using var conn = await _dataSource.OpenConnectionAsync(cancellationToken);
 
-        using var cmd = new NpgsqlCommand($"SELECT b.height, b.hash, b.strippedsize, b.\"size\", b.weight, b.proof_type, b.proofofstakehash , b.progproofofworkhash, b.progpowmixhash ,b.randomxproofofworkhash ,b.sha256dproofofworkhash , b.proofofworkhash, b.\"version\", b.merkleroot ,b.\"time\", b.mediantime,b.nonce ,b.nonce64 ,b.mixhash , b.bits ,b.difficulty ,b.chainwork ,b.anon_index ,b.veil_data_hash ,b.prog_header_hash ,b.prog_header_hex , b.epoch_number , b.synced,  (SELECT COUNT(t.txid) as txn from transactions t where t.block_height = b.height) FROM blocks b WHERE b.height = {height};", conn);
+        await using var cmd = new NpgsqlCommand($"SELECT b.height, b.hash, b.strippedsize, b.\"size\", b.weight, b.proof_type, b.proofofstakehash , b.progproofofworkhash, b.progpowmixhash ,b.randomxproofofworkhash ,b.sha256dproofofworkhash , b.proofofworkhash, b.\"version\", b.merkleroot ,b.\"time\", b.mediantime,b.nonce ,b.nonce64 ,b.mixhash , b.bits ,b.difficulty ,b.chainwork ,b.anon_index ,b.veil_data_hash ,b.prog_header_hash ,b.prog_header_hex , b.epoch_number , b.synced,  (SELECT COUNT(t.txid) as txn from transactions t where t.block_height = b.height) FROM blocks b WHERE b.height = {height};", conn);
         await using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
         var success = await reader.ReadAsync(cancellationToken);
         if (!success) return null;
@@ -115,10 +114,9 @@ public class BlocksRepository : BaseRepository, IBlocksRepository
 
     public async Task<string?> ProbeHashByHeightAsync(int height, CancellationToken cancellationToken = default)
     {
-        using var conn = Connection;
-        await conn.OpenAsync(cancellationToken);
+        await using var conn = await _dataSource.OpenConnectionAsync(cancellationToken);
 
-        using var cmd = new NpgsqlCommand($"SELECT hash FROM blocks WHERE height = {height}", conn);
+        await using var cmd = new NpgsqlCommand($"SELECT hash FROM blocks WHERE height = {height}", conn);
         await using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
         var success = await reader.ReadAsync(cancellationToken);
         if (!success) return null;
@@ -128,10 +126,9 @@ public class BlocksRepository : BaseRepository, IBlocksRepository
 
     public async Task<Block?> GetBlockByHashAsync(string hash, CancellationToken cancellationToken = default)
     {
-        using var conn = Connection;
-        await conn.OpenAsync(cancellationToken);
+        await using var conn = await _dataSource.OpenConnectionAsync(cancellationToken);
 
-        using var cmd = new NpgsqlCommand($"SELECT b.height, b.hash, b.strippedsize, b.\"size\", b.weight, b.proof_type, b.proofofstakehash , b.progproofofworkhash, b.progpowmixhash ,b.randomxproofofworkhash ,b.sha256dproofofworkhash , b.proofofworkhash, b.\"version\", b.merkleroot, b.\"time\", b.mediantime,b.nonce ,b.nonce64 ,b.mixhash , b.bits ,b.difficulty ,b.chainwork ,b.anon_index ,b.veil_data_hash ,b.prog_header_hash ,b.prog_header_hex , b.epoch_number , b.synced,  (SELECT COUNT(t.txid) as txn from transactions t where t.block_height = b.height) FROM blocks b WHERE b.hash = {TransformHex(hash)};", conn);
+        await using var cmd = new NpgsqlCommand($"SELECT b.height, b.hash, b.strippedsize, b.\"size\", b.weight, b.proof_type, b.proofofstakehash , b.progproofofworkhash, b.progpowmixhash ,b.randomxproofofworkhash ,b.sha256dproofofworkhash , b.proofofworkhash, b.\"version\", b.merkleroot, b.\"time\", b.mediantime,b.nonce ,b.nonce64 ,b.mixhash , b.bits ,b.difficulty ,b.chainwork ,b.anon_index ,b.veil_data_hash ,b.prog_header_hash ,b.prog_header_hex , b.epoch_number , b.synced,  (SELECT COUNT(t.txid) as txn from transactions t where t.block_height = b.height) FROM blocks b WHERE b.hash = {TransformHex(hash)};", conn);
         await using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
         var success = await reader.ReadAsync(cancellationToken);
         if (!success) return null;
@@ -145,10 +142,9 @@ public class BlocksRepository : BaseRepository, IBlocksRepository
 
     public async Task<int?> ProbeBlockByHashAsync(string hash, CancellationToken cancellationToken = default)
     {
-        using var conn = Connection;
-        await conn.OpenAsync(cancellationToken);
+        await using var conn = await _dataSource.OpenConnectionAsync(cancellationToken);
 
-        using var cmd = new NpgsqlCommand($"SELECT height FROM blocks WHERE hash = {TransformHex(hash)}", conn);
+        await using var cmd = new NpgsqlCommand($"SELECT height FROM blocks WHERE hash = {TransformHex(hash)}", conn);
         await using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
         var success = await reader.ReadAsync(cancellationToken);
         if (!success) return null;
@@ -158,10 +154,9 @@ public class BlocksRepository : BaseRepository, IBlocksRepository
 
     public async Task<bool> InsertBlockAsync(Block blockTemplate, CancellationToken cancellationToken = default)
     {
-        using var conn = Connection;
-        await conn.OpenAsync(cancellationToken);
+        await using var conn = await _dataSource.OpenConnectionAsync(cancellationToken);
 
-        using var cmd = new NpgsqlCommand("INSERT INTO blocks (height,hash,strippedsize,\"size\",weight,proof_type,proofofstakehash,progproofofworkhash,progpowmixhash," +
+        await using var cmd = new NpgsqlCommand("INSERT INTO blocks (height,hash,strippedsize,\"size\",weight,proof_type,proofofstakehash,progproofofworkhash,progpowmixhash," +
                                             "randomxproofofworkhash,sha256dproofofworkhash,proofofworkhash,\"version\",merkleroot,\"time\",mediantime,nonce,nonce64,mixhash," +
                                             "bits,difficulty,chainwork,anon_index,veil_data_hash,prog_header_hash,prog_header_hex,epoch_number,synced) VALUES (" +
                                             $"{blockTemplate.height}, {TransformHex(blockTemplate.hash_hex)}, {blockTemplate.strippedsize}, {blockTemplate.size}, {blockTemplate.weight}, {(short)blockTemplate.proof_type}, {TransformHex(blockTemplate.proofofstakehash_hex)}, {TransformHex(blockTemplate.progproofofworkhash_hex)}, {TransformHex(blockTemplate.progpowmixhash_hex)}," +
@@ -174,10 +169,9 @@ public class BlocksRepository : BaseRepository, IBlocksRepository
 
     public async Task<bool> UpdateBlockAsync(int height, Block blockTemplate, CancellationToken cancellationToken = default)
     {
-        using var conn = Connection;
-        await conn.OpenAsync(cancellationToken);
+        await using var conn = await _dataSource.OpenConnectionAsync(cancellationToken);
 
-        using var cmd = new NpgsqlCommand("UPDATE blocks " +
+        await using var cmd = new NpgsqlCommand("UPDATE blocks " +
                                             "SET " +
                                             $"hash={TransformHex(blockTemplate.hash_hex)}, strippedsize={blockTemplate.strippedsize}, \"size\"={blockTemplate.size}, weight={blockTemplate.weight}, proof_type={(short)blockTemplate.proof_type}, proofofstakehash={TransformHex(blockTemplate.proofofstakehash_hex)}, progproofofworkhash={TransformHex(blockTemplate.progproofofworkhash_hex)}, progpowmixhash={TransformHex(blockTemplate.progpowmixhash_hex)}," +
                                             $"randomxproofofworkhash={TransformHex(blockTemplate.randomxproofofworkhash_hex)}, sha256dproofofworkhash={TransformHex(blockTemplate.sha256dproofofworkhash_hex)}, proofofworkhash={TransformHex(blockTemplate.proofofworkhash_hex)}, \"version\"={blockTemplate.version}, merkleroot={TransformHex(blockTemplate.merkleroot_hex)}, \"time\"={blockTemplate.time}, mediantime={blockTemplate.mediantime}, nonce={blockTemplate.nonce}, nonce64={blockTemplate.nonce64}, mixhash={TransformHex(blockTemplate.mixhash_hex)}," +
@@ -189,10 +183,9 @@ public class BlocksRepository : BaseRepository, IBlocksRepository
 
     public async Task<bool> SetBlockSyncStateAsync(int height, bool state, CancellationToken cancellationToken = default)
     {
-        using var conn = Connection;
-        await conn.OpenAsync(cancellationToken);
+        await using var conn = await _dataSource.OpenConnectionAsync(cancellationToken);
 
-        using var cmd = new NpgsqlCommand($"UPDATE blocks SET synced='true' WHERE height={height};", conn);
+        await using var cmd = new NpgsqlCommand($"UPDATE blocks SET synced='true' WHERE height={height};", conn);
         await cmd.PrepareAsync(cancellationToken);
         return await cmd.ExecuteNonQueryAsync(cancellationToken) > 0;
     }
