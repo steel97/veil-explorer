@@ -20,6 +20,7 @@
     "ApiQueueSpinDelay": 20
   },
   "Explorer": {
+    "RPCMode": true,
     "TxScopeTimeout": 600,
     "HubNotifyDelay": 5000,
     "PullBlocksDelay": 500,
@@ -66,8 +67,6 @@
         "Microsoft.AspNetCore": "Warning",
         "Microsoft.Hosting.Lifetime": "Information",
         "System.Net.Http.HttpClient": "Error"
-        "Microsoft": "Warning",
-        "Microsoft.Hosting.Lifetime": "Information"
       }
     },
     "Enrich": [

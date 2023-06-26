@@ -29,8 +29,12 @@ builder.Services.Configure<APIConfig>(builder.Configuration.GetSection("API"));
 builder.Services.Configure<ExplorerConfig>(builder.Configuration.GetSection("Explorer"));
 builder.Services.Configure<ServerConfig>(builder.Configuration.GetSection("Server"));
 
+bool rpcMode = builder.Configuration.GetSection("Explorer:RPCMode").Get<bool>();
+
 // Add services to the container.
-builder.Services.AddNpgsqlDataSource(builder.Configuration.GetConnectionString("DefaultConnection") ?? "");
+if(!rpcMode)
+    builder.Services.AddNpgsqlDataSource(builder.Configuration.GetConnectionString("DefaultConnection") ?? ""); // TODO switch to realtime mode
+
 builder.Services.AddSingleton<ChaininfoSingleton>();
 builder.Services.AddSingleton<InternalSingleton>();
 builder.Services.AddSingleton<NodeApiCacheSingleton>();
@@ -39,7 +43,9 @@ builder.Services.AddSingleton<IUtilityService, UtilityService>();
 builder.Services.AddSingleton<INodeRequester, NodeRequester>();
 builder.Services.AddSingleton<IBlocksService, BlocksService>();
 
-builder.Services.AddHostedService<BlocksWorker>();
+if(!rpcMode)
+    builder.Services.AddHostedService<BlocksWorker>(); // TODO switch to realtime mode
+
 builder.Services.AddHostedService<BlockchainWorker>();
 builder.Services.AddHostedService<BlockchainStatsWorker>();
 builder.Services.AddHostedService<HubBackgroundWorker>();
@@ -52,10 +58,13 @@ if (args.Length > 1 && args[0] == "--fixorphans")
     OrphanFixWorker.StartingBlock = int.Parse(args[1]);
     builder.Services.AddHostedService<OrphanFixWorker>();
 }
-
-builder.Services.AddTransient<IBlocksRepository, BlocksRepository>();
-builder.Services.AddTransient<ITransactionsRepository, TransactionsRepository>();
-builder.Services.AddTransient<IRawTxsRepository, RawTxsRepository>();
+// TODO disable this block in case of switching to realtime service
+if(!rpcMode)
+{
+    builder.Services.AddTransient<IBlocksRepository, BlocksRepository>();
+    builder.Services.AddTransient<ITransactionsRepository, TransactionsRepository>();
+    builder.Services.AddTransient<IRawTxsRepository, RawTxsRepository>();
+}
 
 builder.Services.AddTransient<ITransactionDecoder, TransactionsDecoder>();
 

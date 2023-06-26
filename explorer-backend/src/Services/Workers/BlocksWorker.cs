@@ -55,7 +55,7 @@ public class BlocksWorker : BackgroundService
         };
 
         // set initial state, this fixes issue when after restart blocks not retrieved correctly from API before new block come from node
-        using (var scope = _serviceProvider.CreateAsyncScope())
+        await using (var scope = _serviceProvider.CreateAsyncScope())
         {
             var blocksRepository = scope.ServiceProvider.GetRequiredService<IBlocksRepository>();
             var latestSyncedBlock = await blocksRepository.GetLatestBlockAsync(true, cancellationToken);
@@ -68,7 +68,7 @@ public class BlocksWorker : BackgroundService
         {
             try
             {
-                using (var scope = _serviceProvider.CreateAsyncScope())
+                await using (var scope = _serviceProvider.CreateAsyncScope())
                 {
                     var blocksRepository = scope.ServiceProvider.GetRequiredService<IBlocksRepository>();
                     var transactionsRepository = scope.ServiceProvider.GetRequiredService<ITransactionsRepository>();
