@@ -34,7 +34,7 @@ bool rpcMode = builder.Configuration.GetSection("Explorer:RPCMode").Get<bool>();
 
 // Add services to the container.
 if(rpcMode is false)
-    builder.Services.AddNpgsqlDataSource(builder.Configuration.GetConnectionString("DefaultConnection") ?? ""); // TODO switch to realtime mode
+    builder.Services.AddNpgsqlDataSource(builder.Configuration.GetConnectionString("DefaultConnection") ?? "");
 
 builder.Services.AddSingleton<ChaininfoSingleton>();
 builder.Services.AddSingleton<InternalSingleton>();
@@ -45,9 +45,7 @@ builder.Services.AddSingleton<INodeRequester, NodeRequester>();
 builder.Services.AddSingleton<IBlocksService, BlocksService>();
 
 if(rpcMode is false)
-    builder.Services.AddHostedService<BlocksWorker>(); // TODO switch to realtime mode
-// if(rpcMode)
-//     builder.Services.AddHostedService<RealtimeBlocksWorkes>();
+    builder.Services.AddHostedService<BlocksWorker>();
 
 builder.Services.AddHostedService<BlockchainWorker>();
 builder.Services.AddHostedService<BlockchainStatsWorker>();
@@ -61,7 +59,7 @@ if (args.Length > 1 && args[0] == "--fixorphans")
     OrphanFixWorker.StartingBlock = int.Parse(args[1]);
     builder.Services.AddHostedService<OrphanFixWorker>();
 }
-// TODO disable this block in case of switching to realtime service
+
 if(rpcMode is false)
 {
     builder.Services.AddTransient<IBlocksRepository, BlocksRepository>();
