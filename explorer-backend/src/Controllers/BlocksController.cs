@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 using ExplorerBackend.Models.API;
 using ExplorerBackend.Configs;
 using ExplorerBackend.Models.Data;
-using ExplorerBackend.Persistence.Repositories;
+using ExplorerBackend.Services.Data;
 
 namespace ExplorerBackend.Controllers;
 
@@ -13,12 +13,12 @@ namespace ExplorerBackend.Controllers;
 public class BlocksController : ControllerBase
 {
     private readonly IOptions<APIConfig> _apiConfig;
-    private readonly IBlocksRepository _blocksRepository;
+    private readonly IBlocksDataService _blocksDataService; // switched to the new layer
 
-    public BlocksController(IOptions<APIConfig> apiConfig, IBlocksRepository blocksRepository)
+    public BlocksController(IOptions<APIConfig> apiConfig, IBlocksDataService blocksDataService)
     {
         _apiConfig = apiConfig;
-        _blocksRepository = blocksRepository;
+        _blocksDataService = blocksDataService;
     }
 
     [HttpGet(Name = "GetBlocks")]
@@ -32,7 +32,7 @@ public class BlocksController : ControllerBase
             return Problem("count should be more or equal to one", statusCode: 400);
         if (count > _apiConfig.Value.MaxBlocksPullCount)
             return Problem($"count should be less or equal than {_apiConfig.Value.MaxBlocksPullCount}", statusCode: 400);
-
-        return Ok(await _blocksRepository.GetSimplifiedBlocksAsync(offset, count, sort, cancellationToken));
+        // TODO switch to new layer 
+        return Ok(await _blocksDataService.GetSimplifiedBlocksAsync(offset, count, sort, cancellationToken));
     }
 }

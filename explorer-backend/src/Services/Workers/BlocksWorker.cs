@@ -54,7 +54,7 @@ public class BlocksWorker : BackgroundService
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
 
-        // set initial state, this fixes issue when after restart blocks not retrieved correctly from API before new block come from node
+        // set initial state, this fixes issue when after restart, blocks not retrieved correctly from API before new block come from node
         await using (var scope = _serviceProvider.CreateAsyncScope())
         {
             var blocksRepository = scope.ServiceProvider.GetRequiredService<IBlocksRepository>();
@@ -98,7 +98,9 @@ public class BlocksWorker : BackgroundService
                             }
 
                             // get block by hash
-                            //blockHash.Result
+                            // blockHash.Result
+                            // TODO send block info to the caching service
+                            // tip of the day: do not send too much money for a vtuber girls
                             var getBlockRequest = new JsonRPCRequest
                             {
                                 Id = 1,

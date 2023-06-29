@@ -5,7 +5,7 @@ using ExplorerBackend.Models.System;
 using ExplorerBackend.Configs;
 using ExplorerBackend.Models.Data;
 using ExplorerBackend.Services.Core;
-using ExplorerBackend.Persistence.Repositories;
+using ExplorerBackend.Services.Data;
 
 namespace ExplorerBackend.Controllers;
 
@@ -15,16 +15,16 @@ namespace ExplorerBackend.Controllers;
 public class BlockController : ControllerBase
 {
     private readonly IOptions<APIConfig> _apiConfig;
-    private readonly IBlocksRepository _blocksRepository;
-    private readonly ITransactionsRepository _transactionsRepository;
+    private readonly IBlocksDataService _blocksDataService; // switched to the new layer
+    private readonly ITransactionsDataService _transactionsDataService; // switched to the new layer
     private readonly ITransactionDecoder _transactionDecoder;
     private readonly IUtilityService _utilityService;
 
-    public BlockController(IOptions<APIConfig> apiConfig, IBlocksRepository blocksRepository, ITransactionsRepository transactionsRepository, ITransactionDecoder transactionDecoder, IUtilityService utilityService)
+    public BlockController(IOptions<APIConfig> apiConfig, IBlocksDataService blocksDataService, ITransactionsDataService transactionsDataService, ITransactionDecoder transactionDecoder, IUtilityService utilityService)
     {
         _apiConfig = apiConfig;
-        _blocksRepository = blocksRepository;
-        _transactionsRepository = transactionsRepository;
+        _blocksDataService = blocksDataService;
+        _transactionsDataService = transactionsDataService;
         _transactionDecoder = transactionDecoder;
         _utilityService = utilityService;
     }
@@ -48,16 +48,16 @@ public class BlockController : ControllerBase
 
         Block? block = null;
         if (body.Hash != null && _utilityService.VerifyHex(body.Hash))
-            block = await _blocksRepository.GetBlockByHashAsync(body.Hash, cancellationToken);
+            block = await _blocksDataService.GetBlockByHashAsync(body.Hash, cancellationToken);
         else if (body.Height != null)
-            block = await _blocksRepository.GetBlockByHeightAsync(body.Height.Value, cancellationToken);
+            block = await _blocksDataService.GetBlockByHeightAsync(body.Height.Value, cancellationToken);
         else
             return Problem($"count should be less or equal than {_apiConfig.Value.MaxBlocksPullCount}", statusCode: 400);
 
         if (block != null)
         {
-            var nextBlockHash = await _blocksRepository.ProbeHashByHeightAsync(block.height + 1, cancellationToken);
-            var prevBlockHash = await _blocksRepository.ProbeHashByHeightAsync(block.height - 1, cancellationToken);
+            var nextBlockHash = await _blocksDataService.ProbeHashByHeightAsync(block.height + 1, cancellationToken);
+            var prevBlockHash = await _blocksDataService.ProbeHashByHeightAsync(block.height - 1, cancellationToken);
 
             response.Found = true;
             response.Block = block;
@@ -82,7 +82,7 @@ public class BlockController : ControllerBase
                 };
 
 
-            var rtxs = await _transactionsRepository.GetTransactionsForBlockAsync(block.height, body.Offset, body.Count, false, cancellationToken);
+            var rtxs = await _transactionsDataService.GetTransactionsForBlockAsync(block.height, body.Offset, body.Count, false, cancellationToken);
             if (rtxs != null)
             {
                 var txTargets = new List<TxDecodeTarget>();

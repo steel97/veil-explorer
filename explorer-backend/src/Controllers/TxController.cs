@@ -3,7 +3,7 @@ using ExplorerBackend.Models.API;
 using ExplorerBackend.Models.System;
 using ExplorerBackend.Services.Core;
 using ExplorerBackend.Services.Caching;
-using ExplorerBackend.Persistence.Repositories;
+using ExplorerBackend.Services.Data;
 
 namespace ExplorerBackend.Controllers;
 
@@ -12,16 +12,16 @@ namespace ExplorerBackend.Controllers;
 [Produces("application/json")]
 public class TxController : ControllerBase
 {
-    private readonly IBlocksRepository _blocksRepository;
-    private readonly ITransactionsRepository _transactionsRepository;
+    private readonly IBlocksDataService _blocksDataService; // switched to the new layer
+    private readonly ITransactionsDataService _transactionsDataService; // switched to the new layer
     private readonly ITransactionDecoder _transactionDecoder;
     private readonly IUtilityService _utilityService;
     private readonly ChaininfoSingleton _chaininfoSingleton;
 
-    public TxController(IBlocksRepository blocksRepository, ITransactionsRepository transactionsRepository, ITransactionDecoder transactionDecoder, IUtilityService utilityService, ChaininfoSingleton chaininfoSingleton)
+    public TxController(IBlocksDataService blocksDataService, ITransactionsDataService transactionsDataService, ITransactionDecoder transactionDecoder, IUtilityService utilityService, ChaininfoSingleton chaininfoSingleton)
     {
-        _blocksRepository = blocksRepository;
-        _transactionsRepository = transactionsRepository;
+        _blocksDataService = blocksDataService;
+        _transactionsDataService = transactionsDataService;
         _transactionDecoder = transactionDecoder;
         _utilityService = utilityService;
         _chaininfoSingleton = chaininfoSingleton;
@@ -60,10 +60,10 @@ public class TxController : ControllerBase
         }
         else
         {
-            var dbtx = await _transactionsRepository.GetTransactionFullByIdAsync(body.Hash, cancellationToken);
+            var dbtx = await _transactionsDataService.GetTransactionFullByIdAsync(body.Hash, cancellationToken);
             if (dbtx == null) return Problem("can't find tx", statusCode: 400);
 
-            var block = await _blocksRepository.GetBlockByHeightAsync(dbtx.block_height, cancellationToken);
+            var block = await _blocksDataService.GetBlockByHeightAsync(dbtx.block_height, cancellationToken);
 
             txTargets.Add(new TxDecodeTarget
             {

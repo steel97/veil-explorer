@@ -11,6 +11,7 @@ using ExplorerBackend.Services;
 using Serilog;
 using Serilog.Events;
 using ExplorerBackend.Services.Workers.Patches;
+using ExplorerBackend.Services.Data;
 
 Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
@@ -32,7 +33,7 @@ builder.Services.Configure<ServerConfig>(builder.Configuration.GetSection("Serve
 bool rpcMode = builder.Configuration.GetSection("Explorer:RPCMode").Get<bool>();
 
 // Add services to the container.
-if(!rpcMode)
+if(rpcMode is false)
     builder.Services.AddNpgsqlDataSource(builder.Configuration.GetConnectionString("DefaultConnection") ?? ""); // TODO switch to realtime mode
 
 builder.Services.AddSingleton<ChaininfoSingleton>();
@@ -43,8 +44,10 @@ builder.Services.AddSingleton<IUtilityService, UtilityService>();
 builder.Services.AddSingleton<INodeRequester, NodeRequester>();
 builder.Services.AddSingleton<IBlocksService, BlocksService>();
 
-if(!rpcMode)
+if(rpcMode is false)
     builder.Services.AddHostedService<BlocksWorker>(); // TODO switch to realtime mode
+// if(rpcMode)
+//     builder.Services.AddHostedService<RealtimeBlocksWorkes>();
 
 builder.Services.AddHostedService<BlockchainWorker>();
 builder.Services.AddHostedService<BlockchainStatsWorker>();
@@ -59,11 +62,23 @@ if (args.Length > 1 && args[0] == "--fixorphans")
     builder.Services.AddHostedService<OrphanFixWorker>();
 }
 // TODO disable this block in case of switching to realtime service
-if(!rpcMode)
+if(rpcMode is false)
 {
     builder.Services.AddTransient<IBlocksRepository, BlocksRepository>();
     builder.Services.AddTransient<ITransactionsRepository, TransactionsRepository>();
     builder.Services.AddTransient<IRawTxsRepository, RawTxsRepository>();
+}
+if(rpcMode is true)
+{
+   builder.Services.AddTransient<IBlocksDataService, RealtimeBlocksDataService>();
+   builder.Services.AddTransient<ITransactionsDataService, RealtimeTransactionsDataService>();
+   builder.Services.AddTransient<IRawTransactionsDataService, RealtimeRawTransactionsDataService>();
+}
+else
+{
+    builder.Services.AddTransient<IBlocksDataService, DbBlocksDataService>();
+    builder.Services.AddTransient<ITransactionsDataService, DbTransactionsDataService>();
+    builder.Services.AddTransient<IRawTransactionsDataService, DbRawTransactionsDataService>();
 }
 
 builder.Services.AddTransient<ITransactionDecoder, TransactionsDecoder>();

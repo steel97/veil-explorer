@@ -4,7 +4,7 @@ using ExplorerBackend.Models.System;
 using ExplorerBackend.Configs;
 using ExplorerBackend.Services.Core;
 using ExplorerBackend.Services.Caching;
-using ExplorerBackend.Persistence.Repositories;
+using ExplorerBackend.Services.Data;
 using NanoXLSX;
 
 namespace ExplorerBackend.Hubs;
@@ -15,16 +15,16 @@ public class InternalHub : Hub
     private readonly InternalSingleton _internalSingleton;
     private readonly ILogger _logger;
     private readonly IOptions<ServerConfig> _serverConfig;
-    private readonly ITransactionsRepository _transactionsRepository;
+    private readonly ITransactionsDataService _transactionsDataService;
     private readonly ITransactionDecoder _transactionDecoder;
     private readonly IUtilityService _utilityService;
 
-    public InternalHub(ILogger<EventsHub> logger, ChaininfoSingleton chainInfoSingleton, InternalSingleton internalSingleton, IOptions<ServerConfig> serverConfig, ITransactionsRepository transactionsRepository, ITransactionDecoder transactionDecoder, IUtilityService utilityService)
+    public InternalHub(ILogger<EventsHub> logger, ChaininfoSingleton chainInfoSingleton, InternalSingleton internalSingleton, IOptions<ServerConfig> serverConfig, ITransactionsDataService transactionsDataService, ITransactionDecoder transactionDecoder, IUtilityService utilityService)
     {
         _chainInfoSingleton = chainInfoSingleton;
         _internalSingleton = internalSingleton;
         _serverConfig = serverConfig;
-        _transactionsRepository = transactionsRepository;
+        _transactionsDataService = transactionsDataService;
         _transactionDecoder = transactionDecoder;
         _utilityService = utilityService;
         _logger = logger;
@@ -70,7 +70,7 @@ public class InternalHub : Hub
             var si = 0;
             for (var i = 1; i <= mBlock; i++)
             {
-                var rtxs = await _transactionsRepository.GetTransactionsForBlockAsync(i, 0, 0, true, cancellationToken);
+                var rtxs = await _transactionsDataService.GetTransactionsForBlockAsync(i, 0, 0, true, cancellationToken);
                 if (rtxs != null)
                 {
                     var txTargets = new List<TxDecodeTarget>();

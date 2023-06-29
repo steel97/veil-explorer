@@ -16,18 +16,16 @@ namespace ExplorerBackend.Controllers;
 [Route("/")]
 public class NodeProxyController : ControllerBase
 {
-    private readonly static List<string> NODE_ALLOWED_METHODS = new(new string[] {
+    private readonly static IReadOnlyList<string> NODE_ALLOWED_METHODS = new string[] {
         "importlightwalletaddress", "getwatchonlystatus", "getwatchonlytxes", "checkkeyimages", "getanonoutputs",
         "sendrawtransaction", "getblockchaininfo", "getrawmempool"
-    });
+    };
     private readonly static JsonSerializerOptions serializeOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
     private readonly static List<string> emptyList = new();
-
-
     private readonly IOptions<ServerConfig> _serverConfig;
     private readonly INodeRequester _nodeRequester;
     private readonly ChaininfoSingleton _chainInfoSingleton;

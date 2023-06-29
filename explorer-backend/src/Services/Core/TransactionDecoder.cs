@@ -1,19 +1,19 @@
 using ExplorerBackend.VeilStructs;
 using ExplorerBackend.Models.API;
-using ExplorerBackend.Persistence.Repositories;
+using ExplorerBackend.Services.Data;
 using ExplorerBackend.Models.System;
 
 namespace ExplorerBackend.Services.Core;
 
 public class TransactionsDecoder : ITransactionDecoder
 {
-    private readonly IRawTxsRepository _rawTxsRepository;
+    private readonly IRawTransactionsDataService _rawTransactionsDataService;
     private readonly IUtilityService _utilityService;
 
-    public TransactionsDecoder(IRawTxsRepository rawTxsRepository, IUtilityService utilityService)
+    public TransactionsDecoder(IRawTransactionsDataService rawTransactionsDataService, IUtilityService utilityService)
     {
 
-        _rawTxsRepository = rawTxsRepository;
+        _rawTransactionsDataService = rawTransactionsDataService;
         _utilityService = utilityService;
     }
 
@@ -43,7 +43,7 @@ public class TransactionsDecoder : ITransactionDecoder
         // fetch prevout txs
         if (requiredTxs.Count > 0)
         {
-            var outTxs = await _rawTxsRepository.GetTransactionsByIdsAsync(requiredTxs, cancellationToken);
+            var outTxs = await _rawTransactionsDataService.GetTransactionsByIdsAsync(requiredTxs, cancellationToken);
             if (outTxs != null)
                 foreach (var rawTx in outTxs)
                 {
