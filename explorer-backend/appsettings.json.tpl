@@ -1,6 +1,7 @@
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Host=/var/run/postgresql/;Port=5432;Database=veilexplorer;Username=<USER>;Password=<PASSWORD>;Pooling=true;Maximum Pool Size=100;Tcp Keepalive=true;Keepalive=60;No Reset On Close=true;Client Encoding=UTF8"
+    "DefaultConnection": "Host=/var/run/postgresql/;Port=5432;Database=veilexplorer;Username=<USER>;Password=<PASSWORD>;Pooling=true;Maximum Pool Size=100;Tcp Keepalive=true;Keepalive=60;No Reset On Close=true;Client Encoding=UTF8",
+    "Redis" : "localhost:6379"
   },
   "Server": {
     "InternalAccessKey": "",
@@ -36,7 +37,9 @@
     "FoundationAddress": "38J8RGLetRUNEXycBMPg8oZqLt4bB9hCbt",
     "MemoryCache": {
       "ExpirationScanFrequency": 10000,
-      "ExpirationApiAbsoluteTime": 3600000
+      "ExpirationApiAbsoluteTime": 3600000,
+      "AbsoluteExpirationCacheTime" : 120,
+      "UnusedExpirationCacheTime": 45
     },
     "Node": {
       "Url": "http://127.0.0.1:5050/",
