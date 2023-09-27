@@ -18,12 +18,15 @@ public class ExplorerConfig
     public MemoryCache? MemoryCache { get; set; }
     public Node? Node { get; set; }
     public QueueConfig? ScanTxOutsetQueue { get; set; }
+    public bool RPCMode { get; set; }
 }
 
 public class MemoryCache
 {
     public int ExpirationScanFrequency { get; set; }
     public int ExpirationApiAbsoluteTime { get; set; }
+    public int AbsoluteExpirationCacheTime { get; set; }
+    public int UnusedExpirationCacheTime { get; set; }
 }
 
 public class Node
