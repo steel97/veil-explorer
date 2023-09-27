@@ -15,10 +15,11 @@ public partial class UtilityService : IUtilityService
     public string CleanupAddress(string? val) => addressCleanupRegex.Replace(val ?? "", "");
 
     // https://stackoverflow.com/a/321404
+    // try => Convert.FromHexString(hex);
     public byte[] HexToByteArray(string hex) => Enumerable.Range(0, hex.Length)
                      .Where(x => x % 2 == 0)
                      .Select(x => Convert.ToByte(hex.Substring(x, 2), 16))
-                     .ToArray();
+                     .ToArray();    
 
     public string ToHex(byte[] val) => BitConverter.ToString(val).Replace("-", "").ToLowerInvariant();
     public string ToHexReversed(byte[] val) => ToHex(val.Reverse().ToArray());

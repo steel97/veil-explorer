@@ -15,7 +15,7 @@ public class InternalHub : Hub
     private readonly InternalSingleton _internalSingleton;
     private readonly ILogger _logger;
     private readonly IOptions<ServerConfig> _serverConfig;
-    private readonly ITransactionsDataService _transactionsDataService;
+    private readonly ITransactionsDataService _transactionsDataService; // switched to the new layer
     private readonly ITransactionDecoder _transactionDecoder;
     private readonly IUtilityService _utilityService;
 

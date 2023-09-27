@@ -7,7 +7,7 @@ namespace ExplorerBackend.Services.Data;
 public class DbBlocksDataService : IBlocksDataService
 {
     private readonly IBlocksRepository _blocksRepository;
-    public DbBlocksDataService(IBlocksRepository blocksRepository) => (_blocksRepository) = (blocksRepository);
+    public DbBlocksDataService(IBlocksRepository blocksRepository) => _blocksRepository = blocksRepository;
 
     Task<Block?> IBlocksDataService.GetBlockByHashAsync(string hash, CancellationToken cancellationToken) =>
         _blocksRepository.GetBlockByHashAsync(hash, cancellationToken);

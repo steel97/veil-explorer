@@ -5,7 +5,7 @@ namespace ExplorerBackend.Services.Data;
 public class DbRawTransactionsDataService : IRawTransactionsDataService
 {
     private readonly IRawTxsRepository _rawTxsRepository;
-    public DbRawTransactionsDataService(IRawTxsRepository rawTxsRepository) => (_rawTxsRepository) = (rawTxsRepository);
+    public DbRawTransactionsDataService(IRawTxsRepository rawTxsRepository) => _rawTxsRepository = rawTxsRepository;
     public Task<byte[]?> GetTransactionByIdAsync(string txid, CancellationToken cancellationToken = default) =>
         _rawTxsRepository.GetTransactionByIdAsync(txid, cancellationToken);
 
