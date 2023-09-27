@@ -13,6 +13,10 @@ namespace ExplorerBackend.Services.Workers;
 
 public class BlockchainStatsWorker : BackgroundService
 {
+    private Uri? _uri;
+    private AuthenticationHeaderValue? _authHeader;
+    private int _usernameHash;
+    private int _passHash;
     private readonly ILogger _logger;
     private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
     private readonly IHttpClientFactory _httpClientFactory;
@@ -28,19 +32,18 @@ public class BlockchainStatsWorker : BackgroundService
         _explorerConfig = explorerConfig;
         _httpClientFactory = httpClientFactory;
         _chainInfoSingleton = chaininfoSingleton;
+        ConfigSetup();
     }
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         using var httpClient = _httpClientFactory.CreateClient();
 
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Url);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Username);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Password);
-
-        httpClient.BaseAddress = new Uri(_explorerConfig.CurrentValue.Node.Url);
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_explorerConfig.CurrentValue.Node.Username}:{_explorerConfig.CurrentValue.Node.Password}")));
+        if(_passHash !=_explorerConfig.CurrentValue.Node!.Password!.GetHashCode() || _usernameHash !=_explorerConfig.CurrentValue.Node!.Username!.GetHashCode())        
+            ConfigSetup();
+                    
+        httpClient.BaseAddress = _uri;
+        httpClient.DefaultRequestHeaders.Authorization = _authHeader;
 
         var targetBlocksPerDay = 24 * 60 * 60 / Constants.BLOCK_TIME;
 
@@ -145,5 +148,18 @@ public class BlockchainStatsWorker : BackgroundService
         }
 
         return txStatsEntry;
+    }
+
+    private void ConfigSetup()  
+    {
+        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node);
+        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Url);
+        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Username);
+        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Password);
+
+        _authHeader = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_explorerConfig.CurrentValue.Node!.Username}:{_explorerConfig.CurrentValue.Node.Password}")));
+        _uri = new Uri(_explorerConfig.CurrentValue.Node!.Url!);
+        _usernameHash = _explorerConfig.CurrentValue.Node.Password!.GetHashCode();
+        _passHash = _explorerConfig.CurrentValue.Node!.Username!.GetHashCode();
     }
 }

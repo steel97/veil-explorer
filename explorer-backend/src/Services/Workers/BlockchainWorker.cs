@@ -13,6 +13,11 @@ namespace ExplorerBackend.Services.Workers;
 
 public class BlockchainWorker : BackgroundService
 {
+    private Uri? _uri;
+    private AuthenticationHeaderValue? _authHeader;
+    private int _usernameHash;
+    private int _passHash;
+    private JsonSerializerOptions _options;
     private readonly ILogger _logger;
     private readonly IHubContext<EventsHub> _hubContext;
     private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
@@ -26,24 +31,22 @@ public class BlockchainWorker : BackgroundService
         _explorerConfig = explorerConfig;
         _httpClientFactory = httpClientFactory;
         _chainInfoSingleton = chaininfoSingleton;
+        _options = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
+        ConfigSetup();
     }
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         using var httpClient = _httpClientFactory.CreateClient();
 
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Url);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Username);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Password);
-
-        httpClient.BaseAddress = new Uri(_explorerConfig.CurrentValue.Node.Url);
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_explorerConfig.CurrentValue.Node.Username}:{_explorerConfig.CurrentValue.Node.Password}")));
-
-        var options = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
+        if(_passHash !=_explorerConfig.CurrentValue.Node!.Password!.GetHashCode() || _usernameHash !=_explorerConfig.CurrentValue.Node!.Username!.GetHashCode())        
+            ConfigSetup();
+                    
+        httpClient.BaseAddress = _uri;
+        httpClient.DefaultRequestHeaders.Authorization = _authHeader;
 
         while (!cancellationToken.IsCancellationRequested)
         {
@@ -56,8 +59,8 @@ public class BlockchainWorker : BackgroundService
                     Method = "getblockchaininfo",
                     Params = new List<object>(Array.Empty<object>())
                 };
-                var getBlockchainInfoResponse = await httpClient.PostAsJsonAsync("", getBlockchainInfoRequest, options, cancellationToken);
-                var blockchainInfo = await getBlockchainInfoResponse.Content.ReadFromJsonAsync<GetBlockchainInfo>(options, cancellationToken);
+                var getBlockchainInfoResponse = await httpClient.PostAsJsonAsync("", getBlockchainInfoRequest, _options, cancellationToken);
+                var blockchainInfo = await getBlockchainInfoResponse.Content.ReadFromJsonAsync<GetBlockchainInfo>(_options, cancellationToken);
 
                 // get chainalgo stats
                 var getChainalgoStatsRequest = new JsonRPCRequest
@@ -66,8 +69,8 @@ public class BlockchainWorker : BackgroundService
                     Method = "getchainalgostats",
                     Params = new List<object>(Array.Empty<object>())
                 };
-                var getChainalgoStatsResponse = await httpClient.PostAsJsonAsync("", getChainalgoStatsRequest, options, cancellationToken);
-                var chainalgoStats = await getChainalgoStatsResponse.Content.ReadFromJsonAsync<GetChainalgoStats>(options, cancellationToken);
+                var getChainalgoStatsResponse = await httpClient.PostAsJsonAsync("", getChainalgoStatsRequest, _options, cancellationToken);
+                var chainalgoStats = await getChainalgoStatsResponse.Content.ReadFromJsonAsync<GetChainalgoStats>(_options, cancellationToken);
 
                 // updating cache
 
@@ -121,5 +124,18 @@ public class BlockchainWorker : BackgroundService
                 _logger.LogError(ex, "Can't handle blockchain info");
             }
         }
+    
+    }
+    private void ConfigSetup()
+    {
+        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node);
+        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Url);
+        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Username);
+        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Password);
+
+        _authHeader = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_explorerConfig.CurrentValue.Node!.Username}:{_explorerConfig.CurrentValue.Node.Password}")));
+        _uri = new Uri(_explorerConfig.CurrentValue.Node!.Url!);
+        _usernameHash = _explorerConfig.CurrentValue.Node.Password!.GetHashCode();
+        _passHash = _explorerConfig.CurrentValue.Node!.Username!.GetHashCode();
     }
 }

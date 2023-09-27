@@ -18,6 +18,10 @@ namespace ExplorerBackend.Services.Workers.Patches;
 public class OrphanFixWorker : BackgroundService
 {
     public static int StartingBlock { get; set; }
+    private Uri? _uri;
+    private AuthenticationHeaderValue? _authHeader;
+    private int _usernameHash;
+    private int _passHash;
 
     private readonly ILogger _logger;
     private readonly IHubContext<EventsHub> _hubContext;
@@ -26,6 +30,7 @@ public class OrphanFixWorker : BackgroundService
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ChaininfoSingleton _chainInfoSingleton;
     private readonly IBlocksService _blocksService;
+    private readonly JsonSerializerOptions? _options;
 
     public OrphanFixWorker(ILogger<OrphanFixWorker> logger, IHubContext<EventsHub> hubContext,
         IServiceProvider serviceProvider, IOptionsMonitor<ExplorerConfig> explorerConfig,
@@ -39,24 +44,22 @@ public class OrphanFixWorker : BackgroundService
         _httpClientFactory = httpClientFactory;
         _chainInfoSingleton = chaininfoSingleton;
         _blocksService = blocksService;
+        _options = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
+        ConfigSetup();
     }
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         using var httpClient = _httpClientFactory.CreateClient();
 
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Url);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Username);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Password);
-
-        httpClient.BaseAddress = new Uri(_explorerConfig.CurrentValue.Node.Url);
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_explorerConfig.CurrentValue.Node.Username}:{_explorerConfig.CurrentValue.Node.Password}")));
-
-        var options = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
+       if(_passHash !=_explorerConfig.CurrentValue.Node!.Password!.GetHashCode() || _usernameHash !=_explorerConfig.CurrentValue.Node!.Username!.GetHashCode())        
+            ConfigSetup();
+                    
+        httpClient.BaseAddress = _uri;
+        httpClient.DefaultRequestHeaders.Authorization = _authHeader;
 
         _logger.LogInformation("Starting orphan checking process from block {blockHeight}", StartingBlock);
         try
@@ -89,8 +92,8 @@ public class OrphanFixWorker : BackgroundService
                     Method = "getblockhash",
                     Params = new List<object>(new object[] { i })
                 };
-                var getBlockHashCheckResponse = await httpClient.PostAsJsonAsync("", getBlockHashCheckRequest, options, cancellationToken);
-                var blockHashCheck = await getBlockHashCheckResponse.Content.ReadFromJsonAsync<GetBlockHash>(options, cancellationToken);
+                var getBlockHashCheckResponse = await httpClient.PostAsJsonAsync("", getBlockHashCheckRequest, _options, cancellationToken);
+                var blockHashCheck = await getBlockHashCheckResponse.Content.ReadFromJsonAsync<GetBlockHash>(_options, cancellationToken);
 
                 if (blockHashCheck == null || blockHashCheck.Result == null)
                 {
@@ -127,5 +130,17 @@ public class OrphanFixWorker : BackgroundService
         {
             _logger.LogError(ex, "Orphan fix failed");
         }
+    }
+    private void ConfigSetup()
+    {
+        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node);
+        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Url);
+        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Username);
+        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Password);
+
+        _authHeader = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_explorerConfig.CurrentValue.Node!.Username}:{_explorerConfig.CurrentValue.Node.Password}")));
+        _uri = new Uri(_explorerConfig.CurrentValue.Node!.Url!);
+        _usernameHash = _explorerConfig.CurrentValue.Node.Password!.GetHashCode();
+        _passHash = _explorerConfig.CurrentValue.Node!.Username!.GetHashCode();
     }
 }

@@ -13,6 +13,10 @@ namespace ExplorerBackend.Services;
 
 public class BlocksService : IBlocksService
 {
+    private Uri? _uri;
+    private AuthenticationHeaderValue? _authHeader;
+    private int _usernameHash;
+    private int _passHash;
     private readonly ILogger _logger;
     private readonly IServiceProvider _serviceProvider;
     private readonly IHttpClientFactory _httpClientFactory;
@@ -30,6 +34,7 @@ public class BlocksService : IBlocksService
         _serviceProvider = serviceProvider;
         _explorerConfig = explorerConfig;
         _httpClientFactory = httpClientFactory;
+        ConfigSetup();
     }
 
     public Block RPCBlockToDb(GetBlockResult block) => new()
@@ -77,13 +82,11 @@ public class BlocksService : IBlocksService
         using var httpClient = _httpClientFactory.CreateClient();
         using var scope = _serviceProvider.CreateAsyncScope();
 
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Url);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Username);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Password);
-
-        httpClient.BaseAddress = new Uri(_explorerConfig.CurrentValue.Node.Url);
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_explorerConfig.CurrentValue.Node.Username}:{_explorerConfig.CurrentValue.Node.Password}")));
+       if(_passHash !=_explorerConfig.CurrentValue.Node!.Password!.GetHashCode() || _usernameHash !=_explorerConfig.CurrentValue.Node!.Username!.GetHashCode())        
+            ConfigSetup();
+                    
+        httpClient.BaseAddress = _uri;
+        httpClient.DefaultRequestHeaders.Authorization = _authHeader;
 
         var getBlockRequest = new JsonRPCRequest
         {
@@ -113,13 +116,11 @@ public class BlocksService : IBlocksService
         using var httpClient = _httpClientFactory.CreateClient();
         using var scope = _serviceProvider.CreateAsyncScope();
 
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Url);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Username);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Password);
-
-        httpClient.BaseAddress = new Uri(_explorerConfig.CurrentValue.Node.Url);
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_explorerConfig.CurrentValue.Node.Username}:{_explorerConfig.CurrentValue.Node.Password}")));
+       if(_passHash !=_explorerConfig.CurrentValue.Node!.Password!.GetHashCode() || _usernameHash !=_explorerConfig.CurrentValue.Node!.Username!.GetHashCode())        
+            ConfigSetup();
+                    
+        httpClient.BaseAddress = _uri;
+        httpClient.DefaultRequestHeaders.Authorization = _authHeader;
 
         var transactionsRepository = scope.ServiceProvider.GetRequiredService<ITransactionsRepository>();
         var rawTxsRepository = scope.ServiceProvider.GetRequiredService<IRawTxsRepository>();
@@ -189,5 +190,17 @@ public class BlocksService : IBlocksService
         }
 
         return txFailed;
+    }
+    private void ConfigSetup()
+    {
+        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node);
+        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Url);
+        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Username);
+        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Password);
+
+        _authHeader = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_explorerConfig.CurrentValue.Node!.Username}:{_explorerConfig.CurrentValue.Node.Password}")));
+        _uri = new Uri(_explorerConfig.CurrentValue.Node!.Url!);
+        _usernameHash = _explorerConfig.CurrentValue.Node.Password!.GetHashCode();
+        _passHash = _explorerConfig.CurrentValue.Node!.Username!.GetHashCode();
     }
 }

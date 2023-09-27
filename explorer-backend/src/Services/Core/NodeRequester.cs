@@ -11,6 +11,10 @@ namespace ExplorerBackend.Services.Core;
 
 public class NodeRequester : INodeRequester
 {
+    private Uri? _uri;
+    private AuthenticationHeaderValue? _authHeader;
+    private int _usernameHash;
+    private int _passHash;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
     private readonly NodeApiCacheSingleton _nodeApiCacheSingleton;
@@ -22,25 +26,17 @@ public class NodeRequester : INodeRequester
     public NodeRequester(IHttpClientFactory httpClientFactory, IOptionsMonitor<ExplorerConfig> explorerConfig, NodeApiCacheSingleton nodeApiCacheSingleton) =>
         (_explorerConfig, _httpClientFactory, _nodeApiCacheSingleton) = (explorerConfig, httpClientFactory, nodeApiCacheSingleton);
 
-
-    private void ConfigureHttpClient(HttpClient httpClient)
-    {
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Url);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Username);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Password);
-
-        httpClient.BaseAddress = new Uri(_explorerConfig.CurrentValue.Node.Url);
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_explorerConfig.CurrentValue.Node.Username}:{_explorerConfig.CurrentValue.Node.Password}")));
-    }
-
     public async Task<string> NodeRequest(string? method, List<object>? parameters, CancellationToken cancellationToken)
     {
         try
         {
             using var httpClient = _httpClientFactory.CreateClient();
 
-            ConfigureHttpClient(httpClient);
+            if(_passHash !=_explorerConfig.CurrentValue.Node!.Password!.GetHashCode() || _usernameHash !=_explorerConfig.CurrentValue.Node!.Username!.GetHashCode())        
+                ConfigureHttpClient();
+                    
+            httpClient.BaseAddress = _uri;
+            httpClient.DefaultRequestHeaders.Authorization = _authHeader;
 
             var request = new JsonRPCRequest
             {
@@ -75,7 +71,11 @@ public class NodeRequester : INodeRequester
         {
             using var httpClient = _httpClientFactory.CreateClient();
 
-            ConfigureHttpClient(httpClient);
+            if(_passHash !=_explorerConfig.CurrentValue.Node!.Password!.GetHashCode() || _usernameHash !=_explorerConfig.CurrentValue.Node!.Username!.GetHashCode())        
+                ConfigureHttpClient();
+                    
+            httpClient.BaseAddress = _uri;
+            httpClient.DefaultRequestHeaders.Authorization = _authHeader;
 
             var request = new JsonRPCRequest
             {
@@ -92,5 +92,15 @@ public class NodeRequester : INodeRequester
         {
 
         }
+    }
+    private void ConfigureHttpClient()
+    {
+        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node);
+        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Url);
+        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Username);
+        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Password);
+
+        _uri = new Uri(_explorerConfig.CurrentValue.Node.Url);
+        _authHeader = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_explorerConfig.CurrentValue.Node.Username}:{_explorerConfig.CurrentValue.Node.Password}")));
     }
 }
