@@ -5,7 +5,7 @@
     "QrCode": "QR код",
     "Meta": {
         "Title": "Veil Explorer - Просмотр адреса {address}",
-        "Description": "Просмотр информации о адресе {address}"
+        "Description": "Просмотр информации об адресе {address}"
     },
     "Hash160": "Hash 160",
     "ScriptPublicKey": "Script Public Key",
