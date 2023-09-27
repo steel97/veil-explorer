@@ -36,10 +36,8 @@ public class BlockController : ControllerBase
     {
         if (body.Offset < 0)
             return Problem("offset should be higher or equal to zero", statusCode: 400);
-        if (body.Count < 1)
-            return Problem("count should be more or equal to one", statusCode: 400);
-        if (body.Count > _apiConfig.Value.MaxTransactionsPullCount)
-            return Problem($"count should be less or equal than {_apiConfig.Value.MaxBlocksPullCount}", statusCode: 400);
+        if (body.Count > _apiConfig.Value.MaxTransactionsPullCount || body.Count < 1)
+            return Problem($"count should be between 1 and {_apiConfig.Value.MaxBlocksPullCount} ", statusCode: 400);
 
         var response = new BlockResponse
         {
@@ -47,12 +45,12 @@ public class BlockController : ControllerBase
         };
 
         Block? block = null;
-        if (body.Hash != null && _utilityService.VerifyHex(body.Hash))
-            block = await _blocksDataService.GetBlockByHashAsync(body.Hash, cancellationToken);
+        if (body.Hash != null && body.Hash.Length == 64 && _utilityService.VerifyHex(body.Hash))
+            block = await _blocksDataService.GetBlockByHashAsync(body.Hash, cancellationToken);        
         else if (body.Height != null)
             block = await _blocksDataService.GetBlockByHeightAsync(body.Height.Value, cancellationToken);
         else
-            return Problem($"count should be less or equal than {_apiConfig.Value.MaxBlocksPullCount}", statusCode: 400);
+            return Problem($"a problem has occured, try again", statusCode: 400);
 
         if (block != null)
         {
@@ -63,8 +61,7 @@ public class BlockController : ControllerBase
             response.Block = block;
             response.TxnCount = block.txnCount;
 
-            var verHex = BitConverter.GetBytes(block.version);
-            verHex = verHex.Reverse().ToArray();
+            var verHex = BitConverter.GetBytes(block.version).Reverse().ToArray();
             response.VersionHex = _utilityService.ToHex(verHex);
 
             if (nextBlockHash != null)

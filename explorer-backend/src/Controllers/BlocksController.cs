@@ -28,11 +28,9 @@ public class BlocksController : ControllerBase
     {
         if (offset < 0)
             return Problem("offset should be higher or equal to zero", statusCode: 400);
-        if (count < 1)
-            return Problem("count should be more or equal to one", statusCode: 400);
-        if (count > _apiConfig.Value.MaxBlocksPullCount)
-            return Problem($"count should be less or equal than {_apiConfig.Value.MaxBlocksPullCount}", statusCode: 400);
-        // TODO switch to new layer 
+        if (count > _apiConfig.Value.MaxTransactionsPullCount || count < 1)
+            return Problem($"count should be between 1 and {_apiConfig.Value.MaxBlocksPullCount} ", statusCode: 400);
+        
         return Ok(await _blocksDataService.GetSimplifiedBlocksAsync(offset, count, sort, cancellationToken));
     }
 }
