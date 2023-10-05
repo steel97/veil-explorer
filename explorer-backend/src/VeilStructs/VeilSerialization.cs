@@ -30,8 +30,7 @@ public class VeilSerialization
 
     public void ReadBool(out bool bl)
     {
-        byte b;
-        ReadByte(out b);
+        ReadByte(out byte b);
         bl = b > 0;
     }
 
@@ -94,11 +93,10 @@ public class VeilSerialization
         var n = 0ul;
         while (true)
         {
-            byte chData = 0;
-            ReadByte(out chData);
-            ulong a = (n << 7);
+            ReadByte(out byte chData);
+            ulong a = n << 7;
             byte b = (byte)(chData & 0x7F);
-            n = (a | b);
+            n = a | b;
             if ((chData & 0x80) != 0)
                 n++;
             else
@@ -113,7 +111,6 @@ public class VeilSerialization
         byte chSize;
         ReadByte(out chSize);
 
-        nSizeRet = 0;
         if (chSize < 253)
         {
             nSizeRet = chSize;
