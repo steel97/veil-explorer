@@ -8,4 +8,5 @@ public interface IBlocksService
     public Block RPCBlockToDb(GetBlockResult block);
     Task<bool> UpdateDbBlockAsync(int height, string validBlockHash, CancellationToken cancellationToken);
     Task<bool> InsertTransactionsAsync(int blockId, List<string>? txIds, CancellationToken cancellationToken);
+    Task<bool> InsertTransactionsAsync(int height, List<GetRawTransactionResult> txs, CancellationToken cancellationToken);
 }
