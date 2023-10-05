@@ -1,17 +1,9 @@
 using System.Text;
-using System.Text.Json;
-using System.Transactions;
 using System.Net.Http.Headers;
 using Microsoft.Extensions.Options;
-using Microsoft.AspNetCore.SignalR;
-using ExplorerBackend.Hubs;
 using ExplorerBackend.Configs;
-using ExplorerBackend.Services.Caching;
 using ExplorerBackend.Persistence.Repositories;
-using ExplorerBackend.Models.API;
-using ExplorerBackend.Models.Data;
-using ExplorerBackend.Models.Node;
-using ExplorerBackend.Models.Node.Response;
+using ExplorerBackend.Services.Core;
 
 namespace ExplorerBackend.Services.Workers.Patches;
 
@@ -22,32 +14,22 @@ public class OrphanFixWorker : BackgroundService
     private AuthenticationHeaderValue? _authHeader;
     private int _usernameHash;
     private int _passHash;
-
     private readonly ILogger _logger;
-    private readonly IHubContext<EventsHub> _hubContext;
     private readonly IServiceProvider _serviceProvider;
     private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly ChaininfoSingleton _chainInfoSingleton;
     private readonly IBlocksService _blocksService;
-    private readonly JsonSerializerOptions? _options;
+    private readonly NodeRequester _nodeRequester;
 
-    public OrphanFixWorker(ILogger<OrphanFixWorker> logger, IHubContext<EventsHub> hubContext,
-        IServiceProvider serviceProvider, IOptionsMonitor<ExplorerConfig> explorerConfig,
-        IHttpClientFactory httpClientFactory, ChaininfoSingleton chaininfoSingleton,
-        IBlocksService blocksService)
+    public OrphanFixWorker(ILogger<OrphanFixWorker> logger, IServiceProvider serviceProvider, IOptionsMonitor<ExplorerConfig> explorerConfig,
+        IHttpClientFactory httpClientFactory, IBlocksService blocksService, NodeRequester nodeRequester)
     {
         _logger = logger;
-        _hubContext = hubContext;
         _serviceProvider = serviceProvider;
         _explorerConfig = explorerConfig;
         _httpClientFactory = httpClientFactory;
-        _chainInfoSingleton = chaininfoSingleton;
         _blocksService = blocksService;
-        _options = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
+        _nodeRequester = nodeRequester;
         ConfigSetup();
     }
 
@@ -70,7 +52,7 @@ public class OrphanFixWorker : BackgroundService
             var transactionsRepository = scope.ServiceProvider.GetRequiredService<ITransactionsRepository>();
             var rawTxsRepository = scope.ServiceProvider.GetRequiredService<IRawTxsRepository>();
 
-        latestBlockPull:
+            latestBlockPull:
             var latestSyncedBlock = await blocksRepository.GetLatestBlockAsync(true, cancellationToken);
             var currentIndexedBlock = (latestSyncedBlock != null ? latestSyncedBlock.height : 0) + 1;
             if (latestSyncedBlock == null)
@@ -86,14 +68,7 @@ public class OrphanFixWorker : BackgroundService
             for (var i = StartingBlock; i < currentIndexedBlock; i++)
             {
                 // get hash by height
-                var getBlockHashCheckRequest = new JsonRPCRequest
-                {
-                    Id = 1,
-                    Method = "getblockhash",
-                    Params = new List<object>(new object[] { i })
-                };
-                var getBlockHashCheckResponse = await httpClient.PostAsJsonAsync("", getBlockHashCheckRequest, _options, cancellationToken);
-                var blockHashCheck = await getBlockHashCheckResponse.Content.ReadFromJsonAsync<GetBlockHash>(_options, cancellationToken);
+                var blockHashCheck = await _nodeRequester.GetBlockHash((uint)i, httpClient, cancellationToken);
 
                 if (blockHashCheck == null || blockHashCheck.Result == null)
                 {
@@ -122,10 +97,7 @@ public class OrphanFixWorker : BackgroundService
             _logger.LogInformation("Found {totalOrphans}, fixed {fixedOrphans}", foundOrphans, fixedOrphans);
 
         }
-        catch (OperationCanceledException)
-        {
-
-        }
+        catch (OperationCanceledException) { }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Orphan fix failed");

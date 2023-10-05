@@ -6,6 +6,7 @@ using ExplorerBackend.Configs;
 using ExplorerBackend.Services.Caching;
 using ExplorerBackend.Models.Node;
 using ExplorerBackend.Models.Node.Response;
+using ExplorerBackend.Services.Core;
 
 namespace ExplorerBackend.Services.Workers;
 
@@ -15,22 +16,20 @@ public class MempoolWorker : BackgroundService
     private AuthenticationHeaderValue? _authHeader;
     private int _usernameHash;
     private int _passHash;
-    private JsonSerializerOptions _options;
     private readonly ILogger _logger;
     private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ChaininfoSingleton _chainInfoSingleton;
+    private readonly NodeRequester _nodeRequester;
 
-    public MempoolWorker(ILogger<MempoolWorker> logger, IOptionsMonitor<ExplorerConfig> explorerConfig, IHttpClientFactory httpClientFactory, ChaininfoSingleton chaininfoSingleton)
+    public MempoolWorker(ILogger<MempoolWorker> logger, IOptionsMonitor<ExplorerConfig> explorerConfig, IHttpClientFactory httpClientFactory,
+        ChaininfoSingleton chaininfoSingleton, NodeRequester nodeRequester)
     {
         _logger = logger;
         _explorerConfig = explorerConfig;
         _httpClientFactory = httpClientFactory;
         _chainInfoSingleton = chaininfoSingleton;
-        _options = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
+        _nodeRequester = nodeRequester;
         ConfigSetup();
     }
 
@@ -48,45 +47,28 @@ public class MempoolWorker : BackgroundService
         {
             try
             {
-                // get blockchain info
-                var getRawMempoolRequest = new JsonRPCRequest
-                {
-                    Id = 1,
-                    Method = "getrawmempool",
-                    Params = new List<object>(new object[] { false })
-                };
-                var getRawMempoolResult = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", getRawMempoolRequest, _options, cancellationToken);
-                var mempoolInfo = await getRawMempoolResult.Content.ReadFromJsonAsync<GetRawMempool>(_options, cancellationToken);
-                // get chainalgo stats
+                // get raw mempool
+                var mempoolInfo = await _nodeRequester.GetRawMempool(httpClient, cancellationToken);
 
+                // get raw transactions
                 if (mempoolInfo != null && mempoolInfo.Result != null)
                 {
                     var unconfirmedTxs = new List<GetRawTransactionResult>();
                     foreach (var txId in mempoolInfo.Result)
                     {
-                        var getRawTransactionRequest = new JsonRPCRequest
-                        {
-                            Id = 1,
-                            Method = "getrawtransaction",
-                            Params = new List<object>(new object[] { txId, true })
-                        };
-                        var getRawTransactionResponse = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", getRawTransactionRequest, _options, cancellationToken);
-                        var rawTransaction = await getRawTransactionResponse.Content.ReadFromJsonAsync<GetRawTransaction>(_options, cancellationToken);
+                        var rawTransaction = await _nodeRequester.GetRawTransaction(txId, httpClient, cancellationToken);
+
                         if (rawTransaction != null && rawTransaction.Result != null)
                             unconfirmedTxs.Add(rawTransaction.Result);
                     }
 
                     _chainInfoSingleton.UnconfirmedTxs = unconfirmedTxs;
-
                 }
 
                 // TimeSpan not reuired here since we use milliseconds, still put it there to change in future if required
                 await Task.Delay(TimeSpan.FromMilliseconds(_explorerConfig.CurrentValue.PullMempoolDelay), cancellationToken);
             }
-            catch (OperationCanceledException)
-            {
-
-            }
+            catch (OperationCanceledException) { }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Can't handle mempool info");

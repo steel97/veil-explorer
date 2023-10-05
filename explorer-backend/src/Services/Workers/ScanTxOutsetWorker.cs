@@ -13,9 +13,9 @@ public class ScanTxOutsetWorker : BackgroundService
     private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
     private readonly IBackgroundTaskQueue _taskQueue;
     private readonly NodeApiCacheSingleton _nodeApiCacheSingleton;
-    private readonly INodeRequester _nodeRequester;
+    private readonly NodeRequester _nodeRequester;
 
-    public ScanTxOutsetWorker(ILogger<ScanTxOutsetWorker> logger, IOptionsMonitor<ExplorerConfig> explorerConfig, ScanTxOutsetBackgroundTaskQueue taskQueue, NodeApiCacheSingleton nodeApiCacheSingleton, INodeRequester nodeRequester)
+    public ScanTxOutsetWorker(ILogger<ScanTxOutsetWorker> logger, IOptionsMonitor<ExplorerConfig> explorerConfig, ScanTxOutsetBackgroundTaskQueue taskQueue, NodeApiCacheSingleton nodeApiCacheSingleton, NodeRequester nodeRequester)
     {
         _logger = logger;
         _explorerConfig = explorerConfig;

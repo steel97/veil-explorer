@@ -8,6 +8,7 @@ using ExplorerBackend.Models.Node.Response;
 using ExplorerBackend.Persistence.Repositories;
 using Microsoft.Extensions.Options;
 using System.Text;
+using ExplorerBackend.Services.Core;
 
 namespace ExplorerBackend.Services;
 
@@ -21,19 +22,16 @@ public class BlocksService : IBlocksService
     private readonly IServiceProvider _serviceProvider;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
-    private readonly JsonSerializerOptions _serializerOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    };
+    private readonly NodeRequester _nodeRequester;
 
-    public BlocksService(ILogger<IBlocksService> logger,
-         IServiceProvider serviceProvider, IOptionsMonitor<ExplorerConfig> explorerConfig,
-         IHttpClientFactory httpClientFactory)
+    public BlocksService(ILogger<IBlocksService> logger, IServiceProvider serviceProvider, IOptionsMonitor<ExplorerConfig> explorerConfig,
+        IHttpClientFactory httpClientFactory, NodeRequester nodeRequester)
     {
         _logger = logger;
         _serviceProvider = serviceProvider;
         _explorerConfig = explorerConfig;
         _httpClientFactory = httpClientFactory;
+        _nodeRequester = nodeRequester;
         ConfigSetup();
     }
 
@@ -87,15 +85,8 @@ public class BlocksService : IBlocksService
                     
         httpClient.BaseAddress = _uri;
         httpClient.DefaultRequestHeaders.Authorization = _authHeader;
-
-        var getBlockRequest = new JsonRPCRequest
-        {
-            Id = 1,
-            Method = "getblock",
-            Params = new List<object>(new object[] { validBlockHash })
-        };
-        var getBlockResponse = await httpClient.PostAsJsonAsync("", getBlockRequest, _serializerOptions, cancellationToken);
-        var validBlock = await getBlockResponse.Content.ReadFromJsonAsync<GetBlock>(_serializerOptions, cancellationToken);
+        
+        var validBlock = await _nodeRequester.GetBlock(validBlockHash, httpClient, cancellationToken);
 
         if (validBlock == null || validBlock.Result == null)
         {
@@ -108,7 +99,7 @@ public class BlocksService : IBlocksService
 
         await transactionsRepository.RemoveTransactionsForBlockAsync(height, cancellationToken);
         await blocksRepository.UpdateBlockAsync(height, RPCBlockToDb(validBlock.Result), cancellationToken);
-        return !await InsertTransactionsAsync(height, validBlock.Result.Tx, cancellationToken);
+        return !await InsertTransactionsAsync(height, validBlock.Result.Txs!, cancellationToken);
     }
 
     public async Task<bool> InsertTransactionsAsync(int blockId, List<string>? txIds, CancellationToken cancellationToken)
@@ -129,14 +120,7 @@ public class BlocksService : IBlocksService
         if (txIds != null)
             foreach (var txId in txIds)
             {
-                var getTxRequest = new JsonRPCRequest
-                {
-                    Id = 1,
-                    Method = "getrawtransaction",
-                    Params = new List<object>(new object[] { txId, true })
-                };
-                var getTxResponse = await httpClient.PostAsJsonAsync("", getTxRequest, _serializerOptions, cancellationToken);
-                var tx = await getTxResponse.Content.ReadFromJsonAsync<GetRawTransaction>(_serializerOptions, cancellationToken);
+                var tx = await _nodeRequester.GetRawTransaction(txId, httpClient, cancellationToken);
 
                 if (tx == null || tx.Result == null)
                 {
@@ -147,7 +131,7 @@ public class BlocksService : IBlocksService
                 pulledTxs.Add(tx.Result);
             }
 
-        var txFailed = false;
+        var isTxFailed = false;
         foreach (var tx in pulledTxs)
         {
             ArgumentNullException.ThrowIfNull(tx);
@@ -178,18 +162,71 @@ public class BlocksService : IBlocksService
                 if (txCompleted && txRawCompleted)
                     txscope.Complete();
                 else
-                    txFailed = true;
+                    isTxFailed = true;
             }
 
             catch (TransactionAbortedException txex)
             {
                 _logger.LogError(txex, "Can't save transaction {txId} (insert) for block #{blockNumber}", tx.txid, blockId);
-                txFailed = true;
+                isTxFailed = true;
                 break;
             }
         }
 
-        return txFailed;
+        return isTxFailed;
+    }
+
+    // if something doesn't work correctly, then use the method above + check GetBlock model
+    public async Task<bool> InsertTransactionsAsync(int height, List<GetRawTransactionResult> txs, CancellationToken cancellationToken)
+    {
+        using var scope = _serviceProvider.CreateAsyncScope();
+
+        var transactionsRepository = scope.ServiceProvider.GetRequiredService<ITransactionsRepository>();
+        var rawTxsRepository = scope.ServiceProvider.GetRequiredService<IRawTxsRepository>();
+
+        var isTxFailed = false;
+        foreach (var tx in txs)
+        {
+            ArgumentNullException.ThrowIfNull(tx);
+            ArgumentNullException.ThrowIfNull(tx.txid);
+            ArgumentNullException.ThrowIfNull(tx.hex);
+
+            var targetTx = await transactionsRepository.GetTransactionByIdAsync(tx.txid, cancellationToken);
+            if (targetTx != null) continue;
+
+            try
+            {
+                using var txscope = new TransactionScope(TransactionScopeOption.Required, TimeSpan.FromSeconds(_explorerConfig.CurrentValue.TxScopeTimeout), TransactionScopeAsyncFlowOption.Enabled);
+                targetTx = new Models.Data.Transaction
+                {
+                    txid_hex = tx.txid,
+                    hash_hex = tx.hash,
+                    version = tx.version,
+                    size = tx.size,
+                    vsize = tx.vsize,
+                    weight = tx.weight,
+                    locktime = tx.locktime,
+                    block_height = height
+                };
+
+                var txCompleted = await transactionsRepository.InsertTransactionAsync(targetTx, cancellationToken);
+                var txRawCompleted = await rawTxsRepository.InsertTransactionAsync(tx.txid, tx.hex, cancellationToken);
+
+                if (txCompleted && txRawCompleted)
+                    txscope.Complete();
+                else
+                    isTxFailed = true;
+            }
+
+            catch (TransactionAbortedException txex)
+            {
+                _logger.LogError(txex, "Can't save transaction {txId} (insert) for block #{blockNumber}", tx.txid, height);
+                isTxFailed = true;
+                break;
+            }
+        }
+
+        return isTxFailed;
     }
     private void ConfigSetup()
     {

@@ -8,6 +8,7 @@ using ExplorerBackend.Configs;
 using ExplorerBackend.Services.Caching;
 using ExplorerBackend.Models.Node;
 using ExplorerBackend.Models.Node.Response;
+using ExplorerBackend.Services.Core;
 
 namespace ExplorerBackend.Services.Workers;
 
@@ -17,24 +18,22 @@ public class BlockchainWorker : BackgroundService
     private AuthenticationHeaderValue? _authHeader;
     private int _usernameHash;
     private int _passHash;
-    private JsonSerializerOptions _options;
     private readonly ILogger _logger;
     private readonly IHubContext<EventsHub> _hubContext;
     private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ChaininfoSingleton _chainInfoSingleton;
+    private readonly NodeRequester _nodeRequester;
 
-    public BlockchainWorker(ILogger<BlockchainWorker> logger, IHubContext<EventsHub> hubContext, IOptionsMonitor<ExplorerConfig> explorerConfig, IHttpClientFactory httpClientFactory, ChaininfoSingleton chaininfoSingleton)
+    public BlockchainWorker(ILogger<BlockchainWorker> logger, IHubContext<EventsHub> hubContext, IOptionsMonitor<ExplorerConfig> explorerConfig,
+        IHttpClientFactory httpClientFactory, ChaininfoSingleton chaininfoSingleton, NodeRequester nodeRequester)
     {
         _logger = logger;
         _hubContext = hubContext;
         _explorerConfig = explorerConfig;
         _httpClientFactory = httpClientFactory;
         _chainInfoSingleton = chaininfoSingleton;
-        _options = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
+        _nodeRequester = nodeRequester;
         ConfigSetup();
     }
 
@@ -53,27 +52,12 @@ public class BlockchainWorker : BackgroundService
             try
             {
                 // get blockchain info
-                var getBlockchainInfoRequest = new JsonRPCRequest
-                {
-                    Id = 1,
-                    Method = "getblockchaininfo",
-                    Params = new List<object>(Array.Empty<object>())
-                };
-                var getBlockchainInfoResponse = await httpClient.PostAsJsonAsync("", getBlockchainInfoRequest, _options, cancellationToken);
-                var blockchainInfo = await getBlockchainInfoResponse.Content.ReadFromJsonAsync<GetBlockchainInfo>(_options, cancellationToken);
+                var blockchainInfo = await _nodeRequester.GetBlockChainInfo(httpClient, cancellationToken);
 
-                // get chainalgo stats
-                var getChainalgoStatsRequest = new JsonRPCRequest
-                {
-                    Id = 1,
-                    Method = "getchainalgostats",
-                    Params = new List<object>(Array.Empty<object>())
-                };
-                var getChainalgoStatsResponse = await httpClient.PostAsJsonAsync("", getChainalgoStatsRequest, _options, cancellationToken);
-                var chainalgoStats = await getChainalgoStatsResponse.Content.ReadFromJsonAsync<GetChainalgoStats>(_options, cancellationToken);
+                //  chainalgo stats
+                var chainalgoStats = await _nodeRequester.GetChainAlgoStats(httpClient, cancellationToken);
 
                 // updating cache
-
                 if (blockchainInfo != null && blockchainInfo.Result != null)
                 {
                     _chainInfoSingleton.CurrentChainInfo = blockchainInfo.Result;
