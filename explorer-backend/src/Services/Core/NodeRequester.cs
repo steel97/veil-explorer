@@ -165,8 +165,9 @@ public class NodeRequester
     public async Task<GetBlock?> GetLatestBlock(HttpClient httpClient, CancellationToken cancellationToken, bool isOrphanFix = false)
     {
         byte failedRequests = 0;
-    // get blockchain info
-    repeatBlockInfoRequest:
+        
+        // get blockchain info
+        repeatBlockInfoRequest:
         GetBlockchainInfo? blockInfo = await GetBlockChainInfo(httpClient, cancellationToken);
 
         if (blockInfo is null || blockInfo.Result is null)
@@ -180,9 +181,9 @@ public class NodeRequester
         }
         failedRequests = 0;
 
-    // get hash by height
-    repeatBlockHashRequest:
-        GetBlockHash? blockHash = await GetBlockHash(isOrphanFix ? (uint)(blockInfo.Result.Blocks - _explorerConfig.CurrentValue.BlocksOrphanCheck) : blockInfo.Result.Blocks, httpClient, cancellationToken);
+        // get hash by height
+        repeatBlockHashRequest:
+        GetBlockHash? blockHash = await GetBlockHash(isOrphanFix ? (uint)((blockInfo.Result.Blocks - _explorerConfig.CurrentValue.BlocksOrphanCheck) < 1 ? 1 : (blockInfo.Result.Blocks - _explorerConfig.CurrentValue.BlocksOrphanCheck)) : blockInfo.Result.Blocks, httpClient, cancellationToken);
 
         if (blockHash is null || blockHash.Result is null)
         {
@@ -195,8 +196,8 @@ public class NodeRequester
         }
         failedRequests = 0;
 
-    // get block info by hash
-    repeatBlockRequest:
+        // get block info by hash
+        repeatBlockRequest:
         GetBlock? block = await GetBlock(blockHash.Result, httpClient, cancellationToken, simplifiedTxInfo: 2);
 
         if (block is null || block.Result is null)
