@@ -14,28 +14,15 @@ namespace ExplorerBackend.Services;
 
 public class BlocksService : IBlocksService
 {
-    private Uri? _uri;
-    private AuthenticationHeaderValue? _authHeader;
-    private int _usernameHash;
-    private int _passHash;
     private readonly ILogger _logger;
     private readonly IServiceProvider _serviceProvider;
-    private readonly IHttpClientFactory _httpClientFactory;
     private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
     private readonly NodeRequester _nodeRequester;
 
-    public BlocksService(ILogger<IBlocksService> logger, IServiceProvider serviceProvider, IOptionsMonitor<ExplorerConfig> explorerConfig,
-        IHttpClientFactory httpClientFactory, NodeRequester nodeRequester)
-    {
-        _logger = logger;
-        _serviceProvider = serviceProvider;
-        _explorerConfig = explorerConfig;
-        _httpClientFactory = httpClientFactory;
-        _nodeRequester = nodeRequester;
-        ConfigSetup();
-    }
+    public BlocksService(ILogger<IBlocksService> logger, IServiceProvider serviceProvider, IOptionsMonitor<ExplorerConfig> explorerConfig, NodeRequester nodeRequester) =>
+        (_logger, _serviceProvider, _explorerConfig, _nodeRequester) = (logger, serviceProvider, explorerConfig, nodeRequester);
 
-    public Block RPCBlockToDb(GetBlockResult block) => new()
+    public Block RPCBlockToDb(GetBlockResult block, bool isSynced = false) => new()
     {
         anon_index = block.Anon_index,
         bits_hex = block.Bits,
@@ -72,21 +59,14 @@ public class BlocksService : IBlocksService
         veil_data_hash_hex = block.Veil_data_hash,
         version = block.Version,
         weight = block.Weight,
-        synced = false
+        synced = isSynced
     };
 
     public async Task<bool> UpdateDbBlockAsync(int height, string validBlockHash, CancellationToken cancellationToken)
-    {
-        using var httpClient = _httpClientFactory.CreateClient();
+    {        
         using var scope = _serviceProvider.CreateAsyncScope();
-
-       if(_passHash !=_explorerConfig.CurrentValue.Node!.Password!.GetHashCode() || _usernameHash !=_explorerConfig.CurrentValue.Node!.Username!.GetHashCode())        
-            ConfigSetup();
-                    
-        httpClient.BaseAddress = _uri;
-        httpClient.DefaultRequestHeaders.Authorization = _authHeader;
         
-        var validBlock = await _nodeRequester.GetBlock(validBlockHash, httpClient, cancellationToken);
+        var validBlock = await _nodeRequester.GetBlock(validBlockHash, cancellationToken);
 
         if (validBlock == null || validBlock.Result == null)
         {
@@ -104,14 +84,7 @@ public class BlocksService : IBlocksService
 
     public async Task<bool> InsertTransactionsAsync(int blockId, List<string>? txIds, CancellationToken cancellationToken)
     {
-        using var httpClient = _httpClientFactory.CreateClient();
         using var scope = _serviceProvider.CreateAsyncScope();
-
-       if(_passHash !=_explorerConfig.CurrentValue.Node!.Password!.GetHashCode() || _usernameHash !=_explorerConfig.CurrentValue.Node!.Username!.GetHashCode())        
-            ConfigSetup();
-                    
-        httpClient.BaseAddress = _uri;
-        httpClient.DefaultRequestHeaders.Authorization = _authHeader;
 
         var transactionsRepository = scope.ServiceProvider.GetRequiredService<ITransactionsRepository>();
         var rawTxsRepository = scope.ServiceProvider.GetRequiredService<IRawTxsRepository>();
@@ -120,7 +93,7 @@ public class BlocksService : IBlocksService
         if (txIds != null)
             foreach (var txId in txIds)
             {
-                var tx = await _nodeRequester.GetRawTransaction(txId, httpClient, cancellationToken);
+                var tx = await _nodeRequester.GetRawTransaction(txId, cancellationToken);
 
                 if (tx == null || tx.Result == null)
                 {
@@ -227,17 +200,5 @@ public class BlocksService : IBlocksService
         }
 
         return isTxFailed;
-    }
-    private void ConfigSetup()
-    {
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Url);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Username);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Password);
-
-        _authHeader = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_explorerConfig.CurrentValue.Node!.Username}:{_explorerConfig.CurrentValue.Node.Password}")));
-        _uri = new Uri(_explorerConfig.CurrentValue.Node!.Url!);
-        _usernameHash = _explorerConfig.CurrentValue.Node.Password!.GetHashCode();
-        _passHash = _explorerConfig.CurrentValue.Node!.Username!.GetHashCode();
     }
 }

@@ -40,16 +40,12 @@ public class NodeRequester
 
     public async Task<string> NodeRequest(string? method, List<object>? parameters, CancellationToken cancellationToken)
     {
+        using var httpClient = _httpClientFactory.CreateClient();
+
+        CheckHttpClientConfig(httpClient);
+
         try
         {
-            using var httpClient = _httpClientFactory.CreateClient();
-
-            if(_passHash !=_explorerConfig.CurrentValue.Node!.Password!.GetHashCode() || _usernameHash !=_explorerConfig.CurrentValue.Node!.Username!.GetHashCode())        
-                ConfigureHttpClient();
-                    
-            httpClient.BaseAddress = _uri;
-            httpClient.DefaultRequestHeaders.Authorization = _authHeader;
-
             var request = new JsonRPCRequest
             {
                 Id = 1,
@@ -66,16 +62,12 @@ public class NodeRequester
 
     public async ValueTask ScanTxOutsetAndCacheAsync(string target, CancellationToken cancellationToken)
     {
+        using var httpClient = _httpClientFactory.CreateClient();
+
+        CheckHttpClientConfig(httpClient);
+
         try
         {
-            using var httpClient = _httpClientFactory.CreateClient();
-
-            if(_passHash !=_explorerConfig.CurrentValue.Node!.Password!.GetHashCode() || _usernameHash !=_explorerConfig.CurrentValue.Node!.Username!.GetHashCode())        
-                ConfigureHttpClient();
-                    
-            httpClient.BaseAddress = _uri;
-            httpClient.DefaultRequestHeaders.Authorization = _authHeader;
-
             var request = new JsonRPCRequest
             {
                 Id = 1,
@@ -90,8 +82,12 @@ public class NodeRequester
         catch { }
     }
     
-    public async Task<GetBlockchainInfo?> GetBlockChainInfo(HttpClient httpClient, CancellationToken cancellationToken)
+    public async Task<GetBlockchainInfo?> GetBlockChainInfo(CancellationToken cancellationToken)
     {
+        using var httpClient = _httpClientFactory.CreateClient();
+
+        CheckHttpClientConfig(httpClient);
+
         JsonRPCRequest getBlockchainInfoRequest = new()
         {
             Id = 1,
@@ -102,8 +98,11 @@ public class NodeRequester
         return await getBlockchainInfoResponse.Content.ReadFromJsonAsync<GetBlockchainInfo>(_serializerOptions, cancellationToken);
     }
 
-    public async Task<GetBlockHash?> GetBlockHash(uint height, HttpClient httpClient, CancellationToken cancellationToken)
+    public async Task<GetBlockHash?> GetBlockHash(uint height, CancellationToken cancellationToken)
     {
+        using var httpClient = _httpClientFactory.CreateClient();
+
+        CheckHttpClientConfig(httpClient);
         var getBlockHashRequest = new JsonRPCRequest
         {
             Id = 1,
@@ -114,8 +113,12 @@ public class NodeRequester
         return await getBlockHashResponse.Content.ReadFromJsonAsync<GetBlockHash>(_serializerOptions, cancellationToken);
     }
 
-    public async Task<GetBlock?> GetBlock(string hash, HttpClient httpClient, CancellationToken cancellationToken, int simplifiedTxInfo = 1)
+    public async Task<GetBlock?> GetBlock(string hash, CancellationToken cancellationToken, int simplifiedTxInfo = 1)
     {
+        using var httpClient = _httpClientFactory.CreateClient();
+
+        CheckHttpClientConfig(httpClient);
+
         var getBlockRequest = new JsonRPCRequest
         {
             Id = simplifiedTxInfo,
@@ -126,8 +129,12 @@ public class NodeRequester
         return await getBlockResponse.Content.ReadFromJsonAsync<GetBlock>(_serializerOptions, cancellationToken);
     }
 
-    public async Task<GetChainalgoStats?> GetChainAlgoStats(HttpClient httpClient, CancellationToken cancellationToken)
+    public async Task<GetChainalgoStats?> GetChainAlgoStats(CancellationToken cancellationToken)
     {
+        using var httpClient = _httpClientFactory.CreateClient();
+
+        CheckHttpClientConfig(httpClient);
+
         var getChainalgoStatsRequest = new JsonRPCRequest
         {
             Id = 1,
@@ -138,8 +145,12 @@ public class NodeRequester
         return await getChainalgoStatsResponse.Content.ReadFromJsonAsync<GetChainalgoStats>(_serializerOptions, cancellationToken);
     }
 
-    public async Task<GetRawMempool?> GetRawMempool(HttpClient httpClient, CancellationToken cancellationToken, bool isSerialized = false)
+    public async Task<GetRawMempool?> GetRawMempool(CancellationToken cancellationToken, bool isSerialized = false)
     {
+        using var httpClient = _httpClientFactory.CreateClient();
+
+        CheckHttpClientConfig(httpClient);
+
         var getRawMempoolRequest = new JsonRPCRequest
         {
             Id = 1,
@@ -150,8 +161,12 @@ public class NodeRequester
         return await getRawMempoolResult.Content.ReadFromJsonAsync<GetRawMempool>(_serializerOptions, cancellationToken);
     }
 
-    public async Task<GetRawTransaction?> GetRawTransaction(string txId, HttpClient httpClient, CancellationToken cancellationToken)
+    public async Task<GetRawTransaction?> GetRawTransaction(string txId, CancellationToken cancellationToken)
     {
+        using var httpClient = _httpClientFactory.CreateClient();
+
+        CheckHttpClientConfig(httpClient);
+
         var getRawTxRequest = new JsonRPCRequest
         {
             Id = 1,
@@ -162,13 +177,13 @@ public class NodeRequester
         return await getRawTxResponse.Content.ReadFromJsonAsync<GetRawTransaction>(_serializerOptions, cancellationToken);
     }
 
-    public async Task<GetBlock?> GetLatestBlock(HttpClient httpClient, CancellationToken cancellationToken, bool isOrphanFix = false)
+    public async Task<GetBlock?> GetLatestBlock(CancellationToken cancellationToken, bool isOrphanFix = false)
     {
         byte failedRequests = 0;
         
         // get blockchain info
         repeatBlockInfoRequest:
-        GetBlockchainInfo? blockInfo = await GetBlockChainInfo(httpClient, cancellationToken);
+        GetBlockchainInfo? blockInfo = await GetBlockChainInfo(cancellationToken);
 
         if (blockInfo is null || blockInfo.Result is null)
         {
@@ -183,7 +198,7 @@ public class NodeRequester
 
         // get hash by height
         repeatBlockHashRequest:
-        GetBlockHash? blockHash = await GetBlockHash(isOrphanFix ? (uint)((blockInfo.Result.Blocks - _explorerConfig.CurrentValue.BlocksOrphanCheck) < 1 ? 1 : (blockInfo.Result.Blocks - _explorerConfig.CurrentValue.BlocksOrphanCheck)) : blockInfo.Result.Blocks, httpClient, cancellationToken);
+        GetBlockHash? blockHash = await GetBlockHash(isOrphanFix ? (uint)((blockInfo.Result.Blocks - _explorerConfig.CurrentValue.BlocksOrphanCheck) < 1 ? 1 : (blockInfo.Result.Blocks - _explorerConfig.CurrentValue.BlocksOrphanCheck)) : blockInfo.Result.Blocks, cancellationToken);
 
         if (blockHash is null || blockHash.Result is null)
         {
@@ -198,7 +213,7 @@ public class NodeRequester
 
         // get block info by hash
         repeatBlockRequest:
-        GetBlock? block = await GetBlock(blockHash.Result, httpClient, cancellationToken, simplifiedTxInfo: 2);
+        GetBlock? block = await GetBlock(blockHash.Result, cancellationToken, simplifiedTxInfo: 2);
 
         if (block is null || block.Result is null)
         {
@@ -211,6 +226,14 @@ public class NodeRequester
         }
         return block;
     }
+    private void CheckHttpClientConfig(HttpClient httpClient)
+    {
+        if(_passHash != _explorerConfig.CurrentValue.Node!.Password!.GetHashCode() || _usernameHash != _explorerConfig.CurrentValue.Node!.Username!.GetHashCode())        
+            ConfigureHttpClient();
+
+        httpClient.BaseAddress = _uri;
+        httpClient.DefaultRequestHeaders.Authorization = _authHeader;
+    }
     private void ConfigureHttpClient()
     {
         ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node);
@@ -220,6 +243,8 @@ public class NodeRequester
         ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.NodeWorkersPullDelay);
         ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.BlocksOrphanCheck);
 
+        _passHash = _explorerConfig.CurrentValue.Node.Password.GetHashCode();
+        _usernameHash = _explorerConfig.CurrentValue.Node.Username.GetHashCode();
         _uri = new Uri(_explorerConfig.CurrentValue.Node.Url);
         _authHeader = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_explorerConfig.CurrentValue.Node.Username}:{_explorerConfig.CurrentValue.Node.Password}")));
     }
