@@ -10,10 +10,6 @@ namespace ExplorerBackend.Services.Workers.Patches;
 public class OrphanFixWorker : BackgroundService
 {
     public static int StartingBlock { get; set; }
-    private Uri? _uri;
-    private AuthenticationHeaderValue? _authHeader;
-    private int _usernameHash;
-    private int _passHash;
     private readonly ILogger _logger;
     private readonly IServiceProvider _serviceProvider;
     private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
@@ -30,19 +26,10 @@ public class OrphanFixWorker : BackgroundService
         _httpClientFactory = httpClientFactory;
         _blocksService = blocksService;
         _nodeRequester = nodeRequester;
-        ConfigSetup();
     }
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
-        using var httpClient = _httpClientFactory.CreateClient();
-
-       if(_passHash !=_explorerConfig.CurrentValue.Node!.Password!.GetHashCode() || _usernameHash !=_explorerConfig.CurrentValue.Node!.Username!.GetHashCode())        
-            ConfigSetup();
-                    
-        httpClient.BaseAddress = _uri;
-        httpClient.DefaultRequestHeaders.Authorization = _authHeader;
-
         _logger.LogInformation("Starting orphan checking process from block {blockHeight}", StartingBlock);
         try
         {
@@ -68,28 +55,28 @@ public class OrphanFixWorker : BackgroundService
             for (var i = StartingBlock; i < currentIndexedBlock; i++)
             {
                 // get hash by height
-                var blockHashCheck = await _nodeRequester.GetBlockHash((uint)i, httpClient, cancellationToken);
+                var blockHashCheck = await _nodeRequester.GetBlock((uint)i, cancellationToken);
 
-                if (blockHashCheck == null || blockHashCheck.Result == null)
+                if (blockHashCheck == null)
                 {
                     //_logger.LogInformation("Can't pull block hash");
                     continue;
                 }
 
                 // better to get blocks from db in single query, however this is not "hot path" so...
-                var blockFromDB = await blocksRepository.GetBlockByHeightAsync(i, cancellationToken);
-                if (blockFromDB?.hash_hex == blockHashCheck.Result)
+                var blockFromDB = await blocksRepository.GetBlockAsync(i, cancellationToken);
+                if (blockFromDB?.hash_hex == blockHashCheck.Hash)
                     continue;
 
                 foundOrphans++;
 
-                if (!await _blocksService.UpdateDbBlockAsync(i, blockHashCheck.Result, cancellationToken))
+                if (!await _blocksService.UpdateDbBlockAsync(i, blockHashCheck.Hash!, cancellationToken))
                 {
                     _logger.LogError("Can't update orphan block #{blockNumber}", i);
                 }
                 else
                 {
-                    _logger.LogInformation("Update block {blockHeight}, from {fromHash}, to {toHash}", i, blockFromDB?.hash_hex ?? "NULL", blockHashCheck.Result);
+                    _logger.LogInformation("Update block {blockHeight}, from {fromHash}, to {toHash}", i, blockFromDB?.hash_hex ?? "NULL", blockHashCheck.Hash);
                     fixedOrphans++;
                 }
             }
@@ -102,17 +89,5 @@ public class OrphanFixWorker : BackgroundService
         {
             _logger.LogError(ex, "Orphan fix failed");
         }
-    }
-    private void ConfigSetup()
-    {
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Url);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Username);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Password);
-
-        _authHeader = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_explorerConfig.CurrentValue.Node!.Username}:{_explorerConfig.CurrentValue.Node.Password}")));
-        _uri = new Uri(_explorerConfig.CurrentValue.Node!.Url!);
-        _usernameHash = _explorerConfig.CurrentValue.Node.Password!.GetHashCode();
-        _passHash = _explorerConfig.CurrentValue.Node!.Username!.GetHashCode();
     }
 }
