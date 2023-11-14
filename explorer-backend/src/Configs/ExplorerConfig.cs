@@ -13,6 +13,8 @@ public class ExplorerConfig
     public int StatsPointsCount { get; set; }
     public int BlocksPerBatch { get; set; }
     public int BlocksOrphanCheck { get; set; }
+    public int OldestSimplifiedBlocksCacheCount { get; set; }
+    public int SimplifiedBlocksCacheCount { get; set; }
     public string? BudgetAddress { get; set; }
     public string? FoundationAddress { get; set; }
     public MemoryCache? MemoryCache { get; set; }
