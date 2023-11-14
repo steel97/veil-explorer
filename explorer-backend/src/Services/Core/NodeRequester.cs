@@ -6,6 +6,8 @@ using ExplorerBackend.Configs;
 using ExplorerBackend.Services.Caching;
 using ExplorerBackend.Models.Node;
 using ExplorerBackend.Models.Node.Response;
+using ExplorerBackend.Models.API;
+using System.Security.Cryptography;
 
 namespace ExplorerBackend.Services.Core;
 
@@ -15,18 +17,21 @@ public class NodeRequester
     private AuthenticationHeaderValue? _authHeader;
     private int _usernameHash;
     private int _passHash;
-    private readonly string? _nodeFailureError ;
+    private readonly string _nodeFailureError ;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
+    private readonly ChaininfoSingleton _chainInfoSingleton;
     private readonly NodeApiCacheSingleton _nodeApiCacheSingleton;
     private readonly JsonSerializerOptions _serializerOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
-    public NodeRequester(IHttpClientFactory httpClientFactory, IOptionsMonitor<ExplorerConfig> explorerConfig, NodeApiCacheSingleton nodeApiCacheSingleton)
+    public NodeRequester(IHttpClientFactory httpClientFactory, IOptionsMonitor<ExplorerConfig> explorerConfig,
+        ChaininfoSingleton chainInfoSingleton, NodeApiCacheSingleton nodeApiCacheSingleton)
     {
-        (_explorerConfig, _httpClientFactory, _nodeApiCacheSingleton) = (explorerConfig, httpClientFactory, nodeApiCacheSingleton);
+        (_explorerConfig, _httpClientFactory, _chainInfoSingleton, _nodeApiCacheSingleton) =
+        (explorerConfig, httpClientFactory, chainInfoSingleton, nodeApiCacheSingleton);
         _nodeFailureError = JsonSerializer.Serialize(new GenericResult
         {
             Result = null,
@@ -57,7 +62,7 @@ public class NodeRequester
         }
         catch { }
 
-        return _nodeFailureError!; // RPC_INTERNAL_ERROR -32603
+        return _nodeFailureError; // RPC_INTERNAL_ERROR -32603
     }
 
     public async ValueTask ScanTxOutsetAndCacheAsync(string target, CancellationToken cancellationToken)
@@ -113,7 +118,7 @@ public class NodeRequester
         return await getBlockHashResponse.Content.ReadFromJsonAsync<GetBlockHash>(_serializerOptions, cancellationToken);
     }
 
-    public async Task<GetBlock?> GetBlock(string hash, CancellationToken cancellationToken, int simplifiedTxInfo = 1)
+    public async Task<GetBlockResult?> GetBlock(string hash, CancellationToken cancellationToken, int simplifiedTxInfo = 1)
     {
         using var httpClient = _httpClientFactory.CreateClient();
 
@@ -126,7 +131,13 @@ public class NodeRequester
             Params = new List<object>(new object[] { hash })
         };
         var getBlockResponse = await httpClient.PostAsJsonAsync("", getBlockRequest, _serializerOptions, cancellationToken);
-        return await getBlockResponse.Content.ReadFromJsonAsync<GetBlock>(_serializerOptions, cancellationToken);
+        return await getBlockResponse.Content.ReadFromJsonAsync<GetBlockResult>(_serializerOptions, cancellationToken);
+    }
+
+    public async Task<GetBlockResult?> GetBlock(uint height, CancellationToken cancellationToken, int simplifiedTxInfo = 1)
+    {
+        GetBlockHash? hash = await GetBlockHash(height, cancellationToken);
+        return await GetBlock(hash!.Result!, cancellationToken, simplifiedTxInfo);
     }
 
     public async Task<GetChainalgoStats?> GetChainAlgoStats(CancellationToken cancellationToken)
@@ -177,7 +188,7 @@ public class NodeRequester
         return await getRawTxResponse.Content.ReadFromJsonAsync<GetRawTransaction>(_serializerOptions, cancellationToken);
     }
 
-    public async Task<GetBlock?> GetLatestBlock(CancellationToken cancellationToken, bool isOrphanFix = false)
+    public async Task<GetBlockResult?> GetLatestBlock(CancellationToken cancellationToken, bool isOrphanFix = false)
     {
         byte failedRequests = 0;
         
@@ -213,9 +224,9 @@ public class NodeRequester
 
         // get block info by hash
         repeatBlockRequest:
-        GetBlock? block = await GetBlock(blockHash.Result, cancellationToken, simplifiedTxInfo: 2);
+        GetBlockResult? block = await GetBlock(blockHash.Result, cancellationToken, simplifiedTxInfo: 2);
 
-        if (block is null || block.Result is null)
+        if (block is null)
         {
             failedRequests++;
             if (failedRequests >= 2)
@@ -226,6 +237,71 @@ public class NodeRequester
         }
         return block;
     }
+    
+    private async Task<GetChainTxStatsResult> GetChainTxStatsAsync(long ctxInterval, CancellationToken cancellationToken = default)
+    {
+        using var httpClient = _httpClientFactory.CreateClient();
+
+        CheckHttpClientConfig(httpClient);
+        // get blockchain info
+        var getChainTxStatsRequest = new JsonRPCRequest
+        {
+            Id = 1,
+            Method = "getchaintxstats",
+            Params = new List<object>(new object[] { ctxInterval })
+        };
+        var getChainTxStatsResponse = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", getChainTxStatsRequest, _serializerOptions, cancellationToken);
+        var chainTxStats = await getChainTxStatsResponse.Content.ReadFromJsonAsync<GetChainTxStats>(_serializerOptions, cancellationToken);
+
+        if (chainTxStats == null || chainTxStats.Result == null) throw new Exception();
+        return chainTxStats.Result;
+    }
+
+    public async Task<TxStatsEntry> GetTxStatsAsync(int points, int offset, CancellationToken cancellationToken = default)
+    {
+        var count = (int)(_chainInfoSingleton?.CurrentChainInfo?.Blocks ?? 1);
+        if (offset > count)
+            throw new Exception("offset > count");
+
+        if (offset < 0)
+            offset += count;
+
+        var txStatsEntry = new TxStatsEntry
+        {
+            TxCounts = new List<TxStatsDataPoint>(),
+            TxRates = new List<TxStatsDataPoint>(),
+            Labels = new List<string>()
+        };
+
+        var chainTxStatsIntervals = new List<int>();
+        for (var i = 0; i < points; i++)
+        {
+            var target = (int)Math.Max(10.0, (double)count - (double)offset - (double)i * (double)(count - offset) / (double)(points - 1.0d) - 1.0d);
+            chainTxStatsIntervals.Add(target);
+        }
+
+        for (var i = chainTxStatsIntervals.Count - 1; i >= 0; i--)
+        {
+            var res = await GetChainTxStatsAsync( chainTxStatsIntervals[i], cancellationToken);
+
+            if (res.window_tx_count == 0) continue;
+
+            txStatsEntry.TxCounts.Add(new TxStatsDataPoint
+            {
+                X = count - res.window_block_count,
+                Y = res.txcount - res.window_tx_count
+            });
+            txStatsEntry.TxRates.Add(new TxStatsDataPoint
+            {
+                X = count - res.window_block_count,
+                Y = res.txrate
+            });
+            txStatsEntry.Labels.Add(i.ToString());
+        }
+
+        return txStatsEntry;
+    }
+
     private void CheckHttpClientConfig(HttpClient httpClient)
     {
         if(_passHash != _explorerConfig.CurrentValue.Node!.Password!.GetHashCode() || _usernameHash != _explorerConfig.CurrentValue.Node!.Username!.GetHashCode())        
