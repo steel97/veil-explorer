@@ -1,70 +1,52 @@
-using System.Text;
-using System.Text.Json;
-using System.Net.Http.Headers;
 using Microsoft.Extensions.Options;
 using ExplorerBackend.Configs;
 using ExplorerBackend.VeilStructs;
 using ExplorerBackend.Services.Caching;
 using ExplorerBackend.Models.API;
-using ExplorerBackend.Models.Node;
-using ExplorerBackend.Models.Node.Response;
+using ExplorerBackend.Services.Core;
 
 namespace ExplorerBackend.Services.Workers;
 
 public class BlockchainStatsWorker : BackgroundService
 {
-    private Uri? _uri;
-    private AuthenticationHeaderValue? _authHeader;
-    private int _usernameHash;
-    private int _passHash;
     private readonly ILogger _logger;
     private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
-    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly NodeRequester _nodeRequester;
     private readonly ChaininfoSingleton _chainInfoSingleton;
-    private readonly JsonSerializerOptions options = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    };
 
-    public BlockchainStatsWorker(ILogger<BlockchainStatsWorker> logger, IOptionsMonitor<ExplorerConfig> explorerConfig, IHttpClientFactory httpClientFactory, ChaininfoSingleton chaininfoSingleton)
+    public BlockchainStatsWorker(ILogger<BlockchainStatsWorker> logger, IOptionsMonitor<ExplorerConfig> explorerConfig,
+        NodeRequester nodeRequester, ChaininfoSingleton chaininfoSingleton)
     {
         _logger = logger;
         _explorerConfig = explorerConfig;
-        _httpClientFactory = httpClientFactory;
+        _nodeRequester = nodeRequester;
         _chainInfoSingleton = chaininfoSingleton;
-        ConfigSetup();
     }
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
-        using var httpClient = _httpClientFactory.CreateClient();
-
-        if(_passHash !=_explorerConfig.CurrentValue.Node!.Password!.GetHashCode() || _usernameHash !=_explorerConfig.CurrentValue.Node!.Username!.GetHashCode())        
-            ConfigSetup();
-                    
-        httpClient.BaseAddress = _uri;
-        httpClient.DefaultRequestHeaders.Authorization = _authHeader;
-
         var targetBlocksPerDay = 24 * 60 * 60 / Constants.BLOCK_TIME;
 
-        await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken); // let other services warm up, this allows us not to wait PullBlockchainStatsDelay if some data is unavailable at beginning
+        // let other services warm up, this allows us not to wait PullBlockchainStatsDelay if some data is unavailable at beginning
+        await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken); 
 
         while (!cancellationToken.IsCancellationRequested)
         {
             try
             {
+                var txStatsDay = _nodeRequester.GetTxStatsAsync(targetBlocksPerDay / 4, -144, cancellationToken);
+                var txStatsWeek = _nodeRequester.GetTxStatsAsync( targetBlocksPerDay / 4, -144 * 7, cancellationToken);
+                var txStatsMonth = _nodeRequester.GetTxStatsAsync(targetBlocksPerDay / 4, -144 * 30, cancellationToken);
+                var txStatsOverall = _nodeRequester.GetTxStatsAsync(_explorerConfig.CurrentValue.StatsPointsCount, 0, cancellationToken);
 
-                var txStatsDay = await GetTxStatsAsync(httpClient, targetBlocksPerDay / 4, -144, cancellationToken);
-                var txStatsWeek = await GetTxStatsAsync(httpClient, targetBlocksPerDay / 4, -144 * 7, cancellationToken);
-                var txStatsMonth = await GetTxStatsAsync(httpClient, targetBlocksPerDay / 4, -144 * 30, cancellationToken);
-                var txStatsOverall = await GetTxStatsAsync(httpClient, _explorerConfig.CurrentValue.StatsPointsCount, 0, cancellationToken);
+                await Task.WhenAll(txStatsDay, txStatsMonth, txStatsWeek, txStatsOverall);
 
                 var finalDict = new Dictionary<string, TxStatsEntry>()
                 {
-                    {"day", txStatsDay},
-                    {"week", txStatsWeek},
-                    {"month", txStatsMonth},
-                    {"overall", txStatsOverall}
+                    {"day", txStatsDay.Result},
+                    {"week", txStatsWeek.Result},
+                    {"month", txStatsMonth.Result},
+                    {"overall", txStatsOverall.Result}
                 };
 
                 _chainInfoSingleton.CurrentChainStats = new TxStatsComposite
@@ -84,82 +66,5 @@ public class BlockchainStatsWorker : BackgroundService
                 _logger.LogError(ex, "Can't handle blockchain stats info");
             }
         }
-    }
-
-
-
-    private async Task<GetChainTxStatsResult> GetChainTxStatsAsync(HttpClient? httpClient, long ctxInterval, CancellationToken cancellationToken = default)
-    {
-        if (httpClient == null) throw new Exception();
-        // get blockchain info
-        var getChainTxStatsRequest = new JsonRPCRequest
-        {
-            Id = 1,
-            Method = "getchaintxstats",
-            Params = new List<object>(new object[] { ctxInterval })
-        };
-        var getChainTxStatsResponse = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", getChainTxStatsRequest, options, cancellationToken);
-        var chainTxStats = await getChainTxStatsResponse.Content.ReadFromJsonAsync<GetChainTxStats>(options, cancellationToken);
-
-        if (chainTxStats == null || chainTxStats.Result == null) throw new Exception();
-        return chainTxStats.Result;
-    }
-
-    private async Task<TxStatsEntry> GetTxStatsAsync(HttpClient? httpClient, int points, int offset, CancellationToken cancellationToken = default)
-    {
-        var count = (int)(_chainInfoSingleton?.CurrentChainInfo?.Blocks ?? 1);
-        if (offset > count)
-            throw new Exception("offset > count");
-
-        if (offset < 0)
-            offset += count;
-
-        var txStatsEntry = new TxStatsEntry
-        {
-            TxCounts = new List<TxStatsDataPoint>(),
-            TxRates = new List<TxStatsDataPoint>(),
-            Labels = new List<string>()
-        };
-
-        var chainTxStatsIntervals = new List<int>();
-        for (var i = 0; i < points; i++)
-        {
-            var target = (int)Math.Max(10.0, (double)count - (double)offset - (double)i * (double)(count - offset) / (double)(points - 1.0d) - 1.0d);
-            chainTxStatsIntervals.Add(target);
-        }
-
-        for (var i = chainTxStatsIntervals.Count - 1; i >= 0; i--)
-        {
-            var res = await GetChainTxStatsAsync(httpClient, chainTxStatsIntervals[i], cancellationToken);
-
-            if (res.window_tx_count == 0) continue;
-
-            txStatsEntry.TxCounts.Add(new TxStatsDataPoint
-            {
-                X = count - res.window_block_count,
-                Y = res.txcount - res.window_tx_count
-            });
-            txStatsEntry.TxRates.Add(new TxStatsDataPoint
-            {
-                X = count - res.window_block_count,
-                Y = res.txrate
-            });
-            txStatsEntry.Labels.Add(i.ToString());
-        }
-
-        return txStatsEntry;
-    }
-
-    private void ConfigSetup()  
-    {
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Url);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Username);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Password);
-
-        _authHeader = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_explorerConfig.CurrentValue.Node!.Username}:{_explorerConfig.CurrentValue.Node.Password}")));
-        _uri = new Uri(_explorerConfig.CurrentValue.Node!.Url!);
-        _usernameHash = _explorerConfig.CurrentValue.Node.Password!.GetHashCode();
-        _passHash = _explorerConfig.CurrentValue.Node!.Username!.GetHashCode();
     }
 }
