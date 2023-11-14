@@ -10,4 +10,5 @@ public class Transaction
     public int weight { get; set; }
     public long locktime { get; set; }
     public int block_height { get; set; }
+    public string? blockhash { get; set; }
 }
