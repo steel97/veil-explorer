@@ -14,13 +14,7 @@ public partial class UtilityService : IUtilityService
     public bool VerifyAddress(string? val) => val != null && (val.Length == 34 || val.Length == 42 || val.Length == 121 || val.Length == 103);
     public string CleanupAddress(string? val) => addressCleanupRegex.Replace(val ?? "", "");
 
-    // https://stackoverflow.com/a/321404
-    // try => Convert.FromHexString(hex);
-    public byte[] HexToByteArray(string hex) => Enumerable.Range(0, hex.Length)
-                     .Where(x => x % 2 == 0)
-                     .Select(x => Convert.ToByte(hex.Substring(x, 2), 16))
-                     .ToArray();    
-
+    public byte[] HexToByteArray(string hex) => Convert.FromHexString(hex);
     public string ToHex(byte[] val) => BitConverter.ToString(val).Replace("-", "").ToLowerInvariant();
     public string ToHexReversed(byte[] val) => ToHex(val.Reverse().ToArray());
     [GeneratedRegex("/[^a-zA-Z0-9=&]/g", RegexOptions.Compiled)]

@@ -46,16 +46,18 @@ public class BlockController : ControllerBase
 
         Block? block = null;
         if (body.Hash != null && body.Hash.Length == 64 && _utilityService.VerifyHex(body.Hash))
-            block = await _blocksDataService.GetBlockByHashAsync(body.Hash, cancellationToken);        
+            block = await _blocksDataService.GetBlockAsync(body.Hash, cancellationToken);        
         else if (body.Height != null)
-            block = await _blocksDataService.GetBlockByHeightAsync(body.Height.Value, cancellationToken);
+            block = await _blocksDataService.GetBlockAsync(body.Height.Value, cancellationToken);
         else
             return Problem($"a problem has occured, try again", statusCode: 400);
 
         if (block != null)
         {
-            var nextBlockHash = await _blocksDataService.ProbeHashByHeightAsync(block.height + 1, cancellationToken);
-            var prevBlockHash = await _blocksDataService.ProbeHashByHeightAsync(block.height - 1, cancellationToken);
+            Task<string?> nextBlockHash = _blocksDataService.ProbeHashByHeightAsync(block.height + 1, cancellationToken);
+            Task<string?> prevBlockHash = _blocksDataService.ProbeHashByHeightAsync(block.height - 1, cancellationToken);
+
+            await Task.WhenAll(nextBlockHash, prevBlockHash);
 
             response.Found = true;
             response.Block = block;
@@ -67,14 +69,14 @@ public class BlockController : ControllerBase
             if (nextBlockHash != null)
                 response.NextBlock = new BlockBasicData
                 {
-                    Hash = nextBlockHash,
+                    Hash = nextBlockHash.Result,
                     Height = block.height + 1
                 };
 
             if (prevBlockHash != null)
                 response.PrevBlock = new BlockBasicData
                 {
-                    Hash = prevBlockHash,
+                    Hash = prevBlockHash.Result,
                     Height = block.height - 1
                 };
 
