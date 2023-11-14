@@ -9,22 +9,17 @@ public class TransactionsRepository : BaseRepository, ITransactionsRepository
     private readonly NpgsqlDataSource _dataSource;
     public TransactionsRepository(NpgsqlDataSource dataSource, IUtilityService utilityService) : base(utilityService) => _dataSource = dataSource;
 
-    protected async Task<Transaction?> ReadTransactionAsync(NpgsqlDataReader reader, CancellationToken cancellationToken = default)
+    protected async Task<Transaction?> ReadTransactionAsync(NpgsqlDataReader reader, CancellationToken cancellationToken = default) => new() 
     {
-        var tx = new Transaction
-        {
-            txid_hex = await ReadHexFromByteaAsync(reader, 0, cancellationToken),
-            hash_hex = await ReadHexFromByteaAsync(reader, 1, cancellationToken),
-            version = reader.GetInt32(2),
-            size = reader.GetInt32(3),
-            vsize = reader.GetInt32(4),
-            weight = reader.GetInt32(5),
-            locktime = reader.GetInt64(6),
-            block_height = reader.GetInt32(7)
-        };
-
-        return tx;
-    }
+        txid_hex = await ReadHexFromByteaAsync(reader, 0, cancellationToken),
+        hash_hex = await ReadHexFromByteaAsync(reader, 1, cancellationToken),
+        version = reader.GetInt32(2),
+        size = reader.GetInt32(3),
+        vsize = reader.GetInt32(4),
+        weight = reader.GetInt32(5),
+        locktime = reader.GetInt64(6),
+        block_height = reader.GetInt32(7)
+    };
 
     public async Task<Transaction?> GetTransactionByIdAsync(string txid, CancellationToken cancellationToken = default)
     {

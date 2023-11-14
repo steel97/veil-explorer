@@ -9,6 +9,7 @@ using ExplorerBackend.Persistence.Repositories;
 using Microsoft.Extensions.Options;
 using System.Text;
 using ExplorerBackend.Services.Core;
+using ExplorerBackend.Models.API;
 
 namespace ExplorerBackend.Services;
 
@@ -62,13 +63,31 @@ public class BlocksService : IBlocksService
         synced = isSynced
     };
 
+    public SimplifiedBlock RPCBlockToSimplified(GetBlockResult block) => new()
+    {
+        Height = block.Height,
+        Size = block.Size,
+        Weight = block.Weight,
+        ProofType = block.Proof_type switch
+        {
+            "Proof-of-Work (X16RT)" => BlockType.POW_X16RT,
+            "Proof-of-work (ProgPow)" => BlockType.POW_ProgPow,
+            "Proof-of-work (RandomX)" => BlockType.POW_RandomX,
+            "Proof-of-work (Sha256D)" => BlockType.POW_Sha256D,
+            "Proof-of-Stake" => BlockType.POS,
+            _ => BlockType.UNKNOWN
+        },
+        Time = block.Time,
+        MedianTime = block.Mediantime,
+        TxCount = block.NTx
+    };
     public async Task<bool> UpdateDbBlockAsync(int height, string validBlockHash, CancellationToken cancellationToken)
     {        
         using var scope = _serviceProvider.CreateAsyncScope();
         
         var validBlock = await _nodeRequester.GetBlock(validBlockHash, cancellationToken);
 
-        if (validBlock == null || validBlock.Result == null)
+        if (validBlock == null)
         {
             _logger.LogInformation("Can't pull block (orphan fix) for {blockHeight}", height);
             return false;
@@ -78,8 +97,8 @@ public class BlocksService : IBlocksService
         var blocksRepository = scope.ServiceProvider.GetRequiredService<IBlocksRepository>();
 
         await transactionsRepository.RemoveTransactionsForBlockAsync(height, cancellationToken);
-        await blocksRepository.UpdateBlockAsync(height, RPCBlockToDb(validBlock.Result), cancellationToken);
-        return !await InsertTransactionsAsync(height, validBlock.Result.Txs!, cancellationToken);
+        await blocksRepository.UpdateBlockAsync(height, RPCBlockToDb(validBlock), cancellationToken);
+        return !await InsertTransactionsAsync(height, validBlock.Txs!, cancellationToken);
     }
 
     public async Task<bool> InsertTransactionsAsync(int blockId, List<string>? txIds, CancellationToken cancellationToken)
@@ -149,7 +168,7 @@ public class BlocksService : IBlocksService
         return isTxFailed;
     }
 
-    // if something doesn't work correctly, then use the method above + check GetBlock model
+    // if something doesn't work correctly, then switch back to the method above + revisit GetBlock model
     public async Task<bool> InsertTransactionsAsync(int height, List<GetRawTransactionResult> txs, CancellationToken cancellationToken)
     {
         using var scope = _serviceProvider.CreateAsyncScope();

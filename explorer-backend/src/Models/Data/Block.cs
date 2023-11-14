@@ -33,7 +33,7 @@ public class Block
     public int txnCount { get; set; }
 }
 
-public enum BlockType : short
+public enum BlockType : byte
 {
     UNKNOWN = 0,
     POW_X16RT = 1,

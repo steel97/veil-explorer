@@ -16,7 +16,8 @@ public class SearchController : ControllerBase
     private readonly ChaininfoSingleton _chaininfoSingleton;
     private readonly IUtilityService _utilityService;
 
-    public SearchController(IBlocksDataService blocksRepository, ITransactionsDataService transactionsDataService, ChaininfoSingleton chaininfoSingleton, IUtilityService utilityService)
+    public SearchController(IBlocksDataService blocksRepository, ITransactionsDataService transactionsDataService,
+        ChaininfoSingleton chaininfoSingleton, IUtilityService utilityService)
     {
         _blocksDataService = blocksRepository;
         _transactionsDataService = transactionsDataService;

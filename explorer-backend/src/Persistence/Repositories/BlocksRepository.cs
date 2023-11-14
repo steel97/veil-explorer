@@ -96,7 +96,7 @@ public class BlocksRepository : BaseRepository, IBlocksRepository
         return await ReadBlockAsync(reader, cancellationToken);
     }
 
-    public async Task<Block?> GetBlockByHeightAsync(int height, CancellationToken cancellationToken = default)
+    public async Task<Block?> GetBlockAsync(int height, CancellationToken cancellationToken = default)
     {
         await using var conn = await _dataSource.OpenConnectionAsync(cancellationToken);
 
@@ -124,7 +124,7 @@ public class BlocksRepository : BaseRepository, IBlocksRepository
         return await ReadHexFromByteaAsync(reader, 0, cancellationToken);
     }
 
-    public async Task<Block?> GetBlockByHashAsync(string hash, CancellationToken cancellationToken = default)
+    public async Task<Block?> GetBlockAsync(string hash, CancellationToken cancellationToken = default)
     {
         await using var conn = await _dataSource.OpenConnectionAsync(cancellationToken);
 

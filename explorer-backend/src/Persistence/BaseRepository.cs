@@ -7,19 +7,14 @@ public class BaseRepository
 {
     private readonly IUtilityService _utilityService;
 
-    public BaseRepository(IUtilityService utilityService)
-    {
-        _utilityService = utilityService;
-    }
-
+    public BaseRepository(IUtilityService utilityService) => _utilityService = utilityService;
 
     protected string? TransformDouble(double input) => TransformHex(BitConverter.ToString(BitConverter.GetBytes(input)).Replace("-", "").ToLowerInvariant());
-
 
     protected string? TransformHex(string? hexInput)
     {
         if (string.IsNullOrEmpty(hexInput)) return "NULL";
-        if (!_utilityService.VerifyHex(hexInput)) throw new Exception("HEX value is wrong");
+        if (!_utilityService.VerifyHex(hexInput)) throw new Exception("invalid HEX value");
 
         return $@"'\x{hexInput}'::bytea";
     }

@@ -4,6 +4,7 @@ using ExplorerBackend.Models.API;
 using ExplorerBackend.Configs;
 using ExplorerBackend.Models.Data;
 using ExplorerBackend.Services.Data;
+using ExplorerBackend.Services.Caching;
 
 namespace ExplorerBackend.Controllers;
 
@@ -13,11 +14,13 @@ namespace ExplorerBackend.Controllers;
 public class BlocksController : ControllerBase
 {
     private readonly IOptions<APIConfig> _apiConfig;
+    private readonly ChaininfoSingleton _chaininfoSingleton;
     private readonly IBlocksDataService _blocksDataService; // switched to the new layer
 
-    public BlocksController(IOptions<APIConfig> apiConfig, IBlocksDataService blocksDataService)
+    public BlocksController(IOptions<APIConfig> apiConfig, ChaininfoSingleton chaininfoSingleton, IBlocksDataService blocksDataService)
     {
         _apiConfig = apiConfig;
+        _chaininfoSingleton = chaininfoSingleton;
         _blocksDataService = blocksDataService;
     }
 
@@ -26,8 +29,8 @@ public class BlocksController : ControllerBase
     [ProducesResponseType(typeof(List<SimplifiedBlock>), StatusCodes.Status200OK)]
     public async Task<IActionResult> Get(int offset, int count, SortDirection sort, CancellationToken cancellationToken)
     {
-        if (offset < 0)
-            return Problem("offset should be higher or equal to zero", statusCode: 400);
+        if (offset < 0 || offset > _chaininfoSingleton.CurrentSyncedBlock)
+            return Problem($"offset should be higher or equal to zero and less than {_chaininfoSingleton.CurrentSyncedBlock}", statusCode: 400);
         if (count > _apiConfig.Value.MaxTransactionsPullCount || count < 1)
             return Problem($"count should be between 1 and {_apiConfig.Value.MaxBlocksPullCount} ", statusCode: 400);
         

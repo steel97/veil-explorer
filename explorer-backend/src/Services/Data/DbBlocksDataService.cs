@@ -9,11 +9,11 @@ public class DbBlocksDataService : IBlocksDataService
     private readonly IBlocksRepository _blocksRepository;
     public DbBlocksDataService(IBlocksRepository blocksRepository) => _blocksRepository = blocksRepository;
 
-    Task<Block?> IBlocksDataService.GetBlockByHashAsync(string hash, CancellationToken cancellationToken) =>
-        _blocksRepository.GetBlockByHashAsync(hash, cancellationToken);
+    Task<Block?> IBlocksDataService.GetBlockAsync(string hash, CancellationToken cancellationToken) =>
+        _blocksRepository.GetBlockAsync(hash, cancellationToken);
 
-    Task<Block?> IBlocksDataService.GetBlockByHeightAsync(int height, CancellationToken cancellationToken) =>
-        _blocksRepository.GetBlockByHeightAsync(height, cancellationToken);
+    Task<Block?> IBlocksDataService.GetBlockAsync(int height, CancellationToken cancellationToken) =>
+        _blocksRepository.GetBlockAsync(height, cancellationToken);
 
     Task<Block?> IBlocksDataService.GetLatestBlockAsync(bool onlySynced, CancellationToken cancellationToken) =>
         _blocksRepository.GetLatestBlockAsync(onlySynced, cancellationToken);
