@@ -1,37 +1,128 @@
 using ExplorerBackend.Models.API;
 using ExplorerBackend.Models.Data;
+using ExplorerBackend.Configs;
+using ExplorerBackend.Services.Caching;
+using Microsoft.Extensions.Options;
+using ExplorerBackend.Models.Node.Response;
+using ExplorerBackend.Services.Core;
 
 namespace ExplorerBackend.Services.Data;
 
 public class RealtimeBlocksDataService : IBlocksDataService
 {
-    public Task<Block?> GetBlockByHashAsync(string hash, CancellationToken cancellationToken = default)
+    private readonly ILogger _logger;
+    private readonly NodeRequester _nodeRequester;
+    private readonly BlocksCacheSingleton _cache;
+    private readonly SimplifiedBlocksCacheSingleton _smpBlocksCache;
+    private readonly ChaininfoSingleton _chaininfoSingleton;
+    private readonly IBlocksService _blocksService;
+    private readonly IOptionsMonitor<ExplorerConfig> _config;
+    public RealtimeBlocksDataService(ILogger logger, BlocksCacheSingleton cache, SimplifiedBlocksCacheSingleton smpBlocksCache, NodeRequester nodeRequester,
+        ChaininfoSingleton chaininfoSingleton, IBlocksService blocksService, IOptionsMonitor<ExplorerConfig> config)
+        => (_logger, _cache, _smpBlocksCache, _nodeRequester, _chaininfoSingleton, _blocksService, _config) = 
+        (logger, cache, smpBlocksCache, nodeRequester, chaininfoSingleton, blocksService, config);
+    
+    public async Task<Block?> GetBlockAsync(string hash, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        GetBlockResult? rawBlock = await _cache.GetCachedBlockAsync<GetBlockResult>(hash, cancellationToken);        
+        rawBlock ??= await _nodeRequester.GetBlock(hash, cancellationToken, 2);
+
+        return _blocksService.RPCBlockToDb(rawBlock!);
     }
 
-    public Task<Block?> GetBlockByHeightAsync(int height, CancellationToken cancellationToken = default)
+    public async Task<Block?> GetBlockAsync(int height, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        GetBlockResult? rawBlock = await _cache.GetCachedBlockByHeightAsync<GetBlockResult>(height.ToString(), cancellationToken);
+
+        if(rawBlock is null)
+        {
+            var blockHash = await _nodeRequester.GetBlockHash((uint)height, cancellationToken);
+            rawBlock = await _nodeRequester.GetBlock(blockHash!.Result!, cancellationToken, 2);
+        }
+
+        if(rawBlock is null)
+            return default;
+
+        return _blocksService.RPCBlockToDb(rawBlock);
     }
 
-    public Task<Block?> GetLatestBlockAsync(bool onlySynced = false, CancellationToken cancellationToken = default)
+    public async Task<Block?> GetLatestBlockAsync(bool onlySynced = true, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        if(_cache.LatestBlock is null)
+        {
+            var rawBlock = await _nodeRequester.GetLatestBlock(cancellationToken);
+            return _blocksService.RPCBlockToDb(rawBlock!);   
+        }
+        return _blocksService.RPCBlockToDb(_cache.LatestBlock!);
     }
 
-    public Task<List<SimplifiedBlock>> GetSimplifiedBlocksAsync(int offset, int count, SortDirection sort, CancellationToken cancellationToken = default)
+    public async Task<List<SimplifiedBlock>> GetSimplifiedBlocksAsync(int offset, int count, SortDirection sort = SortDirection.DESC, CancellationToken ct = default)
     {
-        throw new NotImplementedException();
+        // ask in-memory cache
+        // or
+        // rpc (it's may crash node lol)💀💀
+        List<SimplifiedBlock> blocksList = new(count);
+        List<Task<GetBlockResult>> rawBlocksList = new(count);
+        
+        int height;
+
+        if (sort == SortDirection.DESC)
+            height = _chaininfoSingleton.CurrentSyncedBlock - offset;
+        else
+            height = 1 + offset;
+        
+        for (int i = height ; count > 0; count--)
+        {
+            SimplifiedBlock? block = _smpBlocksCache.GetSimplifiedBlock(height);
+
+            if(block is null)
+            {
+                rawBlocksList.Add(_nodeRequester.GetBlock((uint)height, ct, simplifiedTxInfo: 1)!); 
+                await Task.Delay(160, ct);
+            }
+            else
+                blocksList.Add(block);
+
+            _ = sort == SortDirection.DESC ? i-- : i++;
+
+            if(ct.IsCancellationRequested)
+                return null!;
+        }
+
+        await Task.WhenAll(rawBlocksList);
+
+        foreach (var rawBlock in rawBlocksList)
+        {
+            blocksList.Add(_blocksService.RPCBlockToSimplified(rawBlock.Result));
+        }
+
+        if(sort == SortDirection.DESC)
+            blocksList.OrderByDescending(x => x.Height);
+        else
+            blocksList.OrderBy(x => x.Height);
+
+        return blocksList;
     }
 
-    public Task<int?> ProbeBlockByHashAsync(string hash, CancellationToken cancellationToken = default)
+    public async Task<int?> ProbeBlockByHashAsync(string hash, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        GetBlockResult? rawBlock = await _cache.GetCachedBlockAsync<GetBlockResult>(hash, cancellationToken);
+
+        if(rawBlock is null || rawBlock.Height <= 0)
+            rawBlock = await _nodeRequester.GetBlock(hash, cancellationToken, 1);
+
+        return rawBlock!.Height;
     }
 
-    public Task<string?> ProbeHashByHeightAsync(int height, CancellationToken cancellationToken = default)
+    public async Task<string?> ProbeHashByHeightAsync(int height, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        GetBlockHash? hash = new()
+        {
+            Result = await _cache.GetCachedBlockHashAsync(height.ToString(), cancellationToken)
+        };
+
+        hash ??= await _nodeRequester.GetBlockHash((uint)height, cancellationToken);
+        
+        return hash!.Result;
     }
 }
