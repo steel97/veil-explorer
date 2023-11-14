@@ -33,20 +33,24 @@ builder.Services.Configure<ServerConfig>(builder.Configuration.GetSection("Serve
 bool rpcMode = builder.Configuration.GetSection("Explorer:RPCMode").Get<bool>();
 
 // Add services to the container.
-if(rpcMode is false)
+if(rpcMode)
+    builder.Services.AddStackExchangeRedisCache(redisOpt =>
+    {
+        redisOpt.Configuration = builder.Configuration.GetConnectionString("Redis") ?? "";
+        redisOpt.InstanceName = "Redis";
+    });
+else
     builder.Services.AddNpgsqlDataSource(builder.Configuration.GetConnectionString("DefaultConnection") ?? "");
-
+    
 builder.Services.AddSingleton<ChaininfoSingleton>();
 builder.Services.AddSingleton<InternalSingleton>();
 builder.Services.AddSingleton<NodeApiCacheSingleton>();
 builder.Services.AddSingleton<ScanTxOutsetBackgroundTaskQueue>();
+builder.Services.AddSingleton<NodeRequester>();
 builder.Services.AddSingleton<IUtilityService, UtilityService>();
-builder.Services.AddSingleton<INodeRequester, NodeRequester>();
 builder.Services.AddSingleton<IBlocksService, BlocksService>();
 
-if(rpcMode is false)
-    builder.Services.AddHostedService<BlocksWorker>();
-
+builder.Services.AddHostedService<BlocksWorker>();
 builder.Services.AddHostedService<BlockchainWorker>();
 builder.Services.AddHostedService<BlockchainStatsWorker>();
 builder.Services.AddHostedService<HubBackgroundWorker>();
@@ -54,29 +58,30 @@ builder.Services.AddHostedService<ScanTxOutsetWorker>();
 builder.Services.AddHostedService<SupplyWorker>();
 builder.Services.AddHostedService<MempoolWorker>();
 builder.Services.AddHostedService<ScanTxOutsetWorker>();
-if (args.Length > 1 && args[0] == "--fixorphans")
+if (args.Length > 1 && args[0] == "--fixorphans" && !rpcMode)
 {
     OrphanFixWorker.StartingBlock = int.Parse(args[1]);
     builder.Services.AddHostedService<OrphanFixWorker>();
 }
 
-if(rpcMode is false)
+if(rpcMode)
 {
-    builder.Services.AddTransient<IBlocksRepository, BlocksRepository>();
-    builder.Services.AddTransient<ITransactionsRepository, TransactionsRepository>();
-    builder.Services.AddTransient<IRawTxsRepository, RawTxsRepository>();
-}
-if(rpcMode is true)
-{
-   builder.Services.AddTransient<IBlocksDataService, RealtimeBlocksDataService>();
-   builder.Services.AddTransient<ITransactionsDataService, RealtimeTransactionsDataService>();
-   builder.Services.AddTransient<IRawTransactionsDataService, RealtimeRawTransactionsDataService>();
+    builder.Services.AddSingleton<BlocksCacheSingleton>();
+    builder.Services.AddSingleton<SimplifiedBlocksCacheSingleton>();
+    
+    builder.Services.AddTransient<IBlocksDataService, RealtimeBlocksDataService>();
+    builder.Services.AddTransient<ITransactionsDataService, RealtimeTransactionsDataService>();
+    builder.Services.AddTransient<IRawTransactionsDataService, RealtimeRawTransactionsDataService>();
 }
 else
 {
     builder.Services.AddTransient<IBlocksDataService, DbBlocksDataService>();
     builder.Services.AddTransient<ITransactionsDataService, DbTransactionsDataService>();
     builder.Services.AddTransient<IRawTransactionsDataService, DbRawTransactionsDataService>();
+
+    builder.Services.AddTransient<IBlocksRepository, BlocksRepository>();
+    builder.Services.AddTransient<ITransactionsRepository, TransactionsRepository>();
+    builder.Services.AddTransient<IRawTxsRepository, RawTxsRepository>();
 }
 
 builder.Services.AddTransient<ITransactionDecoder, TransactionsDecoder>();
