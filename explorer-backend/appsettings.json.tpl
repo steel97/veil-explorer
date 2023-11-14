@@ -33,6 +33,8 @@
     "StatsPointsCount": 50,
     "BlocksPerBatch": 10,
     "BlocksOrphanCheck": 12,
+    "OldestSimplifiedBlocksCacheCount": 20010,
+    "SimplifiedBlocksCacheCount": 200010,
     "BudgetAddress": "35uS99ZnfaYB293sJ8ptUEXkUTQXH8WnDe",
     "FoundationAddress": "38J8RGLetRUNEXycBMPg8oZqLt4bB9hCbt",
     "MemoryCache": {
