@@ -14,7 +14,7 @@ public class VeilPubKey
 
     public VeilPubKey(byte[] buf) => _buf = buf;
 
-    public KeyId GetID() => new KeyId(Hashes.Hash160(_buf));
+    public KeyId GetID() => new(Hashes.Hash160(_buf));
 
 
     public static uint GetLen(byte chHeader)
@@ -26,8 +26,5 @@ public class VeilPubKey
         return 0;
     }
 
-    public static bool ValidSize(byte[] vch)
-    {
-        return vch.Count() > 0 && GetLen(vch[0]) == vch.Count();
-    }
+    public static bool ValidSize(byte[] vch) => vch.Length > 0 && GetLen(vch[0]) == vch.Length;
 }

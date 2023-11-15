@@ -12,8 +12,10 @@ public class VeilAddress
         var dest = conv.DecodeDestination(input);
         bool isValid = dest != null ? conv.IsValidDestination(dest) : false;
 
-        var ret = new ValidateAddress();
-        ret.isvalid = isValid;
+        var ret = new ValidateAddress
+        {
+            isvalid = isValid
+        };
         if (dest != null)
         {
             ret.address = Converters.EncodeDestination(dest);

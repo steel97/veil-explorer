@@ -11,10 +11,8 @@ public class VeilBudget
 
     public static bool IsSuperBlock(int nBlockHeight)
     {
-        return (
-                (NetworkIDString() == "main" && nBlockHeight % nBlocksPerPeriod == 0) ||
-                ((NetworkIDString() == "test" || NetworkIDString() == "dev") && (nBlockHeight % nBlocksPerPeriod == 20000 || nBlockHeight == 1))
-                );
+        return  (NetworkIDString() == "main" && nBlockHeight % nBlocksPerPeriod == 0) ||
+            ((NetworkIDString() == "test" || NetworkIDString() == "dev") && (nBlockHeight % nBlocksPerPeriod == 20000 || nBlockHeight == 1));
     }
 
     public static void GetBlockRewards(int nBlockHeight, out long nBlockReward, out long nFounderPayment, out long nFoundationPayment, out long nBudgetPayment)

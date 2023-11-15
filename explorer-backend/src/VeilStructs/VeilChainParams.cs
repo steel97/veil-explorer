@@ -26,11 +26,11 @@ public enum Base58Type : int
 // hard coded for mainnet
 public class VeilChainParams
 {
-    public List<byte[]>? base58Prefixes = new();
-    public List<byte[]>? bech32Prefixes = new();
+    public List<byte[]>? base58Prefixes = [];
+    public List<byte[]>? bech32Prefixes = [];
 
-    public byte[] bech32_hrp_stealth = new byte[] { (byte)'s', (byte)'v' };
-    public byte[] bech32_hrp_base = new byte[] { (byte)'b', (byte)'v' };
+    public byte[] bech32_hrp_stealth = "sv"u8.ToArray();
+    public byte[] bech32_hrp_base = "bv"u8.ToArray();
 
     /*
      consensus.nProgPowTargetSpacing = 172;
@@ -44,18 +44,18 @@ public class VeilChainParams
 
     public VeilChainParams()
     {
-        for (var i = 0; i < 14; i++) base58Prefixes.Add(new byte[] { });
-        for (var i = 0; i < 14; i++) bech32Prefixes.Add(new byte[] { });
+        for (var i = 0; i < 14; i++) base58Prefixes.Add([]);
+        for (var i = 0; i < 14; i++) bech32Prefixes.Add([]);
 
-        base58Prefixes[(int)Base58Type.PUBKEY_ADDRESS] = new byte[] { 1, 70 };
-        base58Prefixes[(int)Base58Type.SCRIPT_ADDRESS] = new byte[] { 1, 5 };
-        base58Prefixes[(int)Base58Type.SECRET_KEY] = new byte[] { 1, 128 };
-        base58Prefixes[(int)Base58Type.STEALTH_ADDRESS] = new byte[] { 0x84 }; // v
-        base58Prefixes[(int)Base58Type.EXT_PUBLIC_KEY] = new byte[] { 0x04, 0x88, 0xB2, 0x1E };
-        base58Prefixes[(int)Base58Type.EXT_SECRET_KEY] = new byte[] { 0x04, 0x88, 0xAD, 0xE4 };
+        base58Prefixes[(int)Base58Type.PUBKEY_ADDRESS] = [1, 70];
+        base58Prefixes[(int)Base58Type.SCRIPT_ADDRESS] = [1, 5];
+        base58Prefixes[(int)Base58Type.SECRET_KEY] = [1, 128];
+        base58Prefixes[(int)Base58Type.STEALTH_ADDRESS] = [0x84]; // v
+        base58Prefixes[(int)Base58Type.EXT_PUBLIC_KEY] = [0x04, 0x88, 0xB2, 0x1E];
+        base58Prefixes[(int)Base58Type.EXT_SECRET_KEY] = [0x04, 0x88, 0xAD, 0xE4];
 
-        bech32Prefixes[(int)Base58Type.STEALTH_ADDRESS] = new byte[] { (byte)'s', (byte)'v' };
-        bech32Prefixes[(int)Base58Type.BASE_ADDRESS] = new byte[] { (byte)'b', (byte)'v' };
+        bech32Prefixes[(int)Base58Type.STEALTH_ADDRESS] = bech32_hrp_stealth;
+        bech32Prefixes[(int)Base58Type.BASE_ADDRESS] = bech32_hrp_base;
     }
 
     public byte[] Base58Prefix(Base58Type type)

@@ -4,7 +4,7 @@ namespace ExplorerBackend.VeilStructs;
 
 public class VeilTransaction : IVeilSerializable
 {
-    public static readonly byte[] ZEROHASH = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    public static readonly byte[] ZEROHASH = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
 
     public int Version { get; set; }
     public uint LockTime { get; set; }
@@ -13,25 +13,21 @@ public class VeilTransaction : IVeilSerializable
 
     public void Deserialize(VeilSerialization serializationContext, int mode)
     {
-        byte bv;
-        serializationContext.ReadByte(out bv);
+        serializationContext.ReadByte(out byte bv);
 
         Version = bv;
 
         serializationContext.ReadByte(out bv);
         Version |= bv << 8;
 
-        var fUseSegwit = false;
-        serializationContext.ReadBool(out fUseSegwit);
+        serializationContext.ReadBool(out bool fUseSegwit);
 
-        var lockTime = 0u;
-        serializationContext.ReadUint(out lockTime);
+        serializationContext.ReadUint(out uint lockTime);
         LockTime = lockTime;
 
-        var vInCount = 0UL;
-        serializationContext.ReadCompactSize(out vInCount);
+        serializationContext.ReadCompactSize(out ulong vInCount);
 
-        TxIn = new List<VeilTxIn>();
+        TxIn = [];
         for (var i = 0UL; i < vInCount; i++)
         {
             var txin = new VeilTxIn();
@@ -39,35 +35,22 @@ public class VeilTransaction : IVeilSerializable
             TxIn.Add(txin);
         }
 
+        serializationContext.ReadCompactSize(out ulong vOutCount);
 
-        var vOutCount = 0UL;
-        serializationContext.ReadCompactSize(out vOutCount);
-
-        TxOut = new List<VeilTxOut>();
+        TxOut = [];
         for (var i = 0UL; i < vOutCount; i++)
         {
-            byte outputType = 0;
-            serializationContext.ReadByte(out outputType);
+            serializationContext.ReadByte(out byte outputType);
 
-            VeilTxOut txout;
-
-            switch ((OutputTypes)outputType)
+            VeilTxOut txout = (OutputTypes)outputType switch
             {
-                case OutputTypes.OUTPUT_STANDARD:
-                    txout = new VeilTxOutStandard();
-                    break;
-                case OutputTypes.OUTPUT_CT:
-                    txout = new VeilTxOutCT();
-                    break;
-                case OutputTypes.OUTPUT_RINGCT:
-                    txout = new VeilTxOutRingCT();
-                    break;
-                case OutputTypes.OUTPUT_DATA:
-                    txout = new VeilTxOutData();
-                    break;
-                default:
-                    throw new Exception("Unknown output type");
-            }
+                OutputTypes.OUTPUT_STANDARD => new VeilTxOutStandard(),
+                OutputTypes.OUTPUT_CT => new VeilTxOutCT(),
+                OutputTypes.OUTPUT_RINGCT => new VeilTxOutRingCT(),
+                OutputTypes.OUTPUT_DATA => new VeilTxOutData(),
+                _ => throw new Exception("Unknown output type"),
+            };
+            
             txout.Deserialize(serializationContext, mode);
             TxOut.Add(txout);
         }
@@ -92,19 +75,19 @@ public class VeilTransaction : IVeilSerializable
 
     public bool IsBasecoin()
     {
-        return !IsZerocoinSpend() && (TxIn?.Count() == 1 && (TxIn[0].PrevOut?.IsNull() ?? false));
+        return !IsZerocoinSpend() && TxIn?.Count == 1 && (TxIn[0].PrevOut?.IsNull() ?? false);
     }
 
     public bool IsCoinStake()
     {
-        if (TxIn?.Count() == 0)
+        if (TxIn?.Count == 0)
             return false;
 
-        if (TxIn?.Count() != 1 || !TxIn[0].IsZerocoinSpend())
+        if (TxIn?.Count != 1 || !TxIn[0].IsZerocoinSpend())
             return false;
 
         // the coin stake transaction is marked with the first output empty
-        return (TxOut?.Count() > 1 && TxOut[0].IsEmpty());
+        return TxOut?.Count > 1 && TxOut[0].IsEmpty();
     }
     public bool IsZerocoinMint()
     {
@@ -131,8 +114,7 @@ public class OutPoint
     public void Deserialize(VeilSerialization serializationContext, int mode)
     {
         Hash = serializationContext.ReadHash256();
-        var n = 0u;
-        serializationContext.ReadUint(out n);
+        serializationContext.ReadUint(out uint n);
         N = n;
     }
 
@@ -145,8 +127,7 @@ public class Script
     public byte[]? Hash { get; set; }
     public void Deserialize(VeilSerialization serializationContext, int mode)
     {
-        var size = 0UL;
-        serializationContext.ReadCompactSize(out size);
+        serializationContext.ReadCompactSize(out ulong size);
         Hash = serializationContext.ReadByteArray(size);
     }
 
@@ -159,7 +140,7 @@ public class Script
         return (int)opcode - (int)(opcodetype.OP_1 - 1);
     }
 
-    public int Size() => Hash?.Count() ?? 0;
+    public int Size() => Hash?.Length ?? 0;
 
     public bool Empty()
     {
@@ -178,8 +159,7 @@ public class Script
     {
         if (Hash == null) return false;
         //fast test for Zerocoin Mint CScripts
-        return (Hash.Count() > 0 &&
-                Hash[0] == (byte)opcodetype.OP_ZEROCOINMINT);
+        return Hash.Length > 0 && Hash[0] == (byte)opcodetype.OP_ZEROCOINMINT;
     }
 
     public bool IsZerocoinSpend()
@@ -193,18 +173,18 @@ public class Script
     {
         if (Hash == null) return false;
         // Extra-fast test for pay-to-script-hash CScripts:
-        return (Hash.Count() == 23 &&
+        return Hash.Length == 23 &&
                 Hash[0] == (byte)opcodetype.OP_HASH160 &&
                 Hash[1] == 0x14 &&
-                Hash[22] == (byte)opcodetype.OP_EQUAL);
+                Hash[22] == (byte)opcodetype.OP_EQUAL;
     }
 
     public bool IsWitnessProgram(out int version, out byte[] program)
     {
         version = 0;
-        program = new byte[] { };
+        program = [];
         if (Hash == null) return false;
-        if (Hash.Count() < 4 || Hash.Count() > 42)
+        if (Hash.Length < 4 || Hash.Length > 42)
         {
             return false;
         }
@@ -212,10 +192,10 @@ public class Script
         {
             return false;
         }
-        if ((Hash[1] + 2) == Hash.Count())
+        if ((Hash[1] + 2) == Hash.Length)
         {
             version = Converters.DecodeOP_N((opcodetype)Hash[0]);
-            program = new byte[Hash.Count() - 2];
+            program = new byte[Hash.Length - 2];
             Array.Copy(Hash, 2, program, 0, program.Length);
             return true;
         }
@@ -244,7 +224,7 @@ public class Script
     public bool GetScriptOp(ref int pc, int end, out opcodetype opcodeRet, out byte[] pvchRet)
     {
 
-        pvchRet = new byte[] { };
+        pvchRet = [];
         opcodeRet = opcodetype.OP_INVALIDOPCODE;
 
         if (Hash == null) return false;
@@ -302,13 +282,11 @@ public class Script
 
     public bool GetOp(ref int pc, ref opcodetype opcodeRet, out byte[] vchRet)
     {
-        vchRet = new byte[] { };
+        vchRet = [];
         opcodeRet = opcodetype.OP_0;
         if (Hash == null) return false;
-        byte[] vch;
-        opcodetype opr;
         var pcl = pc;
-        var res = GetScriptOp(ref pcl, Hash.Length, out opr, out vch);
+        var res = GetScriptOp(ref pcl, Hash.Length, out opcodetype opr, out byte[] vch);
         if (res)
         {
             pc = pcl;
@@ -322,9 +300,8 @@ public class Script
     {
         opcodeRet = opcodetype.OP_0;
         if (Hash == null) return false;
-        opcodetype tmpop;
         var pcl = pc;
-        var res = GetScriptOp(ref pcl, Hash.Length, out tmpop, out _);
+        var res = GetScriptOp(ref pcl, Hash.Length, out opcodetype tmpop, out _);
         if (res)
         {
             pc = pcl;
@@ -339,15 +316,13 @@ public class WitnessScript
     List<byte[]>? Stack { get; set; }
     public void Deserialize(VeilSerialization serializationContext, int mode)
     {
-        var size = 0UL;
-        var tempSize = 0UL;
-        serializationContext.ReadCompactSize(out size);
+        serializationContext.ReadCompactSize(out ulong size);
 
-        Stack = new List<byte[]>();
+        Stack = [];
 
         for (var i = 0UL; i < size; i++)
         {
-            serializationContext.ReadCompactSize(out tempSize);
+            serializationContext.ReadCompactSize(out ulong tempSize);
             var stackEntry = serializationContext.ReadByteArray(tempSize);
             Stack.Add(stackEntry);
         }
@@ -373,8 +348,7 @@ public class VeilTxIn
         Script = new Script();
         Script.Deserialize(serializationContext, mode);
 
-        var nseq = 0u;
-        serializationContext.ReadUint(out nseq);
+        serializationContext.ReadUint(out uint nseq);
         NSequence = nseq;
 
         if (IsAnonInput())
@@ -401,7 +375,7 @@ public class VeilTxOut
 
     public bool IsEmpty()
     {
-        return (Amount == 0 && (ScriptPubKey?.Empty() ?? true));
+        return Amount == 0 && (ScriptPubKey?.Empty() ?? true);
     }
 
     public List<string> GetAddresses()
@@ -410,10 +384,8 @@ public class VeilTxOut
         if (ScriptPubKey == null) return ret;
         if (OutputType == OutputTypes.OUTPUT_STANDARD || OutputType == OutputTypes.OUTPUT_CT)
         {
-            var nrr = 0;
-            txnouttype ctype;
             var addresses = new List<IDestination>();
-            Converters.ExtractDestinations(ScriptPubKey, out ctype, addresses, out nrr);
+            Converters.ExtractDestinations(ScriptPubKey, out txnouttype ctype, addresses, out int nrr);
             addresses.ForEach(addr => ret.Add(Converters.EncodeDestination(addr)));
         }
         return ret;
@@ -426,8 +398,7 @@ public class VeilTxOutStandard : VeilTxOut
 
     public override void Deserialize(VeilSerialization serializationContext, int mode)
     {
-        var amount = 0L;
-        serializationContext.ReadLong(out amount);
+        serializationContext.ReadLong(out long amount);
         Amount = amount;
 
         ScriptPubKey = new Script();
@@ -447,8 +418,7 @@ public class VeilTxOutCT : VeilTxOut
     {
         Commitment = serializationContext.ReadByteArray(33);
 
-        var size = 0UL;
-        serializationContext.ReadCompactSize(out size);
+        serializationContext.ReadCompactSize(out ulong size);
         Data = serializationContext.ReadByteArray(size);
 
         ScriptPubKey = new Script();
@@ -473,8 +443,7 @@ public class VeilTxOutRingCT : VeilTxOut
         PK = serializationContext.ReadByteArray(33);
         Commitment = serializationContext.ReadByteArray(33);
 
-        var size = 0UL;
-        serializationContext.ReadCompactSize(out size);
+        serializationContext.ReadCompactSize(out ulong size);
         Data = serializationContext.ReadByteArray(size);
 
         serializationContext.ReadCompactSize(out size);
@@ -491,8 +460,7 @@ public class VeilTxOutData : VeilTxOut
 
     public override void Deserialize(VeilSerialization serializationContext, int mode)
     {
-        var size = 0UL;
-        serializationContext.ReadCompactSize(out size);
+        serializationContext.ReadCompactSize(out ulong size);
         Data = serializationContext.ReadByteArray(size);
 
         CTFee = null;
@@ -503,8 +471,7 @@ public class VeilTxOutData : VeilTxOut
         var serializationSubContext = new VeilSerialization(Data);
         serializationSubContext.ReadByte(out _); // skip first byte as we used it above
 
-        var ctfeelocal = 0ul;
-        serializationSubContext.ReadVarInt(out ctfeelocal);
+        serializationSubContext.ReadVarInt(out ulong ctfeelocal);
 
         CTFee = ctfeelocal;
     }

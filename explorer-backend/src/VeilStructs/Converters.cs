@@ -11,7 +11,7 @@ public class Converters
     const int HashSize = 160 / 8;//160/8?
 
     // piece of bech32, did that for veil specific stuff, can be replaced with NBitcoin implemention?
-    static int[] CHARSET_REV = new int[]{
+    static int[] CHARSET_REV = [
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -20,7 +20,7 @@ public class Converters
      1,  0,  3, 16, 11, 28, 12, 14,  6,  4,  2, -1, -1, -1, -1, -1,
     -1, 29, -1, 24, 13, 25,  9,  8, 23, -1, 18, 22, 31, 27, 19, -1,
      1,  0,  3, 16, 11, 28, 12, 14,  6,  4,  2, -1, -1, -1, -1, -1
-};
+];
     bool VerifyChecksum(string hrp, byte[] values)
     {
         // PolyMod computes what value to xor into the final values to make the checksum 0. However,
@@ -54,7 +54,7 @@ public class Converters
         return local.ToArray();
     }
 
-    private static readonly uint[] Generator = { 0x3b6a57b2U, 0x26508e6dU, 0x1ea119faU, 0x3d4233ddU, 0x2a1462b3U };
+    private static readonly uint[] Generator = [0x3b6a57b2U, 0x26508e6dU, 0x1ea119faU, 0x3d4233ddU, 0x2a1462b3U];
     private uint PolyMod(byte[] values)
     {
         uint chk = 1;
@@ -105,7 +105,7 @@ public class Converters
         if (!VerifyChecksum(hrp, values))
             return new Tuple<string?, byte[]?>(null, null);
 
-        return new Tuple<string?, byte[]?>(hrp, values.Take(values.Count() - 6).ToArray());
+        return new Tuple<string?, byte[]?>(hrp, values.Take(values.Length - 6).ToArray());
     }
 
     static bool ConvertBits(Action<byte> outfn, byte[] val, int valOffset, int valCount, int frombits, int tobits, bool pad)
@@ -150,13 +150,13 @@ public class Converters
             // base58-encoded Bitcoin addresses.
             // Public-key-hash-addresses have version 0 (or 111 testnet).
             // The data vector contains RIPEMD160(SHA256(pubkey)), where pubkey is the serialized public key.
-            byte[] pubkey_prefix = new byte[] { chainParams.Base58Prefix(Base58Type.PUBKEY_ADDRESS)[1] };
+            byte[] pubkey_prefix = [chainParams.Base58Prefix(Base58Type.PUBKEY_ADDRESS)[1]];
             if (data.Length == HashSize + pubkey_prefix.Length && data.Take(pubkey_prefix.Length).SequenceEqual(pubkey_prefix)) //std::equal(pubkey_prefix.begin(), pubkey_prefix.end(), data.begin()))
                 return new KeyId(data.Skip(pubkey_prefix.Length).ToArray());
 
             // Script-hash-addresses have version 5 (or 196 testnet).
             // The data vector contains RIPEMD160(SHA256(cscript)), where cscript is the serialized redemption script.
-            byte[] script_prefix = new byte[] { chainParams.Base58Prefix(Base58Type.SCRIPT_ADDRESS)[1] };
+            byte[] script_prefix = [chainParams.Base58Prefix(Base58Type.SCRIPT_ADDRESS)[1]];
             if (data.Length == HashSize + script_prefix.Length && data.Take(script_prefix.Length).SequenceEqual(script_prefix))
                 return new ScriptId(data.Skip(script_prefix.Length).ToArray());
 
@@ -164,7 +164,7 @@ public class Converters
             if (data.Length > stealth_prefix.Length && data.Take(stealth_prefix.Length).SequenceEqual(stealth_prefix))
             {
                 var sx = new VeilStealthAddress();
-                if (0 == sx.FromRaw(data.Skip(stealth_prefix.Count()).ToArray()))
+                if (0 == sx.FromRaw(data.Skip(stealth_prefix.Length).ToArray()))
                     return sx;
                 return null;
             }
@@ -175,7 +175,7 @@ public class Converters
         }
 
 
-        data = new byte[] { };
+        data = [];
         var dataz = new List<byte>();
         var bech = Decode(str);
 
@@ -193,7 +193,7 @@ public class Converters
             var offsetl = fIsStealth ? 0 : 1;
             //ConvertBits(c => data.Add(c), bech.Item2, offsetl, bech.Item2.Count() - offsetl, 5, 8, false)
             //if (ConvertBits < 5, 8, false > ([&](unsigned char c) { data.push_back(c); }, bech.second.begin() + (fIsStealth ? 0 : 1), bech.second.end()))
-            if (ConvertBits(c => dataz.Add(c), bech.Item2, offsetl, bech.Item2.Count() - offsetl, 5, 8, false))
+            if (ConvertBits(c => dataz.Add(c), bech.Item2, offsetl, bech.Item2.Length - offsetl, 5, 8, false))
             {
                 data = dataz.ToArray();
                 if (version == 0)
@@ -201,15 +201,15 @@ public class Converters
                     {
 
 
-                        if (data.Count() == WITNESS_V0_KEYHASH_SIZE)
+                        if (data.Length == WITNESS_V0_KEYHASH_SIZE)
                             return new WitKeyId(data);
                     }
                     {
-                        if (data.Count() == WITNESS_V0_SCRIPTHASH_SIZE)
+                        if (data.Length == WITNESS_V0_SCRIPTHASH_SIZE)
                             return new WitScriptId(data);
                     }
                     {
-                        if (data.Count() == 70)
+                        if (data.Length == 70)
                         { //Size of stealth addr
                             var sx = new VeilStealthAddress();
                             if (0 == sx.FromRaw(data))
@@ -218,12 +218,14 @@ public class Converters
                     }
                     return null;
                 }
-                if (version > 16 || data.Count() < 2 || data.Count() > 40)
+                if (version > 16 || data.Length < 2 || data.Length > 40)
                     return null;
 
-                var unk = new VeilWitnessUnknown();
-                unk.version = version;
-                unk.program = data;
+                var unk = new VeilWitnessUnknown
+                {
+                    version = version,
+                    program = data
+                };
 
                 return unk;
             }
@@ -255,8 +257,10 @@ public class Converters
                 benc.Encode()
             }*/
 
-            var data = new List<byte>();
-            data.Add(m_params.Base58Prefix(Base58Type.PUBKEY_ADDRESS)[1]);
+            var data = new List<byte>
+            {
+                m_params.Base58Prefix(Base58Type.PUBKEY_ADDRESS)[1]
+            };
 
             var id = (KeyId)value;
 
@@ -274,8 +278,10 @@ public class Converters
                 return bech32::Encode(sHrp, data);
             }*/
 
-            var data = new List<byte>();
-            data.Add(m_params.Base58Prefix(Base58Type.SCRIPT_ADDRESS)[1]);
+            var data = new List<byte>
+            {
+                m_params.Base58Prefix(Base58Type.SCRIPT_ADDRESS)[1]
+            };
 
             var id = (ScriptId)value;
 
@@ -283,32 +289,32 @@ public class Converters
             return b58check.EncodeData(data.ToArray());
         }
 
-        if (value is WitKeyId)
+        if (value is WitKeyId id2)
         {
             var bech = new Bech32Encoder(m_params.bech32_hrp_base);
             /*var data = new List<byte>(new byte[]{ 0x00 });
             data.reserve(33);
             ConvertBits < 8, 5, true > ([&](unsigned char c) { data.push_back(c); }, id.begin(), id.end());
             return bech32::Encode(m_params.Bech32HRPBase(), data);*/
-            var id = (WitKeyId)value;
+            var id = id2;
             return bech.Encode(0, id.ToBytes());
         }
 
-        if (value is VeilStealthAddress)
+        if (value is VeilStealthAddress address)
         {
             var bech = new Bech32Encoder(m_params.bech32_hrp_stealth);
-            var id = (VeilStealthAddress)value;
+            var id = address;
             return bech.Encode(0, id.RawData);
         }
 
-        if (value is WitScriptId)
+        if (value is WitScriptId id1)
         {
             var bech = new Bech32Encoder(m_params.bech32_hrp_base);
             /*std::vector < unsigned char> data = { 0};
             data.reserve(53);
             ConvertBits < 8, 5, true > ([&](unsigned char c) { data.push_back(c); }, id.begin(), id.end());*/
 
-            var id = (WitScriptId)value;
+            var id = id1;
             return bech.Encode(0, id.ToBytes());
         }
         else
@@ -344,9 +350,7 @@ public class Converters
             return true;
         }
 
-        int witnessversion;
-        byte[] witnessprogram;
-        if (scriptPubKey.IsWitnessProgram(out witnessversion, out witnessprogram))
+        if (scriptPubKey.IsWitnessProgram(out int witnessversion, out byte[] witnessprogram))
         {
             if (witnessversion == 0 && witnessprogram.Length == WITNESS_V0_KEYHASH_SIZE)
             {
@@ -363,7 +367,7 @@ public class Converters
             if (witnessversion != 0)
             {
                 typeRet = txnouttype.TX_WITNESS_UNKNOWN;
-                vSolutionsRet?.Add(new byte[] { (byte)witnessversion });
+                vSolutionsRet?.Add([(byte)witnessversion]);
                 vSolutionsRet?.Add(witnessprogram);
                 return true;
             }
@@ -382,8 +386,7 @@ public class Converters
             return true;
         }
 
-        byte[] data;
-        if (MatchPayToPubkey(scriptPubKey, out data))
+        if (MatchPayToPubkey(scriptPubKey, out byte[] data))
         {
             typeRet = txnouttype.TX_PUBKEY;
             vSolutionsRet?.Add(data);
@@ -397,17 +400,16 @@ public class Converters
             return true;
         }
 
-        uint required;
-        List<byte[]> keys = new();
-        if (MatchMultisig(scriptPubKey, out required, keys))
+        List<byte[]> keys = [];
+        if (MatchMultisig(scriptPubKey, out uint required, keys))
         {
             typeRet = txnouttype.TX_MULTISIG;
-            vSolutionsRet?.Add(new byte[] { (byte)required }); // safe as required is in range 1..16
+            vSolutionsRet?.Add([(byte)required]); // safe as required is in range 1..16
                                                                //vSolutionsRet.insert(vSolutionsRet.end(), keys.begin(), keys.end());
             foreach (var key in keys)
                 vSolutionsRet?.Add(key);
 
-            vSolutionsRet?.Add(new byte[] { (byte)keys.Count() }); // safe as size is in range 1..16
+            vSolutionsRet?.Add([(byte)keys.Count]); // safe as size is in range 1..16
             return true;
         }
 
@@ -434,7 +436,7 @@ public class Converters
 
     public static bool MatchPayToPubkey(Script script, out byte[] pubkey)
     {
-        pubkey = new byte[] { };
+        pubkey = [];
         if (script.Size() == VeilPubKey.PUBLIC_KEY_SIZE + 2 && script.Hash?[0] == VeilPubKey.PUBLIC_KEY_SIZE && script.Hash?.Last() == (byte)opcodetype.OP_CHECKSIG)
         {
             //pubkey = valtype(script.begin() + 1, script.begin() + CPubKey::PUBLIC_KEY_SIZE + 1);
@@ -454,7 +456,7 @@ public class Converters
 
     public static bool MatchPayToPubkeyHash(Script script, out byte[] pubkeyhash)
     {
-        pubkeyhash = new byte[] { };
+        pubkeyhash = [];
         if (script.Size() == 25 && script.Hash?[0] == (byte)opcodetype.OP_DUP && script.Hash?[1] == (byte)opcodetype.OP_HASH160 && script.Hash?[2] == 20 && script.Hash?[23] == (byte)opcodetype.OP_EQUALVERIFY && script.Hash?[24] == (byte)opcodetype.OP_CHECKSIG)
         {
             //pubkeyhash = valtype(script.begin() + 3, script.begin() + 23);
@@ -472,28 +474,28 @@ public class Converters
     {
         opcodetype opcode = opcodetype.OP_0;
         required = 0;
-        byte[] data;
         int it = 0;
         if (script.Size() < 1 || script.Hash?.Last() != (byte)opcodetype.OP_CHECKMULTISIG) return false;
 
-        if (!script.GetOp(ref it, ref opcode, out data) || !IsSmallInteger(opcode)) return false;
+        if (!script.GetOp(ref it, ref opcode, out byte[] data) || !IsSmallInteger(opcode)) return false;
+
         required = (uint)Script.DecodeOP_N(opcode);
+        
         while (script.GetOp(ref it, ref opcode, out data) && VeilPubKey.ValidSize(data))
         {
             pubkeys.Add(data);
         }
         if (!IsSmallInteger(opcode)) return false;
         var keys = (uint)Script.DecodeOP_N(opcode);
-        if (pubkeys.Count() != keys || keys < required) return false;
-        return (it + 1 == script.Hash.Count());
+        if (pubkeys.Count != keys || keys < required) return false;
+        return it + 1 == script.Hash.Length;
     }
 
     public static bool ExtractDestination(Script scriptPubKey, out IDestination addressRet)
     {
         var vSolutions = new List<byte[]>();
-        txnouttype whichType;
         addressRet = new KeyId();
-        if (!Solver(scriptPubKey, out whichType, vSolutions))
+        if (!Solver(scriptPubKey, out txnouttype whichType, vSolutions))
             return false;
 
         if (whichType == txnouttype.TX_PUBKEY)
@@ -553,7 +555,7 @@ public class Converters
 
         txnouttype ctout;
 
-        List<byte[]> vSolutions = new List<byte[]>();
+        List<byte[]> vSolutions = [];
 
         if (!Solver(scriptPubKey, out ctout, vSolutions))
             return false;
@@ -569,7 +571,7 @@ public class Converters
         if (typeRet == txnouttype.TX_MULTISIG)
         {
             nRequiredRet = vSolutions[0][0];
-            for (uint i = 1; i < vSolutions.Count() - 1; i++)
+            for (uint i = 1; i < vSolutions.Count - 1; i++)
             {
                 var pubKey = vSolutions[(int)i];
                 //CPubKey pubKey(vSolutions[i]);
@@ -581,14 +583,13 @@ public class Converters
                 addressRet.Add(address);
             }
 
-            if (addressRet.Count() == 0)
+            if (addressRet.Count == 0)
                 return false;
         }
         else
         {
             nRequiredRet = 1;
-            IDestination address;
-            if (!ExtractDestination(scriptPubKey, out address))
+            if (!ExtractDestination(scriptPubKey, out IDestination address))
                 return false;
             addressRet.Add(address);
         }

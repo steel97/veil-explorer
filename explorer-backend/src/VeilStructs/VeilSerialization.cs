@@ -108,8 +108,7 @@ public class VeilSerialization
 
     public void ReadCompactSize(out ulong nSizeRet)
     {
-        byte chSize;
-        ReadByte(out chSize);
+        ReadByte(out byte chSize);
 
         if (chSize < 253)
         {
@@ -117,24 +116,21 @@ public class VeilSerialization
         }
         else if (chSize == 253)
         {
-            short sh;
-            ReadShort(out sh);
+            ReadShort(out short sh);
             nSizeRet = (ulong)sh;
             if (nSizeRet < 253)
                 throw new Exception("non-canonical ReadCompactSize()");
         }
         else if (chSize == 254)
         {
-            int sh;
-            ReadInt(out sh);
+            ReadInt(out int sh);
             nSizeRet = (ulong)sh;
             if (nSizeRet < 0x10000u)
                 throw new Exception("non-canonical ReadCompactSize()");
         }
         else
         {
-            long sh;
-            ReadLong(out sh);
+            ReadLong(out long sh);
             nSizeRet = (ulong)sh;
             if (nSizeRet < 0x100000000UL)
                 throw new Exception("non-canonical ReadCompactSize()");
