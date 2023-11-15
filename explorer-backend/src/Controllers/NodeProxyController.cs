@@ -8,6 +8,7 @@ using ExplorerBackend.Services.Caching;
 using ExplorerBackend.Services.Core;
 using Microsoft.AspNetCore.Cors;
 using ExplorerBackend.Core;
+using System.Collections.Frozen;
 
 namespace ExplorerBackend.Controllers;
 
@@ -16,22 +17,23 @@ namespace ExplorerBackend.Controllers;
 [Route("/")]
 public class NodeProxyController : ControllerBase
 {
-    private readonly static IReadOnlyList<string> NODE_ALLOWED_METHODS = new string[] {
-        "importlightwalletaddress", "getwatchonlystatus", "getwatchonlytxes", "checkkeyimages", "getanonoutputs",
-        "sendrawtransaction", "getblockchaininfo", "getrawmempool"
-    };
-    private readonly string _invalidError;
-    private readonly static List<string> emptyList = new();
+    private readonly FrozenSet<string> NODE_ALLOWED_METHODS;
+    
+    private readonly string _invalidOperation;
+    private readonly static List<string> emptyList = [];
     private readonly IOptions<ServerConfig> _serverConfig;
     private readonly NodeRequester _nodeRequester;
     private readonly ChaininfoSingleton _chainInfoSingleton;
 
     public NodeProxyController(IOptions<ServerConfig> serverConfig, NodeRequester nodeRequester, ChaininfoSingleton chainInfoSingleton)
     {
+        List<string> set = ["importlightwalletaddress", "getwatchonlystatus", "getwatchonlytxes", "checkkeyimages", "getanonoutputs",
+        "sendrawtransaction", "getblockchaininfo", "getrawmempool"];
+        NODE_ALLOWED_METHODS = set.ToFrozenSet();
         _serverConfig = serverConfig;
         _nodeRequester = nodeRequester;
         _chainInfoSingleton = chainInfoSingleton;
-        _invalidError = JsonSerializer.Serialize(new GenericResult
+        _invalidOperation = JsonSerializer.Serialize(new GenericResult
         {
             Result = null,
             Id = null,
@@ -57,7 +59,7 @@ public class NodeProxyController : ControllerBase
     {
         // verify method (and parameters?)
         if (!NODE_ALLOWED_METHODS.Contains(model.Method ?? ""))
-            return Content(_invalidError, "application/json");
+            return Content(_invalidOperation, "application/json");
         
 
         if ((model.Method ?? "") == "getblockchaininfo")
