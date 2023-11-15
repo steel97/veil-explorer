@@ -9,27 +9,17 @@ using NanoXLSX;
 
 namespace ExplorerBackend.Hubs;
 
-public class InternalHub : Hub
+public class InternalHub(ILogger<EventsHub> logger, ChaininfoSingleton chainInfoSingleton, InternalSingleton internalSingleton, IOptions<ServerConfig> serverConfig,
+    ITransactionsDataService transactionsDataService, ITransactionDecoder transactionDecoder, IUtilityService utilityService)
+    : Hub
 {
-    private readonly ChaininfoSingleton _chainInfoSingleton;
-    private readonly InternalSingleton _internalSingleton;
-    private readonly ILogger _logger;
-    private readonly IOptions<ServerConfig> _serverConfig;
-    private readonly ITransactionsDataService _transactionsDataService; // switched to the new layer
-    private readonly ITransactionDecoder _transactionDecoder;
-    private readonly IUtilityService _utilityService;
-
-    public InternalHub(ILogger<EventsHub> logger, ChaininfoSingleton chainInfoSingleton, InternalSingleton internalSingleton, IOptions<ServerConfig> serverConfig, ITransactionsDataService transactionsDataService, ITransactionDecoder transactionDecoder, IUtilityService utilityService)
-    {
-        _chainInfoSingleton = chainInfoSingleton;
-        _internalSingleton = internalSingleton;
-        _serverConfig = serverConfig;
-        _transactionsDataService = transactionsDataService;
-        _transactionDecoder = transactionDecoder;
-        _utilityService = utilityService;
-        _logger = logger;
-
-    }
+    private readonly ChaininfoSingleton _chainInfoSingleton = chainInfoSingleton;
+    private readonly InternalSingleton _internalSingleton = internalSingleton;
+    private readonly ILogger _logger = logger;
+    private readonly IOptions<ServerConfig> _serverConfig = serverConfig;
+    private readonly ITransactionsDataService _transactionsDataService = transactionsDataService; // switched to the new layer
+    private readonly ITransactionDecoder _transactionDecoder = transactionDecoder;
+    private readonly IUtilityService _utilityService = utilityService;
 
     public async Task FetchBasecoinTxs(string accessKey, string[] addresses)//, CancellationToken cancellationToken = default)
     {

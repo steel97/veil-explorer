@@ -3,10 +3,9 @@ using ExplorerBackend.Services.Core;
 
 namespace ExplorerBackend.Persistence.Repositories;
 
-public class RawTxsRepository : BaseRepository, IRawTxsRepository
+public class RawTxsRepository(NpgsqlDataSource dataSource, IUtilityService utilityService) : BaseRepository(utilityService), IRawTxsRepository
 {
-    private readonly NpgsqlDataSource _dataSource;
-    public RawTxsRepository(NpgsqlDataSource dataSource, IUtilityService utilityService) : base(utilityService) => _dataSource = dataSource;
+    private readonly NpgsqlDataSource _dataSource = dataSource;
 
     public async Task<byte[]?> GetTransactionByIdAsync(string txid, CancellationToken cancellationToken = default)
     {
@@ -35,7 +34,7 @@ public class RawTxsRepository : BaseRepository, IRawTxsRepository
             {
                 var txid = await ReadHexFromByteaAsync(reader, 0, cancellationToken);
                 var data = await ReadByteaAsync(reader, 1, cancellationToken);
-                result.Add(txid ?? "", data ?? Array.Empty<byte>());
+                result.Add(txid ?? "", data ?? []);
             }
         }
         return result;
