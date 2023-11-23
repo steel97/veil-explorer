@@ -12,22 +12,13 @@ namespace ExplorerBackend.Controllers;
 [ApiController]
 [Route("/api/[controller]")]
 [Produces("application/json")]
-public class BlockController : ControllerBase
+public class BlockController(IOptions<APIConfig> apiConfig, IBlocksDataService blocksDataService, ITransactionsDataService transactionsDataService, ITransactionDecoder transactionDecoder, IUtilityService utilityService) : ControllerBase
 {
-    private readonly IOptions<APIConfig> _apiConfig;
-    private readonly IBlocksDataService _blocksDataService; // switched to the new layer
-    private readonly ITransactionsDataService _transactionsDataService; // switched to the new layer
-    private readonly ITransactionDecoder _transactionDecoder;
-    private readonly IUtilityService _utilityService;
-
-    public BlockController(IOptions<APIConfig> apiConfig, IBlocksDataService blocksDataService, ITransactionsDataService transactionsDataService, ITransactionDecoder transactionDecoder, IUtilityService utilityService)
-    {
-        _apiConfig = apiConfig;
-        _blocksDataService = blocksDataService;
-        _transactionsDataService = transactionsDataService;
-        _transactionDecoder = transactionDecoder;
-        _utilityService = utilityService;
-    }
+    private readonly IOptions<APIConfig> _apiConfig = apiConfig;
+    private readonly IBlocksDataService _blocksDataService = blocksDataService;
+    private readonly ITransactionsDataService _transactionsDataService = transactionsDataService;
+    private readonly ITransactionDecoder _transactionDecoder = transactionDecoder;
+    private readonly IUtilityService _utilityService = utilityService;
 
     [HttpPost(Name = "GetBlock")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -37,18 +28,18 @@ public class BlockController : ControllerBase
         if (body.Offset < 0)
             return Problem("offset should be higher or equal to zero", statusCode: 400);
         if (body.Count > _apiConfig.Value.MaxTransactionsPullCount || body.Count < 1)
-            return Problem($"count should be between 1 and {_apiConfig.Value.MaxBlocksPullCount} ", statusCode: 400);
+            return Problem($"count should be between 1 and {_apiConfig.Value.MaxBlocksPullCount}", statusCode: 400);
 
         var response = new BlockResponse
         {
             Found = false
         };
 
-        Block? block = null;
-        if (body.Hash != null && body.Hash.Length == 64 && _utilityService.VerifyHex(body.Hash))
-            block = await _blocksDataService.GetBlockAsync(body.Hash, cancellationToken);        
-        else if (body.Height != null)
-            block = await _blocksDataService.GetBlockAsync(body.Height.Value, cancellationToken);
+        Block? block;
+        if (body.Height != null)
+            block = await _blocksDataService.GetBlockAsync(body.Height.Value, 2, cancellationToken);
+        else if (body.Hash != null && body.Hash.Length == 64 && _utilityService.VerifyHex(body.Hash))
+            block = await _blocksDataService.GetBlockAsync(body.Hash, 2, cancellationToken);        
         else
             return Problem($"a problem has occured, try again", statusCode: 400);
 
@@ -79,9 +70,14 @@ public class BlockController : ControllerBase
                     Hash = prevBlockHash.Result,
                     Height = block.height - 1
                 };
+            
+            List<TransactionExtended>? rtxs;
 
+            if(block.tx is null)
+                rtxs = await _transactionsDataService.GetTransactionsForBlockAsync(block.height, body.Offset, body.Count, false, cancellationToken);
+            else
+                rtxs = _transactionsDataService.ToTransactionExtended(block.tx, block.height);
 
-            var rtxs = await _transactionsDataService.GetTransactionsForBlockAsync(block.height, body.Offset, body.Count, false, cancellationToken);
             if (rtxs != null)
             {
                 var txTargets = new List<TxDecodeTarget>();

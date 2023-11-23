@@ -5,25 +5,18 @@ using ExplorerBackend.Models.System;
 
 namespace ExplorerBackend.Services.Core;
 
-public class TransactionsDecoder : ITransactionDecoder
+public class TransactionsDecoder(IRawTransactionsDataService rawTransactionsDataService, IUtilityService utilityService) : ITransactionDecoder
 {
-    private readonly IRawTransactionsDataService _rawTransactionsDataService;
-    private readonly IUtilityService _utilityService;
-
-    public TransactionsDecoder(IRawTransactionsDataService rawTransactionsDataService, IUtilityService utilityService)
-    {
-
-        _rawTransactionsDataService = rawTransactionsDataService;
-        _utilityService = utilityService;
-    }
+    private readonly IRawTransactionsDataService _rawTransactionsDataService = rawTransactionsDataService;
+    private readonly IUtilityService _utilityService = utilityService;
 
     public async Task<List<TransactionSimpleDecoded>?> DecodeTransactionsAsync(List<TxDecodeTarget> targets, int blockHeight, CancellationToken cancellationToken)
     {
-        var txs = new List<TransactionSimpleDecoded>();
+        List<TransactionSimpleDecoded> txs = [];
 
+        Dictionary<string, VeilTransaction> dict = [];
+        List<string> requiredTxs = [];
 
-        var dict = new Dictionary<string, VeilTransaction>();
-        var requiredTxs = new List<string>();
         foreach (var rawTx in targets)
         {
             if (rawTx.Data == null) continue;
@@ -49,8 +42,7 @@ public class TransactionsDecoder : ITransactionDecoder
                 {
                     var tx = VeilSerialization.Deserialize<VeilTransaction>(rawTx.Value, 0);
 
-                    if (!dict.ContainsKey(rawTx.Key))
-                        dict.Add(rawTx.Key, tx);
+                    dict.TryAdd(rawTx.Key, tx);
                 }
         }
 
@@ -66,14 +58,14 @@ public class TransactionsDecoder : ITransactionDecoder
                 IsZerocoinMint = tx.IsZerocoinMint(),
                 IsCoinStake = tx.IsCoinStake(),
                 IsBasecoin = tx.IsBasecoin(),
-                Inputs = new List<TxVinSimpleDecoded>(),
-                Outputs = new List<TxVoutSimpleDecoded>()
+                Inputs = [],
+                Outputs = []
             };
 
             if (tx.TxIn != null)
                 foreach (var txin in tx.TxIn)
                 {
-                    var txinsimple = new TxVinSimpleDecoded
+                    TxVinSimpleDecoded txinsimple = new()
                     {
                         Type = TxInType.DEFAULT
                     };
@@ -84,9 +76,8 @@ public class TransactionsDecoder : ITransactionDecoder
 
                     txinsimple.PrevOutTx = _utilityService.ToHexReversed(txin.PrevOut?.Hash ?? Array.Empty<byte>());
                     txinsimple.PrevOutNum = txin.PrevOut?.N ?? 0;
-                    if (dict.TryGetValue(txinsimple.PrevOutTx, out VeilTransaction? value))
+                    if (dict.TryGetValue(txinsimple.PrevOutTx, out VeilTransaction? prevTx))
                     {
-                        var prevTx = value;
                         if (prevTx != null && prevTx.TxOut != null && prevTx.TxOut.Count > txinsimple.PrevOutNum)
                         {
                             if (prevTx.TxOut[(int)txinsimple.PrevOutNum].OutputType == OutputTypes.OUTPUT_STANDARD)
@@ -126,7 +117,7 @@ public class TransactionsDecoder : ITransactionDecoder
 
                     if (txout.ScriptPubKey != null)
                     {
-                        Converters.Solver(txout.ScriptPubKey, out scriptType, new List<byte[]>());
+                        Converters.Solver(txout.ScriptPubKey, out scriptType, []);
                         if (txout.ScriptPubKey.Hash != null && txout.ScriptPubKey.Hash.Length > 0)
                             txoutsimple.IsOpreturn = txout.ScriptPubKey.Hash[0] == (byte)opcodetype.OP_RETURN;
                         else
