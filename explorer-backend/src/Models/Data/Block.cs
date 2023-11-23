@@ -1,3 +1,5 @@
+using ExplorerBackend.Models.Node.Response;
+
 namespace ExplorerBackend.Models.Data;
 
 public class Block
@@ -16,6 +18,7 @@ public class Block
     public string? proofofworkhash_hex { get; set; }
     public int version { get; set; }
     public string? merkleroot_hex { get; set; }
+    public List<GetRawTransactionResult>? tx { get; set; }
     public long time { get; set; }
     public long mediantime { get; set; }
     public ulong nonce { get; set; }

@@ -17,7 +17,7 @@ public class InternalHub(ILogger<EventsHub> logger, ChaininfoSingleton chainInfo
     private readonly InternalSingleton _internalSingleton = internalSingleton;
     private readonly ILogger _logger = logger;
     private readonly IOptions<ServerConfig> _serverConfig = serverConfig;
-    private readonly ITransactionsDataService _transactionsDataService = transactionsDataService; // switched to the new layer
+    private readonly ITransactionsDataService _transactionsDataService = transactionsDataService;
     private readonly ITransactionDecoder _transactionDecoder = transactionDecoder;
     private readonly IUtilityService _utilityService = utilityService;
 
@@ -63,7 +63,7 @@ public class InternalHub(ILogger<EventsHub> logger, ChaininfoSingleton chainInfo
                 var rtxs = await _transactionsDataService.GetTransactionsForBlockAsync(i, 0, 0, true, cancellationToken);
                 if (rtxs != null)
                 {
-                    var txTargets = new List<TxDecodeTarget>();
+                    List<TxDecodeTarget> txTargets = [];
 
                     rtxs.ForEach(rtx => txTargets.Add(new TxDecodeTarget
                     {
@@ -88,7 +88,7 @@ public class InternalHub(ILogger<EventsHub> logger, ChaininfoSingleton chainInfo
                                             if (addr == address)
                                             {
                                                 if (!txInputs.ContainsKey(address))
-                                                    txInputs.Add(address, new());
+                                                    txInputs.Add(address, []);
 
                                                 if (txInputs[address].ContainsKey(dtr.TxId!))
                                                     txInputs[address][dtr.TxId!] += input.PrevOutAmount / 100000000.0d;
@@ -111,7 +111,7 @@ public class InternalHub(ILogger<EventsHub> logger, ChaininfoSingleton chainInfo
                                             if (addr == address)
                                             {
                                                 if (!txOutputs.ContainsKey(address))
-                                                    txOutputs.Add(address, new());
+                                                    txOutputs.Add(address, []);
 
                                                 if (txOutputs[address].ContainsKey(dtr.TxId!))
                                                     txOutputs[address][dtr.TxId!] += output.Amount / 100000000.0d;

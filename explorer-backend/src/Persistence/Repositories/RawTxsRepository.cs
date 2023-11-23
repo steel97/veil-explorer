@@ -24,7 +24,8 @@ public class RawTxsRepository(NpgsqlDataSource dataSource, IUtilityService utili
         await using var conn = await _dataSource.OpenConnectionAsync(cancellationToken);
 
         var query = $"txid = {TransformHex(txids[0])}";
-        txids.Skip(1).ToList().ForEach(txid => query += $" OR txid = {TransformHex(txid)}");
+        if(txids.Count > 1)
+            txids.Skip(1).ToList().ForEach(txid => query += $" OR txid = {TransformHex(txid)}");
 
         var result = new Dictionary<string, byte[]>();
         using (var cmd = new NpgsqlCommand($"SELECT txid, \"data\" FROM rawtxs WHERE {query}", conn))

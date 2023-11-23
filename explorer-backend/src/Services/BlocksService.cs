@@ -35,6 +35,7 @@ public class BlocksService : IBlocksService
         mediantime = block.Mediantime,
         merkleroot_hex = block.Merkleroot,
         mixhash_hex = block.Mixhash,
+        tx = block.Txs,
         nonce = block.Nonce,
         nonce64 = block.Nonce64,
         prog_header_hash_hex = block.prog_header_hash,
