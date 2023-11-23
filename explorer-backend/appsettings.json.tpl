@@ -40,8 +40,8 @@
     "MemoryCache": {
       "ExpirationScanFrequency": 10000,
       "ExpirationApiAbsoluteTime": 3600000,
-      "AbsoluteExpirationCacheTime" : 120,
-      "UnusedExpirationCacheTime": 45
+      "ServerAbsoluteExpirationCacheTimeMin" : 10080,
+      "UserAbsoluteExpirationCacheTimeSec": 30
     },
     "Node": {
       "Url": "http://127.0.0.1:5050/",

@@ -27,8 +27,8 @@ public class MemoryCache
 {
     public int ExpirationScanFrequency { get; set; }
     public int ExpirationApiAbsoluteTime { get; set; }
-    public int AbsoluteExpirationCacheTime { get; set; }
-    public int UnusedExpirationCacheTime { get; set; }
+    public int ServerAbsoluteExpirationCacheTimeMin { get; set; }
+    public int UserAbsoluteExpirationCacheTimeSec { get; set; }
 }
 
 public class Node
