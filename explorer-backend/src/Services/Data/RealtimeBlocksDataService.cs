@@ -18,26 +18,26 @@ public class RealtimeBlocksDataService : IBlocksDataService
     private readonly IBlocksService _blocksService;
     private readonly IOptionsMonitor<ExplorerConfig> _config;
     public RealtimeBlocksDataService(ILogger logger, BlocksCacheSingleton cache, SimplifiedBlocksCacheSingleton smpBlocksCache, NodeRequester nodeRequester,
-        ChaininfoSingleton chaininfoSingleton, IBlocksService blocksService, IOptionsMonitor<ExplorerConfig> config)
-        => (_logger, _cache, _smpBlocksCache, _nodeRequester, _chaininfoSingleton, _blocksService, _config) = 
+        ChaininfoSingleton chaininfoSingleton, IBlocksService blocksService, IOptionsMonitor<ExplorerConfig> config) =>
+        (_logger, _cache, _smpBlocksCache, _nodeRequester, _chaininfoSingleton, _blocksService, _config) = 
         (logger, cache, smpBlocksCache, nodeRequester, chaininfoSingleton, blocksService, config);
     
-    public async Task<Block?> GetBlockAsync(string hash, CancellationToken cancellationToken = default)
+    public async Task<Block?> GetBlockAsync(string hash, int simplifiedTxInfo = 2, CancellationToken cancellationToken = default)
     {
         GetBlockResult? rawBlock = await _cache.GetCachedBlockAsync<GetBlockResult>(hash, cancellationToken);        
-        rawBlock ??= await _nodeRequester.GetBlock(hash, cancellationToken, 2);
+        rawBlock ??= await _nodeRequester.GetBlock(hash, cancellationToken, simplifiedTxInfo);
 
         return _blocksService.RPCBlockToDb(rawBlock!);
     }
 
-    public async Task<Block?> GetBlockAsync(int height, CancellationToken cancellationToken = default)
+    public async Task<Block?> GetBlockAsync(int height, int simplifiedTxInfo = 2, CancellationToken cancellationToken = default)
     {
         GetBlockResult? rawBlock = await _cache.GetCachedBlockByHeightAsync<GetBlockResult>(height.ToString(), cancellationToken);
 
         if(rawBlock is null)
         {
             var blockHash = await _nodeRequester.GetBlockHash((uint)height, cancellationToken);
-            rawBlock = await _nodeRequester.GetBlock(blockHash!.Result!, cancellationToken, 2);
+            rawBlock = await _nodeRequester.GetBlock(blockHash!.Result!, cancellationToken, simplifiedTxInfo);
         }
 
         if(rawBlock is null)
@@ -118,7 +118,7 @@ public class RealtimeBlocksDataService : IBlocksDataService
     {
         GetBlockHash? hash = new()
         {
-            Result = await _cache.GetCachedBlockHashAsync(height.ToString(), cancellationToken)
+            Result = await _cache.GetCachedBlockHashAsync(height, cancellationToken)
         };
 
         hash ??= await _nodeRequester.GetBlockHash((uint)height, cancellationToken);
