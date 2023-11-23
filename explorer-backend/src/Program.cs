@@ -12,6 +12,7 @@ using Serilog;
 using Serilog.Events;
 using ExplorerBackend.Services.Workers.Patches;
 using ExplorerBackend.Services.Data;
+using StackExchange.Redis;
 
 Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
@@ -21,9 +22,9 @@ Log.Logger = new LoggerConfiguration()
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog((context, services, configuration) => configuration
-                    .ReadFrom.Configuration(context.Configuration)
-                    .ReadFrom.Services(services)
-                    .Enrich.FromLogContext());
+    .ReadFrom.Configuration(context.Configuration)
+    .ReadFrom.Services(services)
+    .Enrich.FromLogContext());
 
 // Configuration
 builder.Services.Configure<APIConfig>(builder.Configuration.GetSection("API"));
@@ -34,11 +35,8 @@ bool rpcMode = builder.Configuration.GetSection("Explorer:RPCMode").Get<bool>();
 
 // Add services to the container.
 if(rpcMode)
-    builder.Services.AddStackExchangeRedisCache(redisOpt =>
-    {
-        redisOpt.Configuration = builder.Configuration.GetConnectionString("Redis") ?? "";
-        redisOpt.InstanceName = "Redis";
-    });
+    builder.Services.AddSingleton<IConnectionMultiplexer>(options =>    
+        ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("Redis") ?? ""));
 else
     builder.Services.AddNpgsqlDataSource(builder.Configuration.GetConnectionString("DefaultConnection") ?? "");
     
