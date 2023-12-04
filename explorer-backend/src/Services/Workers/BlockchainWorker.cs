@@ -17,17 +17,15 @@ public class BlockchainWorker : BackgroundService
     private readonly ILogger _logger;
     private readonly IHubContext<EventsHub> _hubContext;
     private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
-    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ChaininfoSingleton _chainInfoSingleton;
     private readonly NodeRequester _nodeRequester;
 
     public BlockchainWorker(ILogger<BlockchainWorker> logger, IHubContext<EventsHub> hubContext, IOptionsMonitor<ExplorerConfig> explorerConfig,
-        IHttpClientFactory httpClientFactory, ChaininfoSingleton chaininfoSingleton, NodeRequester nodeRequester)
+        ChaininfoSingleton chaininfoSingleton, NodeRequester nodeRequester)
     {
         _logger = logger;
         _hubContext = hubContext;
         _explorerConfig = explorerConfig;
-        _httpClientFactory = httpClientFactory;
         _chainInfoSingleton = chaininfoSingleton;
         _nodeRequester = nodeRequester;;
     }
