@@ -20,7 +20,7 @@ public class NodeProxyController : ControllerBase
     private readonly FrozenSet<string> NODE_ALLOWED_METHODS;
     
     private readonly string _invalidOperation;
-    private readonly static List<string> emptyList = [];
+    private readonly static List<string> _emptyList = [];
     private readonly IOptions<ServerConfig> _serverConfig;
     private readonly NodeRequester _nodeRequester;
     private readonly ChaininfoSingleton _chainInfoSingleton;
@@ -77,7 +77,7 @@ public class NodeProxyController : ControllerBase
             var res1 = new GetRawMempool
             {
                 Id = model.Id,
-                Result = _chainInfoSingleton.UnconfirmedTxs?.Select(a => a.txid ?? "").ToList() ?? emptyList
+                Result = _chainInfoSingleton.UnconfirmedTxs?.Select(a => a.txid ?? "").ToList() ?? _emptyList
             };
             return Ok(res1);
         }

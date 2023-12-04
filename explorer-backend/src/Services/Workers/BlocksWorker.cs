@@ -219,7 +219,7 @@ public class BlocksWorker : BackgroundService
                 
                 bool isPrevBlockHashValid = await _blocksCacheSingleton.ValidateCacheAsync(i.ToString(), prevBlocksHash.Result);
 
-                if(isPrevBlockHashValid is false)
+                if(isPrevBlockHashValid)
                 {
                     var prevBlock = await _nodeRequester.GetBlock(prevBlocksHash.Result, cancellationToken, 2);
 
