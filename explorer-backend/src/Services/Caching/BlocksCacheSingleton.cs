@@ -7,6 +7,7 @@ using ExplorerBackend.Services.Data;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
 using ExplorerBackend.Models.Node.Response;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ExplorerBackend.Services.Caching;
 
@@ -24,21 +25,20 @@ public class BlocksCacheSingleton
         _memoryCacheConfig = memoryCacheConfig;
         _cache = cache;
 
-        ArgumentNullException.ThrowIfNull(_memoryCacheConfig.CurrentValue.ServerAbsoluteExpirationCacheTimeMin);
-        ArgumentNullException.ThrowIfNull(_memoryCacheConfig.CurrentValue.UserAbsoluteExpirationCacheTimeSec);
+        ArgumentNullException.ThrowIfNull(_memoryCacheConfig.CurrentValue.ServerAbsExpCacheTimeDays);
+        ArgumentNullException.ThrowIfNull(_memoryCacheConfig.CurrentValue.UserAbsExpCacheTimeSec);
 
-        _serverAbsExpTime = TimeSpan.FromMinutes(_memoryCacheConfig.CurrentValue.ServerAbsoluteExpirationCacheTimeMin);
-        _userAbsExpTime = TimeSpan.FromMinutes(_memoryCacheConfig.CurrentValue.UserAbsoluteExpirationCacheTimeSec);
+        _serverAbsExpTime = TimeSpan.FromMinutes(_memoryCacheConfig.CurrentValue.ServerAbsExpCacheTimeDays);
+        _userAbsExpTime = TimeSpan.FromMinutes(_memoryCacheConfig.CurrentValue.UserAbsExpCacheTimeSec);
     }
-    // TODO: implement MemoryPack to deal with byte[], create redis key-value templ (height -> hash, height:s - simplified block), 
-    //       create logic for saving simplified blocks (optionaly batch N per 1 request instead of N requests)
+    // TODO: implement MemoryPack to deal with byte[], create redis key-value templ (height -> hash, height:s - simplified block)
     public async Task<bool> UserCacheDataAsync(int blockHeight, string blockHash, GetBlockResult blockData, CancellationToken ct = default)
     {
-        var redisServer = _cache.GetServer();
+        var redisServer = _cache.GetServer("");
         RedisResult redisResult =  await redisServer.ExecuteAsync("DBSIZE");
-        double.TryParse(redisResult.ToString(), out double totalCachedObj);
+        bool parseResult = double.TryParse(redisResult.ToString(), out double totalCachedObj);
 
-        if(totalCachedObj < )
+        if(totalCachedObj < 000 && parseResult)
         {
             var redis = _cache.GetDatabase();
             // will be MemoryPack
@@ -62,11 +62,12 @@ public class BlocksCacheSingleton
     public async Task<bool> SetServerCacheDataAsync(int blockHeight, string blockHash, GetBlockResult blockData, CancellationToken ct = default)
     {
         LatestBlock = blockData;
+        var db = _cache.GetDatabase();
 
         string serverData = JsonSerializer.Serialize(blockData);
 
-        Task keyDataPair = _cache.SetAsync(blockHash, serverData, _serverOptions, ct);
-        Task hashKeyPair = _cache.SetAsync(blockHeight, blockHash, _serverOptions, ct);
+        Task hashKeyPair = db.StringSetAsync(blockHeight.ToString(), blockHash,_serverAbsExpTime);
+        Task keyDataPair = db.StringSetAsync(blockHash, serverData, _serverAbsExpTime);
         try
         {
             await Task.WhenAll(keyDataPair, hashKeyPair);
@@ -81,51 +82,46 @@ public class BlocksCacheSingleton
 
     public async Task<string?> GetCachedBlockHashAsync(int height, CancellationToken ct)
     {
-       var a = await _cache.GetAsync(height, ct);
+       var db = _cache.GetDatabase();
+       return await db.StringGetAsync(height.ToString());
     }
     
     public async Task<GetBlockResult?> GetCachedBlockAsync<GetBlockResult>(string hash, CancellationToken ct)
     {
-        var rawBlock = await _cache.GetAsync(hash, ct);
-        if(rawBlock is null) return default!;        
+        var db = _cache.GetDatabase();
+        RedisValue? rawBlock = await db.StringGetAsync(hash);
+        if(rawBlock is null) return default;
 
-        return JsonSerializer.Deserialize<GetBlockResult>(rawBlock);
+        return JsonSerializer.Deserialize<GetBlockResult>(rawBlock!);
     }
     
     public async Task<GetBlockResult?> GetCachedBlockByHeightAsync<GetBlockResult>(string height, CancellationToken ct)
     {
-        var blockHash = await _cache.GetAsync(height, ct);
+        var db = _cache.GetDatabase();
+        RedisValue? blockHash = await db.StringGetAsync(height);
         if(blockHash is null) return default;
 
-        var rawBlock = await _cache.GetAsync(blockHash, ct);
+        string? hash = blockHash.Value;
+        RedisValue? rawBlock = await db.StringGetAsync(hash);
         if(rawBlock is null) return default;
 
-        return JsonSerializer.Deserialize<GetBlockResult>(rawBlock);
+        return JsonSerializer.Deserialize<GetBlockResult>(rawBlock!);
     }
 
     public async Task UpdateCachedDataAsync(string height, string newHash, GetBlockResult newData, CancellationToken ct = default)
     {
-        var oldHash = await _cache.GetAsync(height, ct);
-
-        Task heightHashPair = _cache.RemoveAsync(height, ct);
-        Task hashDataPair = _cache.RemoveAsync(oldHash!, ct);
-
-        try
-        {
-            await Task.WhenAll(heightHashPair, hashDataPair);
-        }
-        catch
-        {
-            _logger.LogError("can't update cache");
-        }
+        var db = _cache.GetDatabase();
+        RedisValue? oldHash = await db.StringGetAsync(height);
+        string? oldHashStr = oldHash.Value;
+        Task heightHashPair = db.StringSetAsync(height, newHash, _serverAbsExpTime);
+        Task hashDataPairDeletion = db.StringSetAsync(oldHashStr, string.Empty, TimeSpan.FromSeconds(1));
 
         string serverData = JsonSerializer.Serialize(newData);
+        Task hashDataPair = db.StringSetAsync(newHash, serverData, _serverAbsExpTime);
 
-        Task heightHashNewPair = _cache.SetAsync(height, serverData, _serverOptions, ct);
-        Task hashDataNewPair = _cache.SetAsync(newHash, height, _serverOptions, ct);
         try
         {
-            await Task.WhenAll(heightHashNewPair, hashDataNewPair);
+            await Task.WhenAll(heightHashPair, hashDataPairDeletion, hashDataPair);
         }
         catch
         {
@@ -134,9 +130,10 @@ public class BlocksCacheSingleton
     }
 
     public async ValueTask<bool> ValidateCacheAsync(string height, string newHash)
-    {        
-        var cachedHash = await _cache.GetAsync(height);
+    {     
+        var db = _cache.GetDatabase();   
+        var cachedHash = await db.StringGetAsync(height);
 
-        return cachedHash != newHash;
+        return cachedHash == newHash;
     }
 }
