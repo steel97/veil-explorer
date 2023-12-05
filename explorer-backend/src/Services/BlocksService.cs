@@ -49,15 +49,7 @@ public class BlocksService : IBlocksService
         size = block.Size,
         strippedsize = block.Strippedsize,
         time = block.Time,
-        proof_type = block.Proof_type switch
-        {
-            "Proof-of-Work (X16RT)" => BlockType.POW_X16RT,
-            "Proof-of-work (ProgPow)" => BlockType.POW_ProgPow,
-            "Proof-of-work (RandomX)" => BlockType.POW_RandomX,
-            "Proof-of-work (Sha256D)" => BlockType.POW_Sha256D,
-            "Proof-of-Stake" => BlockType.POS,
-            _ => BlockType.UNKNOWN
-        },
+        proof_type = GetBlockType(block.Proof_type!),
         veil_data_hash_hex = block.Veil_data_hash,
         version = block.Version,
         weight = block.Weight,
@@ -69,15 +61,7 @@ public class BlocksService : IBlocksService
         Height = block.Height,
         Size = block.Size,
         Weight = block.Weight,
-        ProofType = block.Proof_type switch
-        {
-            "Proof-of-Work (X16RT)" => BlockType.POW_X16RT,
-            "Proof-of-work (ProgPow)" => BlockType.POW_ProgPow,
-            "Proof-of-work (RandomX)" => BlockType.POW_RandomX,
-            "Proof-of-work (Sha256D)" => BlockType.POW_Sha256D,
-            "Proof-of-Stake" => BlockType.POS,
-            _ => BlockType.UNKNOWN
-        },
+        ProofType = GetBlockType(block.Proof_type!),
         Time = block.Time,
         MedianTime = block.Mediantime,
         TxCount = block.NTx
@@ -221,4 +205,14 @@ public class BlocksService : IBlocksService
 
         return isTxFailed;
     }
+
+    public BlockType GetBlockType(string proofType) => proofType switch
+    {
+        "Proof-of-Work (X16RT)" => BlockType.POW_X16RT,
+        "Proof-of-work (ProgPow)" => BlockType.POW_ProgPow,
+        "Proof-of-work (RandomX)" => BlockType.POW_RandomX,
+        "Proof-of-work (Sha256D)" => BlockType.POW_Sha256D,
+        "Proof-of-Stake" => BlockType.POS,
+        _ => BlockType.UNKNOWN
+    };
 }

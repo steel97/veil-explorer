@@ -11,4 +11,5 @@ public interface IBlocksService
     public Task<bool> UpdateDbBlockAsync(int height, string validBlockHash, CancellationToken cancellationToken);
     public Task<bool> InsertTransactionsAsync(int blockId, List<string>? txIds, CancellationToken cancellationToken);
     public Task<bool> InsertTransactionsAsync(int height, List<GetRawTransactionResult> txs, CancellationToken cancellationToken);
+    public BlockType GetBlockType(string proofType);
 }

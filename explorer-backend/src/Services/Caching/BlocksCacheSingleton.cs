@@ -1,19 +1,16 @@
 using ExplorerBackend.Configs;
-using ExplorerBackend.Models.Data;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
 using StackExchange.Redis;
-using ExplorerBackend.Services.Data;
-using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Caching.StackExchangeRedis;
 using ExplorerBackend.Models.Node.Response;
-using Microsoft.AspNetCore.Mvc;
 
 namespace ExplorerBackend.Services.Caching;
 
 public class BlocksCacheSingleton
 {
     public GetBlockResult? LatestBlock {get; private set;}
+    private readonly string _host;
+    private readonly int _port;
     private readonly TimeSpan _serverAbsExpTime;
     private readonly TimeSpan _userAbsExpTime;
     private readonly ILogger _logger;
@@ -25,23 +22,27 @@ public class BlocksCacheSingleton
         _memoryCacheConfig = memoryCacheConfig;
         _cache = cache;
 
+        ArgumentNullException.ThrowIfNull(_memoryCacheConfig.CurrentValue.Port);
+        ArgumentNullException.ThrowIfNull(_memoryCacheConfig.CurrentValue.Host);
         ArgumentNullException.ThrowIfNull(_memoryCacheConfig.CurrentValue.ServerAbsExpCacheTimeDays);
         ArgumentNullException.ThrowIfNull(_memoryCacheConfig.CurrentValue.UserAbsExpCacheTimeSec);
 
+        _port = _memoryCacheConfig.CurrentValue.Port;
+        _host = _memoryCacheConfig.CurrentValue.Host;
         _serverAbsExpTime = TimeSpan.FromMinutes(_memoryCacheConfig.CurrentValue.ServerAbsExpCacheTimeDays);
         _userAbsExpTime = TimeSpan.FromMinutes(_memoryCacheConfig.CurrentValue.UserAbsExpCacheTimeSec);
     }
     // TODO: implement MemoryPack to deal with byte[], create redis key-value templ (height -> hash, height:s - simplified block)
     public async Task<bool> UserCacheDataAsync(int blockHeight, string blockHash, GetBlockResult blockData, CancellationToken ct = default)
     {
-        var redisServer = _cache.GetServer("");
+        var redisServer = _cache.GetServer(_host, _port);
         RedisResult redisResult =  await redisServer.ExecuteAsync("DBSIZE");
-        bool parseResult = double.TryParse(redisResult.ToString(), out double totalCachedObj);
+        bool parseResult = double.TryParse(redisResult.ToString(), out double dbSize);
 
-        if(totalCachedObj < 000 && parseResult)
+        if(dbSize <= 600 && parseResult)
         {
             var redis = _cache.GetDatabase();
-            // will be MemoryPack
+
             string userJsonData = JsonSerializer.Serialize(blockData);
             Task userKeyDatapair = redis.StringSetAsync(blockHeight.ToString(), blockHash, _userAbsExpTime);
             Task userHashKeyPair = redis.StringSetAsync(blockHash, userJsonData, _userAbsExpTime);
