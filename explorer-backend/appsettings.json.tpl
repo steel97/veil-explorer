@@ -38,6 +38,8 @@
     "BudgetAddress": "35uS99ZnfaYB293sJ8ptUEXkUTQXH8WnDe",
     "FoundationAddress": "38J8RGLetRUNEXycBMPg8oZqLt4bB9hCbt",
     "MemoryCache": {
+      "Port" : "6379",
+      "Host" : "localhost",
       "ExpirationScanFrequency": 10000,
       "ExpirationApiAbsoluteTime": 3600000,
       "ServerAbsExpCacheTimeDays" : 7,
