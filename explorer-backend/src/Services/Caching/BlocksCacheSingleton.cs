@@ -38,14 +38,13 @@ public class BlocksCacheSingleton
         var redisServer = _cache.GetServer(_host, _port);
         RedisResult redisResult =  await redisServer.ExecuteAsync("DBSIZE");
         bool parseResult = double.TryParse(redisResult.ToString(), out double dbSize);
-
+        // MB or bytes?
         if(dbSize <= 600 && parseResult)
         {
             var redis = _cache.GetDatabase();
 
-            string userJsonData = JsonSerializer.Serialize(blockData);
             Task userKeyDatapair = redis.StringSetAsync(blockHeight.ToString(), blockHash, _userAbsExpTime);
-            Task userHashKeyPair = redis.StringSetAsync(blockHash, userJsonData, _userAbsExpTime);
+            Task userHashKeyPair = redis.StringSetAsync(blockHash, JsonSerializer.Serialize(blockData), _userAbsExpTime);
             try
             {
                 await Task.WhenAll(userKeyDatapair, userHashKeyPair);
@@ -65,10 +64,8 @@ public class BlocksCacheSingleton
         LatestBlock = blockData;
         var db = _cache.GetDatabase();
 
-        string serverData = JsonSerializer.Serialize(blockData);
-
         Task hashKeyPair = db.StringSetAsync(blockHeight.ToString(), blockHash,_serverAbsExpTime);
-        Task keyDataPair = db.StringSetAsync(blockHash, serverData, _serverAbsExpTime);
+        Task keyDataPair = db.StringSetAsync(blockHash, JsonSerializer.Serialize(blockData), _serverAbsExpTime);
         try
         {
             await Task.WhenAll(keyDataPair, hashKeyPair);
@@ -117,8 +114,7 @@ public class BlocksCacheSingleton
         Task heightHashPair = db.StringSetAsync(height, newHash, _serverAbsExpTime);
         Task hashDataPairDeletion = db.StringSetAsync(oldHashStr, string.Empty, TimeSpan.FromSeconds(1));
 
-        string serverData = JsonSerializer.Serialize(newData);
-        Task hashDataPair = db.StringSetAsync(newHash, serverData, _serverAbsExpTime);
+        Task hashDataPair = db.StringSetAsync(newHash, JsonSerializer.Serialize(newData), _serverAbsExpTime);
 
         try
         {

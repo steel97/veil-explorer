@@ -72,12 +72,12 @@ public class SimplifiedBlocksCacheSingleton
         
         if(block.Height < _latestBlockHeight && block.Height > (_latestBlockHeight - _blocksBufferCapacity))
         {
-            _semaphoreSlim.Wait(5000);
+            _semaphoreSlim.Wait(1000);
 
             int positionToWrite = _latestBlockPosition - (_latestBlockHeight - block.Height) - 1;
 
             if(positionToWrite < _blocksBufferCapacity)
-                positionToWrite = _blocksBufferCapacity + positionToWrite;
+                positionToWrite += _blocksBufferCapacity;
             
             long offset = positionToWrite * _BytesInBlock;
 
@@ -157,9 +157,12 @@ public class SimplifiedBlocksCacheSingleton
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static SimplifiedBlock DeserializeBlock(byte[] buffer, long offset, int height)
+    private static SimplifiedBlock? DeserializeBlock(byte[] buffer, long offset, int height)
     {
         ref byte bufferRef = ref MemoryMarshal.GetArrayDataReference(buffer);
+
+        int size = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref bufferRef, (nuint)offset));
+        if(size == 0) return null!;
 
         SimplifiedBlock block = new()
         {
