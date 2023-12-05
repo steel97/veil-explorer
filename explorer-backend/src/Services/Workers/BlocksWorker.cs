@@ -16,7 +16,6 @@ namespace ExplorerBackend.Services.Workers;
 public class BlocksWorker : BackgroundService
 {
     private int _latestBlock;
-    private bool _firstRun;
     private readonly int _blocksPerBatch;
     private readonly int _blocksOrphanCheck;
     private readonly bool _RPCMode;
@@ -47,7 +46,6 @@ public class BlocksWorker : BackgroundService
         _blocksPerBatch = _explorerConfig.CurrentValue.BlocksPerBatch == 0 ? 10 : _explorerConfig.CurrentValue.BlocksPerBatch;
         _blocksOrphanCheck = _explorerConfig.CurrentValue.BlocksOrphanCheck == 0 ? 12 : _explorerConfig.CurrentValue.BlocksOrphanCheck;
         _RPCMode = _explorerConfig.CurrentValue.RPCMode;
-        _firstRun = true;
     }
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -58,7 +56,11 @@ public class BlocksWorker : BackgroundService
             {
                 var latestBlock = await _nodeRequester.GetLatestBlock(cancellationToken);
                
-                _latestBlock = latestBlock!.Height;
+               if (latestBlock != null)
+               {
+                    _latestBlock = latestBlock.Height;
+                    _chainInfoSingleton.CurrentSyncedBlock = latestBlock.Height;
+               }
             }
             catch (ArgumentNullException) { return; }
             catch (Exception)
@@ -245,15 +247,7 @@ public class BlocksWorker : BackgroundService
             Height = block.Height,
             Size = block.Size,
             Weight = block.Weight,
-            ProofType = block.Proof_type switch
-            {
-                "Proof-of-Work (X16RT)" => BlockType.POW_X16RT,
-                "Proof-of-work (ProgPow)" => BlockType.POW_ProgPow,
-                "Proof-of-work (RandomX)" => BlockType.POW_RandomX,
-                "Proof-of-work (Sha256D)" => BlockType.POW_Sha256D,
-                "Proof-of-Stake" => BlockType.POS,
-                _ => BlockType.UNKNOWN
-            },
+            ProofType = _blocksService.GetBlockType(block.Proof_type!),
             Time = block.Time,
             MedianTime = block.Mediantime,
             TxCount = txCount

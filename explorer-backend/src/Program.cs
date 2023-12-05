@@ -35,6 +35,7 @@ bool rpcMode = builder.Configuration.GetSection("Explorer:RPCMode").Get<bool>();
 
 // Add services to the container.
 if(rpcMode)
+    // Redis-cli config: save="", activedefrag=yes, maxmemory=600mb, loglevel=warning, crash-log-enabled=no, crash-memcheck-enabled=no, protected-mode=yes
     builder.Services.AddSingleton<IConnectionMultiplexer>(options =>    
         ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("Redis") ?? ""));
 else

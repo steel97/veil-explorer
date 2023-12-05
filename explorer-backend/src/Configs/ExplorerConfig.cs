@@ -25,6 +25,8 @@ public class ExplorerConfig
 
 public class MemoryCache
 {
+    public int Port { get; set; }
+    public string? Host { get; set; }
     public int ExpirationScanFrequency { get; set; }
     public int ExpirationApiAbsoluteTime { get; set; }
     public int ServerAbsExpCacheTimeDays { get; set; }
