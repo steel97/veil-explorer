@@ -54,22 +54,28 @@ public class SimplifiedBlocksCacheSingleton
 
         if(isLatestBlock)
         {
-            // potential bug
-            // what if new block height is not equals to {_latestBlockHeight} + 1
+            int differenceOfHeight = block.Height -_latestBlockHeight;
+            if(differenceOfHeight < 1) goto PrevBlock;
+
             _latestBlockHeight = block.Height;
-            
-            long offset = _latestBlockPosition * _BytesInBlock;
+            long offset;
+
+            if(differenceOfHeight > 1)
+                offset = (_latestBlockPosition + differenceOfHeight - 1) * _BytesInBlock;
+            else    
+                offset = _latestBlockPosition * _BytesInBlock;
 
             SerializeBlock(block, _blocksBuffer, offset);
 
-            _latestBlockPosition++;
+            _latestBlockPosition += differenceOfHeight;
 
             if(_latestBlockPosition > _blocksBufferCapacity - 1)            
-                _latestBlockPosition = 0;            
+                _latestBlockPosition -= _blocksBufferCapacity;            
 
            return;
         }
-        
+
+        PrevBlock:
         if(block.Height < _latestBlockHeight && block.Height > (_latestBlockHeight - _blocksBufferCapacity))
         {
             _semaphoreSlim.Wait(1000);
