@@ -58,7 +58,7 @@ public class RealtimeBlocksDataService : IBlocksDataService
 
     public async Task<List<SimplifiedBlock>> GetSimplifiedBlocksAsync(int offset, int count, SortDirection sort = SortDirection.DESC, CancellationToken ct = default)
     {
-        // ask in-memory cache
+        // get from cache
         // or
         // rpc (it's may crash node lol)💀💀
         List<SimplifiedBlock> blocksList = new(count);
@@ -89,7 +89,14 @@ public class RealtimeBlocksDataService : IBlocksDataService
                 return null!;
         }
 
-        await Task.WhenAll(rawBlocksList);
+        try
+        {
+            await Task.WhenAll(rawBlocksList);
+        }
+        catch
+        {
+            _logger.LogError("failed to get SimplifiedBlock list");
+        }
 
         foreach (var rawBlock in rawBlocksList)
         {
@@ -100,6 +107,14 @@ public class RealtimeBlocksDataService : IBlocksDataService
             blocksList.OrderByDescending(x => x.Height);
         else
             blocksList.OrderBy(x => x.Height);
+
+        if(_smpBlocksCache.IsInCacheRange(blocksList[0].Height))
+        {
+            foreach (var block in rawBlocksList)
+            {
+               _smpBlocksCache.SetBlockCache(block.Result);
+            }
+        }
 
         return blocksList;
     }

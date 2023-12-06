@@ -33,6 +33,7 @@ public class SimplifiedBlocksCacheSingleton
         _blocksBuffer = GC.AllocateUninitializedArray<byte>(_blocksBufferCapacity * _BytesInBlock, pinned: true);
     }
 
+    public bool IsInCacheRange(int value) => _latestBlockHeight -_blocksBufferCapacity <= value && value < _latestBlockHeight;
     // writing blocks
     public async Task SetBlockCache(GetBlockResult block, bool isLatestBlock = false)
     {
