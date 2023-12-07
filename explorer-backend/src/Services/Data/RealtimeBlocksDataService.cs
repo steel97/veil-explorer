@@ -38,6 +38,9 @@ public class RealtimeBlocksDataService : IBlocksDataService
         {
             var blockHash = await _nodeRequester.GetBlockHash((uint)height, cancellationToken);
             rawBlock = await _nodeRequester.GetBlock(blockHash!.Result!, cancellationToken, simplifiedTxInfo);
+            
+            if(rawBlock is not null)
+                await _cache.SetUserCacheDataAsync(height, rawBlock!.Hash!, rawBlock, cancellationToken);
         }
 
         if(rawBlock is null)

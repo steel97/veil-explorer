@@ -33,7 +33,7 @@ public class BlocksCacheSingleton
         _userAbsExpTime = TimeSpan.FromMinutes(_memoryCacheConfig.CurrentValue.UserAbsExpCacheTimeSec);
     }
     // TODO: implement MemoryPack to deal with byte[], create redis key-value templ (height -> hash, height:s - simplified block)
-    public async Task<bool> UserCacheDataAsync(int blockHeight, string blockHash, GetBlockResult blockData, CancellationToken ct = default)
+    public async Task<bool> SetUserCacheDataAsync(int blockHeight, string blockHash, GetBlockResult blockData, CancellationToken ct = default)
     {
         var redisServer = _cache.GetServer(_host, _port);
         RedisResult redisResult =  await redisServer.ExecuteAsync("DBSIZE");
