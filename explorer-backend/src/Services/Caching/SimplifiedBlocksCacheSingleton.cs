@@ -169,14 +169,14 @@ public class SimplifiedBlocksCacheSingleton
         ref byte bufferRef = ref MemoryMarshal.GetArrayDataReference(buffer);
 
         int size = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref bufferRef, (nuint)offset));
-        if(size == 0) return null!;
+        if(size <= 0) return default;
 
         SimplifiedBlock block = new()
         {
             Height = height,
+            Size = size
         };
 
-        block.Size = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref bufferRef, (nuint)offset));
         offset += sizeof(int);
         block.Weight = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref bufferRef, (nuint)offset));
         offset += sizeof(int);
