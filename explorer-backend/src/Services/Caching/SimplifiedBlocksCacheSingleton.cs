@@ -46,8 +46,6 @@ public class SimplifiedBlocksCacheSingleton
         if(block.Height <= _oldestBlocksBufferCapacity)
         {
             long offset = (block.Height * _BytesInBlock) - _BytesInBlock;
-            if (offset < 0)
-                offset = 0;
 
             SerializeBlock(block, _oldestBlocksBuffer, offset);
             return;
@@ -62,7 +60,12 @@ public class SimplifiedBlocksCacheSingleton
             long offset;
 
             if(differenceOfHeight > 1)
-                offset = (_latestBlockPosition + differenceOfHeight - 1) * _BytesInBlock;
+            {
+                if(_latestBlockPosition + differenceOfHeight - 1 > _blocksBufferCapacity - 1)
+                    offset = (_latestBlockPosition + differenceOfHeight - 1 - _blocksBufferCapacity) * _BytesInBlock;
+                else
+                    offset = (_latestBlockPosition + differenceOfHeight - 1) * _BytesInBlock;
+            }
             else    
                 offset = _latestBlockPosition * _BytesInBlock;
 
