@@ -51,6 +51,7 @@ builder.Services.AddSingleton<IUtilityService, UtilityService>();
 builder.Services.AddSingleton<IBlocksService, BlocksService>();
 
 builder.Services.AddHostedService<BlocksWorker>();
+builder.Services.AddHostedService<CacheInitialBlocks>();
 builder.Services.AddHostedService<BlockchainWorker>();
 builder.Services.AddHostedService<BlockchainStatsWorker>();
 builder.Services.AddHostedService<HubBackgroundWorker>();
