@@ -35,13 +35,15 @@ bool rpcMode = builder.Configuration.GetSection("Explorer:RPCMode").Get<bool>();
 
 // Add services to the container.
 if(rpcMode)
-    // Redis-cli config: save="", activedefrag=yes, maxmemory=524288000 (value should be in bytes),maxmemory-policy=volatile-lru, 
-    // loglevel=warning, crash-log-enabled=no, crash-memcheck-enabled=no, protected-mode=yes
+    // Redis-cli config: save "", activedefrag yes, maxmemory 524288000 (500MB in bytes, both valid),maxmemory-policy volatile-ttl, 
+    // loglevel warning, crash-log-enabled no, crash-memcheck-enabled no, protected-mode yes
+    // exmp: CONFIG SET SAVE ""
     builder.Services.AddSingleton<IConnectionMultiplexer>(options =>    
         ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("Redis") ?? ""));
 else
     builder.Services.AddNpgsqlDataSource(builder.Configuration.GetConnectionString("DefaultConnection") ?? "");
-    
+
+builder.Services.AddSingleton<RedisStats>();
 builder.Services.AddSingleton<ChaininfoSingleton>();
 builder.Services.AddSingleton<InternalSingleton>();
 builder.Services.AddSingleton<NodeApiCacheSingleton>();
@@ -51,7 +53,11 @@ builder.Services.AddSingleton<IUtilityService, UtilityService>();
 builder.Services.AddSingleton<IBlocksService, BlocksService>();
 
 builder.Services.AddHostedService<BlocksWorker>();
-builder.Services.AddHostedService<CacheInitialBlocks>();
+if(rpcMode)
+{
+    builder.Services.AddHostedService<RedisStatWorker>();
+    builder.Services.AddHostedService<CacheInitialBlocks>();
+}
 builder.Services.AddHostedService<BlockchainWorker>();
 builder.Services.AddHostedService<BlockchainStatsWorker>();
 builder.Services.AddHostedService<HubBackgroundWorker>();

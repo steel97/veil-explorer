@@ -11,35 +11,36 @@ public class BlocksCacheSingleton
     public GetBlockResult? LatestBlock {get; private set;}
     private readonly string _host;
     private readonly int _port;
+    private readonly int _redisMaxMemoryUsage;
     private readonly TimeSpan _serverAbsExpTime;
     private readonly TimeSpan _userAbsExpTime;
+    private readonly RedisStats _redisStats;
     private readonly ILogger _logger;
     private readonly IConnectionMultiplexer _cache;
     private readonly IOptionsMonitor<MemoryCache> _memoryCacheConfig;
-    public BlocksCacheSingleton(ILogger logger, IConnectionMultiplexer cache, IOptionsMonitor<MemoryCache> memoryCacheConfig)
+    public BlocksCacheSingleton(RedisStats redisStats, ILogger logger, IConnectionMultiplexer cache, IOptionsMonitor<MemoryCache> memoryCacheConfig)
     {
-        _logger = logger;
-        _memoryCacheConfig = memoryCacheConfig;
+        _redisStats = redisStats;
         _cache = cache;
+        _memoryCacheConfig = memoryCacheConfig;
+        _logger = logger;
 
         ArgumentNullException.ThrowIfNull(_memoryCacheConfig.CurrentValue.Port);
-        ArgumentNullException.ThrowIfNull(_memoryCacheConfig.CurrentValue.Host);
+        ArgumentNullException.ThrowIfNull(_memoryCacheConfig.CurrentValue.Host);        
+        ArgumentNullException.ThrowIfNull(_memoryCacheConfig.CurrentValue.RedisMaxMemoryUsage);
         ArgumentNullException.ThrowIfNull(_memoryCacheConfig.CurrentValue.ServerAbsExpCacheTimeDays);
         ArgumentNullException.ThrowIfNull(_memoryCacheConfig.CurrentValue.UserAbsExpCacheTimeSec);
 
         _port = _memoryCacheConfig.CurrentValue.Port;
         _host = _memoryCacheConfig.CurrentValue.Host;
+        _redisMaxMemoryUsage = _memoryCacheConfig.CurrentValue.RedisMaxMemoryUsage;
         _serverAbsExpTime = TimeSpan.FromMinutes(_memoryCacheConfig.CurrentValue.ServerAbsExpCacheTimeDays);
         _userAbsExpTime = TimeSpan.FromMinutes(_memoryCacheConfig.CurrentValue.UserAbsExpCacheTimeSec);
     }
-    // TODO: implement MemoryPack to deal with byte[], create redis key-value templ (height -> hash, height:s - simplified block)
+    // TODO: implement MemoryPack to reduce memory consumption
     public async Task<bool> SetUserCacheDataAsync(int blockHeight, string blockHash, GetBlockResult blockData, CancellationToken ct = default)
     {
-        var redisServer = _cache.GetServer(_host, _port);
-        RedisResult redisResult =  await redisServer.ExecuteAsync("DBSIZE");
-        bool parseResult = double.TryParse(redisResult.ToString(), out double dbSize);
-        // MB or bytes?
-        if(dbSize <= 600 && parseResult)
+        if(_redisStats.MemoryUsageBytes <= _redisMaxMemoryUsage)
         {
             var redis = _cache.GetDatabase();
 

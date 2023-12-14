@@ -40,6 +40,7 @@
     "MemoryCache": {
       "Port" : "6379",
       "Host" : "localhost",
+      "RedisMaxMemoryUsage": 524288000,
       "ExpirationScanFrequency": 10000,
       "ExpirationApiAbsoluteTime": 3600000,
       "ServerAbsExpCacheTimeDays" : 7,
