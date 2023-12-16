@@ -11,6 +11,7 @@ using ExplorerBackend.Configs;
 using ExplorerBackend.Services.Queues;
 using ExplorerBackend.Services.Core;
 using ExplorerBackend.Services.Caching;
+using System.Buffers;
 
 namespace ExplorerBackend.Controllers;
 
@@ -44,9 +45,9 @@ public class AddressController : ControllerBase
             IsValid = false
         };
 
-        if (_utilityService.VerifyAddress(body.Address) && body.Address != null)
+        if (body.Address != null && _utilityService.VerifyAddress(body.Address))
         {
-            var reqAddr = _utilityService.CleanupAddress(body.Address);
+            string reqAddr = _utilityService.CleanupAddress(body.Address);
 
             var validateRes = VeilAddress.ValidateAddress(body.Address);// decode internal
             var scanTxOutsetRes = _nodeApiCacheSingleton.GetApiCache<ScanTxOutset>($"scantxoutset-{reqAddr}");
@@ -99,29 +100,39 @@ public class AddressController : ControllerBase
                 {
                     if (validateRes.scriptPubKey != null && _utilityService.VerifyHex(validateRes.scriptPubKey))
                     {
-                        try
-                        {
-                            var ch = SHA256.HashData(_utilityService.HexToByteArray(validateRes.scriptPubKey));
-                            response.ScriptHash = new String(_utilityService.ToHex(ch).Reverse().ToArray());
-                        }
-                        catch
-                        {
+                        byte[] ch = ArrayPool<byte>.Shared.Rent(validateRes.scriptPubKey.Length / 2);
+                        
+                        ch = SHA256.HashData(_utilityService.HexToByteArray(validateRes.scriptPubKey));
 
-                        }
+                        response.ScriptHash = new string(_utilityService.ToHex(ch).Reverse().ToArray());                        
+
+                        ArrayPool<byte>.Shared.Return(ch);   
                     }
+
+                    byte[] b58Data = [];
+                    bool isDecoded = true;
+                   
+                    var b58enc = new Base58Encoder();
                     try
                     {
-                        var b58enc = new Base58Encoder();
-                        var b58Data = b58enc.DecodeData(reqAddr);
-                        //var b58Data = Base58Encoding.Decode(reqAddr);
-                        var version = b58Data[0];
-                        var hash = b58Data.Skip(1).ToArray();
-
-                        response.Version = version;
-                        response.Hash = _utilityService.ToHex(hash);
-                        response.Hash = response.Hash[0..^8];
+                        b58Data = b58enc.DecodeData(reqAddr);
                     }
                     catch
+                    {
+                        isDecoded = false;
+                    }
+                    //var b58Data = Base58Encoding.Decode(reqAddr);
+                    if(isDecoded)
+                    {
+                        byte[] hash = ArrayPool<byte>.Shared.Rent(b58Data.Length - 1);
+                        hash = b58Data.Skip(1).ToArray();
+
+                        response.Version = b58Data[0];
+                        response.Hash = _utilityService.ToHex(hash);
+                        response.Hash = response.Hash[0..^8];
+                        ArrayPool<byte>.Shared.Return(hash);
+                    }
+                    else
                     {
                         try
                         {
@@ -140,6 +151,7 @@ public class AddressController : ControllerBase
 
                         }
                     }
+                    
                 }
 
                 // copy amount if it exists
