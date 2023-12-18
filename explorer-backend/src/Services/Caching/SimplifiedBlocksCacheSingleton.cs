@@ -18,16 +18,19 @@ public class SimplifiedBlocksCacheSingleton
     private static int _latestBlockPosition = default;
     private const byte _BytesInBlock = 27; // SimplifiedBlock without height
     private static readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
-    private readonly ILogger _logger;
-    private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
+    private readonly ILogger<SimplifiedBlocksCacheSingleton> _logger;
+    private readonly IOptionsMonitor<MemoryCacheConfig> _memoryCacheConfig;
     
-    public SimplifiedBlocksCacheSingleton(IOptionsMonitor<ExplorerConfig> explorerConfig, ILogger logger)
+    public SimplifiedBlocksCacheSingleton(IOptionsMonitor<MemoryCacheConfig> memoryCacheConfig, ILogger<SimplifiedBlocksCacheSingleton> logger)
     {
-        _explorerConfig = explorerConfig;
+        _memoryCacheConfig = memoryCacheConfig;
         _logger = logger;
 
-        _oldestBlocksBufferCapacity = _explorerConfig.CurrentValue.OldestSimplifiedBlocksCacheCount;
-        _blocksBufferCapacity = _explorerConfig.CurrentValue.SimplifiedBlocksCacheCount;
+        ArgumentNullException.ThrowIfNull(_memoryCacheConfig.CurrentValue.OldestSimplifiedBlocksCacheCount);
+        ArgumentNullException.ThrowIfNull(_memoryCacheConfig.CurrentValue.SimplifiedBlocksCacheCount);
+
+        _oldestBlocksBufferCapacity = _memoryCacheConfig.CurrentValue.OldestSimplifiedBlocksCacheCount;
+        _blocksBufferCapacity = _memoryCacheConfig.CurrentValue.SimplifiedBlocksCacheCount;
 
         _oldestBlocksBuffer = GC.AllocateUninitializedArray<byte>(_oldestBlocksBufferCapacity * _BytesInBlock, pinned: true);
         _blocksBuffer = GC.AllocateUninitializedArray<byte>(_blocksBufferCapacity * _BytesInBlock, pinned: true);
@@ -39,7 +42,7 @@ public class SimplifiedBlocksCacheSingleton
     {
         if(block is null || block.Height < 1)
         {
-            _logger.LogInformation("can't set simplifiedBLock cache");
+            _logger.LogInformation("can't set {service} cache. probably cuz block data was null", nameof(SimplifiedBlocksCacheSingleton));
             return;
         }
 
@@ -62,7 +65,13 @@ public class SimplifiedBlocksCacheSingleton
             if(differenceOfHeight > 1)
             {
                 if(_latestBlockPosition + differenceOfHeight - 1 > _blocksBufferCapacity - 1)
+                {
+                    while(differenceOfHeight > _blocksBufferCapacity)
+                    {
+                        differenceOfHeight -= _blocksBufferCapacity;
+                    }
                     offset = (_latestBlockPosition + differenceOfHeight - 1 - _blocksBufferCapacity) * _BytesInBlock;
+                }
                 else
                     offset = (_latestBlockPosition + differenceOfHeight - 1) * _BytesInBlock;
             }
