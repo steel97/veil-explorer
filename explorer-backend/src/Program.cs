@@ -30,6 +30,7 @@ builder.Host.UseSerilog((context, services, configuration) => configuration
 builder.Services.Configure<APIConfig>(builder.Configuration.GetSection("API"));
 builder.Services.Configure<ExplorerConfig>(builder.Configuration.GetSection("Explorer"));
 builder.Services.Configure<ServerConfig>(builder.Configuration.GetSection("Server"));
+builder.Services.Configure<MemoryCacheConfig>(builder.Configuration.GetSection("MemoryCache"));
 
 bool rpcMode = builder.Configuration.GetSection("Explorer:RPCMode").Get<bool>();
 

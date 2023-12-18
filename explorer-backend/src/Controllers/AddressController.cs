@@ -104,7 +104,7 @@ public class AddressController : ControllerBase
                         
                         ch = SHA256.HashData(_utilityService.HexToByteArray(validateRes.scriptPubKey));
 
-                        response.ScriptHash = new string(_utilityService.ToHex(ch).Reverse().ToArray());                        
+                        response.ScriptHash = new string(_utilityService.ToHex(ch).Reverse().ToArray());
 
                         ArrayPool<byte>.Shared.Return(ch);   
                     }

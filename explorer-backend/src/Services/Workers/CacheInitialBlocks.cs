@@ -12,7 +12,7 @@ public class CacheInitialBlocks
     private readonly uint _blockToCache;
     private readonly int _blockPullDelay;
     private readonly ILogger _logger;
-    private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
+    private readonly IOptionsMonitor<MemoryCacheConfig> _explorerConfig;
     private readonly SimplifiedBlocksCacheSingleton _smpBlocksCacheSingleton;
     private readonly NodeRequester _nodeRequester;
 

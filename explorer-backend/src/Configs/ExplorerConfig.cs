@@ -13,26 +13,13 @@ public class ExplorerConfig
     public int StatsPointsCount { get; set; }
     public int BlocksPerBatch { get; set; }
     public int BlocksOrphanCheck { get; set; }
-    public int OldestSimplifiedBlocksCacheCount { get; set; }
-    public int SimplifiedBlocksCacheCount { get; set; }
     public string? BudgetAddress { get; set; }
     public string? FoundationAddress { get; set; }
-    public MemoryCache? MemoryCache { get; set; }
     public Node? Node { get; set; }
     public QueueConfig? ScanTxOutsetQueue { get; set; }
     public bool RPCMode { get; set; }
 }
 
-public class MemoryCache
-{
-    public int Port { get; set; }
-    public string? Host { get; set; }
-    public int RedisMaxMemoryUsage { get; set; }
-    public int ExpirationScanFrequency { get; set; }
-    public int ExpirationApiAbsoluteTime { get; set; }
-    public int ServerAbsExpCacheTimeDays { get; set; }
-    public int UserAbsExpCacheTimeSec { get; set; }
-}
 
 public class Node
 {

@@ -16,11 +16,10 @@ public class RealtimeBlocksDataService : IBlocksDataService
     private readonly SimplifiedBlocksCacheSingleton _smpBlocksCache;
     private readonly ChaininfoSingleton _chaininfoSingleton;
     private readonly IBlocksService _blocksService;
-    private readonly IOptionsMonitor<ExplorerConfig> _config;
     public RealtimeBlocksDataService(ILogger logger, BlocksCacheSingleton cache, SimplifiedBlocksCacheSingleton smpBlocksCache, NodeRequester nodeRequester,
         ChaininfoSingleton chaininfoSingleton, IBlocksService blocksService, IOptionsMonitor<ExplorerConfig> config) =>
-        (_logger, _cache, _smpBlocksCache, _nodeRequester, _chaininfoSingleton, _blocksService, _config) = 
-        (logger, cache, smpBlocksCache, nodeRequester, chaininfoSingleton, blocksService, config);
+        (_logger, _cache, _smpBlocksCache, _nodeRequester, _chaininfoSingleton, _blocksService) = 
+        (logger, cache, smpBlocksCache, nodeRequester, chaininfoSingleton, blocksService);
     
     public async Task<Block?> GetBlockAsync(string hash, int simplifiedTxInfo = 2, CancellationToken cancellationToken = default)
     {

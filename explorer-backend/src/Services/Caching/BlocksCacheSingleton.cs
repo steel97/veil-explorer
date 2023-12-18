@@ -17,8 +17,8 @@ public class BlocksCacheSingleton
     private readonly RedisStats _redisStats;
     private readonly ILogger _logger;
     private readonly IConnectionMultiplexer _cache;
-    private readonly IOptionsMonitor<MemoryCache> _memoryCacheConfig;
-    public BlocksCacheSingleton(RedisStats redisStats, ILogger logger, IConnectionMultiplexer cache, IOptionsMonitor<MemoryCache> memoryCacheConfig)
+    private readonly IOptionsMonitor<MemoryCacheConfig> _memoryCacheConfig;
+    public BlocksCacheSingleton(RedisStats redisStats, ILogger logger, IConnectionMultiplexer cache, IOptionsMonitor<MemoryCacheConfig> memoryCacheConfig)
     {
         _redisStats = redisStats;
         _cache = cache;
