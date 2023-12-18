@@ -62,30 +62,11 @@ It's recommended to use appsettings.json.tpl as configuration template, configur
     "StatsPointsCount": 50,
     # blocks pulled per batch
     "BlocksPerBatch": 10,
-    # amount of simplified oldest blocks that will be cached
-    "OldestSimplifiedBlocksCacheCount": 20010,
-    # amount of simplified newest blocks that will be cached
-    "SimplifiedBlocksCacheCount": 200010,
     # address of veil budget
     "BudgetAddress": "35uS99ZnfaYB293sJ8ptUEXkUTQXH8WnDe",
     # address of veil foundation
     "FoundationAddress": "38J8RGLetRUNEXycBMPg8oZqLt4bB9hCbt",
-    "MemoryCache": {
-      # redis standard port
-      "Port" : "6379",
-      # redis standard host
-      "Host" : "localhost",
-      # limit of redis memory usage in bytes
-      "RedisMaxMemoryUsage": 524288000,
-      # delay between expiration scan process
-      "ExpirationScanFrequency": 10000,
-      # cache expiration absolute time
-      "ExpirationApiAbsoluteTime": 3600000,
-      # time after block data will expires in days
-      "ServerAbsExpCacheTimeDays" : 7,
-      # expiration time of user blocks data cache (if it isn't cached by the server)
-      "UserAbsExpCacheTimeSec": 30
-    },
+    
     "Node": {
       # veil node api address
       "Url": "http://127.0.0.1:5050/",
@@ -99,6 +80,26 @@ It's recommended to use appsettings.json.tpl as configuration template, configur
       # see https://docs.microsoft.com/en-us/dotnet/api/system.threading.channels.boundedchannelfullmode?view=net-6.0
       "Mode": 2
     }
+  },
+  "MemoryCache": {
+    # redis standard port
+    "Port" : "6379",
+    # redis standard host
+    "Host" : "localhost",    
+    # amount of simplified oldest blocks that will be cached
+    "OldestSimplifiedBlocksCacheCount": 20010,
+    # amount of simplified newest blocks that will be cached
+    "SimplifiedBlocksCacheCount": 200010,
+    # limit of redis memory usage in bytes
+    "RedisMaxMemoryUsage": 524288000,
+    # delay between expiration scan process
+    "ExpirationScanFrequency": 10000,
+    # cache expiration absolute time
+    "ExpirationApiAbsoluteTime": 3600000,
+    # time after block data will expires in days
+    "ServerAbsExpCacheTimeDays" : 7,
+    # expiration time of user blocks data cache (if it isn't cached by the server)
+    "UserAbsExpCacheTimeSec": 30
   },
   # configuration below is kestrel server configuration
   # see https://docs.microsoft.com/en-us/aspnet/core/fundamentals/servers/kestrel/endpoints?view=aspnetcore-6.0
