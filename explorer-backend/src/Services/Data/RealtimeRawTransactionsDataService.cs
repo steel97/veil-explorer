@@ -29,7 +29,7 @@ public class RealtimeRawTransactionsDataService(NodeRequester nodeRequester, IUt
         {
             if(list[i] is null || list[i].Result is null || list[i].Result!.Result is null)
             {
-                result.Add(txids[i], null);
+                result.Add(txids[i], null!);
                 continue;
             }
             result.TryAdd(txids[i], _utilityService.HexToByteArray(list[i].Result!.Result!.hex!));
