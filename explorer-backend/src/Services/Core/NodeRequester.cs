@@ -118,7 +118,7 @@ public class NodeRequester
         return await getBlockHashResponse.Content.ReadFromJsonAsync<GetBlockHash>(_serializerOptions, cancellationToken);
     }
 
-    public async Task<GetBlockResult?> GetBlock(string hash, CancellationToken cancellationToken, int simplifiedTxInfo = 1)
+    public async Task<GetBlock?> GetBlock(string hash, CancellationToken cancellationToken, int simplifiedTxInfo = 1)
     {
         using var httpClient = _httpClientFactory.CreateClient();
 
@@ -131,10 +131,10 @@ public class NodeRequester
             Params = new List<object>(new object[] { hash })
         };
         var getBlockResponse = await httpClient.PostAsJsonAsync("", getBlockRequest, _serializerOptions, cancellationToken);
-        return await getBlockResponse.Content.ReadFromJsonAsync<GetBlockResult>(_serializerOptions, cancellationToken);
+        return await getBlockResponse.Content.ReadFromJsonAsync<GetBlock>(_serializerOptions, cancellationToken);
     }
 
-    public async Task<GetBlockResult?> GetBlock(uint height, CancellationToken cancellationToken, int simplifiedTxInfo = 1)
+    public async Task<GetBlock?> GetBlock(uint height, CancellationToken cancellationToken, int simplifiedTxInfo = 1)
     {
         GetBlockHash? hash = await GetBlockHash(height, cancellationToken);
         return await GetBlock(hash!.Result!, cancellationToken, simplifiedTxInfo);
@@ -188,7 +188,7 @@ public class NodeRequester
         return await getRawTxResponse.Content.ReadFromJsonAsync<GetRawTransaction>(_serializerOptions, cancellationToken);
     }
 
-    public async Task<GetBlockResult?> GetLatestBlock(CancellationToken cancellationToken, bool isOrphanFix = false)
+    public async Task<GetBlock?> GetLatestBlock(CancellationToken cancellationToken, bool isOrphanFix = false)
     {
         byte failedRequests = 0;
         
@@ -224,7 +224,7 @@ public class NodeRequester
 
         // get block info by hash
         repeatBlockRequest:
-        GetBlockResult? block = await GetBlock(blockHash.Result, cancellationToken, simplifiedTxInfo: 2);
+        GetBlock? block = await GetBlock(blockHash.Result, cancellationToken, simplifiedTxInfo: 2);
 
         if (block is null)
         {
@@ -250,7 +250,7 @@ public class NodeRequester
             Method = "getchaintxstats",
             Params = new List<object>(new object[] { ctxInterval })
         };
-        var getChainTxStatsResponse = await httpClient.PostAsJsonAsync<JsonRPCRequest>("", getChainTxStatsRequest, _serializerOptions, cancellationToken);
+        var getChainTxStatsResponse = await httpClient.PostAsJsonAsync("", getChainTxStatsRequest, _serializerOptions, cancellationToken);
         var chainTxStats = await getChainTxStatsResponse.Content.ReadFromJsonAsync<GetChainTxStats>(_serializerOptions, cancellationToken);
 
         if (chainTxStats == null || chainTxStats.Result == null) throw new Exception();
@@ -268,9 +268,9 @@ public class NodeRequester
 
         var txStatsEntry = new TxStatsEntry
         {
-            TxCounts = new List<TxStatsDataPoint>(),
-            TxRates = new List<TxStatsDataPoint>(),
-            Labels = new List<string>()
+            TxCounts = [],
+            TxRates = [],
+            Labels = []
         };
 
         var chainTxStatsIntervals = new List<int>();

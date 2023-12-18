@@ -9,30 +9,24 @@ namespace ExplorerBackend.Services.Caching;
 public class BlocksCacheSingleton
 {
     public GetBlockResult? LatestBlock {get; private set;}
-    private readonly string _host;
-    private readonly int _port;
-    private readonly int _redisMaxMemoryUsage;
+    private readonly long _redisMaxMemoryUsage;
     private readonly TimeSpan _serverAbsExpTime;
     private readonly TimeSpan _userAbsExpTime;
     private readonly RedisStats _redisStats;
-    private readonly ILogger _logger;
+    private readonly ILogger<BlocksCacheSingleton> _logger;
     private readonly IConnectionMultiplexer _cache;
     private readonly IOptionsMonitor<MemoryCacheConfig> _memoryCacheConfig;
-    public BlocksCacheSingleton(RedisStats redisStats, ILogger logger, IConnectionMultiplexer cache, IOptionsMonitor<MemoryCacheConfig> memoryCacheConfig)
+    public BlocksCacheSingleton(RedisStats redisStats, ILogger<BlocksCacheSingleton> logger, IConnectionMultiplexer cache, IOptionsMonitor<MemoryCacheConfig> memoryCacheConfig)
     {
         _redisStats = redisStats;
         _cache = cache;
         _memoryCacheConfig = memoryCacheConfig;
         _logger = logger;
-
-        ArgumentNullException.ThrowIfNull(_memoryCacheConfig.CurrentValue.Port);
-        ArgumentNullException.ThrowIfNull(_memoryCacheConfig.CurrentValue.Host);        
+        
         ArgumentNullException.ThrowIfNull(_memoryCacheConfig.CurrentValue.RedisMaxMemoryUsage);
         ArgumentNullException.ThrowIfNull(_memoryCacheConfig.CurrentValue.ServerAbsExpCacheTimeDays);
         ArgumentNullException.ThrowIfNull(_memoryCacheConfig.CurrentValue.UserAbsExpCacheTimeSec);
 
-        _port = _memoryCacheConfig.CurrentValue.Port;
-        _host = _memoryCacheConfig.CurrentValue.Host;
         _redisMaxMemoryUsage = _memoryCacheConfig.CurrentValue.RedisMaxMemoryUsage;
         _serverAbsExpTime = TimeSpan.FromMinutes(_memoryCacheConfig.CurrentValue.ServerAbsExpCacheTimeDays);
         _userAbsExpTime = TimeSpan.FromMinutes(_memoryCacheConfig.CurrentValue.UserAbsExpCacheTimeSec);

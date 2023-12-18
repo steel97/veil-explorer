@@ -15,7 +15,6 @@ namespace ExplorerBackend.Services.Workers;
 
 public class BlocksWorker : BackgroundService
 {
-    private int _latestBlock;
     private readonly int _blocksPerBatch;
     private readonly int _blocksOrphanCheck;
     private readonly bool _RPCMode;
@@ -56,17 +55,14 @@ public class BlocksWorker : BackgroundService
             {
                 var latestBlock = await _nodeRequester.GetLatestBlock(cancellationToken);
                
-               if (latestBlock != null)
+               if (latestBlock != null || latestBlock!.Result != null)
                {
-                    _latestBlock = latestBlock.Height;
-                    _chainInfoSingleton.CurrentSyncedBlock = latestBlock.Height;
+                    _chainInfoSingleton.CurrentSyncedBlock = latestBlock.Result!.Height;
                }
             }
-            catch (ArgumentNullException) { return; }
             catch (Exception)
             {
                 _logger.LogError("Can't get blocks");
-                return;
             }
         }
         else
@@ -126,7 +122,7 @@ public class BlocksWorker : BackgroundService
 
                 var block = await _nodeRequester.GetBlock(blockHash.Result, cancellationToken, simplifiedTxInfo: 2); // 1 -> block, 2 -> block + tx
 
-                if (block == null)
+                if (block == null || block.Result == null)
                 {
                     _logger.LogInformation("Can't pull block");
                     break;
@@ -138,7 +134,7 @@ public class BlocksWorker : BackgroundService
                 // transform block rpc to block data
                 if (targetBlock == null)
                 {
-                    targetBlock = _blocksService.RPCBlockToDb(block);
+                    targetBlock = _blocksService.RPCBlockToDb(block.Result);
                     // save block
                     if (!await blocksRepository.InsertBlockAsync(targetBlock, cancellationToken))
                     {
@@ -148,7 +144,7 @@ public class BlocksWorker : BackgroundService
                 }
 
                 // save block's transactions
-                var txFailed = await _blocksService.InsertTransactionsAsync(i, block.Txs!, cancellationToken);
+                var txFailed = await _blocksService.InsertTransactionsAsync(i, block.Result.Txs!, cancellationToken);
                 if (txFailed) break;
   
                 if (!await blocksRepository.SetBlockSyncStateAsync(i, true, cancellationToken))
@@ -159,7 +155,7 @@ public class BlocksWorker : BackgroundService
 
                 try
                 {
-                    await OnNewBlockHubUpdate(block, block.NTx, cancellationToken);
+                    await OnNewBlockHubUpdate(block, block.Result.NTx, cancellationToken);
                 }
                 catch { }
                 // check orphans
@@ -192,19 +188,17 @@ public class BlocksWorker : BackgroundService
     {
         try
         {   
-            var block = await _nodeRequester.GetBlockHash((uint)_latestBlock, cancellationToken);
+            var block = await _nodeRequester.GetBlockHash((uint)_chainInfoSingleton.CurrentSyncedBlock, cancellationToken);
             if (block is null || block.Result is null)
                 return;
             
             var newBlock = await _nodeRequester.GetBlock(block.Result, cancellationToken);
-            if(newBlock is null)
+            if(newBlock is null || newBlock.Result is null)
                 return;
-
-            _latestBlock = newBlock.Height;
             
-            var setBlockCache = _blocksCacheSingleton.SetServerCacheDataAsync(newBlock.Height, newBlock.Hash!, newBlock, cancellationToken);
-            var setSimplifiedBlockCacke = _simplifiedBlocksCacheSingleton.SetBlockCache(newBlock, true);
-            var updateHub = OnNewBlockHubUpdate(newBlock, newBlock.NTx, cancellationToken);
+            var setBlockCache = _blocksCacheSingleton.SetServerCacheDataAsync(newBlock.Result.Height, newBlock.Result.Hash!, newBlock.Result, cancellationToken);
+            var setSimplifiedBlockCacke = _simplifiedBlocksCacheSingleton.SetBlockCache(newBlock.Result, true);
+            var updateHub = OnNewBlockHubUpdate(newBlock, newBlock.Result.NTx, cancellationToken);
 
             try
             {
@@ -212,7 +206,7 @@ public class BlocksWorker : BackgroundService
             }
             catch { }
             // checking prev blocks
-            for (int i = _latestBlock - _blocksOrphanCheck; i < _latestBlock; i++)
+            for (int i = _chainInfoSingleton.CurrentSyncedBlock - _blocksOrphanCheck; i < _chainInfoSingleton.CurrentSyncedBlock; i++)
             {
                 var prevBlocksHash = await _nodeRequester.GetBlockHash((uint)i, cancellationToken);
 
@@ -225,8 +219,11 @@ public class BlocksWorker : BackgroundService
                 {
                     var prevBlock = await _nodeRequester.GetBlock(prevBlocksHash.Result, cancellationToken, 2);
 
-                    var updateCache = _blocksCacheSingleton.UpdateCachedDataAsync(i.ToString(), prevBlocksHash.Result, prevBlock!, cancellationToken);
-                    var updateSimplifiedCache = _simplifiedBlocksCacheSingleton.SetBlockCache(prevBlock!);
+                    if(prevBlock is null)
+                        continue;
+
+                    var updateCache = _blocksCacheSingleton.UpdateCachedDataAsync(i.ToString(), prevBlocksHash.Result, prevBlock.Result!, cancellationToken);
+                    var updateSimplifiedCache = _simplifiedBlocksCacheSingleton.SetBlockCache(prevBlock.Result!);
 
                     await Task.WhenAll(updateCache, updateSimplifiedCache);
                 }
@@ -239,17 +236,17 @@ public class BlocksWorker : BackgroundService
         }
     }
 
-    private async Task OnNewBlockHubUpdate(GetBlockResult block, int txCount, CancellationToken cancellationToken)
+    private async Task OnNewBlockHubUpdate(GetBlock block, int txCount, CancellationToken cancellationToken)
     {
-        _chainInfoSingleton.CurrentSyncedBlock = block.Height;
+        _chainInfoSingleton.CurrentSyncedBlock = block.Result!.Height;
         await _hubContext.Clients.Group(EventsHub.BlocksDataChannel).SendAsync("blocksUpdated", new SimplifiedBlock
         {
-            Height = block.Height,
-            Size = block.Size,
-            Weight = block.Weight,
-            ProofType = _blocksService.GetBlockType(block.Proof_type!),
-            Time = block.Time,
-            MedianTime = block.Mediantime,
+            Height = block.Result.Height,
+            Size = block.Result.Size,
+            Weight = block.Result.Weight,
+            ProofType = _blocksService.GetBlockType(block.Result.Proof_type!),
+            Time = block.Result.Time,
+            MedianTime = block.Result.Mediantime,
             TxCount = txCount
         }, cancellationToken);
 
