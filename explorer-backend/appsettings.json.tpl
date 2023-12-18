@@ -33,19 +33,8 @@
     "StatsPointsCount": 50,
     "BlocksPerBatch": 10,
     "BlocksOrphanCheck": 12,
-    "OldestSimplifiedBlocksCacheCount": 20010,
-    "SimplifiedBlocksCacheCount": 200010,
     "BudgetAddress": "35uS99ZnfaYB293sJ8ptUEXkUTQXH8WnDe",
     "FoundationAddress": "38J8RGLetRUNEXycBMPg8oZqLt4bB9hCbt",
-    "MemoryCache": {
-      "Port" : "6379",
-      "Host" : "localhost",
-      "RedisMaxMemoryUsage": 524288000,
-      "ExpirationScanFrequency": 10000,
-      "ExpirationApiAbsoluteTime": 3600000,
-      "ServerAbsExpCacheTimeDays" : 7,
-      "UserAbsExpCacheTimeSec": 30
-    },
     "Node": {
       "Url": "http://127.0.0.1:5050/",
       "Username": "[noderpc_username]",
@@ -55,6 +44,18 @@
       "Capacity": 50,
       "Mode": 2
     }
+  },
+  "MemoryCache":
+  {
+    "Port" : "6379",
+    "Host" : "localhost",
+    "ExpirationScanFrequency": 10000,
+    "ExpirationApiAbsoluteTime": 3600000,
+    "OldestSimplifiedBlocksCacheCount": 20010,
+    "SimplifiedBlocksCacheCount": 200010,
+    "RedisMaxMemoryUsage": 524288000,
+    "ServerAbsExpCacheTimeDays" : 7,
+    "UserAbsExpCacheTimeSec": 30
   },
   "AllowedHosts": "*",
   "Kestrel": {
