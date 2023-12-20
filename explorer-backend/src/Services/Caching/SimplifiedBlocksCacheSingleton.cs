@@ -80,7 +80,7 @@ public class SimplifiedBlocksCacheSingleton
                     {
                         differenceOfHeight -= _blocksBufferCapacity;
                     }
-                    offset = (_latestBlockPosition + differenceOfHeight - 1 - _blocksBufferCapacity) * _BytesInBlock;
+                    offset = (_latestBlockPosition + differenceOfHeight - 1) * _BytesInBlock;
                 }
                 else
                     offset = (_latestBlockPosition + differenceOfHeight - 1) * _BytesInBlock;
