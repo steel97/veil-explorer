@@ -36,9 +36,19 @@ public class SimplifiedBlocksCacheSingleton
         _blocksBuffer = GC.AllocateUninitializedArray<byte>(_blocksBufferCapacity * _BytesInBlock, pinned: true);
     }
 
-    public bool IsInCacheRange(int value) => _latestBlockHeight -_blocksBufferCapacity <= value && value < _latestBlockHeight;
+    public bool IsInCacheRange(int value)
+    {
+        if(value >= 1 && value <= _oldestBlocksBufferCapacity)
+            return true;
+
+        if(value <= _latestBlockHeight && value >= _latestBlockHeight - _blocksBufferCapacity)
+            return true;
+
+        return false;
+    }
+
     // writing blocks
-    public async Task SetBlockCache(GetBlockResult block, bool isLatestBlock = false)
+    public void SetBlockCache(GetBlockResult block, bool isLatestBlock = false)
     {
         if(block is null || block.Height < 1)
         {
@@ -56,7 +66,7 @@ public class SimplifiedBlocksCacheSingleton
 
         if(isLatestBlock)
         {
-            int differenceOfHeight = block.Height -_latestBlockHeight;
+            int differenceOfHeight = block.Height - _latestBlockHeight;
             if(differenceOfHeight < 1) goto PrevBlock;
 
             _latestBlockHeight = block.Height;
@@ -82,8 +92,8 @@ public class SimplifiedBlocksCacheSingleton
 
             _latestBlockPosition += differenceOfHeight;
 
-            if(_latestBlockPosition > _blocksBufferCapacity - 1)            
-                _latestBlockPosition -= _blocksBufferCapacity;            
+            while(_latestBlockPosition > _blocksBufferCapacity - 1)
+                _latestBlockPosition -= _blocksBufferCapacity;
 
            return;
         }
@@ -91,7 +101,7 @@ public class SimplifiedBlocksCacheSingleton
         PrevBlock:
         if(block.Height < _latestBlockHeight && block.Height > (_latestBlockHeight - _blocksBufferCapacity))
         {
-            _semaphoreSlim.Wait(1000);
+            _semaphoreSlim.Wait(10);
 
             int positionToWrite = _latestBlockPosition - (_latestBlockHeight - block.Height) - 1;
 
@@ -175,6 +185,39 @@ public class SimplifiedBlocksCacheSingleton
         return null;
     }
 
+    public void GetSimplifiedBlocksRange(int height, int count, List<SimplifiedBlock> blocksList, out List<byte> notCachedBlockOffset)
+    {
+        notCachedBlockOffset = [];
+        byte offsetDiff = 0;
+
+        if (_latestBlockPosition + count < _blocksBufferCapacity && height <= _latestBlockHeight && height >= _latestBlockHeight - 15 && count <= 15)
+        {
+            int arrayLenght = count * _BytesInBlock;
+            int blockPosition = _latestBlockPosition - (_latestBlockHeight - height);
+
+            Span<byte> bytes = stackalloc byte[arrayLenght];
+            _blocksBuffer.AsSpan(blockPosition, arrayLenght).CopyTo(bytes);
+
+            for (int offset = 0; offset < arrayLenght; offset += _BytesInBlock, offsetDiff++)
+            {
+                SimplifiedBlock? block = DeserializeBlock(height, bytes, offset);
+
+                if(block is null) notCachedBlockOffset.Add(offsetDiff);                
+                else blocksList.Add(block);
+            }
+            return;
+        }
+
+        for (int i = height; offsetDiff < (byte)count; i--, offsetDiff++)
+        {
+            SimplifiedBlock? block = GetSimplifiedBlock(i);
+
+            if(block is null) notCachedBlockOffset.Add(offsetDiff);            
+            else blocksList.Add(block); 
+        }
+
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static SimplifiedBlock? DeserializeBlock(byte[] buffer, long offset, int height)
     {
@@ -199,6 +242,41 @@ public class SimplifiedBlocksCacheSingleton
         block.MedianTime = Unsafe.ReadUnaligned<long>(ref Unsafe.Add(ref bufferRef, (nuint)offset));
         offset += sizeof(long);
         block.TxCount = Unsafe.ReadUnaligned<ushort>(ref Unsafe.Add(ref bufferRef, (nuint)offset));
+
+        return block;
+    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static SimplifiedBlock? DeserializeBlock(int height, ReadOnlySpan<byte> buffer, int offsetSpan)
+    {
+        int size = MemoryMarshal.Read<int>(buffer);
+        ReadOnlySpan<byte> spanBufferSliced = buffer.Slice(offsetSpan, sizeof(int));
+
+        if(size <= 0) return default;
+
+        SimplifiedBlock block = new()
+        {
+            Height = height,
+            Size = size
+        };
+        offsetSpan += sizeof(int);
+        spanBufferSliced = buffer.Slice(offsetSpan, sizeof(int));
+        block.Weight = MemoryMarshal.Read<int>(spanBufferSliced);
+
+        offsetSpan += sizeof(int);
+        spanBufferSliced = buffer.Slice(offsetSpan, sizeof(byte));
+        block.ProofType = MemoryMarshal.Read<BlockType>(spanBufferSliced);
+
+        offsetSpan += sizeof(byte);
+        spanBufferSliced = buffer.Slice(offsetSpan, sizeof(long));
+        block.Time = MemoryMarshal.Read<long>(spanBufferSliced);
+
+        offsetSpan += sizeof(long);
+        spanBufferSliced = buffer.Slice(offsetSpan, sizeof(long));
+        block.MedianTime = MemoryMarshal.Read<long>(spanBufferSliced);
+
+        offsetSpan += sizeof(long);
+        spanBufferSliced = buffer.Slice(offsetSpan, sizeof(ushort));
+        block.TxCount = MemoryMarshal.Read<ushort>(spanBufferSliced);
 
         return block;
     }

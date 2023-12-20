@@ -56,7 +56,7 @@ public class RealtimeBlocksDataService : IBlocksDataService
         if(_cache.LatestBlock is null)
         {
             var rawBlock = await _nodeRequester.GetLatestBlock(cancellationToken);
-            return _blocksService.RPCBlockToDb(rawBlock!.Result!);   
+            return _blocksService.RPCBlockToDb(rawBlock!.Result!);
         }
         return _blocksService.RPCBlockToDb(_cache.LatestBlock!);
     }
@@ -64,62 +64,28 @@ public class RealtimeBlocksDataService : IBlocksDataService
     public async Task<List<SimplifiedBlock>> GetSimplifiedBlocksAsync(int offset, int count, SortDirection sort = SortDirection.DESC, CancellationToken ct = default)
     {
         // get from cache or rpc (it's may crash node lol)💀💀
+        int height = sort == SortDirection.DESC ? _chaininfoSingleton.CurrentSyncedBlock - offset : 1 + offset + (count - 1);
+
+        bool IsInCacheRange = _smpBlocksCache.IsInCacheRange(height);
+
         List<SimplifiedBlock> blocksList = new(count);
-        List<Task<GetBlock>> rawBlocksList = new(count);
-        
-        int height;
 
-        if (sort == SortDirection.DESC)
-            height = _chaininfoSingleton.CurrentSyncedBlock - offset;
+        if(IsInCacheRange)
+        {
+            _smpBlocksCache.GetSimplifiedBlocksRange(height, count, blocksList, out List<byte> notCachedBlockOffset);
+
+            if(notCachedBlockOffset.Count > 0)            
+                await GetBlocksViaRPC(height, count, blocksList, ct, notCachedBlockOffset);            
+        }
         else
-            height = 1 + offset;
-        
-        for (int i = height ; count > 0; count--)
         {
-            SimplifiedBlock? block = _smpBlocksCache.GetSimplifiedBlock(height);
-
-            if(block is null)
-            {
-                rawBlocksList.Add(_nodeRequester.GetBlock((uint)height, ct, simplifiedTxInfo: 1)!); 
-                await Task.Delay(160, ct);
-            }
-            else
-                blocksList.Add(block);
-
-            _ = sort == SortDirection.DESC ? i-- : i++;
-
-            if(ct.IsCancellationRequested)
-                return null!;
-        }
-
-        try
-        {
-            await Task.WhenAll(rawBlocksList);
-        }
-        catch
-        {
-            _logger.LogError("failed to get SimplifiedBlock list");
-        }
-
-        foreach (var rawBlock in rawBlocksList)
-        {
-            blocksList.Add(_blocksService.RPCBlockToSimplified(rawBlock.Result.Result!));
+            await GetBlocksViaRPC(height, count, blocksList, ct);
         }
 
         if(sort == SortDirection.DESC)
             blocksList.OrderByDescending(x => x.Height);
         else
             blocksList.OrderBy(x => x.Height);
-
-        if(_smpBlocksCache.IsInCacheRange(blocksList[0].Height))
-        {
-            foreach (var block in rawBlocksList)
-            {
-                if(block is null || block.Result.Result is null)
-                    continue;
-               _smpBlocksCache.SetBlockCache(block.Result.Result);
-            }
-        }
 
         return blocksList;
     }
@@ -144,5 +110,44 @@ public class RealtimeBlocksDataService : IBlocksDataService
         hash ??= await _nodeRequester.GetBlockHash((uint)height, cancellationToken);
         
         return hash!.Result;
+    }
+
+    private async Task GetBlocksViaRPC(int height, int count, List<SimplifiedBlock> blocksList, CancellationToken ct, List<byte>? list = null)
+    {
+        List<Task<GetBlock>> rawBlocksList = new(count);
+
+        try
+        {
+            if(list is not null && list.Count > 0)
+            {
+                for(int i = 0; i < list.Count; i++)
+                {
+                    rawBlocksList.Add(_nodeRequester.GetBlock((uint)height - list[i], ct)!);
+                }
+                if(ct.IsCancellationRequested)
+                    return;
+            }
+            else
+            {
+                for (int i = height ; count > 0; count--, i--)
+                {
+                    rawBlocksList.Add(_nodeRequester.GetBlock((uint)i, ct, simplifiedTxInfo: 1)!);
+
+                    if(ct.IsCancellationRequested)
+                        return;
+                }
+            }
+            await Task.WhenAll(rawBlocksList);
+        }
+        catch
+        {
+            _logger.LogError("{service} failed to get list of simplified blocks :(", nameof(RealtimeBlocksDataService));
+        }
+
+        foreach (var item in rawBlocksList)
+        {
+            if(item.Result is not null && item.Result.Result is not null)
+                blocksList.Add(_blocksService.RPCBlockToSimplified(item.Result.Result));
+        }
     }
 }
