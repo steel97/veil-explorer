@@ -190,24 +190,35 @@ public class SimplifiedBlocksCacheSingleton
         notCachedBlockOffset = [];
         byte offsetDiff = 0;
 
-        if (_latestBlockPosition + count < _blocksBufferCapacity && height <= _latestBlockHeight && height >= _latestBlockHeight - 15 && count <= 15)
+        int blockIndex = _latestBlockPosition - (_latestBlockHeight - height);
+
+        if (blockIndex - count >= 0 && height <= _latestBlockHeight && height >= _latestBlockHeight - 15 && count <= 15)
         {
             int arrayLenght = count * _BytesInBlock;
-            int blockPosition = _latestBlockPosition - (_latestBlockHeight - height);
+            offsetDiff = (byte)count;
+            int bufferOffset;
+            if( blockIndex < 0)
+            {
+                blockIndex += _blocksBufferCapacity;
+                bufferOffset = blockIndex * _BytesInBlock;
+            }
+            else
+            {
+                bufferOffset = blockIndex * _BytesInBlock;
+            }            
 
             Span<byte> bytes = stackalloc byte[arrayLenght];
-            _blocksBuffer.AsSpan(blockPosition, arrayLenght).CopyTo(bytes);
-
-            for (int offset = 0; offset < arrayLenght; offset += _BytesInBlock, offsetDiff++)
+            _blocksBuffer.AsSpan(bufferOffset - arrayLenght, arrayLenght).CopyTo(bytes);
+            int heightCopy = height;
+            for (int offset = arrayLenght - _BytesInBlock; offset >= 0; offset -= _BytesInBlock, offsetDiff--, heightCopy--)
             {
-                SimplifiedBlock? block = DeserializeBlock(height, bytes, offset);
+                SimplifiedBlock? block = DeserializeBlock(heightCopy, bytes, offset);
 
-                if(block is null) notCachedBlockOffset.Add(offsetDiff);                
+                if(block is null) notCachedBlockOffset.Add(offsetDiff);
                 else blocksList.Add(block);
             }
             return;
         }
-
         for (int i = height; offsetDiff < (byte)count; i--, offsetDiff++)
         {
             SimplifiedBlock? block = GetSimplifiedBlock(i);
@@ -247,8 +258,8 @@ public class SimplifiedBlocksCacheSingleton
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static SimplifiedBlock? DeserializeBlock(int height, ReadOnlySpan<byte> buffer, int offsetSpan)
     {
-        int size = MemoryMarshal.Read<int>(buffer);
         ReadOnlySpan<byte> spanBufferSliced = buffer.Slice(offsetSpan, sizeof(int));
+        int size = MemoryMarshal.Read<int>(spanBufferSliced);
 
         if(size <= 0) return default;
 
