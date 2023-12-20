@@ -65,18 +65,18 @@ public class OrphanFixWorker : BackgroundService
 
                 // better to get blocks from db in single query, however this is not "hot path" so...
                 var blockFromDB = await blocksRepository.GetBlockAsync(i, cancellationToken);
-                if (blockFromDB?.hash_hex == blockHashCheck.Hash)
+                if (blockFromDB?.hash_hex == blockHashCheck.Result!.Hash)
                     continue;
 
                 foundOrphans++;
 
-                if (!await _blocksService.UpdateDbBlockAsync(i, blockHashCheck.Hash!, cancellationToken))
+                if (!await _blocksService.UpdateDbBlockAsync(i, blockHashCheck.Result.Hash!, cancellationToken))
                 {
                     _logger.LogError("Can't update orphan block #{blockNumber}", i);
                 }
                 else
                 {
-                    _logger.LogInformation("Update block {blockHeight}, from {fromHash}, to {toHash}", i, blockFromDB?.hash_hex ?? "NULL", blockHashCheck.Hash);
+                    _logger.LogInformation("Update block {blockHeight}, from {fromHash}, to {toHash}", i, blockFromDB?.hash_hex ?? "NULL", blockHashCheck.Result.Hash);
                     fixedOrphans++;
                 }
             }

@@ -5,18 +5,18 @@ using ExplorerBackend.Services.Core;
 
 namespace ExplorerBackend.Services.Workers;
 
-public class CacheInitialBlocks : BackgroundService
+public class CacheInitialBlocksWorker : BackgroundService
 {
     private uint _blockHeight;
     private readonly uint _blockToCache;
     private readonly int _blockPullDelay;
-    private readonly ILogger _logger;
+    private readonly ILogger<CacheInitialBlocksWorker> _logger;
     private readonly IOptionsMonitor<MemoryCacheConfig> _memoryCacheConfig;
     private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
     private readonly SimplifiedBlocksCacheSingleton _smpBlocksCacheSingleton;
     private readonly NodeRequester _nodeRequester;
 
-    public CacheInitialBlocks(ILogger logger, IOptionsMonitor<MemoryCacheConfig> memoryCacheConfig, IOptionsMonitor<ExplorerConfig> explorerConfig,
+    public CacheInitialBlocksWorker(ILogger<CacheInitialBlocksWorker> logger, IOptionsMonitor<MemoryCacheConfig> memoryCacheConfig, IOptionsMonitor<ExplorerConfig> explorerConfig,
     SimplifiedBlocksCacheSingleton smpBlocksCacheSingleton, NodeRequester nodeRequester)
     {
         _logger = logger;
@@ -39,19 +39,19 @@ public class CacheInitialBlocks : BackgroundService
         {
             try
             {
-                var block = await _nodeRequester.GetBlockHash(_blockHeight, cancellationToken);
-                if (block is null || block.Result is null)
+                var blockHash = await _nodeRequester.GetBlockHash(_blockHeight, cancellationToken);
+                if (blockHash is null || blockHash.Result is null)
                     continue;
 
-                var newBlock = await _nodeRequester.GetBlock(block.Result, cancellationToken);
-                if(newBlock is null || newBlock.Result is null)
+                var block = await _nodeRequester.GetBlock(blockHash.Result, cancellationToken);
+                if(block is null || block.Result is null)
                     continue;
 
-                var setSimplifiedBlockCacke = _smpBlocksCacheSingleton.SetBlockCache(newBlock.Result);
+                _smpBlocksCacheSingleton.SetBlockCache(block.Result);
             }
             catch
             {
-                _logger.LogWarning("{serivce} failed to pull block", nameof(CacheInitialBlocks));
+                _logger.LogWarning("{serivce} failed to pull block", nameof(CacheInitialBlocksWorker));
             }
 
             _blockHeight++;

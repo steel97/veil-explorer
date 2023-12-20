@@ -5,13 +5,12 @@ using ExplorerBackend.Services.Core;
 
 namespace ExplorerBackend.Services.Data;
 
-public class RealtimeTransactionsDataService(NodeRequester nodeRequester, IUtilityService utilityService, IBlocksDataService blocksDataService, BlocksCacheSingleton cache)
+public class RealtimeTransactionsDataService(NodeRequester nodeRequester, IUtilityService utilityService, BlocksCacheSingleton cache)
     : ITransactionsDataService
 {
     private readonly BlocksCacheSingleton _cache = cache;
     private readonly NodeRequester _nodeRequester = nodeRequester;
     private readonly IUtilityService _utilityService = utilityService;
-    private readonly IBlocksDataService _blocksDataService = blocksDataService;
 
     public async Task<Transaction?> GetTransactionByIdAsync(string txid, CancellationToken cancellationToken = default)
     {

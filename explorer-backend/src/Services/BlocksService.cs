@@ -82,8 +82,8 @@ public class BlocksService : IBlocksService
         var blocksRepository = scope.ServiceProvider.GetRequiredService<IBlocksRepository>();
 
         await transactionsRepository.RemoveTransactionsForBlockAsync(height, cancellationToken);
-        await blocksRepository.UpdateBlockAsync(height, RPCBlockToDb(validBlock), cancellationToken);
-        return !await InsertTransactionsAsync(height, validBlock.Txs!, cancellationToken);
+        await blocksRepository.UpdateBlockAsync(height, RPCBlockToDb(validBlock!.Result!), cancellationToken);
+        return !await InsertTransactionsAsync(height, validBlock.Result!.Txs!, cancellationToken);
     }
 
     public async Task<bool> InsertTransactionsAsync(int blockId, List<string>? txIds, CancellationToken cancellationToken)

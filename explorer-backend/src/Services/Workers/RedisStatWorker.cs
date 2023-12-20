@@ -12,8 +12,8 @@ public class RedisStatWorker : BackgroundService
     private readonly int _port;
     private readonly  RedisStats _redisStats;
     private readonly IConnectionMultiplexer _cache;
-    private readonly IOptionsMonitor<MemoryCache> _memoryCacheConfig;
-    public RedisStatWorker(RedisStats redisStats ,IConnectionMultiplexer cache, IOptionsMonitor<MemoryCache> memoryCacheConfig)
+    private readonly IOptionsMonitor<MemoryCacheConfig> _memoryCacheConfig;
+    public RedisStatWorker(RedisStats redisStats ,IConnectionMultiplexer cache, IOptionsMonitor<MemoryCacheConfig> memoryCacheConfig)
     {
         _redisStats = redisStats;
         _cache = cache;

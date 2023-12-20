@@ -47,7 +47,7 @@
   },
   "MemoryCache":
   {
-    "Port" : "6379",
+    "Port" : 6379,
     "Host" : "localhost",
     "ExpirationScanFrequency": 10000,
     "ExpirationApiAbsoluteTime": 3600000,

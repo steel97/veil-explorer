@@ -55,10 +55,11 @@ public class BlocksWorker : BackgroundService
             {
                 var latestBlock = await _nodeRequester.GetLatestBlock(cancellationToken);
                
-               if (latestBlock != null || latestBlock!.Result != null)
-               {
+                if (latestBlock != null || latestBlock!.Result != null)
+                {                
                     _chainInfoSingleton.CurrentSyncedBlock = latestBlock.Result!.Height;
-               }
+                    _simplifiedBlocksCacheSingleton.SetBlockCache(latestBlock.Result, true);
+                }
             }
             catch (Exception)
             {
@@ -196,13 +197,13 @@ public class BlocksWorker : BackgroundService
             if(newBlock is null || newBlock.Result is null)
                 return;
             
+            _simplifiedBlocksCacheSingleton.SetBlockCache(newBlock.Result, true);
             var setBlockCache = _blocksCacheSingleton.SetServerCacheDataAsync(newBlock.Result.Height, newBlock.Result.Hash!, newBlock.Result, cancellationToken);
-            var setSimplifiedBlockCacke = _simplifiedBlocksCacheSingleton.SetBlockCache(newBlock.Result, true);
             var updateHub = OnNewBlockHubUpdate(newBlock, newBlock.Result.NTx, cancellationToken);
 
             try
             {
-                await Task.WhenAll(setBlockCache, updateHub, setSimplifiedBlockCacke);
+                await Task.WhenAll(setBlockCache, updateHub);
             }
             catch { }
             // checking prev blocks
@@ -219,13 +220,13 @@ public class BlocksWorker : BackgroundService
                 {
                     var prevBlock = await _nodeRequester.GetBlock(prevBlocksHash.Result, cancellationToken, 2);
 
-                    if(prevBlock is null)
+                    if(prevBlock is null || prevBlock.Result is null)
                         continue;
 
-                    var updateCache = _blocksCacheSingleton.UpdateCachedDataAsync(i.ToString(), prevBlocksHash.Result, prevBlock.Result!, cancellationToken);
-                    var updateSimplifiedCache = _simplifiedBlocksCacheSingleton.SetBlockCache(prevBlock.Result!);
+                    _simplifiedBlocksCacheSingleton.SetBlockCache(prevBlock.Result);
+                    var updateCache = _blocksCacheSingleton.UpdateCachedDataAsync(i.ToString(), prevBlocksHash.Result, prevBlock.Result, cancellationToken);
 
-                    await Task.WhenAll(updateCache, updateSimplifiedCache);
+                    await Task.WhenAll(updateCache);
                 }
             }
         }

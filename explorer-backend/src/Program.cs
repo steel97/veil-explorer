@@ -57,7 +57,7 @@ builder.Services.AddHostedService<BlocksWorker>();
 if(rpcMode)
 {
     builder.Services.AddHostedService<RedisStatWorker>();
-    builder.Services.AddHostedService<CacheInitialBlocks>();
+    builder.Services.AddHostedService<CacheInitialBlocksWorker>();
 }
 builder.Services.AddHostedService<BlockchainWorker>();
 builder.Services.AddHostedService<BlockchainStatsWorker>();
