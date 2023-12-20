@@ -167,15 +167,11 @@ public class SimplifiedBlocksCacheSingleton
             int blockIndex = _latestBlockPosition - (_latestBlockHeight - height) - 1;
             
             long offset;
-            if( blockIndex < 0)
-            {
+            if( blockIndex < 0)            
                 blockIndex = _blocksBufferCapacity + blockIndex;
-                offset = blockIndex * _BytesInBlock;
-            }
-            else
-            {
-                offset = blockIndex * _BytesInBlock;
-            }
+                
+            offset = blockIndex * _BytesInBlock;
+            
             if(offset < 0)
                 offset = 0;
 
@@ -197,15 +193,10 @@ public class SimplifiedBlocksCacheSingleton
             int arrayLenght = count * _BytesInBlock;
             offsetDiff = (byte)count;
             int bufferOffset;
-            if( blockIndex < 0)
-            {
+            if( blockIndex < 0)    
                 blockIndex += _blocksBufferCapacity;
-                bufferOffset = blockIndex * _BytesInBlock;
-            }
-            else
-            {
-                bufferOffset = blockIndex * _BytesInBlock;
-            }            
+           
+            bufferOffset = blockIndex * _BytesInBlock;                        
 
             Span<byte> bytes = stackalloc byte[arrayLenght];
             _blocksBuffer.AsSpan(bufferOffset - arrayLenght, arrayLenght).CopyTo(bytes);
