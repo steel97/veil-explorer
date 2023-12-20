@@ -41,7 +41,7 @@ public class SimplifiedBlocksCacheSingleton
         if(value >= 1 && value <= _oldestBlocksBufferCapacity)
             return true;
 
-        if(value <= _latestBlockHeight && value >= _latestBlockHeight - _blocksBufferCapacity)
+        if(value <= _latestBlockHeight && value > _latestBlockHeight - _blocksBufferCapacity)
             return true;
 
         return false;
@@ -215,7 +215,6 @@ public class SimplifiedBlocksCacheSingleton
             if(block is null) notCachedBlockOffset.Add(offsetDiff);            
             else blocksList.Add(block); 
         }
-
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
