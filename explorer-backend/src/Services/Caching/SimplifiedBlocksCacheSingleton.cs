@@ -186,7 +186,7 @@ public class SimplifiedBlocksCacheSingleton
         notCachedBlockOffset = [];
         byte offsetDiff = 0;
 
-        int blockIndex = _latestBlockPosition - (_latestBlockHeight - height);
+        int blockIndex = _latestBlockPosition - (_latestBlockHeight - height); 
 
         if (blockIndex - count >= 0 && height <= _latestBlockHeight && height >= _latestBlockHeight - 15 && count <= 15)
         {
