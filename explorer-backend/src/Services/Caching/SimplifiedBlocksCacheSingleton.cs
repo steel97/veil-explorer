@@ -193,10 +193,10 @@ public class SimplifiedBlocksCacheSingleton
             int arrayLenght = count * _BytesInBlock;
             offsetDiff = (byte)count;
             int bufferOffset;
-            if( blockIndex < 0)    
+            if( blockIndex < 0)
                 blockIndex += _blocksBufferCapacity;
            
-            bufferOffset = blockIndex * _BytesInBlock;                        
+            bufferOffset = blockIndex * _BytesInBlock;
 
             Span<byte> bytes = stackalloc byte[arrayLenght];
             _blocksBuffer.AsSpan(bufferOffset - arrayLenght, arrayLenght).CopyTo(bytes);
@@ -214,7 +214,7 @@ public class SimplifiedBlocksCacheSingleton
         {
             SimplifiedBlock? block = GetSimplifiedBlock(i);
 
-            if(block is null) notCachedBlockOffset.Add(offsetDiff);            
+            if(block is null) notCachedBlockOffset.Add(offsetDiff);
             else blocksList.Add(block); 
         }
     }
