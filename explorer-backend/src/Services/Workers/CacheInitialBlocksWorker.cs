@@ -51,6 +51,7 @@ public class CacheInitialBlocksWorker : BackgroundService
             }
             catch
             {
+                _blockHeight--;
                 _logger.LogWarning("{serivce} failed to pull block", nameof(CacheInitialBlocksWorker));
             }
 
