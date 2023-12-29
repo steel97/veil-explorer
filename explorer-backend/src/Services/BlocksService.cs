@@ -35,7 +35,18 @@ public class BlocksService : IBlocksService
         mediantime = block.Mediantime,
         merkleroot_hex = block.Merkleroot,
         mixhash_hex = block.Mixhash,
-        tx = block.Txs,
+        tx = block.Tx?.Select(el =>
+        {
+            var jsonEl = (JsonElement)el;
+            if (jsonEl.ValueKind == JsonValueKind.String)
+                return new()
+                {
+                    txid = jsonEl.GetString()
+                };
+
+            var elem = JsonSerializer.Deserialize<GetRawTransactionResult>(jsonEl)!;
+            return elem;
+        }).ToList(),
         nonce = block.Nonce,
         nonce64 = block.Nonce64,
         prog_header_hash_hex = block.prog_header_hash,
@@ -67,9 +78,9 @@ public class BlocksService : IBlocksService
         TxCount = block.NTx
     };
     public async Task<bool> UpdateDbBlockAsync(int height, string validBlockHash, CancellationToken cancellationToken)
-    {        
+    {
         using var scope = _serviceProvider.CreateAsyncScope();
-        
+
         var validBlock = await _nodeRequester.GetBlock(validBlockHash, cancellationToken);
 
         if (validBlock == null)
@@ -83,7 +94,7 @@ public class BlocksService : IBlocksService
 
         await transactionsRepository.RemoveTransactionsForBlockAsync(height, cancellationToken);
         await blocksRepository.UpdateBlockAsync(height, RPCBlockToDb(validBlock!.Result!), cancellationToken);
-        return !await InsertTransactionsAsync(height, validBlock.Result!.Txs!, cancellationToken);
+        return !await InsertTransactionsAsync(height, validBlock.Result!.Tx!.Select(a => (string)a).ToList(), cancellationToken);
     }
 
     public async Task<bool> InsertTransactionsAsync(int blockId, List<string>? txIds, CancellationToken cancellationToken)

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using ExplorerBackend.Models.Data;
 using ExplorerBackend.Models.Node.Response;
 using ExplorerBackend.Services.Caching;
@@ -26,7 +27,7 @@ public class RealtimeTransactionsDataService(NodeRequester nodeRequester, IUtili
             weight = tx.Result.weight,
             locktime = tx.Result.locktime,
             blockhash = tx.Result.blockhash
-        };        
+        };
     }
 
     public async Task<TransactionExtended?> GetTransactionFullByIdAsync(string txid, CancellationToken cancellationToken = default)
@@ -49,10 +50,27 @@ public class RealtimeTransactionsDataService(NodeRequester nodeRequester, IUtili
 
     public async Task<List<TransactionExtended>?> GetTransactionsForBlockAsync(int blockHeight, int offset, int count, bool fetchAll, CancellationToken ct = default)
     {
-        GetBlockResult? rawBlock = await _cache.GetCachedBlockByHeightAsync<GetBlockResult>(blockHeight.ToString(), ct);;
-        List<TransactionExtended>? list = [];
-        foreach (var tx in rawBlock!.Txs!)
+        var rawBlock = await _cache.GetCachedBlockByHeightAsync(blockHeight.ToString(), ct);
+        if (rawBlock == null)
         {
+            var blockHashResult = await _nodeRequester.GetBlockHash((uint)blockHeight, ct);
+            if (blockHashResult == null || blockHashResult.Result == null) return null;
+
+            var blockRpcRes = await _nodeRequester.GetBlock(blockHashResult.Result, ct, 2);
+            if (blockRpcRes == null || blockRpcRes.Result == null) return null;
+            rawBlock = blockRpcRes.Result;
+        }
+
+        List<TransactionExtended>? list = [];
+        foreach (var txObj in rawBlock?.Tx ?? Enumerable.Empty<object>())
+        {
+            var tx = JsonSerializer.Deserialize<GetRawTransactionResult>((JsonElement)txObj);
+            if (tx == null)
+            {
+                // TO-DO log
+                continue;
+            }
+
             list.Add(new()
             {
                 block_height = blockHeight,
@@ -64,7 +82,7 @@ public class RealtimeTransactionsDataService(NodeRequester nodeRequester, IUtili
                 weight = tx.weight,
                 locktime = tx.locktime,
                 blockhash = tx.blockhash,
-                data = _utilityService.HexToByteArray(tx.hex!), 
+                data = _utilityService.HexToByteArray(tx.hex!),
             });
         }
         return list;
@@ -76,10 +94,10 @@ public class RealtimeTransactionsDataService(NodeRequester nodeRequester, IUtili
 
         return tx!.Result!.hex!;
     }
-    
+
     public List<TransactionExtended>? ToTransactionExtended(List<GetRawTransactionResult> list, int height)
     {
-       if(list is null) return null;
+        if (list is null) return null;
 
         List<TransactionExtended>? listExtended = [];
         foreach (var tx in list)
@@ -95,7 +113,7 @@ public class RealtimeTransactionsDataService(NodeRequester nodeRequester, IUtili
                 weight = tx.weight,
                 locktime = tx.locktime,
                 blockhash = tx.blockhash,
-                data = _utilityService.HexToByteArray(tx.hex!), 
+                data = _utilityService.HexToByteArray(tx.hex!),
             });
         }
         return listExtended;

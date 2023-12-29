@@ -18,8 +18,7 @@ public class GetBlockResult
     public int Version { get; set; }
     public string? VersionHex { get; set; }
     public string? Merkleroot { get; set; }
-    // public List<string>? Tx { get; set; }
-    public List<GetRawTransactionResult>? Txs { get; set; }
+    public List<object>? Tx { get; set; }
     public long Time { get; set; }
     public long Mediantime { get; set; }
     public ulong Nonce { get; set; }

@@ -17,7 +17,7 @@ public class NodeRequester
     private AuthenticationHeaderValue? _authHeader;
     private int _usernameHash;
     private int _passHash;
-    private readonly string _nodeFailureError ;
+    private readonly string _nodeFailureError;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
     private readonly ChaininfoSingleton _chainInfoSingleton;
@@ -86,7 +86,7 @@ public class NodeRequester
         }
         catch { }
     }
-    
+
     public async Task<GetBlockchainInfo?> GetBlockChainInfo(CancellationToken cancellationToken)
     {
         using var httpClient = _httpClientFactory.CreateClient();
@@ -126,9 +126,9 @@ public class NodeRequester
 
         var getBlockRequest = new JsonRPCRequest
         {
-            Id = simplifiedTxInfo,
+            Id = 1,
             Method = "getblock",
-            Params = new List<object>(new object[] { hash })
+            Params = new List<object>(new object[] { hash, simplifiedTxInfo })
         };
         var getBlockResponse = await httpClient.PostAsJsonAsync("", getBlockRequest, _serializerOptions, cancellationToken);
         return await getBlockResponse.Content.ReadFromJsonAsync<GetBlock>(_serializerOptions, cancellationToken);
@@ -191,9 +191,9 @@ public class NodeRequester
     public async Task<GetBlock?> GetLatestBlock(CancellationToken cancellationToken, bool isOrphanFix = false)
     {
         byte failedRequests = 0;
-        
-        // get blockchain info
-        repeatBlockInfoRequest:
+
+    // get blockchain info
+    repeatBlockInfoRequest:
         GetBlockchainInfo? blockInfo = await GetBlockChainInfo(cancellationToken);
 
         if (blockInfo is null || blockInfo.Result is null)
@@ -207,8 +207,8 @@ public class NodeRequester
         }
         failedRequests = 0;
 
-        // get hash by height
-        repeatBlockHashRequest:
+    // get hash by height
+    repeatBlockHashRequest:
         GetBlockHash? blockHash = await GetBlockHash(isOrphanFix ? (uint)((blockInfo.Result.Blocks - _explorerConfig.CurrentValue.BlocksOrphanCheck) < 1 ? 1 : (blockInfo.Result.Blocks - _explorerConfig.CurrentValue.BlocksOrphanCheck)) : blockInfo.Result.Blocks, cancellationToken);
 
         if (blockHash is null || blockHash.Result is null)
@@ -222,8 +222,8 @@ public class NodeRequester
         }
         failedRequests = 0;
 
-        // get block info by hash
-        repeatBlockRequest:
+    // get block info by hash
+    repeatBlockRequest:
         GetBlock? block = await GetBlock(blockHash.Result, cancellationToken, simplifiedTxInfo: 2);
 
         if (block is null)
@@ -237,7 +237,7 @@ public class NodeRequester
         }
         return block;
     }
-    
+
     private async Task<GetChainTxStatsResult> GetChainTxStatsAsync(long ctxInterval, CancellationToken cancellationToken = default)
     {
         using var httpClient = _httpClientFactory.CreateClient();
@@ -282,7 +282,7 @@ public class NodeRequester
 
         for (var i = chainTxStatsIntervals.Count - 1; i >= 0; i--)
         {
-            var res = await GetChainTxStatsAsync( chainTxStatsIntervals[i], cancellationToken);
+            var res = await GetChainTxStatsAsync(chainTxStatsIntervals[i], cancellationToken);
 
             if (res.window_tx_count == 0) continue;
 
@@ -304,7 +304,7 @@ public class NodeRequester
 
     private void CheckHttpClientConfig(HttpClient httpClient)
     {
-        if(_passHash != _explorerConfig.CurrentValue.Node!.Password!.GetHashCode() || _usernameHash != _explorerConfig.CurrentValue.Node!.Username!.GetHashCode())        
+        if (_passHash != _explorerConfig.CurrentValue.Node!.Password!.GetHashCode() || _usernameHash != _explorerConfig.CurrentValue.Node!.Username!.GetHashCode())
             ConfigureHttpClient();
 
         httpClient.BaseAddress = _uri;

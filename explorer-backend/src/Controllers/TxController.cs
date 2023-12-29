@@ -58,12 +58,12 @@ public class TxController(IBlocksDataService blocksDataService, ITransactionsDat
             if (tx == null) return Problem("tx not found", statusCode: 400);
 
             Block? block;
-            if(tx.block_height == 0)
+            if (tx.block_height == 0)
             {
                 block = await _blocksDataService.GetBlockAsync(tx.blockhash!, 1, cancellationToken);
                 tx.block_height = block!.height;
             }
-            else 
+            else
                 block = await _blocksDataService.GetBlockAsync(tx.block_height, 1, cancellationToken);
 
             txTargets.Add(new TxDecodeTarget
@@ -71,7 +71,7 @@ public class TxController(IBlocksDataService blocksDataService, ITransactionsDat
                 TxId = tx.txid_hex!,
                 Data = tx.data
             });
-            
+
             response.TxId = tx.txid_hex!;
             response.Confirmed = true;
             response.BlockHeight = tx.block_height;
