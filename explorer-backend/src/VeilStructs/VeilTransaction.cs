@@ -50,7 +50,7 @@ public class VeilTransaction : IVeilSerializable
                 OutputTypes.OUTPUT_DATA => new VeilTxOutData(),
                 _ => throw new Exception("Unknown output type"),
             };
-            
+
             txout.Deserialize(serializationContext, mode);
             TxOut.Add(txout);
         }

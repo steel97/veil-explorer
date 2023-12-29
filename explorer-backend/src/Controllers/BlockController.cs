@@ -39,7 +39,7 @@ public class BlockController(IOptions<APIConfig> apiConfig, IBlocksDataService b
         if (body.Height != null)
             block = await _blocksDataService.GetBlockAsync(body.Height.Value, 2, cancellationToken);
         else if (body.Hash != null && body.Hash.Length == 64 && _utilityService.VerifyHex(body.Hash))
-            block = await _blocksDataService.GetBlockAsync(body.Hash, 2, cancellationToken);        
+            block = await _blocksDataService.GetBlockAsync(body.Hash, 2, cancellationToken);
         else
             return Problem($"a problem has occured, try again", statusCode: 400);
 
@@ -70,10 +70,10 @@ public class BlockController(IOptions<APIConfig> apiConfig, IBlocksDataService b
                     Hash = prevBlockHash.Result,
                     Height = block.height - 1
                 };
-            
+
             List<TransactionExtended>? rtxs;
 
-            if(block.tx is null)
+            if (block.tx is null)
                 rtxs = await _transactionsDataService.GetTransactionsForBlockAsync(block.height, body.Offset, body.Count, false, cancellationToken);
             else
                 rtxs = _transactionsDataService.ToTransactionExtended(block.tx, block.height);

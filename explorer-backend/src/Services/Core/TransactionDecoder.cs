@@ -24,9 +24,9 @@ public class TransactionsDecoder(IRawTransactionsDataService rawTransactionsData
             // collect required previous txs
             tx.TxIn?.ForEach(ntxin =>
             {
-                if (ntxin.PrevOut != null && !ntxin.PrevOut.IsNull())
+                if (ntxin.PrevOut != null && !ntxin.PrevOut.IsNull() && !ntxin.PrevOut.IsAnonInput())
                 {
-                    var prevTxHex = _utilityService.ToHexReversed(ntxin.PrevOut?.Hash ?? Array.Empty<byte>());
+                    var prevTxHex = _utilityService.ToHexReversed(ntxin.PrevOut?.Hash ?? []);
                     if (!requiredTxs.Contains(prevTxHex)) requiredTxs.Add(prevTxHex);
                 }
             });

@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 namespace ExplorerBackend.Services.Caching;
 
 public class SimplifiedBlocksCacheSingleton
-{   
+{
     private readonly byte[] _oldestBlocksBuffer; // oldest 20 010 blocks
     private readonly byte[] _blocksBuffer; // latest 200 010 blocks
     private readonly int _oldestBlocksBufferCapacity;
@@ -20,7 +20,7 @@ public class SimplifiedBlocksCacheSingleton
     private static readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
     private readonly ILogger<SimplifiedBlocksCacheSingleton> _logger;
     private readonly IOptionsMonitor<MemoryCacheConfig> _memoryCacheConfig;
-    
+
     public SimplifiedBlocksCacheSingleton(IOptionsMonitor<MemoryCacheConfig> memoryCacheConfig, ILogger<SimplifiedBlocksCacheSingleton> logger)
     {
         _memoryCacheConfig = memoryCacheConfig;
@@ -38,10 +38,10 @@ public class SimplifiedBlocksCacheSingleton
 
     public bool IsInCacheRange(int value)
     {
-        if(value >= 1 && value <= _oldestBlocksBufferCapacity)
+        if (value >= 1 && value <= _oldestBlocksBufferCapacity)
             return true;
 
-        if(value <= _latestBlockHeight && value > _latestBlockHeight - _blocksBufferCapacity)
+        if (value <= _latestBlockHeight && value > _latestBlockHeight - _blocksBufferCapacity)
             return true;
 
         return false;
@@ -50,13 +50,13 @@ public class SimplifiedBlocksCacheSingleton
     // writing blocks
     public void SetBlockCache(GetBlockResult block, bool isLatestBlock = false)
     {
-        if(block is null || block.Height < 1)
+        if (block is null || block.Height < 1)
         {
             _logger.LogInformation("can't set {service} cache. probably cuz block data was null", nameof(SimplifiedBlocksCacheSingleton));
             return;
         }
 
-        if(block.Height <= _oldestBlocksBufferCapacity)
+        if (block.Height <= _oldestBlocksBufferCapacity)
         {
             long offset = (block.Height * _BytesInBlock) - _BytesInBlock;
 
@@ -64,19 +64,19 @@ public class SimplifiedBlocksCacheSingleton
             return;
         }
 
-        if(isLatestBlock)
+        if (isLatestBlock)
         {
             int differenceOfHeight = block.Height - _latestBlockHeight;
-            if(differenceOfHeight < 1) goto PrevBlock;
+            if (differenceOfHeight < 1) goto PrevBlock;
 
             _latestBlockHeight = block.Height;
             long offset;
 
-            if(differenceOfHeight > 1)
+            if (differenceOfHeight > 1)
             {
-                if(_latestBlockPosition + differenceOfHeight - 1 > _blocksBufferCapacity - 1)
+                if (_latestBlockPosition + differenceOfHeight - 1 > _blocksBufferCapacity - 1)
                 {
-                    while(differenceOfHeight > _blocksBufferCapacity)
+                    while (differenceOfHeight > _blocksBufferCapacity)
                     {
                         differenceOfHeight -= _blocksBufferCapacity;
                     }
@@ -85,29 +85,29 @@ public class SimplifiedBlocksCacheSingleton
                 else
                     offset = (_latestBlockPosition + differenceOfHeight - 1) * _BytesInBlock;
             }
-            else    
+            else
                 offset = _latestBlockPosition * _BytesInBlock;
 
             SerializeBlock(block, _blocksBuffer, offset);
 
             _latestBlockPosition += differenceOfHeight;
 
-            while(_latestBlockPosition > _blocksBufferCapacity - 1)
+            while (_latestBlockPosition > _blocksBufferCapacity - 1)
                 _latestBlockPosition -= _blocksBufferCapacity;
 
-           return;
+            return;
         }
 
-        PrevBlock:
-        if(block.Height < _latestBlockHeight && block.Height > (_latestBlockHeight - _blocksBufferCapacity))
+    PrevBlock:
+        if (block.Height < _latestBlockHeight && block.Height > (_latestBlockHeight - _blocksBufferCapacity))
         {
             _semaphoreSlim.Wait(10);
 
             int positionToWrite = _latestBlockPosition - (_latestBlockHeight - block.Height) - 1;
 
-            if(positionToWrite < _blocksBufferCapacity)
-                positionToWrite += _blocksBufferCapacity;
-            
+            while (positionToWrite > _blocksBufferCapacity)
+                positionToWrite -= _blocksBufferCapacity;
+
             long offset = positionToWrite * _BytesInBlock;
 
             SerializeBlock(block, _blocksBuffer, offset);
@@ -144,35 +144,35 @@ public class SimplifiedBlocksCacheSingleton
         offset += sizeof(long);
         Unsafe.WriteUnaligned(ref Unsafe.Add(ref bufferRef, (nuint)offset), (ushort)block.NTx);
     }
-    
+
     // reading blocks
     public SimplifiedBlock? GetSimplifiedBlock(int height)
     {
-        if(height >= 1 && height <= _oldestBlocksBufferCapacity)
+        if (height >= 1 && height <= _oldestBlocksBufferCapacity)
         {
             long offset = (height * _BytesInBlock) - _BytesInBlock;
             return DeserializeBlock(_oldestBlocksBuffer, offset, height);
         }
 
-        if(height == _latestBlockHeight)
+        if (height == _latestBlockHeight)
         {
             long offset = _latestBlockPosition * _BytesInBlock - _BytesInBlock;
-            if(offset < 0)
+            if (offset < 0)
                 offset = 0;
             return DeserializeBlock(_blocksBuffer, offset, height);
         }
 
-        if(height < _latestBlockHeight && height > (_latestBlockHeight - _blocksBufferCapacity))
+        if (height < _latestBlockHeight && height > (_latestBlockHeight - _blocksBufferCapacity))
         {
             int blockIndex = _latestBlockPosition - (_latestBlockHeight - height) - 1;
-            
+
             long offset;
-            if( blockIndex < 0)            
+            if (blockIndex < 0)
                 blockIndex = _blocksBufferCapacity + blockIndex;
-                
+
             offset = blockIndex * _BytesInBlock;
-            
-            if(offset < 0)
+
+            if (offset < 0)
                 offset = 0;
 
             return DeserializeBlock(_blocksBuffer, offset, height);
@@ -186,16 +186,16 @@ public class SimplifiedBlocksCacheSingleton
         notCachedBlockOffset = [];
         byte offsetDiff = 0;
 
-        int blockIndex = _latestBlockPosition - (_latestBlockHeight - height); 
+        int blockIndex = _latestBlockPosition - (_latestBlockHeight - height);
 
         if (blockIndex - count >= 0 && height <= _latestBlockHeight && height >= _latestBlockHeight - 15 && count <= 15)
         {
             int arrayLenght = count * _BytesInBlock;
             offsetDiff = (byte)count;
             int bufferOffset;
-            if( blockIndex < 0)
+            if (blockIndex < 0)
                 blockIndex += _blocksBufferCapacity;
-           
+
             bufferOffset = blockIndex * _BytesInBlock;
 
             Span<byte> bytes = stackalloc byte[arrayLenght];
@@ -205,7 +205,7 @@ public class SimplifiedBlocksCacheSingleton
             {
                 SimplifiedBlock? block = DeserializeBlock(heightCopy, bytes, offset);
 
-                if(block is null) notCachedBlockOffset.Add(offsetDiff);
+                if (block is null) notCachedBlockOffset.Add(offsetDiff);
                 else blocksList.Add(block);
             }
             return;
@@ -214,8 +214,8 @@ public class SimplifiedBlocksCacheSingleton
         {
             SimplifiedBlock? block = GetSimplifiedBlock(i);
 
-            if(block is null) notCachedBlockOffset.Add(offsetDiff);
-            else blocksList.Add(block); 
+            if (block is null) notCachedBlockOffset.Add(offsetDiff);
+            else blocksList.Add(block);
         }
     }
 
@@ -225,7 +225,7 @@ public class SimplifiedBlocksCacheSingleton
         ref byte bufferRef = ref MemoryMarshal.GetArrayDataReference(buffer);
 
         int size = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref bufferRef, (nuint)offset));
-        if(size <= 0) return default;
+        if (size <= 0) return default;
 
         SimplifiedBlock block = new()
         {
@@ -252,7 +252,7 @@ public class SimplifiedBlocksCacheSingleton
         ReadOnlySpan<byte> spanBufferSliced = buffer.Slice(offsetSpan, sizeof(int));
         int size = MemoryMarshal.Read<int>(spanBufferSliced);
 
-        if(size <= 0) return default;
+        if (size <= 0) return default;
 
         SimplifiedBlock block = new()
         {
