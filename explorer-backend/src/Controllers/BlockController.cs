@@ -45,10 +45,16 @@ public class BlockController(IOptions<APIConfig> apiConfig, IBlocksDataService b
 
         if (block != null)
         {
-            Task<string?> nextBlockHash = _blocksDataService.ProbeHashByHeightAsync(block.height + 1, cancellationToken);
-            Task<string?> prevBlockHash = _blocksDataService.ProbeHashByHeightAsync(block.height - 1, cancellationToken);
+            Task<string?>? nextBlockHash = null;
+            Task<string?>? prevBlockHash = null;
+            try
+            {
+                nextBlockHash = _blocksDataService.ProbeHashByHeightAsync(block.height + 1, cancellationToken);
+                prevBlockHash = _blocksDataService.ProbeHashByHeightAsync(block.height - 1, cancellationToken);
 
-            await Task.WhenAll(nextBlockHash, prevBlockHash);
+                await Task.WhenAll(nextBlockHash, prevBlockHash);
+            }
+            catch { }
 
             response.Found = true;
             response.Block = block;
@@ -57,14 +63,14 @@ public class BlockController(IOptions<APIConfig> apiConfig, IBlocksDataService b
             var verHex = BitConverter.GetBytes(block.version).Reverse().ToArray();
             response.VersionHex = _utilityService.ToHex(verHex);
 
-            if (nextBlockHash != null)
+            if (nextBlockHash != null && nextBlockHash.Result != null)
                 response.NextBlock = new BlockBasicData
                 {
                     Hash = nextBlockHash.Result,
                     Height = block.height + 1
                 };
 
-            if (prevBlockHash != null)
+            if (prevBlockHash != null && prevBlockHash.Result != null)
                 response.PrevBlock = new BlockBasicData
                 {
                     Hash = prevBlockHash.Result,
