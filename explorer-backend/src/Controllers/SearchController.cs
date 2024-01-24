@@ -11,8 +11,8 @@ namespace ExplorerBackend.Controllers;
 [Produces("application/json")]
 public class SearchController : ControllerBase
 {
-    private readonly IBlocksDataService _blocksDataService; // switched to the new layer
-    private readonly ITransactionsDataService _transactionsDataService; // switched to the new layer
+    private readonly IBlocksDataService _blocksDataService;
+    private readonly ITransactionsDataService _transactionsDataService;
     private readonly ChaininfoSingleton _chaininfoSingleton;
     private readonly IUtilityService _utilityService;
 

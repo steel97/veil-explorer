@@ -15,8 +15,8 @@ public class TxController(IBlocksDataService blocksDataService, ITransactionsDat
     IUtilityService utilityService, ChaininfoSingleton chaininfoSingleton)
     : ControllerBase
 {
-    private readonly IBlocksDataService _blocksDataService = blocksDataService; // switched to the new layer
-    private readonly ITransactionsDataService _transactionsDataService = transactionsDataService; // switched to the new layer
+    private readonly IBlocksDataService _blocksDataService = blocksDataService;
+    private readonly ITransactionsDataService _transactionsDataService = transactionsDataService;
     private readonly ITransactionDecoder _transactionDecoder = transactionDecoder;
     private readonly IUtilityService _utilityService = utilityService;
     private readonly ChaininfoSingleton _chaininfoSingleton = chaininfoSingleton;

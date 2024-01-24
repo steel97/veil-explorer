@@ -21,7 +21,7 @@ public class BlocksWorker : BackgroundService
     private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
     private readonly ChaininfoSingleton _chainInfoSingleton;
     private readonly BlocksCacheSingleton _blocksCacheSingleton;
-    private readonly SimplifiedBlocksCacheSingleton _simplifiedBlocksCacheSingleton;
+    private readonly SimplifiedBlocksCacheSingleton _smpBlkCacheSingleton;
     private readonly NodeRequester _nodeRequester;
     private readonly IBlocksService _blocksService;
 
@@ -38,7 +38,7 @@ public class BlocksWorker : BackgroundService
         _explorerConfig = explorerConfig;
         _chainInfoSingleton = chaininfoSingleton;
         _blocksCacheSingleton = blocksCacheSingleton;
-        _simplifiedBlocksCacheSingleton = simplifiedBlocksCacheSingleton;
+        _smpBlkCacheSingleton = simplifiedBlocksCacheSingleton;
         _nodeRequester = nodeRequester;
         _blocksService = blocksService;
         _blocksPerBatch = _explorerConfig.CurrentValue.BlocksPerBatch == 0 ? 10 : _explorerConfig.CurrentValue.BlocksPerBatch;
@@ -57,7 +57,7 @@ public class BlocksWorker : BackgroundService
                 if (latestBlock != null || latestBlock!.Result != null)
                 {
                     _chainInfoSingleton.CurrentSyncedBlock = latestBlock.Result!.Height;
-                    _simplifiedBlocksCacheSingleton.SetBlockCache(latestBlock.Result, true);
+                    _smpBlkCacheSingleton.SetBlockCache(latestBlock.Result, true);
                 }
             }
             catch (Exception)
@@ -197,7 +197,8 @@ public class BlocksWorker : BackgroundService
             if (newBlock is null || newBlock.Result is null)
                 return;
 
-            _simplifiedBlocksCacheSingleton.SetBlockCache(newBlock.Result, true);
+            _smpBlkCacheSingleton.SetBlockCache(newBlock.Result, true);
+            
             try
             {
                 var setBlockCache = _blocksCacheSingleton.SetServerCacheDataAsync(newBlock.Result.Height, newBlock.Result.Hash!, newBlock.Result, cancellationToken);
@@ -206,7 +207,9 @@ public class BlocksWorker : BackgroundService
                 await Task.WhenAll(setBlockCache, updateHub);
             }
             catch { }
+
             _rpcLatestSyncedBlock = newBlock.Result.Height;
+
             // checking prev blocks
             for (int i = _chainInfoSingleton.CurrentSyncedBlock - _blocksOrphanCheck; i < _chainInfoSingleton.CurrentSyncedBlock + 1; i++)
             {
@@ -224,7 +227,7 @@ public class BlocksWorker : BackgroundService
                     if (prevBlock is null || prevBlock.Result is null)
                         continue;
 
-                    _simplifiedBlocksCacheSingleton.SetBlockCache(prevBlock.Result);
+                    _smpBlkCacheSingleton.SetBlockCache(prevBlock.Result);
                     await _blocksCacheSingleton.UpdateCachedDataAsync(i.ToString(), prevBlocksHash.Result, prevBlock.Result, cancellationToken);
                 }
             }
