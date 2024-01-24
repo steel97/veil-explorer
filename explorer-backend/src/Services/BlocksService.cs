@@ -10,6 +10,7 @@ using Microsoft.Extensions.Options;
 using System.Text;
 using ExplorerBackend.Services.Core;
 using ExplorerBackend.Models.API;
+using System.Runtime.CompilerServices;
 
 namespace ExplorerBackend.Services;
 
@@ -67,16 +68,6 @@ public class BlocksService : IBlocksService
         synced = isSynced
     };
 
-    public SimplifiedBlock RPCBlockToSimplified(GetBlockResult block) => new()
-    {
-        Height = block.Height,
-        Size = block.Size,
-        Weight = block.Weight,
-        ProofType = GetBlockType(block.Proof_type!),
-        Time = block.Time,
-        MedianTime = block.Mediantime,
-        TxCount = block.NTx
-    };
     public async Task<bool> UpdateDbBlockAsync(int height, string validBlockHash, CancellationToken cancellationToken)
     {
         using var scope = _serviceProvider.CreateAsyncScope();
@@ -216,7 +207,8 @@ public class BlocksService : IBlocksService
 
         return isTxFailed;
     }
-
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public BlockType GetBlockType(string proofType) => proofType switch
     {
         "Proof-of-Work (X16RT)" => BlockType.POW_X16RT,
