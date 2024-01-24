@@ -77,7 +77,7 @@ public class NodeRequester
             {
                 Id = 1,
                 Method = "scantxoutset",
-                Params = new List<object>(new object[] { "start", new object[] { $"addr({target})" } })
+                Params = new List<object>(["start", new object[] { $"addr({target})" }])
             };
             var response = await httpClient.PostAsJsonAsync("", request, _serializerOptions, cancellationToken);
             var data = await response.Content.ReadFromJsonAsync<ScanTxOutset>(_serializerOptions, cancellationToken);
@@ -112,7 +112,7 @@ public class NodeRequester
         {
             Id = 1,
             Method = "getblockhash",
-            Params = new List<object>(new object[] { height })
+            Params = new List<object>([height])
         };
         var getBlockHashResponse = await httpClient.PostAsJsonAsync("", getBlockHashRequest, _serializerOptions, cancellationToken);
         return await getBlockHashResponse.Content.ReadFromJsonAsync<GetBlockHash>(_serializerOptions, cancellationToken);
@@ -128,7 +128,7 @@ public class NodeRequester
         {
             Id = 1,
             Method = "getblock",
-            Params = new List<object>(new object[] { hash, simplifiedTxInfo })
+            Params = new List<object>([hash, simplifiedTxInfo])
         };
         var getBlockResponse = await httpClient.PostAsJsonAsync("", getBlockRequest, _serializerOptions, cancellationToken);
         return await getBlockResponse.Content.ReadFromJsonAsync<GetBlock>(_serializerOptions, cancellationToken);
@@ -150,7 +150,7 @@ public class NodeRequester
         {
             Id = 1,
             Method = "getchainalgostats",
-            Params = new List<object>(Array.Empty<object>())
+            Params = new List<object>([])
         };
         var getChainalgoStatsResponse = await httpClient.PostAsJsonAsync("", getChainalgoStatsRequest, _serializerOptions, cancellationToken);
         return await getChainalgoStatsResponse.Content.ReadFromJsonAsync<GetChainalgoStats>(_serializerOptions, cancellationToken);
@@ -166,7 +166,7 @@ public class NodeRequester
         {
             Id = 1,
             Method = "getrawmempool",
-            Params = new List<object>(new object[] { isSerialized })
+            Params = new List<object>([isSerialized])
         };
         var getRawMempoolResult = await httpClient.PostAsJsonAsync("", getRawMempoolRequest, _serializerOptions, cancellationToken);
         return await getRawMempoolResult.Content.ReadFromJsonAsync<GetRawMempool>(_serializerOptions, cancellationToken);
@@ -182,7 +182,7 @@ public class NodeRequester
         {
             Id = 1,
             Method = "getrawtransaction",
-            Params = new List<object>(new object[] { txId, true })
+            Params = new List<object>([txId, true])
         };
         var getRawTxResponse = await httpClient.PostAsJsonAsync("", getRawTxRequest, _serializerOptions, cancellationToken);
         return await getRawTxResponse.Content.ReadFromJsonAsync<GetRawTransaction>(_serializerOptions, cancellationToken);
@@ -248,7 +248,7 @@ public class NodeRequester
         {
             Id = 1,
             Method = "getchaintxstats",
-            Params = new List<object>(new object[] { ctxInterval })
+            Params = new List<object>([ctxInterval])
         };
         var getChainTxStatsResponse = await httpClient.PostAsJsonAsync("", getChainTxStatsRequest, _serializerOptions, cancellationToken);
         var chainTxStats = await getChainTxStatsResponse.Content.ReadFromJsonAsync<GetChainTxStats>(_serializerOptions, cancellationToken);
