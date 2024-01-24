@@ -72,29 +72,25 @@ public class RealtimeBlocksDataService : IBlocksDataService
 
     public async Task<List<SimplifiedBlock>> GetSimplifiedBlocksAsync(int offset, int count, SortDirection sort = SortDirection.DESC, CancellationToken ct = default)
     {
-        // get from cache or rpc (it's may crash node lol)💀💀
-        int height = sort == SortDirection.DESC ? _chaininfoSingleton.CurrentSyncedBlock - offset : 1 + offset + (count - 1);
+        // get from cache or via rpc (it might crash the node lol)💀💀
+        int height = sort is SortDirection.DESC ? _chaininfoSingleton.CurrentSyncedBlock - offset : 1 + offset;
 
-        bool IsInCacheRange = _smpBlocksCache.IsInCacheRange(height);
+        List<SimplifiedBlock> blocksList = FillWithDefaultBlocks(count, height, sort);
 
-        List<SimplifiedBlock> blocksList = new(count);
-
-        if (IsInCacheRange)
+        if (_smpBlocksCache.IsInCacheRange(height))
         {
-            _smpBlocksCache.GetSimplifiedBlocksRange(height, count, blocksList, out List<byte> notCachedBlockOffset);
+            _smpBlocksCache.GetSimplifiedBlocksRange(blocksList, height, count, sort, out List<uint>? missedCacheBlocksList);
 
-            if (notCachedBlockOffset.Count > 0)
-                await GetBlocksViaRPC(height, count, blocksList, ct, notCachedBlockOffset);
+            if (missedCacheBlocksList is not null && missedCacheBlocksList.Count > 0)
+                await GetBlocksViaRPC(height, missedCacheBlocksList.Count, blocksList, ct, missedCacheBlocksList);
         }
         else
         {
             await GetBlocksViaRPC(height, count, blocksList, ct);
         }
 
-        if (sort == SortDirection.DESC)
-            blocksList = [.. blocksList.OrderByDescending(x => x.Height)];
-        else
-            blocksList = [.. blocksList.OrderBy(x => x.Height)];
+        if(ct.IsCancellationRequested)
+            return null!;
 
         return blocksList;
     }
@@ -130,20 +126,20 @@ public class RealtimeBlocksDataService : IBlocksDataService
         return rawBlockHashResult;
     }
 
-    private async Task GetBlocksViaRPC(int height, int count, List<SimplifiedBlock> blocksList, CancellationToken ct, List<byte>? list = null)
+    private async Task GetBlocksViaRPC(int height, int count, List<SimplifiedBlock> blocksList, CancellationToken ct, List<uint>? list = null)
     {
-        List<Task<GetBlock>> rawBlocksList = new(count);
+        List<Task<GetBlock>> rawBlocksList = list is not null && list.Count > 0 ? new(list.Count) : new(count);
 
         try
         {
             if (list is not null && list.Count > 0)
             {
-                for (int i = 0; i < list.Count; i++)
+                foreach (var blockHeight in list!)
                 {
-                    rawBlocksList.Add(_nodeRequester.GetBlock((uint)height - list[i], ct)!);
+                    rawBlocksList.Add(_nodeRequester.GetBlock(blockHeight, ct)!);
+
+                    if (ct.IsCancellationRequested) return;
                 }
-                if (ct.IsCancellationRequested)
-                    return;
             }
             else
             {
@@ -155,6 +151,7 @@ public class RealtimeBlocksDataService : IBlocksDataService
                         return;
                 }
             }
+
             await Task.WhenAll(rawBlocksList);
         }
         catch
@@ -162,10 +159,40 @@ public class RealtimeBlocksDataService : IBlocksDataService
             _logger.LogError("{service} failed to get list of simplified blocks :(", nameof(RealtimeBlocksDataService));
         }
 
-        foreach (var item in rawBlocksList)
+        ConvertToSimplifiedBlock(rawBlocksList, blocksList);
+    }
+    private void ConvertToSimplifiedBlock(List<Task<GetBlock>> rawBlocksList, List<SimplifiedBlock> blocksList)
+    {
+        foreach (var rawBlock in rawBlocksList)
         {
-            if (item.Result is not null && item.Result.Result is not null)
-                blocksList.Add(_blocksService.RPCBlockToSimplified(item.Result.Result));
+            foreach (var block in blocksList)
+            {
+                if(rawBlock is not null && rawBlock.Result is not null && rawBlock.Result.Result!.Height == block.Height)
+                {
+                    block.Size = rawBlock.Result.Result!.Size;
+                    block.Weight = rawBlock.Result.Result!.Weight;
+                    block.ProofType = _blocksService.GetBlockType(rawBlock.Result.Result.Proof_type!);
+                    block.Time = rawBlock.Result.Result!.Size;
+                    block.MedianTime = rawBlock.Result.Result!.Size;
+                    block.TxCount = rawBlock.Result.Result!.Size;
+                    break;
+                }
+            }
         }
+    }
+
+    private List<SimplifiedBlock> FillWithDefaultBlocks(int count, int height, SortDirection sortDirection)
+    {
+        List<SimplifiedBlock> list = new(count);
+        for(int i = 0; i < count; i++)
+        {
+            list.Add(new SimplifiedBlock()
+            {
+                Height = height
+            });
+            _ = sortDirection is SortDirection.DESC ? height-- : height++;
+        }
+
+        return list;
     }
 }
