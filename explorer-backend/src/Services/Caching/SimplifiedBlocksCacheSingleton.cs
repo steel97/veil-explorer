@@ -5,6 +5,7 @@ using ExplorerBackend.Models.Data;
 using ExplorerBackend.Models.Node.Response;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
+using System.Diagnostics;
 
 namespace ExplorerBackend.Services.Caching;
 
@@ -18,13 +19,15 @@ public class SimplifiedBlocksCacheSingleton
     private static int _latestBlockPosition = default;
     private const byte _BytesInBlock = 27; // SimplifiedBlock without height
     private static readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
+    private readonly IBlocksService _blocksService;
     private readonly ILogger<SimplifiedBlocksCacheSingleton> _logger;
     private readonly IOptionsMonitor<MemoryCacheConfig> _memoryCacheConfig;
 
-    public SimplifiedBlocksCacheSingleton(IOptionsMonitor<MemoryCacheConfig> memoryCacheConfig, ILogger<SimplifiedBlocksCacheSingleton> logger)
+    public SimplifiedBlocksCacheSingleton(IOptionsMonitor<MemoryCacheConfig> memoryCacheConfig, BlocksService blocksService, ILogger<SimplifiedBlocksCacheSingleton> logger)
     {
         _memoryCacheConfig = memoryCacheConfig;
         _logger = logger;
+        _blocksService = blocksService;
 
         ArgumentNullException.ThrowIfNull(_memoryCacheConfig.CurrentValue.OldestSimplifiedBlocksCacheCount);
         ArgumentNullException.ThrowIfNull(_memoryCacheConfig.CurrentValue.SimplifiedBlocksCacheCount);
@@ -36,16 +39,9 @@ public class SimplifiedBlocksCacheSingleton
         _blocksBuffer = GC.AllocateUninitializedArray<byte>(_blocksBufferCapacity * _BytesInBlock, pinned: true);
     }
 
-    public bool IsInCacheRange(int value)
-    {
-        if (value >= 1 && value <= _oldestBlocksBufferCapacity)
-            return true;
-
-        if (value <= _latestBlockHeight && value > _latestBlockHeight - _blocksBufferCapacity)
-            return true;
-
-        return false;
-    }
+    public bool IsInCacheRange(int height) =>
+        (height >= 1 && height <= _oldestBlocksBufferCapacity) ||
+        (height <= _latestBlockHeight && height > _latestBlockHeight - _blocksBufferCapacity);
 
     // writing blocks
     public void SetBlockCache(GetBlockResult block, bool isLatestBlock = false)
@@ -60,9 +56,11 @@ public class SimplifiedBlocksCacheSingleton
         {
             long offset = (block.Height * _BytesInBlock) - _BytesInBlock;
 
-            SerializeBlock(block, _oldestBlocksBuffer, offset);
+            SerializeBlock(block, _oldestBlocksBuffer, (nuint)offset);
             return;
         }
+
+        _semaphoreSlim.Wait(10);
 
         if (isLatestBlock)
         {
@@ -88,21 +86,20 @@ public class SimplifiedBlocksCacheSingleton
             else
                 offset = _latestBlockPosition * _BytesInBlock;
 
-            SerializeBlock(block, _blocksBuffer, offset);
+            SerializeBlock(block, _blocksBuffer, (nuint)offset);
 
             _latestBlockPosition += differenceOfHeight;
 
             while (_latestBlockPosition > _blocksBufferCapacity - 1)
                 _latestBlockPosition -= _blocksBufferCapacity;
 
+            _semaphoreSlim.Release();
             return;
         }
 
-    PrevBlock:
+        PrevBlock:
         if (block.Height < _latestBlockHeight && block.Height > (_latestBlockHeight - _blocksBufferCapacity))
         {
-            _semaphoreSlim.Wait(10);
-
             int positionToWrite = _latestBlockPosition - (_latestBlockHeight - block.Height) - 1;
 
             while (positionToWrite > _blocksBufferCapacity)
@@ -110,175 +107,180 @@ public class SimplifiedBlocksCacheSingleton
 
             long offset = positionToWrite * _BytesInBlock;
 
-            SerializeBlock(block, _blocksBuffer, offset);
+            SerializeBlock(block, _blocksBuffer, (nuint)offset);
 
             _semaphoreSlim.Release();
+            return;
         }
 
+        _semaphoreSlim.Release();
         return;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void SerializeBlock(GetBlockResult block, byte[] buffer, long offset)
+    private void SerializeBlock(GetBlockResult block, byte[] buffer, nuint offset)
     {
         ref byte bufferRef = ref MemoryMarshal.GetArrayDataReference(buffer);
-        BlockType blockType = block.Proof_type switch
-        {
-            "Proof-of-Work (X16RT)" => BlockType.POW_X16RT,
-            "Proof-of-work (ProgPow)" => BlockType.POW_ProgPow,
-            "Proof-of-work (RandomX)" => BlockType.POW_RandomX,
-            "Proof-of-work (Sha256D)" => BlockType.POW_Sha256D,
-            "Proof-of-Stake" => BlockType.POS,
-            _ => BlockType.UNKNOWN
-        };
+        BlockType blockType = _blocksService.GetBlockType(block.Proof_type!);
 
-        Unsafe.WriteUnaligned(ref Unsafe.Add(ref bufferRef, (nuint)offset), block.Size);
+        Unsafe.WriteUnaligned(ref Unsafe.Add(ref bufferRef, offset), block.Size);
         offset += sizeof(int);
-        Unsafe.WriteUnaligned(ref Unsafe.Add(ref bufferRef, (nuint)offset), block.Weight);
+        Unsafe.WriteUnaligned(ref Unsafe.Add(ref bufferRef, offset), block.Weight);
         offset += sizeof(int);
-        Unsafe.WriteUnaligned(ref Unsafe.Add(ref bufferRef, (nuint)offset), (byte)blockType);
+        Unsafe.WriteUnaligned(ref Unsafe.Add(ref bufferRef, offset), (byte)blockType);
         offset += sizeof(byte);
-        Unsafe.WriteUnaligned(ref Unsafe.Add(ref bufferRef, (nuint)offset), block.Time);
+        Unsafe.WriteUnaligned(ref Unsafe.Add(ref bufferRef, offset), block.Time);
         offset += sizeof(long);
-        Unsafe.WriteUnaligned(ref Unsafe.Add(ref bufferRef, (nuint)offset), block.Mediantime);
+        Unsafe.WriteUnaligned(ref Unsafe.Add(ref bufferRef, offset), block.Mediantime);
         offset += sizeof(long);
-        Unsafe.WriteUnaligned(ref Unsafe.Add(ref bufferRef, (nuint)offset), (ushort)block.NTx);
+        Unsafe.WriteUnaligned(ref Unsafe.Add(ref bufferRef, offset), (ushort)block.NTx);
     }
 
     // reading blocks
-    public SimplifiedBlock? GetSimplifiedBlock(int height)
+    public bool GetSimplifiedBlock(SimplifiedBlock block, int height)
     {
+        long offset;
         if (height >= 1 && height <= _oldestBlocksBufferCapacity)
         {
-            long offset = (height * _BytesInBlock) - _BytesInBlock;
-            return DeserializeBlock(_oldestBlocksBuffer, offset, height);
+            offset = (height * _BytesInBlock) - _BytesInBlock;
+            return DeserializeBlock(_oldestBlocksBuffer, (nuint)offset, block);            
         }
 
         if (height == _latestBlockHeight)
         {
-            long offset = _latestBlockPosition * _BytesInBlock - _BytesInBlock;
+            offset = _latestBlockPosition * _BytesInBlock - _BytesInBlock;
             if (offset < 0)
                 offset = 0;
-            return DeserializeBlock(_blocksBuffer, offset, height);
+
+            return DeserializeBlock(_blocksBuffer, (nuint)offset, block);
         }
 
         if (height < _latestBlockHeight && height > (_latestBlockHeight - _blocksBufferCapacity))
         {
             int blockIndex = _latestBlockPosition - (_latestBlockHeight - height) - 1;
 
-            long offset;
             if (blockIndex < 0)
                 blockIndex = _blocksBufferCapacity + blockIndex;
 
             offset = blockIndex * _BytesInBlock;
 
-            if (offset < 0)
-                offset = 0;
-
-            return DeserializeBlock(_blocksBuffer, offset, height);
+            return DeserializeBlock(_blocksBuffer, (nuint)offset, block);
         }
 
-        return null;
+        return false;
     }
 
-    public void GetSimplifiedBlocksRange(int height, int count, List<SimplifiedBlock> blocksList, out List<byte> notCachedBlockOffset)
+    public void GetSimplifiedBlocksRange(List<SimplifiedBlock> blocksList, int height, int count, SortDirection sort, out List<uint>? missedCacheBlocksList)
     {
-        notCachedBlockOffset = [];
-        byte offsetDiff = 0;
+        missedCacheBlocksList = null;
 
-        int blockIndex = _latestBlockPosition - (_latestBlockHeight - height);
+        _semaphoreSlim.Wait(10);
 
-        if (blockIndex - count >= 0 && height <= _latestBlockHeight && height >= _latestBlockHeight - 15 && count <= 15)
+        int blockPosition = _latestBlockPosition - (_latestBlockHeight - height);
+
+        if (blockPosition - count >= 0 && height <= _latestBlockHeight && height >= _latestBlockHeight - 15 && count <= 15)
         {
-            int arrayLenght = count * _BytesInBlock;
-            offsetDiff = (byte)count;
+            int arrayLength = count * _BytesInBlock;
             int bufferOffset;
-            if (blockIndex < 0)
-                blockIndex += _blocksBufferCapacity;
 
-            bufferOffset = blockIndex * _BytesInBlock;
+            if (blockPosition < 0)
+                blockPosition += _blocksBufferCapacity;
 
-            Span<byte> bytes = stackalloc byte[arrayLenght];
-            _blocksBuffer.AsSpan(bufferOffset - arrayLenght, arrayLenght).CopyTo(bytes);
-            int heightCopy = height;
-            for (int offset = arrayLenght - _BytesInBlock; offset >= 0; offset -= _BytesInBlock, offsetDiff--, heightCopy--)
+            bufferOffset = blockPosition * _BytesInBlock;
+
+            Span<byte> buffer = stackalloc byte[arrayLength];            
+            _blocksBuffer.AsSpan(bufferOffset - arrayLength, arrayLength).CopyTo(buffer);
+
+            _semaphoreSlim.Release();
+
+            int offsetSpan = sort is SortDirection.DESC ? arrayLength - _BytesInBlock : 0;
+            foreach (var block in blocksList)
             {
-                SimplifiedBlock? block = DeserializeBlock(heightCopy, bytes, offset);
-
-                if (block is null) notCachedBlockOffset.Add(offsetDiff);
-                else blocksList.Add(block);
+                bool deserializationSuccess = DeserializeBlock(buffer.Slice(offsetSpan, _BytesInBlock), block);
+                if(!deserializationSuccess)
+                {
+                    missedCacheBlocksList ??= new(count);
+                    missedCacheBlocksList.Add((uint)block.Height);
+                }
+                offsetSpan = Advance(offsetSpan, sort);
             }
             return;
         }
-        for (int i = height; offsetDiff < (byte)count; i--, offsetDiff++)
-        {
-            SimplifiedBlock? block = GetSimplifiedBlock(i);
 
-            if (block is null) notCachedBlockOffset.Add(offsetDiff);
-            else blocksList.Add(block);
+        foreach (var block in blocksList)
+        {
+            bool deserializationSuccess = GetSimplifiedBlock(block, block.Height);
+            if(!deserializationSuccess)
+            {
+                missedCacheBlocksList ??= new(count);
+                missedCacheBlocksList.Add((uint)block.Height);
+            } 
         }
+        _semaphoreSlim.Release();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static SimplifiedBlock? DeserializeBlock(byte[] buffer, long offset, int height)
+    private static bool DeserializeBlock(byte[] buffer, nuint offset, SimplifiedBlock block)
     {
         ref byte bufferRef = ref MemoryMarshal.GetArrayDataReference(buffer);
 
-        int size = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref bufferRef, (nuint)offset));
-        if (size <= 0) return default;
+        block.Size = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref bufferRef, offset));
 
-        SimplifiedBlock block = new()
-        {
-            Height = height,
-            Size = size
-        };
+        if (block.Size <= 0) return false;
 
         offset += sizeof(int);
-        block.Weight = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref bufferRef, (nuint)offset));
+        block.Weight = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref bufferRef, offset));
         offset += sizeof(int);
-        block.ProofType = Unsafe.ReadUnaligned<BlockType>(ref Unsafe.Add(ref bufferRef, (nuint)offset));
+        block.ProofType = Unsafe.ReadUnaligned<BlockType>(ref Unsafe.Add(ref bufferRef, offset));
         offset += sizeof(byte);
-        block.Time = Unsafe.ReadUnaligned<long>(ref Unsafe.Add(ref bufferRef, (nuint)offset));
+        block.Time = Unsafe.ReadUnaligned<long>(ref Unsafe.Add(ref bufferRef, offset));
         offset += sizeof(long);
-        block.MedianTime = Unsafe.ReadUnaligned<long>(ref Unsafe.Add(ref bufferRef, (nuint)offset));
+        block.MedianTime = Unsafe.ReadUnaligned<long>(ref Unsafe.Add(ref bufferRef, offset));
         offset += sizeof(long);
-        block.TxCount = Unsafe.ReadUnaligned<ushort>(ref Unsafe.Add(ref bufferRef, (nuint)offset));
+        block.TxCount = Unsafe.ReadUnaligned<ushort>(ref Unsafe.Add(ref bufferRef, offset));
 
-        return block;
+        return true;
     }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static SimplifiedBlock? DeserializeBlock(int height, ReadOnlySpan<byte> buffer, int offsetSpan)
+    private static bool DeserializeBlock(ReadOnlySpan<byte> buffer, SimplifiedBlock block)
     {
+        int offsetSpan = 0;
+
         ReadOnlySpan<byte> spanBufferSliced = buffer.Slice(offsetSpan, sizeof(int));
-        int size = MemoryMarshal.Read<int>(spanBufferSliced);
 
-        if (size <= 0) return default;
+        block.Size = MemoryMarshal.Read<int>(spanBufferSliced);
 
-        SimplifiedBlock block = new()
-        {
-            Height = height,
-            Size = size
-        };
+        if (block.Size <= 0) return false;
+
         offsetSpan += sizeof(int);
         spanBufferSliced = buffer.Slice(offsetSpan, sizeof(int));
-        block.Weight = MemoryMarshal.Read<int>(spanBufferSliced);
 
+        block.Weight = MemoryMarshal.Read<int>(spanBufferSliced);
         offsetSpan += sizeof(int);
         spanBufferSliced = buffer.Slice(offsetSpan, sizeof(byte));
-        block.ProofType = MemoryMarshal.Read<BlockType>(spanBufferSliced);
 
+        block.ProofType = MemoryMarshal.Read<BlockType>(spanBufferSliced);
         offsetSpan += sizeof(byte);
         spanBufferSliced = buffer.Slice(offsetSpan, sizeof(long));
-        block.Time = MemoryMarshal.Read<long>(spanBufferSliced);
 
+        block.Time = MemoryMarshal.Read<long>(spanBufferSliced);
         offsetSpan += sizeof(long);
         spanBufferSliced = buffer.Slice(offsetSpan, sizeof(long));
-        block.MedianTime = MemoryMarshal.Read<long>(spanBufferSliced);
 
+        block.MedianTime = MemoryMarshal.Read<long>(spanBufferSliced);
         offsetSpan += sizeof(long);
         spanBufferSliced = buffer.Slice(offsetSpan, sizeof(ushort));
+
         block.TxCount = MemoryMarshal.Read<ushort>(spanBufferSliced);
 
-        return block;
+        return true;
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int Advance(int value, SortDirection sort) => sort switch
+    {
+        SortDirection.DESC => value - _BytesInBlock,
+        _ => value + _BytesInBlock
+    };
 }
