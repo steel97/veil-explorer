@@ -29,12 +29,35 @@ public class BlocksController : ControllerBase
     [ProducesResponseType(typeof(List<SimplifiedBlock>), StatusCodes.Status200OK)]
     public async Task<IActionResult> Get(int offset, int count, SortDirection sort, CancellationToken cancellationToken)
     {
-        int calculatedHeight = sort == SortDirection.DESC ? _chaininfoSingleton.CurrentSyncedBlock - offset - count : 1 + offset + count;
-
-        if (calculatedHeight < 0 || calculatedHeight > _chaininfoSingleton.CurrentSyncedBlock)
-            return Problem($"offset should be higher or equal to 0 and less than {_chaininfoSingleton.CurrentSyncedBlock}", statusCode: 400);
-        if (count > _apiConfig.Value.MaxTransactionsPullCount || count < 1)
+        if (count < 1 || count > _apiConfig.Value.MaxBlocksPullCount)
             return Problem($"count should be between 1 and {_apiConfig.Value.MaxBlocksPullCount} ", statusCode: 400);
+
+        int latestBlockHeight = _chaininfoSingleton.CurrentSyncedBlock;
+
+        bool isOutOfBounds = false;
+        int offsetDifference;
+
+        if(sort is SortDirection.DESC)
+        {
+            offsetDifference = latestBlockHeight - offset - count;
+
+            if(offsetDifference <= count * (-1))
+                isOutOfBounds = true;
+            else if(offsetDifference < 0)
+                count += offsetDifference;
+        }
+        else
+        {
+            offsetDifference =  1 + offset + count;
+
+            if(offsetDifference - latestBlockHeight > count - 1)
+                isOutOfBounds = true;  
+            else if(offsetDifference - latestBlockHeight >= 0)
+                count -= offsetDifference - latestBlockHeight;
+        }
+
+        if (isOutOfBounds)
+            return Problem($"offset should be higher or equal to 0 and less than {_chaininfoSingleton.CurrentSyncedBlock}", statusCode: 400);
         
         return Ok(await _blocksDataService.GetSimplifiedBlocksAsync(offset, count, sort, cancellationToken));
     }
