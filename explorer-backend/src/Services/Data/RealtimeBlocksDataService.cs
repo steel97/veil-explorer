@@ -79,7 +79,7 @@ public class RealtimeBlocksDataService : IBlocksDataService
 
         if (_smpBlocksCache.IsInCacheRange(height))
         {
-            _smpBlocksCache.GetSimplifiedBlocksRange(blocksList, height, count, sort, out List<uint>? missedCacheBlocksList);
+            _smpBlocksCache.GetSimplifiedBlocksRange(blocksList, count, out List<uint>? missedCacheBlocksList);
 
             if (missedCacheBlocksList is not null && missedCacheBlocksList.Count > 0)
                 await GetBlocksViaRPC(height, missedCacheBlocksList.Count, blocksList, ct, missedCacheBlocksList);

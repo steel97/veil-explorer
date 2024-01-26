@@ -23,7 +23,7 @@ public class SimplifiedBlocksCacheSingleton
     private readonly ILogger<SimplifiedBlocksCacheSingleton> _logger;
     private readonly IOptionsMonitor<MemoryCacheConfig> _memoryCacheConfig;
 
-    public SimplifiedBlocksCacheSingleton(IOptionsMonitor<MemoryCacheConfig> memoryCacheConfig, BlocksService blocksService, ILogger<SimplifiedBlocksCacheSingleton> logger)
+    public SimplifiedBlocksCacheSingleton(IOptionsMonitor<MemoryCacheConfig> memoryCacheConfig, IBlocksService blocksService, ILogger<SimplifiedBlocksCacheSingleton> logger)
     {
         _memoryCacheConfig = memoryCacheConfig;
         _logger = logger;
@@ -35,8 +35,8 @@ public class SimplifiedBlocksCacheSingleton
         _oldestBlocksBufferCapacity = _memoryCacheConfig.CurrentValue.OldestSimplifiedBlocksCacheCount;
         _blocksBufferCapacity = _memoryCacheConfig.CurrentValue.SimplifiedBlocksCacheCount;
 
-        _oldestBlocksBuffer = GC.AllocateUninitializedArray<byte>(_oldestBlocksBufferCapacity * _BytesInBlock, pinned: true);
-        _blocksBuffer = GC.AllocateUninitializedArray<byte>(_blocksBufferCapacity * _BytesInBlock, pinned: true);
+        _oldestBlocksBuffer = GC.AllocateArray<byte>(_oldestBlocksBufferCapacity * _BytesInBlock, pinned: true);
+        _blocksBuffer = GC.AllocateArray<byte>(_blocksBufferCapacity * _BytesInBlock, pinned: true);
     }
 
     public bool IsInCacheRange(int height) =>
@@ -170,42 +170,11 @@ public class SimplifiedBlocksCacheSingleton
         return false;
     }
 
-    public void GetSimplifiedBlocksRange(List<SimplifiedBlock> blocksList, int height, int count, SortDirection sort, out List<uint>? missedCacheBlocksList)
+    public void GetSimplifiedBlocksRange(List<SimplifiedBlock> blocksList, int count, out List<uint>? missedCacheBlocksList)
     {
         missedCacheBlocksList = null;
 
         _semaphoreSlim.Wait(10);
-
-        int blockPosition = _latestBlockPosition - (_latestBlockHeight - height);
-
-        if (blockPosition - count >= 0 && height <= _latestBlockHeight && height >= _latestBlockHeight - 15 && count <= 15)
-        {
-            int arrayLength = count * _BytesInBlock;
-            int bufferOffset;
-
-            if (blockPosition < 0)
-                blockPosition += _blocksBufferCapacity;
-
-            bufferOffset = blockPosition * _BytesInBlock;
-
-            Span<byte> buffer = stackalloc byte[arrayLength];            
-            _blocksBuffer.AsSpan(bufferOffset - arrayLength, arrayLength).CopyTo(buffer);
-
-            _semaphoreSlim.Release();
-
-            int offsetSpan = sort is SortDirection.DESC ? arrayLength - _BytesInBlock : 0;
-            foreach (var block in blocksList)
-            {
-                bool deserializationSuccess = DeserializeBlock(buffer.Slice(offsetSpan, _BytesInBlock), block);
-                if(!deserializationSuccess)
-                {
-                    missedCacheBlocksList ??= new(count);
-                    missedCacheBlocksList.Add((uint)block.Height);
-                }
-                offsetSpan = Advance(offsetSpan, sort);
-            }
-            return;
-        }
 
         foreach (var block in blocksList)
         {
@@ -241,46 +210,4 @@ public class SimplifiedBlocksCacheSingleton
 
         return true;
     }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool DeserializeBlock(ReadOnlySpan<byte> buffer, SimplifiedBlock block)
-    {
-        int offsetSpan = 0;
-
-        ReadOnlySpan<byte> spanBufferSliced = buffer.Slice(offsetSpan, sizeof(int));
-
-        block.Size = MemoryMarshal.Read<int>(spanBufferSliced);
-
-        if (block.Size <= 0) return false;
-
-        offsetSpan += sizeof(int);
-        spanBufferSliced = buffer.Slice(offsetSpan, sizeof(int));
-
-        block.Weight = MemoryMarshal.Read<int>(spanBufferSliced);
-        offsetSpan += sizeof(int);
-        spanBufferSliced = buffer.Slice(offsetSpan, sizeof(byte));
-
-        block.ProofType = MemoryMarshal.Read<BlockType>(spanBufferSliced);
-        offsetSpan += sizeof(byte);
-        spanBufferSliced = buffer.Slice(offsetSpan, sizeof(long));
-
-        block.Time = MemoryMarshal.Read<long>(spanBufferSliced);
-        offsetSpan += sizeof(long);
-        spanBufferSliced = buffer.Slice(offsetSpan, sizeof(long));
-
-        block.MedianTime = MemoryMarshal.Read<long>(spanBufferSliced);
-        offsetSpan += sizeof(long);
-        spanBufferSliced = buffer.Slice(offsetSpan, sizeof(ushort));
-
-        block.TxCount = MemoryMarshal.Read<ushort>(spanBufferSliced);
-
-        return true;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int Advance(int value, SortDirection sort) => sort switch
-    {
-        SortDirection.DESC => value - _BytesInBlock,
-        _ => value + _BytesInBlock
-    };
 }
