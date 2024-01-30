@@ -35,6 +35,7 @@ import { useUI } from "@/composables/UI";
 const { t } = useI18n();
 const { getApiPath } = useConfigs();
 const { scrollToAnimated } = useUI();
+const localePath = useLocalePath();
 const route = useRoute();
 const config = useRuntimeConfig();
 
@@ -51,7 +52,7 @@ const getFetchUnconfirmedTxUrl = () =>
   ).toString()}&count=${config.public.txsPerPage as any as string}`;
 
 const unconfirmedTxData = ref((await useFetch<UnconfirmedTxResponse>(getFetchUnconfirmedTxUrl())).data);
-const buildRouteTemplate = () => `/unconfirmed-tx/{page}/`;
+const buildRouteTemplate = () => decodeURI(localePath(`/unconfirmed-tx/{page}/`));
 
 const selectPage = async (pg: number) => {
   if (pg == currentPage.value) return;

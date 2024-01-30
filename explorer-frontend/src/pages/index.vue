@@ -9,7 +9,7 @@
         {{ t("Home.RecentBlocks") }}
       </h1>
       <div class="text-right">
-        <NuxtLink to="/blocks" class="
+        <NuxtLink :to="localePath('/blocks')" class="
             uppercase
             text-sky-700
             dark:text-sky-400
@@ -28,6 +28,7 @@
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
+const localePath = useLocalePath();
 const config = useRuntimeConfig();
 
 const meta = computed(() => {

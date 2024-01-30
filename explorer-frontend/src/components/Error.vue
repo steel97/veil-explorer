@@ -15,7 +15,7 @@
       ">
       {{ t("Errors." + errLocale + ".Description") }}
     </div>
-    <NuxtLink to="/" class="
+    <NuxtLink :to="localePath('/')" class="
         uppercase
         text-sky-700
         dark:text-sky-400
@@ -28,6 +28,7 @@
 </template>
 
 <script setup lang="ts">
+const localePath = useLocalePath();
 const { t } = useI18n();
 const config = useRuntimeConfig();
 const route = useRoute();

@@ -11,7 +11,7 @@
   <div class="grid grid-cols-2 md:grid-cols-7 p-1 py-4 text-sm gap-3" v-for="(val, index) in props.data"
     :key="'block-' + val.height" :class="index < props.data.length - 1 ? 'border-b' : ''" :id="'block-' + val.height">
     <div>
-      <NuxtLink :to="'/block-height/' + val.height" class="
+      <NuxtLink :to="localePath('/block-height/' + val.height)" class="
           text-sky-700
           dark:text-sky-400
           hover:underline
@@ -89,6 +89,8 @@ const props = defineProps<{
   data: Array<SimplifiedBlock>;
   reactivityFix: number;
 }>();
+
+const localePath = useLocalePath();
 
 const date = useState('date', () => Date.now());
 let mounted = false;

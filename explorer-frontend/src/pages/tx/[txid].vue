@@ -26,12 +26,12 @@
           {{ t("Tx.BlockHeight") }}
         </div>
         <div v-if="tx.confirmed" class="border-b py-4">
-          <RouterLink :to="'/block-height/' + tx.blockHeight" class="
+          <NuxtLink :to="localePath('/block-height/' + tx.blockHeight)" class="
               text-sky-700
               dark:text-sky-400
               hover:underline
               underline-offset-4
-            ">#{{ tx.blockHeight }}</RouterLink>
+            ">#{{ tx.blockHeight }}</NuxtLink>
         </div>
 
         <!-- timestamp -->
@@ -94,6 +94,7 @@ import LockClosedIcon from "@heroicons/vue/24/solid/LockClosedIcon";
 const { t } = useI18n();
 const { getApiPath } = useConfigs();
 const { formatDateTimeLocal } = useFormatting();
+const localePath = useLocalePath();
 const data = useBlockchainInfo();
 const route = useRoute();
 const router = useRouter();

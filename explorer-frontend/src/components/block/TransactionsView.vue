@@ -1,7 +1,7 @@
 <template>
   <div v-for="tx in props.txdata" :key="'tx-' + tx.txId">
     <h2 class="font-semibold pt-4">
-      <RouterLink :to="'/tx/' + tx.txId" class="
+      <NuxtLink :to="localePath('/tx/' + tx.txId)" class="
           block
           text-sky-700
           dark:text-sky-400
@@ -14,7 +14,7 @@
           height-offset-fix
         ">
         {{ tx.txId }}
-      </RouterLink>
+      </NuxtLink>
     </h2>
     <SharedTransactionData :tx="tx" />
   </div>
@@ -26,4 +26,6 @@ import type { TransactionSimpleDecoded } from "@/models/API/BlockResponse";
 const props = defineProps<{
   txdata: Array<TransactionSimpleDecoded>;
 }>();
+
+const localePath = useLocalePath();
 </script>

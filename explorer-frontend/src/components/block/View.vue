@@ -7,12 +7,12 @@
           <!-- should never happend? -->
           <div v-if="props.block.prevBlock != null">
             <div class="max-w-full overflow-hidden text-ellipsis">
-              <RouterLink :to="'/block/' + props.block.prevBlock.hash" class="
+              <NuxtLink :to="localePath('/block/' + props.block.prevBlock.hash)" class="
                   text-sky-700
                   dark:text-sky-400
                   hover:underline
                   underline-offset-4
-                ">{{ props.block.prevBlock.hash }}</RouterLink>
+                ">{{ props.block.prevBlock.hash }}</NuxtLink>
             </div>
             <div class="text-xs text-gray-500 dark:text-gray-400">
               #{{ props.block.prevBlock.height }}
@@ -27,12 +27,12 @@
         <div class="text-right">
           <div v-if="props.block.nextBlock != null">
             <div class="max-w-full overflow-hidden text-ellipsis">
-              <RouterLink :to="'/block/' + props.block.nextBlock.hash" class="
+              <NuxtLink :to="localePath('/block/' + props.block.nextBlock.hash)" class="
                   text-sky-700
                   dark:text-sky-400
                   hover:underline
                   underline-offset-4
-                ">{{ props.block.nextBlock.hash }}</RouterLink>
+                ">{{ props.block.nextBlock.hash }}</NuxtLink>
             </div>
             <div class="text-xs text-gray-500 dark:text-gray-400">
               #{{ props.block.nextBlock.height }}
@@ -174,6 +174,7 @@ const props = defineProps<{
 const { t } = useI18n();
 const { getPow } = useBlockchain();
 const { formatDateLocal, formatTimeLocal } = useFormatting();
+const localePath = useLocalePath();
 const confirmationsEl = ref<HTMLElement | null>(null);
 const confirmationsTooltipEl = ref<HTMLElement | null>(null);
 const config = useRuntimeConfig();

@@ -9,7 +9,7 @@
     ">
     <div class="max-w-full mx-auto pr-3">
       <div class="flex justify-between items-center py-2">
-        <NuxtLink to="/" class="flex items-center">
+        <NuxtLink :to="localePath('/')" class="flex items-center">
           <div class="px-3 pr-2">
             <div class="flex items-center">
               <img class="h-6 w-auto pr-2 my-3" src="/images/logo.png" :alt="t('Header.Title')" />
@@ -98,18 +98,18 @@
                 dark:bg-gray-800 dark:text-gray-300
                 pt-2
               ">
-              <div class="
+              <NuxtLink :to="switchLocalePath(val.code)" class="
                   flex
                   items-center
                   justify-between
                   lang-entry
                   px-2
                   cursor-pointer
-                " v-for="val in getLocales()" :key="'lang-' + val.code" @click="switchLang(val.code)">
+                " v-for="val in getLocales()" :key="'lang-' + val.code">
                 <span class="mr-2"><img class="locale-icon" :alt="val.name"
                     :src="'/images/locales/' + val.code + '.png'" /></span>
                 <span class="grow uppercase">{{ val.name }}</span>
-              </div>
+              </NuxtLink>
             </div>
           </div>
         </div>
@@ -177,17 +177,17 @@
                 dark:bg-gray-800 dark:text-gray-300
                 pt-2
               ">
-              <div class="
+              <NuxtLink :to="switchLocalePath(valm.code)" class="
                   flex
                   items-center
                   justify-between
                   lang-entry
                   px-2
                   cursor-pointer
-                " v-for="valm in getLocales()" :key="'lang-m-' + valm.code" @click="switchLang(valm.code)">
+                " v-for="valm in getLocales()" :key="'lang-m-' + valm.code">
                 <span class="mr-2"><img class="locale-icon" :src="'/images/locales/' + valm.code + '.png'" /></span>
                 <span class="grow uppercase">{{ valm.name }}</span>
-              </div>
+              </NuxtLink>
             </div>
           </div>
         </div>
@@ -205,6 +205,8 @@ import Cookie from "js-cookie";
 
 const { t, locales, locale, fallbackLocale } =
   useI18n();
+const localePath = useLocalePath();
+const switchLocalePath = useSwitchLocalePath();
 const data = useBlockchainInfo();
 const themeState = useThemeState();
 const route = useRoute();
@@ -247,22 +249,22 @@ const getLinks = () => {
     {
       locale: t("Header.Links.Home"),
       name: "index",
-      link: "/",
+      link: localePath("/"),
     },
     {
       locale: t("Header.Links.Blocks"),
       name: "block",
-      link: "/blocks",
+      link: localePath("/blocks"),
     },
     {
       locale: t("Header.Links.TxStats"),
       name: "tx-stats",
-      link: "/tx-stats",
+      link: localePath("/tx-stats"),
     },
     {
       locale: t("Header.Links.UTxs"),
       name: "unconfirmed-tx",
-      link: "/unconfirmed-tx",
+      link: localePath("/unconfirmed-tx"),
     },
   ];
   return ret;
@@ -287,25 +289,6 @@ const getLocales = () => {
     loc.push(link);
   });
   return loc;
-};
-
-const switchLang = (lang: string) => {
-  let targetLang = lang;
-  if (locales.value.filter(a => (a as LocaleObject).code == targetLang).length == 0) {
-    targetLang = fallbackLocale.value.toString();
-  }
-
-  const now = new Date();
-  now.setDate(now.getDate() + config.public.cookieSaveDays);
-
-  Cookie.set("lang", targetLang, {
-    expires: now,
-    sameSite: "lax",
-  });
-
-  locale.value = targetLang;
-
-  openLocaleMenu();
 };
 
 const computeClasses = (link: ILink) => {

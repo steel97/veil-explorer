@@ -41,6 +41,7 @@ const { t } = useI18n();
 const { getApiPath } = useConfigs();
 const searchmodel = ref<string>("");
 const router = useRouter();
+const localePath = useLocalePath();
 
 const search = async () => {
   await searchInner();
@@ -49,7 +50,7 @@ const search = async () => {
 const searchInner = async (retry = 0) => {
   const query = searchmodel.value;
   if (query == "" || query == null) return;
-  const resData = await useFetch<SearchResponse>(
+  const resData = await $fetch<SearchResponse | null>(
     `${getApiPath()}/search`,
     {
       method: "POST",
@@ -59,12 +60,9 @@ const searchInner = async (retry = 0) => {
     }
   );
 
-  const data = resData.data.value;
+  const data = resData;
   if (data == null) {
-    // again ohmyfetch/nuxt3 bug
-    // to-do remove, when fix come to ohmyfetch/nuxt3
-    if (retry == 0) await searchInner(1);
-    else router.replace(`/search/notfound`);
+    router.replace(localePath(`/search/notfound`));
     return;
   }
 
@@ -75,19 +73,19 @@ const searchInner = async (retry = 0) => {
 
   switch (data.type) {
     case EntityType.UNKNOWN:
-      router.replace(`/search/notfound`);
+      router.replace(localePath(`/search/notfound`));
       break;
     case EntityType.BLOCK_HEIGHT:
-      router.replace(`/block-height/${data.query}`);
+      router.replace(localePath(`/block-height/${data.query}`));
       break;
     case EntityType.BLOCK_HASH:
-      router.replace(`/block/${data.query}`);
+      router.replace(localePath(`/block/${data.query}`));
       break;
     case EntityType.TRANSACTION_HASH:
-      router.replace(`/tx/${data.query}`);
+      router.replace(localePath(`/tx/${data.query}`));
       break;
     case EntityType.ADDRESS:
-      router.replace(`/address/${data.query}`);
+      router.replace(localePath(`/address/${data.query}`));
       break;
   }
 };

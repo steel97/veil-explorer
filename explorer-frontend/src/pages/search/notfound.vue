@@ -15,7 +15,7 @@
       ">
       {{ t("Search.Description") }}
     </div>
-    <NuxtLink to="/" class="
+    <NuxtLink :to="localePath('/')" class="
         uppercase
         text-sky-700
         dark:text-sky-400
@@ -29,6 +29,7 @@
 
 <script setup lang="ts">
 const { t } = useI18n();
+const localePath = useLocalePath();
 const config = useRuntimeConfig();
 
 const meta = computed(() => {

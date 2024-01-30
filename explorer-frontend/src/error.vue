@@ -31,8 +31,6 @@ import {
     useThemeState
 } from "@/composables/States";
 import { useNetworkManager } from "@/composables/NetworkManager";
-import { useLocalization } from "@/composables/Localization";
-import type { LocaleObject } from "vue-i18n-routing";
 import Cookie from "js-cookie";
 
 const config = useRuntimeConfig();
@@ -41,13 +39,10 @@ const props = defineProps({
 });
 
 const { connect } = useNetworkManager();
-const { getClientLocale } = useLocalization();
-const { t, locales, fallbackLocale, locale } = useI18n();
+const { t, locale } = useI18n();
 const themeState = useThemeState();
 const theme = useCookie("theme").value ?? "";
-const lang = useCookie("lang").value ?? getClientLocale();
 
-let currentLang = lang.toString();
 let currentTheme = theme;
 
 let usedMedia = false;
@@ -68,11 +63,6 @@ if (process.client && currentTheme == "") {
     }
 }
 
-if (locales.value.filter(locale => (locale as LocaleObject).code == currentLang).length == 0) {
-    currentLang = fallbackLocale.value.toString();
-}
-
-locale.value = currentLang;
 themeState.value = currentTheme == "dark" ? "dark" : "";
 
 const meta = computed(() => {

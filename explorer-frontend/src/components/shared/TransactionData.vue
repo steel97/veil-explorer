@@ -67,7 +67,7 @@
                     dark:text-sky-400
                     mr-2
                   " />
-                <RouterLink :to="'/address/' + input.prevOutAddresses[0]" class="
+                <NuxtLink :to="localePath('/address/' + input.prevOutAddresses[0])" class="
                     inline-block
                     max-width-hack
                     align-middle
@@ -83,7 +83,7 @@
                     height-offset-fix
                   ">
                   {{ input.prevOutAddresses[0] }}
-                </RouterLink>
+                </NuxtLink>
               </div>
               <div class="
                   text-xs
@@ -95,14 +95,14 @@
                   height-offset-fix
                 ">
                 via&nbsp;
-                <RouterLink :to="'/tx/' + input.prevOutTx + '#output-' + input.prevOutNum" class="
+                <NuxtLink :to="localePath('/tx/' + input.prevOutTx + '#output-' + input.prevOutNum)" class="
                     text-sky-700
                     dark:text-sky-400
                     hover:underline
                     underline-offset-4
                   ">
                   [{{ input.prevOutNum }}] {{ input.prevOutTx }}
-                </RouterLink>
+                </NuxtLink>
               </div>
             </div>
 
@@ -134,7 +134,7 @@
           <div class="block lg:flex justify-between">
             <div v-if="output.addresses != null && output.addresses.length > 0">
               <div class="mr-2 block lg:inline-block">#{{ outputId + 0 }}</div>
-              <RouterLink :to="'/address/' + output.addresses[0]" class="
+              <NuxtLink :to="localePath('/address/' + output.addresses[0])" class="
                   inline-block
                   align-middle
                   lg:align-bottom lg:max-w-none
@@ -149,7 +149,7 @@
                   height-offset-fix
                 ">
                 {{ output.addresses[0] }}
-              </RouterLink>
+              </NuxtLink>
             </div>
 
             <!-- start others -->
@@ -308,6 +308,7 @@ import type {
 import { COIN } from "@/core/Constants";
 
 const { t } = useI18n();
+const localePath = useLocalePath();
 
 const props = defineProps<{
   tx: TransactionSimpleDecoded;

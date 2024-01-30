@@ -37,6 +37,7 @@ import { useUI } from "@/composables/UI";
 const { t } = useI18n();
 const { getApiPath } = useConfigs();
 const { scrollToAnimated } = useUI();
+const localePath = useLocalePath();
 const route = useRoute();
 const config = useRuntimeConfig();
 
@@ -64,7 +65,7 @@ const blockHash = computed(
 );
 
 const buildRouteTemplate = () =>
-    `/block-height/${route.params.blockheight as string}/{page}/`;
+    decodeURI(localePath(`/block-height/${route.params.blockheight as string}/{page}/`));
 
 const selectPage = async (pg: number) => {
     if (pg == currentPage.value) return;
