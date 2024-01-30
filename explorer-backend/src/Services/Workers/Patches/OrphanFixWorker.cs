@@ -1,5 +1,3 @@
-using System.Text;
-using System.Net.Http.Headers;
 using Microsoft.Extensions.Options;
 using ExplorerBackend.Configs;
 using ExplorerBackend.Persistence.Repositories;
@@ -39,7 +37,7 @@ public class OrphanFixWorker : BackgroundService
             var transactionsRepository = scope.ServiceProvider.GetRequiredService<ITransactionsRepository>();
             var rawTxsRepository = scope.ServiceProvider.GetRequiredService<IRawTxsRepository>();
 
-            latestBlockPull:
+        latestBlockPull:
             var latestSyncedBlock = await blocksRepository.GetLatestBlockAsync(true, cancellationToken);
             var currentIndexedBlock = (latestSyncedBlock != null ? latestSyncedBlock.height : 0) + 1;
             if (latestSyncedBlock == null)
@@ -57,7 +55,7 @@ public class OrphanFixWorker : BackgroundService
                 // get hash by height
                 var blockHashCheck = await _nodeRequester.GetBlock((uint)i, cancellationToken);
 
-                if (blockHashCheck == null)
+                if (blockHashCheck == null || blockHashCheck.Result == null)
                 {
                     //_logger.LogInformation("Can't pull block hash");
                     continue;
@@ -65,7 +63,7 @@ public class OrphanFixWorker : BackgroundService
 
                 // better to get blocks from db in single query, however this is not "hot path" so...
                 var blockFromDB = await blocksRepository.GetBlockAsync(i, cancellationToken);
-                if (blockFromDB?.hash_hex == blockHashCheck.Result!.Hash)
+                if (blockFromDB?.hash_hex == blockHashCheck.Result.Hash)
                     continue;
 
                 foundOrphans++;

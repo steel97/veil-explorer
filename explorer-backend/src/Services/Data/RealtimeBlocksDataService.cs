@@ -1,8 +1,6 @@
 using ExplorerBackend.Models.API;
 using ExplorerBackend.Models.Data;
-using ExplorerBackend.Configs;
 using ExplorerBackend.Services.Caching;
-using Microsoft.Extensions.Options;
 using ExplorerBackend.Models.Node.Response;
 using ExplorerBackend.Services.Core;
 
@@ -45,12 +43,13 @@ public class RealtimeBlocksDataService : IBlocksDataService
         {
             var blockHash = await _nodeRequester.GetBlockHash((uint)height, cancellationToken);
             if (blockHash == null || blockHash.Result == null) return null;
-            var rawBlock = await _nodeRequester.GetBlock(blockHash!.Result!, cancellationToken, 2);
+            var rawBlock = await _nodeRequester.GetBlock(blockHash.Result, cancellationToken, 2);
 
             if (rawBlock is not null)
             {
                 rawBlockResult = rawBlock.Result;
-                await _cache.SetUserCacheDataAsync(height, rawBlock.Result!.Hash!, rawBlock.Result, cancellationToken);
+                if (rawBlock.Result is not null)
+                    await _cache.SetUserCacheDataAsync(height, rawBlock.Result.Hash!, rawBlock.Result, cancellationToken);
             }
         }
 
@@ -65,9 +64,11 @@ public class RealtimeBlocksDataService : IBlocksDataService
         if (_cache.LatestBlock is null)
         {
             var rawBlock = await _nodeRequester.GetLatestBlock(cancellationToken);
-            return _blocksService.RPCBlockToDb(rawBlock!.Result!);
+            if (rawBlock == null || rawBlock.Result == null) return null;
+            return _blocksService.RPCBlockToDb(rawBlock.Result);
         }
-        return _blocksService.RPCBlockToDb(_cache.LatestBlock!);
+
+        return _blocksService.RPCBlockToDb(_cache.LatestBlock);
     }
 
     public async Task<List<SimplifiedBlock>> GetSimplifiedBlocksAsync(int offset, int count, SortDirection sort = SortDirection.DESC, CancellationToken ct = default)
@@ -89,8 +90,8 @@ public class RealtimeBlocksDataService : IBlocksDataService
             await GetBlocksViaRPC(height, count, blocksList, ct);
         }
 
-        if(ct.IsCancellationRequested)
-            return null!;
+        if (ct.IsCancellationRequested)
+            return Enumerable.Empty<SimplifiedBlock>().ToList();
 
         return blocksList;
     }
@@ -128,15 +129,15 @@ public class RealtimeBlocksDataService : IBlocksDataService
 
     private async Task GetBlocksViaRPC(int height, int count, List<SimplifiedBlock> blocksList, CancellationToken ct, List<uint>? list = null)
     {
-        List<Task<GetBlock>> rawBlocksList = list is not null && list.Count > 0 ? new(list.Count) : new(count);
+        List<Task<GetBlock?>> rawBlocksList = list is not null && list.Count > 0 ? new(list.Count) : new(count);
 
         try
         {
             if (list is not null && list.Count > 0)
             {
-                foreach (var blockHeight in list!)
+                foreach (var blockHeight in list)
                 {
-                    rawBlocksList.Add(_nodeRequester.GetBlock(blockHeight, ct)!);
+                    rawBlocksList.Add(_nodeRequester.GetBlock(blockHeight, ct));
 
                     if (ct.IsCancellationRequested) return;
                 }
@@ -145,7 +146,7 @@ public class RealtimeBlocksDataService : IBlocksDataService
             {
                 for (int i = height; count > 0; count--, i--)
                 {
-                    rawBlocksList.Add(_nodeRequester.GetBlock((uint)i, ct, simplifiedTxInfo: 1)!);
+                    rawBlocksList.Add(_nodeRequester.GetBlock((uint)i, ct, simplifiedTxInfo: 1));
 
                     if (ct.IsCancellationRequested)
                         return;
@@ -161,20 +162,20 @@ public class RealtimeBlocksDataService : IBlocksDataService
 
         ConvertToSimplifiedBlock(rawBlocksList, blocksList);
     }
-    private void ConvertToSimplifiedBlock(List<Task<GetBlock>> rawBlocksList, List<SimplifiedBlock> blocksList)
+    private void ConvertToSimplifiedBlock(List<Task<GetBlock?>> rawBlocksList, List<SimplifiedBlock> blocksList)
     {
         foreach (var rawBlock in rawBlocksList)
         {
             foreach (var block in blocksList)
             {
-                if(rawBlock is not null && rawBlock.Result is not null && rawBlock.Result.Result!.Height == block.Height)
+                if (rawBlock is not null && rawBlock.Result is not null && rawBlock.Result.Result is not null && rawBlock.Result.Result.Height == block.Height)
                 {
-                    block.Size = rawBlock.Result.Result!.Size;
-                    block.Weight = rawBlock.Result.Result!.Weight;
-                    block.ProofType = _blocksService.GetBlockType(rawBlock.Result.Result.Proof_type!);
-                    block.Time = rawBlock.Result.Result!.Size;
-                    block.MedianTime = rawBlock.Result.Result!.Size;
-                    block.TxCount = rawBlock.Result.Result!.Size;
+                    block.Size = rawBlock.Result.Result.Size;
+                    block.Weight = rawBlock.Result.Result.Weight;
+                    block.ProofType = _blocksService.GetBlockType(rawBlock.Result.Result.Proof_type ?? string.Empty);
+                    block.Time = rawBlock.Result.Result.Time;
+                    block.MedianTime = rawBlock.Result.Result.Mediantime;
+                    block.TxCount = rawBlock.Result.Result.Tx?.Count ?? 0;
                     break;
                 }
             }
@@ -184,7 +185,7 @@ public class RealtimeBlocksDataService : IBlocksDataService
     private List<SimplifiedBlock> FillWithDefaultBlocks(int count, int height, SortDirection sortDirection)
     {
         List<SimplifiedBlock> list = new(count);
-        for(int i = 0; i < count; i++)
+        for (int i = 0; i < count; i++)
         {
             list.Add(new SimplifiedBlock()
             {

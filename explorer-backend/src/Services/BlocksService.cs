@@ -1,15 +1,11 @@
 using System.Text.Json;
 using System.Transactions;
-using System.Net.Http.Headers;
 using ExplorerBackend.Configs;
 using ExplorerBackend.Models.Data;
-using ExplorerBackend.Models.Node;
 using ExplorerBackend.Models.Node.Response;
 using ExplorerBackend.Persistence.Repositories;
 using Microsoft.Extensions.Options;
-using System.Text;
 using ExplorerBackend.Services.Core;
-using ExplorerBackend.Models.API;
 using System.Runtime.CompilerServices;
 
 namespace ExplorerBackend.Services;
@@ -61,7 +57,7 @@ public class BlocksService : IBlocksService
         size = block.Size,
         strippedsize = block.Strippedsize,
         time = block.Time,
-        proof_type = GetBlockType(block.Proof_type!),
+        proof_type = GetBlockType(block.Proof_type ?? string.Empty),
         veil_data_hash_hex = block.Veil_data_hash,
         version = block.Version,
         weight = block.Weight,
@@ -74,7 +70,7 @@ public class BlocksService : IBlocksService
 
         var validBlock = await _nodeRequester.GetBlock(validBlockHash, cancellationToken);
 
-        if (validBlock == null)
+        if (validBlock == null || validBlock.Result == null)
         {
             _logger.LogInformation("Can't pull block (orphan fix) for {blockHeight}", height);
             return false;
@@ -84,8 +80,8 @@ public class BlocksService : IBlocksService
         var blocksRepository = scope.ServiceProvider.GetRequiredService<IBlocksRepository>();
 
         await transactionsRepository.RemoveTransactionsForBlockAsync(height, cancellationToken);
-        await blocksRepository.UpdateBlockAsync(height, RPCBlockToDb(validBlock!.Result!), cancellationToken);
-        return !await InsertTransactionsAsync(height, validBlock.Result!.Tx!.Select(a => (string)a).ToList(), cancellationToken);
+        await blocksRepository.UpdateBlockAsync(height, RPCBlockToDb(validBlock.Result), cancellationToken);
+        return !await InsertTransactionsAsync(height, validBlock.Result?.Tx?.Select(a => ((JsonElement)a).GetString() ?? string.Empty).ToList(), cancellationToken);
     }
 
     public async Task<bool> InsertTransactionsAsync(int blockId, List<string>? txIds, CancellationToken cancellationToken)
@@ -207,7 +203,7 @@ public class BlocksService : IBlocksService
 
         return isTxFailed;
     }
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public BlockType GetBlockType(string proofType) => proofType switch
     {

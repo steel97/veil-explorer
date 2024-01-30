@@ -1,13 +1,8 @@
-using System.Text;
-using System.Text.Json;
-using System.Net.Http.Headers;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.SignalR;
 using ExplorerBackend.Hubs;
 using ExplorerBackend.Configs;
 using ExplorerBackend.Services.Caching;
-using ExplorerBackend.Models.Node;
-using ExplorerBackend.Models.Node.Response;
 using ExplorerBackend.Services.Core;
 
 namespace ExplorerBackend.Services.Workers;
@@ -27,7 +22,7 @@ public class BlockchainWorker : BackgroundService
         _hubContext = hubContext;
         _explorerConfig = explorerConfig;
         _chainInfoSingleton = chaininfoSingleton;
-        _nodeRequester = nodeRequester;;
+        _nodeRequester = nodeRequester; ;
     }
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -37,11 +32,11 @@ public class BlockchainWorker : BackgroundService
             try
             {
                 // get blockchain info
-                var blockchainInfo =  _nodeRequester.GetBlockChainInfo(cancellationToken);
+                var blockchainInfo = _nodeRequester.GetBlockChainInfo(cancellationToken);
 
                 //  chainalgo stats
-                var chainalgoStats =  _nodeRequester.GetChainAlgoStats(cancellationToken);
-                
+                var chainalgoStats = _nodeRequester.GetChainAlgoStats(cancellationToken);
+
                 await Task.WhenAll(chainalgoStats, blockchainInfo);
 
                 // updating cache
@@ -95,6 +90,6 @@ public class BlockchainWorker : BackgroundService
                 _logger.LogError(ex, "Can't handle blockchain info");
             }
         }
-    
+
     }
 }

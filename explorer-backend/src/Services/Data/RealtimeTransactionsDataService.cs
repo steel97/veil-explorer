@@ -16,10 +16,12 @@ public class RealtimeTransactionsDataService(NodeRequester nodeRequester, IUtili
     public async Task<Transaction?> GetTransactionByIdAsync(string txid, CancellationToken cancellationToken = default)
     {
         GetRawTransaction? tx = await _nodeRequester.GetRawTransaction(txid, cancellationToken);
+        if (tx == null || tx.Result == null) return null;
+
         return new()
         {
             block_height = 0,
-            txid_hex = tx!.Result!.txid,
+            txid_hex = tx.Result.txid,
             hash_hex = tx.Result.hash,
             version = tx.Result.version,
             size = tx.Result.size,
@@ -33,10 +35,12 @@ public class RealtimeTransactionsDataService(NodeRequester nodeRequester, IUtili
     public async Task<TransactionExtended?> GetTransactionFullByIdAsync(string txid, CancellationToken cancellationToken = default)
     {
         GetRawTransaction? tx = await _nodeRequester.GetRawTransaction(txid, cancellationToken);
+        if (tx == null || tx.Result == null) return null;
+
         return new()
         {
             block_height = 0,
-            txid_hex = tx!.Result!.txid,
+            txid_hex = tx.Result.txid,
             hash_hex = tx.Result.hash,
             version = tx.Result.version,
             size = tx.Result.size,
@@ -74,7 +78,7 @@ public class RealtimeTransactionsDataService(NodeRequester nodeRequester, IUtili
             list.Add(new()
             {
                 block_height = blockHeight,
-                txid_hex = tx!.txid,
+                txid_hex = tx.txid,
                 hash_hex = tx.hash,
                 version = tx.version,
                 size = tx.size,
@@ -92,7 +96,7 @@ public class RealtimeTransactionsDataService(NodeRequester nodeRequester, IUtili
     {
         GetRawTransaction? tx = await _nodeRequester.GetRawTransaction(txid, cancellationToken);
 
-        return tx!.Result!.hex!;
+        return tx?.Result?.hex;
     }
 
     public List<TransactionExtended>? ToTransactionExtended(List<GetRawTransactionResult> list, int height)

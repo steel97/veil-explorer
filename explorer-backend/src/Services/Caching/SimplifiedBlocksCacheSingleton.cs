@@ -97,7 +97,7 @@ public class SimplifiedBlocksCacheSingleton
             return;
         }
 
-        PrevBlock:
+    PrevBlock:
         if (block.Height < _latestBlockHeight && block.Height > (_latestBlockHeight - _blocksBufferCapacity))
         {
             int positionToWrite = _latestBlockPosition - (_latestBlockHeight - block.Height) - 1;
@@ -121,7 +121,7 @@ public class SimplifiedBlocksCacheSingleton
     private void SerializeBlock(GetBlockResult block, byte[] buffer, nuint offset)
     {
         ref byte bufferRef = ref MemoryMarshal.GetArrayDataReference(buffer);
-        BlockType blockType = _blocksService.GetBlockType(block.Proof_type!);
+        BlockType blockType = _blocksService.GetBlockType(block.Proof_type ?? string.Empty);
 
         Unsafe.WriteUnaligned(ref Unsafe.Add(ref bufferRef, offset), block.Size);
         offset += sizeof(int);
@@ -143,7 +143,7 @@ public class SimplifiedBlocksCacheSingleton
         if (height >= 1 && height <= _oldestBlocksBufferCapacity)
         {
             offset = (height * _BytesInBlock) - _BytesInBlock;
-            return DeserializeBlock(_oldestBlocksBuffer, (nuint)offset, block);            
+            return DeserializeBlock(_oldestBlocksBuffer, (nuint)offset, block);
         }
 
         if (height == _latestBlockHeight)
@@ -179,11 +179,11 @@ public class SimplifiedBlocksCacheSingleton
         foreach (var block in blocksList)
         {
             bool deserializationSuccess = GetSimplifiedBlock(block, block.Height);
-            if(!deserializationSuccess)
+            if (!deserializationSuccess)
             {
                 missedCacheBlocksList ??= new(count);
                 missedCacheBlocksList.Add((uint)block.Height);
-            } 
+            }
         }
         _semaphoreSlim.Release();
     }

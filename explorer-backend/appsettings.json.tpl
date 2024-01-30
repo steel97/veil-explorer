@@ -10,7 +10,8 @@
     ],
     "Swagger": {
       "Enabled": true,
-      "RoutePrefix": ""
+      "RoutePrefix": "/swagger",
+      "RedirectFromHomepage": true
     }
   },
   "API": {
@@ -75,7 +76,8 @@
         "Microsoft": "Warning",
         "Microsoft.AspNetCore": "Warning",
         "Microsoft.Hosting.Lifetime": "Information",
-        "System.Net.Http.HttpClient": "Error"
+        "System.Net.Http.HttpClient": "Error",
+        "Npgsql": "Warning"
       }
     },
     "Enrich": [
