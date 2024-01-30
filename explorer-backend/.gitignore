@@ -4,6 +4,8 @@ output
 internal
 logs
 appsettings.json
+appsettings.db.json
+appsettings.rpc.json
 appsettings.production.json
 *.cfg
 *.rsa

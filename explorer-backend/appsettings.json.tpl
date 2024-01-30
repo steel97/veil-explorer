@@ -46,8 +46,7 @@
       "Mode": 2
     }
   },
-  "MemoryCache":
-  {
+  "MemoryCache": {
     "Port" : 6379,
     "Host" : "localhost",
     "ExpirationScanFrequency": 10000,
