@@ -1,6 +1,8 @@
 # veil-explorer
 [Veil Blockchain](https://github.com/Veil-Project/veil) explorer developed with asp.net core and nuxt3
 
+## Warning `master` branch contains unreleased changes which is not yet covered by docs
+
 Example: https://explorer.veil-project.com
 
 [![Build](https://github.com/steel97/veil-explorer/actions/workflows/build.yaml/badge.svg)](https://github.com/steel97/veil-explorer/actions/workflows/build.yaml)
