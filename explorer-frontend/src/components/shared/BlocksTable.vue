@@ -76,12 +76,11 @@
 </template>
 
 <script setup lang="ts">
-import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/vue/solid";
+import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/vue/24/solid";
 import { useI18n } from "vue-i18n";
 import { useFormatting } from "@/composables/Formatting";
-import { BlockType, SimplifiedBlock } from "@/models/API/SimplifiedBlock";
+import type { SimplifiedBlock } from "@/models/API/SimplifiedBlock";
 import { useBlockchain } from "@/composables/Blockchain";
-import locale from "@/localization/en";
 
 const config = useRuntimeConfig();
 const watcher = ref(0);
@@ -211,7 +210,7 @@ const getAge = (block: SimplifiedBlock) => {
 };
 
 const getBlockWeightRaw = (block: SimplifiedBlock) =>
-  ((100 * block.weight) / config.MAX_BLOCK_WEIGHT).toFixed(1);
+  ((100 * block.weight) / config.public.maxBlockWeight).toFixed(1);
 
 const getBlockWeight = (block: SimplifiedBlock) =>
   `width: ${getBlockWeightRaw(block)}%`;

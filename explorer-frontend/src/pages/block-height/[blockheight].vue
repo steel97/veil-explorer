@@ -24,13 +24,13 @@
     <BlockTransactionsView v-if="blockData != null && blockData.transactions != null" :txdata="blockData.transactions" />
 
     <SharedPagination v-if="blockData != null && blockData.transactions != null" :overallEntries="blockData.txnCount"
-      :entriesPerPage="config.TXS_PER_PAGE" :currentPage="currentPage" :linkTemplate="buildRouteTemplate()"
+      :entriesPerPage="config.public.txsPerPage" :currentPage="currentPage" :linkTemplate="buildRouteTemplate()"
       @pageSelected="selectPage" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { BlockResponse } from "@/models/API/BlockResponse";
+import type { BlockResponse } from "@/models/API/BlockResponse";
 import { useUI } from "@/composables/UI";
 import { useI18n } from "vue-i18n";
 
@@ -47,11 +47,11 @@ const page =
 const currentPage = ref(page + 1);
 
 const fetchBlock = async () =>
-  await useFetch<string, BlockResponse>(`${getApiPath()}/block`, {
+  await useFetch<BlockResponse>(`${getApiPath()}/block`, {
     method: "POST",
     body: {
       height: route.params.blockheight,
-      offset: (currentPage.value - 1) * config.TXS_PER_PAGE,
+      offset: (currentPage.value - 1) * config.public.txsPerPage,
       count: config.TXS_PER_PAGE,
     },
   });
@@ -109,5 +109,5 @@ const meta = computed(() => {
     ],
   };
 });
-useMeta(meta);
+useHead(meta);
 </script>

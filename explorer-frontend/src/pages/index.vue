@@ -49,5 +49,5 @@ const meta = computed(() => {
     ],
   };
 });
-useMeta(meta);
+useHead(meta);
 </script>

@@ -12,7 +12,7 @@
             text-ellipsis
             max-address-width
           ">{{ address }}</span>&nbsp;
-        <DuplicateIcon class="
+        <DocumentDuplicateIcon class="
             inline-block
             h-5
             w-5
@@ -41,7 +41,7 @@
                     text-sky-700
                     dark:text-sky-400
                   " />
-                <XIcon v-if="!val.check" class="
+                <XMarkIcon v-if="!val.check" class="
                     inline-block
                     h-5
                     w-5
@@ -115,8 +115,10 @@
 </template>
 
 <script setup lang="ts">
-import { AddressResponse } from "@/models/API/AddressResponse";
-import { DuplicateIcon, CheckIcon, XIcon } from "@heroicons/vue/solid";
+import type { AddressResponse } from "@/models/API/AddressResponse";
+import DocumentDuplicateIcon from "@heroicons/vue/24/solid/DocumentDuplicateIcon";
+import CheckIcon from "@heroicons/vue/24/solid/CheckIcon";
+import XMarkIcon from "@heroicons/vue/24/solid/XMarkIcon";
 import { useI18n } from "vue-i18n";
 import QrcodeVue from "qrcode.vue";
 import Toastify from "toastify-js";
@@ -230,7 +232,7 @@ const copyToClipboard = () => {
 
 const fetchAddress = async (forceScanAmount = false) => {
   try {
-    const { data } = await useFetch<string, AddressResponse>(
+    const { data } = await useFetch<AddressResponse>(
       `${getApiPath()}/address`,
       {
         method: "POST",
@@ -295,7 +297,7 @@ const meta = computed(() => {
     ],
   };
 });
-useMeta(meta);
+useHead(meta);
 </script>
 
 <style scoped>

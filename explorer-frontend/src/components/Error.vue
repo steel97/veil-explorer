@@ -64,7 +64,7 @@ const meta = computed(() => {
   };
 });
 
-useMeta(meta);
+useHead(meta);
 
 if (process.server) {
   const nuxtApp = useNuxtApp();

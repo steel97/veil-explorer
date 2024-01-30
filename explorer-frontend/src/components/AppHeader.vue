@@ -33,7 +33,7 @@
               focus:outline-none
             " @click="toggleMenu">
             <span class="sr-only">{{ t("Header.OpenMenu") }}</span>
-            <MenuIcon class="h-6 w-6" />
+            <Bars3Icon class="h-6 w-6" />
           </button>
         </div>
         <nav class="hidden lg:flex uppercase px-10 grow">
@@ -196,8 +196,9 @@
   </header>
 </template>
 <script setup lang="ts">
-import { SunIcon, MoonIcon } from "@heroicons/vue/solid";
-import { MenuIcon } from "@heroicons/vue/outline";
+import MoonIcon from "@heroicons/vue/24/solid/MoonIcon";
+//import SunIcon from "@heroicons/vue/24/solid/SunIcon";
+import Bars3Icon from "@heroicons/vue/24/outline/Bars3Icon";
 import { useThemeState, useBlockchainInfo } from "@/composables/States";
 import { useI18n } from "vue-i18n";
 import Cookie from "js-cookie";
@@ -229,7 +230,7 @@ export interface ILink {
 
 watch(themeSwitch, (nval) => {
   const now = new Date();
-  now.setDate(now.getDate() + config.COOKIE_SAVE_DAYS);
+  now.setDate(now.getDate() + config.public.cookieSaveDays);
 
   themeState.value = themeSwitch.value ? "dark" : "light";
 
@@ -270,7 +271,7 @@ const getLinks = () => {
 const getCurrentLocale = () => {
   return {
     code: locale.value,
-    name: config.locales[locale.value],
+    name: config.public.locales[locale.value],
   };
 };
 
@@ -280,7 +281,7 @@ const getLocales = () => {
     if (lang == getCurrentLocale().code) return;
     const link: ILocale = {
       code: lang,
-      name: config.locales[lang] as any as string,
+      name: config.public.locales[lang] as any as string,
     };
     locales.push(link);
   });
@@ -294,7 +295,7 @@ const switchLang = (lang: string) => {
   }
 
   const now = new Date();
-  now.setDate(now.getDate() + config.COOKIE_SAVE_DAYS);
+  now.setDate(now.getDate() + config.public.cookieSaveDays);
 
   Cookie.set("lang", targetLang, {
     expires: now,

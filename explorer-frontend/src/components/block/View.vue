@@ -155,11 +155,11 @@
 </template>
 
 <script setup lang="ts">
-import { BlockResponse } from "@/models/API/BlockResponse";
+import type { BlockResponse } from "@/models/API/BlockResponse";
 import { useBlockchain } from "@/composables/Blockchain";
 import { useFormatting } from "@/composables/Formatting";
 import { useBlockchainInfo } from "@/composables/States";
-import { LockClosedIcon } from "@heroicons/vue/solid";
+import { LockClosedIcon } from "@heroicons/vue/24/solid";
 import { useI18n } from "vue-i18n";
 import {
   createPopperLite as createPopper,
@@ -200,7 +200,7 @@ const getTitle = computed(() =>
 );
 
 const getBlockWeightRaw = (weight: number) =>
-  ((100 * weight) / config.MAX_BLOCK_WEIGHT).toFixed(1);
+  ((100 * weight) / config.public.maxBlockWeight).toFixed(1);
 
 const getBlockWeight = (weight: number) =>
   `width: ${getBlockWeightRaw(weight)}%`;

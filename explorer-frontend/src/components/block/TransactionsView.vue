@@ -21,9 +21,7 @@
 </template>
 
 <script setup lang="ts">
-import { TransactionSimpleDecoded } from "@/models/API/BlockResponse";
-
-const config = useRuntimeConfig();
+import type { TransactionSimpleDecoded } from "@/models/API/BlockResponse";
 
 const props = defineProps<{
   txdata: Array<TransactionSimpleDecoded>;

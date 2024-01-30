@@ -47,7 +47,7 @@
           </div>
         </div>
         <div class="text-left mx-2 mt-4 md:mt-0 md:flex-center">
-          &copy; VEIL-PROJECT 2022
+          &copy; VEIL-PROJECT 2024
         </div>
       </div>
     </div>

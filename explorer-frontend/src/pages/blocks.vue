@@ -30,10 +30,10 @@
       <SharedBlocksTable :data="blocks" :reactivityFix="reactivityFix" />
     </div>
     <SharedPagination :overallEntries="backgroundInfoDataState != null &&
-        backgroundInfoDataState.currentSyncedBlock != null
-        ? backgroundInfoDataState.currentSyncedBlock
-        : 0
-      " :entriesPerPage="config.BLOCKS_PER_PAGE" :currentPage="currentPage" :linkTemplate="buildRouteTemplate()"
+      backgroundInfoDataState.currentSyncedBlock != null
+      ? backgroundInfoDataState.currentSyncedBlock
+      : 0
+      " :entriesPerPage="config.public.blocksPerPage" :currentPage="currentPage" :linkTemplate="buildRouteTemplate()"
       @pageSelected="selectPage" />
   </div>
 </template>
@@ -44,7 +44,7 @@ import { useLatestBlockInfo } from "@/composables/States";
 import { useConfigs } from "@/composables/Configs";
 import { useBackgroundInfo } from "@/composables/States";
 import { useUI } from "@/composables/UI";
-import { SimplifiedBlock } from "@/models/API/SimplifiedBlock";
+import type { SimplifiedBlock } from "@/models/API/SimplifiedBlock";
 
 const { getApiPath } = useConfigs();
 const { scrollToAnimated } = useUI();
@@ -70,7 +70,7 @@ const changeSort = async (target: string) => {
   targetSort.value = target == "asc" ? 0 : 1;
   window.history.replaceState({}, "", buildRouteSort(target));
   const blocksInfoLocal = await fetchBlocks();
-  blocks.value = blocksInfoLocal.data.value;
+  blocks.value = blocksInfoLocal.data.value ?? [];
   reactivityFix.value++;
 };
 
@@ -92,18 +92,18 @@ const selectPage = async (pg: number) => {
   currentPage.value = pg;
   window.history.replaceState({}, "", link);
   const blocksInfoLocal = await fetchBlocks();
-  blocks.value = blocksInfoLocal.data.value;
+  blocks.value = blocksInfoLocal.data.value ?? [];
   reactivityFix.value++;
 };
 
 const fetchBlocks = async () =>
-  await useFetch<string, Array<SimplifiedBlock>>(
-    `${getApiPath()}/blocks?offset=${(currentPage.value - 1) * config.BLOCKS_PER_PAGE
+  await useFetch<Array<SimplifiedBlock>>(
+    `${getApiPath()}/blocks?offset=${(currentPage.value - 1) * config.public.blocksPerPage
     }&count=${config.BLOCKS_PER_PAGE}&sort=${targetSort.value}`
   );
 
 const blocksInfo = await fetchBlocks();
-const blocks = ref<Array<SimplifiedBlock>>(blocksInfo.data.value);
+const blocks = ref<Array<SimplifiedBlock>>(blocksInfo.data.value ?? []);
 const reactivityFix = ref(0);
 
 watch(latestBlock, (nval) => {
@@ -138,5 +138,5 @@ const meta = computed(() => {
     ],
   };
 });
-useMeta(meta);
+useHead(meta);
 </script>

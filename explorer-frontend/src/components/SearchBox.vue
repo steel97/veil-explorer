@@ -50,7 +50,7 @@ const search = async () => {
 const searchInner = async (retry = 0) => {
   const query = searchmodel.value;
   if (query == "" || query == null) return;
-  const resData = await useFetch<string, SearchResponse>(
+  const resData = await useFetch<SearchResponse>(
     `${getApiPath()}/search`,
     {
       method: "POST",

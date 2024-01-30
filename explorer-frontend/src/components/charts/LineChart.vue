@@ -5,8 +5,9 @@
 </template>
 
 <script setup lang="ts">
-import { GraphData } from "@/models/System/GraphData";
-import { Chart, ChartOptions } from "chart.js";
+import type { GraphData } from "@/models/System/GraphData";
+import { Chart } from "chart.js";
+import type { ChartOptions } from "chart.js";
 
 const ctxRef = ref<HTMLCanvasElement | null>(null);
 

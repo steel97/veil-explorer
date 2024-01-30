@@ -58,7 +58,7 @@
               input.prevOutAddresses.length > 0
               ">
               <div class="block lg:flex flex-wrap basis-0 flex-grow items-center">
-                <ArrowCircleRightIcon class="
+                <ArrowRightCircleIcon class="
                     inline-block
                     lg:block
                     h-4
@@ -292,16 +292,16 @@
 </template>
 
 <script setup lang="ts">
+import ArrowRightCircleIcon from "@heroicons/vue/24/solid/ArrowRightCircleIcon";
+import ChevronRightIcon from "@heroicons/vue/24/solid/ChevronRightIcon";
+import ChevronDownIcon from "@heroicons/vue/24/solid/ChevronDownIcon";
 import {
-  ChevronRightIcon,
-  ChevronDownIcon,
-  ArrowCircleRightIcon,
-} from "@heroicons/vue/solid";
-import {
-  TransactionSimpleDecoded,
   TxInType,
   OutputTypes,
-  txnouttype,
+  txnouttype
+} from "@/models/API/BlockResponse";
+import type {
+  TransactionSimpleDecoded,
   TxVinSimpleDecoded,
   TxVoutSimpleDecoded,
 } from "@/models/API/BlockResponse";

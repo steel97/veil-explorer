@@ -88,9 +88,8 @@
 <script setup lang="ts">
 import { useFormatting } from "@/composables/Formatting";
 import { useBlockchainInfo } from "@/composables/States";
-import { TxRequest } from "@/models/API/TxRequest";
-import { TxResponse } from "@/models/API/TxResponse";
-import { LockClosedIcon } from "@heroicons/vue/solid";
+import type { TxResponse } from "@/models/API/TxResponse";
+import LockClosedIcon from "@heroicons/vue/24/solid/LockClosedIcon";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
@@ -104,7 +103,7 @@ const config = useRuntimeConfig();
 const mtxid = (route.params.txid as string).split("#")[0];
 
 const fetchTx = async () =>
-  await useFetch<string, TxResponse>(`${getApiPath()}/tx`, {
+  await useFetch<TxResponse>(`${getApiPath()}/tx`, {
     method: "POST",
     body: {
       hash: mtxid,
@@ -124,6 +123,7 @@ const getConfirmationClass = computed(() => {
 });
 
 const calculateConfirmations = computed(() => {
+  if (tx.value == null) return 0;
   if (!tx.value.confirmed) return 0;
   return (data.value?.blocks ?? 0) - tx.value.blockHeight + 1;
 });
@@ -149,5 +149,5 @@ const meta = computed(() => {
     ],
   };
 });
-useMeta(meta);
+useHead(meta);
 </script>

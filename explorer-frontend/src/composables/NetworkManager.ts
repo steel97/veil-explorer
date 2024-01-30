@@ -1,9 +1,9 @@
 import * as signalR from "@microsoft/signalr";
 import { useConfigs } from "@/composables/Configs";
 import { useBackgroundInfo, useBlockchainInfo, useLatestBlockInfo } from "@/composables/States";
-import { GetBlockchainInfoResult } from "@/models/Node/GetBlockchainInfoResult";
-import { GetChainalgoStatsResult } from "@/models/Node/GetChainalgoStatsResult";
-import { SimplifiedBlock } from "@/models/API/SimplifiedBlock";
+import type { GetBlockchainInfoResult } from "@/models/Node/GetBlockchainInfoResult";
+import type { GetChainalgoStatsResult } from "@/models/Node/GetChainalgoStatsResult";
+import type { SimplifiedBlock } from "@/models/API/SimplifiedBlock";
 
 export const useNetworkManager = () => {
     const { getApiPath } = useConfigs();

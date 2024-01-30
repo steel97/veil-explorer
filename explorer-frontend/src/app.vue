@@ -127,9 +127,9 @@ const meta = computed(() => {
   };
 });
 
-useMeta(meta);
+useHead(meta);
 
-const chainInfo = await useFetch<string, BlockchainInfo>(
+const chainInfo = await useFetch<BlockchainInfo>(
   `${getApiPath()}/blockchaininfo`
 );
 

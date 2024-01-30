@@ -24,7 +24,8 @@
       </div>
       <div class="flex justify-between mb-2">
         <div class="flex items-center">
-          <RefreshIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" /><span>{{ t("NetworkSummary.LastBlockUpdate")
+          <ArrowPathIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" /><span>{{
+            t("NetworkSummary.LastBlockUpdate")
           }}</span>
         </div>
         <div class="text-right overflow-hidden text-ellipsis max-right-width">
@@ -36,14 +37,14 @@
       </div>
       <div class="flex justify-between mb-2">
         <div class="flex items-center">
-          <DatabaseIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" />
+          <CircleStackIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" />
           <span>{{ t("NetworkSummary.DataSize") }}</span>
         </div>
         <div class="text-right max-right-width">{{ getSize() }}</div>
       </div>
       <div class="flex justify-between mb-2">
         <div class="flex items-center">
-          <PuzzleIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" />
+          <PuzzlePieceIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" />
           <span>{{ t("NetworkSummary.NextSuperblock") }}</span>
         </div>
         <div class="text-right max-right-width">
@@ -66,7 +67,7 @@
       </div>
       <div class="flex justify-between mb-2">
         <div class="flex items-center">
-          <ChipIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" /><span>ProgPow</span>
+          <CpuChipIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" /><span>ProgPow</span>
         </div>
         <div class="text-right">
           {{ blockchainData?.difficulty_progpow ?? t("Core.NoData") }}
@@ -74,7 +75,7 @@
       </div>
       <div class="flex justify-between mb-2">
         <div class="flex items-center">
-          <LightningBoltIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" /><span>RandomX</span>
+          <BoltIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" /><span>RandomX</span>
         </div>
         <div class="text-right">
           {{ blockchainData?.difficulty_randomx ?? t("Core.NoData") }}
@@ -157,7 +158,7 @@
       </div>
       <div class="flex justify-between mb-2">
         <div class="flex items-center">
-          <CashIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" />
+          <BanknotesIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" />
           <span>{{ t("NetworkSummary.Total") }}</span>
         </div>
         <div class="text-right">
@@ -212,20 +213,20 @@
 import {
   CubeIcon,
   HashtagIcon,
-  RefreshIcon,
-  DatabaseIcon,
-  PuzzleIcon,
+  ArrowPathIcon,
+  CircleStackIcon,
+  PuzzlePieceIcon,
   //
   CreditCardIcon,
-  ChipIcon,
-  LightningBoltIcon,
+  CpuChipIcon,
+  BoltIcon,
   ServerIcon,
   //,
-  CashIcon,
+  BanknotesIcon,
   ChartBarIcon,
   ChartPieIcon,
-} from "@heroicons/vue/solid";
-import { BlockchainInfo } from "@/models/API/BlockchainInfo";
+} from "@heroicons/vue/24/solid";
+import type { BlockchainInfo } from "@/models/API/BlockchainInfo";
 import { useFormatting } from "@/composables/Formatting";
 import { useBackgroundInfo, useBlockchainInfo } from "@/composables/States";
 import { useI18n } from "vue-i18n";

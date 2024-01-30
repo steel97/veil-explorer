@@ -23,13 +23,13 @@
       :txdata="unconfirmedTxData.transactions" />
 
     <SharedPagination v-if="unconfirmedTxData != null && unconfirmedTxData.transactions != null"
-      :overallEntries="unconfirmedTxData.txnCount" :entriesPerPage="config.TXS_PER_PAGE" :currentPage="currentPage"
+      :overallEntries="unconfirmedTxData.txnCount" :entriesPerPage="config.public.txsPerPage" :currentPage="currentPage"
       :linkTemplate="buildRouteTemplate()" @pageSelected="selectPage" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { UnconfirmedTxResponse } from "@/models/API/UnconfirmedTxResponse";
+import type { UnconfirmedTxResponse } from "@/models/API/UnconfirmedTxResponse";
 import { useUI } from "@/composables/UI";
 import { useI18n } from "vue-i18n";
 
@@ -46,11 +46,11 @@ const page =
 const currentPage = ref(page + 1);
 
 const fetchUnconfirmedTx = async () =>
-  await useFetch<string, UnconfirmedTxResponse>(
+  await useFetch<UnconfirmedTxResponse>(
     `${getApiPath()}/unconfirmedtransactions?offset=${(
       (currentPage.value - 1) *
-      config.TXS_PER_PAGE
-    ).toString()}&count=${config.TXS_PER_PAGE as any as string}`
+      config.public.txsPerPage
+    ).toString()}&count=${config.public.txsPerPage as any as string}`
   );
 
 const unconfirmedTxData = ref((await fetchUnconfirmedTx()).data);
@@ -96,5 +96,5 @@ const meta = computed(() => {
     ],
   };
 });
-useMeta(meta);
+useHead(meta);
 </script>
