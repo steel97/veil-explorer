@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using ExplorerBackend.Models.API;
 using ExplorerBackend.Services.Core;
 using ExplorerBackend.Services.Caching;
-using ExplorerBackend.Persistence.Repositories;
+using ExplorerBackend.Services.Data;
 
 namespace ExplorerBackend.Controllers;
 
@@ -11,15 +11,16 @@ namespace ExplorerBackend.Controllers;
 [Produces("application/json")]
 public class SearchController : ControllerBase
 {
-    private readonly IBlocksRepository _blocksRepository;
-    private readonly ITransactionsRepository _transactionsRepository;
+    private readonly IBlocksDataService _blocksDataService;
+    private readonly ITransactionsDataService _transactionsDataService;
     private readonly ChaininfoSingleton _chaininfoSingleton;
     private readonly IUtilityService _utilityService;
 
-    public SearchController(IBlocksRepository blocksRepository, ITransactionsRepository transactionsRepository, ChaininfoSingleton chaininfoSingleton, IUtilityService utilityService)
+    public SearchController(IBlocksDataService blocksRepository, ITransactionsDataService transactionsDataService,
+        ChaininfoSingleton chaininfoSingleton, IUtilityService utilityService)
     {
-        _blocksRepository = blocksRepository;
-        _transactionsRepository = transactionsRepository;
+        _blocksDataService = blocksRepository;
+        _transactionsDataService = transactionsDataService;
         _chaininfoSingleton = chaininfoSingleton;
         _utilityService = utilityService;
     }
@@ -59,7 +60,7 @@ public class SearchController : ControllerBase
                         return Ok(response);
                     }
 
-                    var tx = await _transactionsRepository.ProbeTransactionByHashAsync(body.Query, cancellationToken);
+                    var tx = await _transactionsDataService.ProbeTransactionByHashAsync(body.Query, cancellationToken);
                     if (tx != null)
                     {
                         response.Found = true;
@@ -67,7 +68,7 @@ public class SearchController : ControllerBase
                     }
                     else
                     {
-                        var block = await _blocksRepository.ProbeBlockByHashAsync(body.Query, cancellationToken);
+                        var block = await _blocksDataService.ProbeBlockByHashAsync(body.Query, cancellationToken);
                         if (block != null)
                         {
                             response.Found = true;

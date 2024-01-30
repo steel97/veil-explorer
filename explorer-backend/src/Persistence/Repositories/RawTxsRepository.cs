@@ -3,10 +3,9 @@ using ExplorerBackend.Services.Core;
 
 namespace ExplorerBackend.Persistence.Repositories;
 
-public class RawTxsRepository : BaseRepository, IRawTxsRepository
+public class RawTxsRepository(NpgsqlDataSource dataSource, IUtilityService utilityService) : BaseRepository(utilityService), IRawTxsRepository
 {
-    private readonly NpgsqlDataSource _dataSource;
-    public RawTxsRepository(NpgsqlDataSource dataSource, IUtilityService utilityService) : base(utilityService) => _dataSource = dataSource;
+    private readonly NpgsqlDataSource _dataSource = dataSource;
 
     public async Task<byte[]?> GetTransactionByIdAsync(string txid, CancellationToken cancellationToken = default)
     {
@@ -25,7 +24,8 @@ public class RawTxsRepository : BaseRepository, IRawTxsRepository
         await using var conn = await _dataSource.OpenConnectionAsync(cancellationToken);
 
         var query = $"txid = {TransformHex(txids[0])}";
-        txids.Skip(1).ToList().ForEach(txid => query += $" OR txid = {TransformHex(txid)}");
+        if(txids.Count > 1)
+            txids.Skip(1).ToList().ForEach(txid => query += $" OR txid = {TransformHex(txid)}");
 
         var result = new Dictionary<string, byte[]>();
         using (var cmd = new NpgsqlCommand($"SELECT txid, \"data\" FROM rawtxs WHERE {query}", conn))
@@ -35,7 +35,7 @@ public class RawTxsRepository : BaseRepository, IRawTxsRepository
             {
                 var txid = await ReadHexFromByteaAsync(reader, 0, cancellationToken);
                 var data = await ReadByteaAsync(reader, 1, cancellationToken);
-                result.Add(txid ?? "", data ?? Array.Empty<byte>());
+                result.Add(txid ?? "", data ?? []);
             }
         }
         return result;

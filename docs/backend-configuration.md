@@ -8,7 +8,10 @@ It's recommended to use appsettings.json.tpl as configuration template, configur
 {
   "ConnectionStrings": {
     # change user and password, host (if needed, by default it connects to db via unix socket, recommended and fastest way)
-    "DefaultConnection": "Host=/var/run/postgresql/;Port=5432;Database=veilexplorer;Username=<USER>;Password=<PASSWORD>;Pooling=true;Maximum Pool Size=100;Tcp Keepalive=true;Keepalive=60;No Reset On Close=true;Client Encoding=UTF8"
+    "DefaultConnection": "Host=/var/run/postgresql/;Port=5432;Database=veilexplorer;Username=<USER>;Password=<PASSWORD>;Pooling=true;Maximum Pool Size=100;Tcp Keepalive=true;Keepalive=60;No Reset On Close=true;Client Encoding=UTF8",
+    # standard redis connection string
+    # see https://github.com/StackExchange/StackExchange.Redis/blob/main/docs/Basics.md
+    "Redis" : "localhost:6379,serviceName=Redis"
   },
   "Server": {
     # secret key to access internal APIs
@@ -37,6 +40,8 @@ It's recommended to use appsettings.json.tpl as configuration template, configur
     "ApiQueueSpinDelay": 20
   },
   "Explorer": {
+    # specifies what will be used to store data. true is for in-memory caching, false - database
+    "RPCMode" : true,
     # database transaction timeout in ms
     "TxScopeTimeout": 600,
     # realtime notification interval in ms
@@ -61,12 +66,7 @@ It's recommended to use appsettings.json.tpl as configuration template, configur
     "BudgetAddress": "35uS99ZnfaYB293sJ8ptUEXkUTQXH8WnDe",
     # address of veil foundation
     "FoundationAddress": "38J8RGLetRUNEXycBMPg8oZqLt4bB9hCbt",
-    "MemoryCache": {
-      # delay between expiration scan process
-      "ExpirationScanFrequency": 10000,
-      # cache expiration absolute time
-      "ExpirationApiAbsoluteTime": 3600000
-    },
+    
     "Node": {
       # veil node api address
       "Url": "http://127.0.0.1:5050/",
@@ -80,6 +80,26 @@ It's recommended to use appsettings.json.tpl as configuration template, configur
       # see https://docs.microsoft.com/en-us/dotnet/api/system.threading.channels.boundedchannelfullmode?view=net-6.0
       "Mode": 2
     }
+  },
+  "MemoryCache": {
+    # redis standard port
+    "Port" : "6379",
+    # redis standard host
+    "Host" : "localhost",    
+    # amount of simplified oldest blocks that will be cached
+    "OldestSimplifiedBlocksCacheCount": 20010,
+    # amount of simplified newest blocks that will be cached
+    "SimplifiedBlocksCacheCount": 200010,
+    # limit of redis memory usage in bytes
+    "RedisMaxMemoryUsage": 524288000,
+    # delay between expiration scan process
+    "ExpirationScanFrequency": 10000,
+    # cache expiration absolute time
+    "ExpirationApiAbsoluteTime": 3600000,
+    # time after block data will expires in days
+    "ServerAbsExpCacheTimeDays" : 7,
+    # expiration time of user blocks data cache (if it isn't cached by the server)
+    "UserAbsExpCacheTimeSec": 30
   },
   # configuration below is kestrel server configuration
   # see https://docs.microsoft.com/en-us/aspnet/core/fundamentals/servers/kestrel/endpoints?view=aspnetcore-6.0

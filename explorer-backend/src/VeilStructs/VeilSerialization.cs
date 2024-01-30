@@ -30,8 +30,7 @@ public class VeilSerialization
 
     public void ReadBool(out bool bl)
     {
-        byte b;
-        ReadByte(out b);
+        ReadByte(out byte b);
         bl = b > 0;
     }
 
@@ -94,11 +93,10 @@ public class VeilSerialization
         var n = 0ul;
         while (true)
         {
-            byte chData = 0;
-            ReadByte(out chData);
-            ulong a = (n << 7);
+            ReadByte(out byte chData);
+            ulong a = n << 7;
             byte b = (byte)(chData & 0x7F);
-            n = (a | b);
+            n = a | b;
             if ((chData & 0x80) != 0)
                 n++;
             else
@@ -110,34 +108,29 @@ public class VeilSerialization
 
     public void ReadCompactSize(out ulong nSizeRet)
     {
-        byte chSize;
-        ReadByte(out chSize);
+        ReadByte(out byte chSize);
 
-        nSizeRet = 0;
         if (chSize < 253)
         {
             nSizeRet = chSize;
         }
         else if (chSize == 253)
         {
-            short sh;
-            ReadShort(out sh);
+            ReadShort(out short sh);
             nSizeRet = (ulong)sh;
             if (nSizeRet < 253)
                 throw new Exception("non-canonical ReadCompactSize()");
         }
         else if (chSize == 254)
         {
-            int sh;
-            ReadInt(out sh);
+            ReadInt(out int sh);
             nSizeRet = (ulong)sh;
             if (nSizeRet < 0x10000u)
                 throw new Exception("non-canonical ReadCompactSize()");
         }
         else
         {
-            long sh;
-            ReadLong(out sh);
+            ReadLong(out long sh);
             nSizeRet = (ulong)sh;
             if (nSizeRet < 0x100000000UL)
                 throw new Exception("non-canonical ReadCompactSize()");

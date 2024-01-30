@@ -15,16 +15,11 @@ public class ExplorerConfig
     public int BlocksOrphanCheck { get; set; }
     public string? BudgetAddress { get; set; }
     public string? FoundationAddress { get; set; }
-    public MemoryCache? MemoryCache { get; set; }
     public Node? Node { get; set; }
     public QueueConfig? ScanTxOutsetQueue { get; set; }
+    public bool RPCMode { get; set; }
 }
 
-public class MemoryCache
-{
-    public int ExpirationScanFrequency { get; set; }
-    public int ExpirationApiAbsoluteTime { get; set; }
-}
 
 public class Node
 {

@@ -1,13 +1,9 @@
-using System.Text;
-using System.Text.Json;
-using System.Net.Http.Headers;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.SignalR;
 using ExplorerBackend.Hubs;
 using ExplorerBackend.Configs;
 using ExplorerBackend.Services.Caching;
-using ExplorerBackend.Models.Node;
-using ExplorerBackend.Models.Node.Response;
+using ExplorerBackend.Services.Core;
 
 namespace ExplorerBackend.Services.Workers;
 
@@ -16,64 +12,37 @@ public class BlockchainWorker : BackgroundService
     private readonly ILogger _logger;
     private readonly IHubContext<EventsHub> _hubContext;
     private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
-    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ChaininfoSingleton _chainInfoSingleton;
+    private readonly NodeRequester _nodeRequester;
 
-    public BlockchainWorker(ILogger<BlockchainWorker> logger, IHubContext<EventsHub> hubContext, IOptionsMonitor<ExplorerConfig> explorerConfig, IHttpClientFactory httpClientFactory, ChaininfoSingleton chaininfoSingleton)
+    public BlockchainWorker(ILogger<BlockchainWorker> logger, IHubContext<EventsHub> hubContext, IOptionsMonitor<ExplorerConfig> explorerConfig,
+        ChaininfoSingleton chaininfoSingleton, NodeRequester nodeRequester)
     {
         _logger = logger;
         _hubContext = hubContext;
         _explorerConfig = explorerConfig;
-        _httpClientFactory = httpClientFactory;
         _chainInfoSingleton = chaininfoSingleton;
+        _nodeRequester = nodeRequester; ;
     }
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
-        using var httpClient = _httpClientFactory.CreateClient();
-
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Url);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Username);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Password);
-
-        httpClient.BaseAddress = new Uri(_explorerConfig.CurrentValue.Node.Url);
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_explorerConfig.CurrentValue.Node.Username}:{_explorerConfig.CurrentValue.Node.Password}")));
-
-        var options = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
-
         while (!cancellationToken.IsCancellationRequested)
         {
             try
             {
                 // get blockchain info
-                var getBlockchainInfoRequest = new JsonRPCRequest
-                {
-                    Id = 1,
-                    Method = "getblockchaininfo",
-                    Params = new List<object>(Array.Empty<object>())
-                };
-                var getBlockchainInfoResponse = await httpClient.PostAsJsonAsync("", getBlockchainInfoRequest, options, cancellationToken);
-                var blockchainInfo = await getBlockchainInfoResponse.Content.ReadFromJsonAsync<GetBlockchainInfo>(options, cancellationToken);
+                var blockchainInfo = _nodeRequester.GetBlockChainInfo(cancellationToken);
 
-                // get chainalgo stats
-                var getChainalgoStatsRequest = new JsonRPCRequest
-                {
-                    Id = 1,
-                    Method = "getchainalgostats",
-                    Params = new List<object>(Array.Empty<object>())
-                };
-                var getChainalgoStatsResponse = await httpClient.PostAsJsonAsync("", getChainalgoStatsRequest, options, cancellationToken);
-                var chainalgoStats = await getChainalgoStatsResponse.Content.ReadFromJsonAsync<GetChainalgoStats>(options, cancellationToken);
+                //  chainalgo stats
+                var chainalgoStats = _nodeRequester.GetChainAlgoStats(cancellationToken);
+
+                await Task.WhenAll(chainalgoStats, blockchainInfo);
 
                 // updating cache
-
                 if (blockchainInfo != null && blockchainInfo.Result != null)
                 {
-                    _chainInfoSingleton.CurrentChainInfo = blockchainInfo.Result;
+                    _chainInfoSingleton.CurrentChainInfo = blockchainInfo.Result.Result!;
                     _chainInfoSingleton.CurrentChainInfo.Next_super_block = (uint)Math.Floor((_chainInfoSingleton.CurrentChainInfo.Blocks / (double)43200) + 1) * 43200;
                     if (_chainInfoSingleton.LastSyncedBlockOnNode < _chainInfoSingleton.CurrentChainInfo?.Blocks)
                         _chainInfoSingleton.LastSyncedBlockOnNode = (int)(_chainInfoSingleton.CurrentChainInfo?.Blocks ?? 0);
@@ -105,7 +74,7 @@ public class BlockchainWorker : BackgroundService
                 //    _logger.LogWarning("BlockChainInfo is null");
 
                 if (chainalgoStats != null && chainalgoStats.Result != null)
-                    _chainInfoSingleton.CurrentChainAlgoStats = chainalgoStats.Result;
+                    _chainInfoSingleton.CurrentChainAlgoStats = chainalgoStats.Result.Result;
                 //else
                 //    _logger.LogWarning("ChainalgoStats is null");
 
@@ -121,5 +90,6 @@ public class BlockchainWorker : BackgroundService
                 _logger.LogError(ex, "Can't handle blockchain info");
             }
         }
+
     }
 }

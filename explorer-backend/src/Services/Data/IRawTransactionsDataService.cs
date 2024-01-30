@@ -1,8 +1,7 @@
-namespace ExplorerBackend.Persistence.Repositories;
+namespace ExplorerBackend.Services.Data;
 
-public interface IRawTxsRepository
+public interface IRawTransactionsDataService
 {
     public Task<byte[]?> GetTransactionByIdAsync(string txid, CancellationToken cancellationToken = default);
     public Task<Dictionary<string, byte[]>?> GetTransactionsByIdsAsync(List<string> txids, CancellationToken cancellationToken = default);
-    public Task<bool> InsertTransactionAsync(string txid_hex, string txdata_hex, CancellationToken cancellationToken = default);
 }

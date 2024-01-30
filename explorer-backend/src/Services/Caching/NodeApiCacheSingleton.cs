@@ -7,17 +7,17 @@ namespace ExplorerBackend.Services.Caching;
 
 public class NodeApiCacheSingleton
 {
-    private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
+    private readonly IOptionsMonitor<MemoryCacheConfig> _memoryCacheConfig;
     private MemoryCache Cache { get; set; }
     private readonly List<string> ApisInQueue = new();
     private readonly SemaphoreSlim ApisQueueSemaphore = new(1, 1);
 
-    public NodeApiCacheSingleton(IOptionsMonitor<ExplorerConfig> explorerConfig)
+    public NodeApiCacheSingleton(IOptionsMonitor<MemoryCacheConfig> memoryCacheConfig)
     {
-        _explorerConfig = explorerConfig;
+        _memoryCacheConfig = memoryCacheConfig;
         Cache = new MemoryCache(new MemoryCacheOptions
         {
-            ExpirationScanFrequency = TimeSpan.FromMilliseconds(_explorerConfig.CurrentValue.MemoryCache?.ExpirationScanFrequency ?? 1000)
+            ExpirationScanFrequency = TimeSpan.FromMilliseconds(_memoryCacheConfig.CurrentValue.ExpirationScanFrequency)
         });
     }
 
@@ -80,7 +80,7 @@ public class NodeApiCacheSingleton
     {
         Cache.Set(key, apiResult, new MemoryCacheEntryOptions
         {
-            AbsoluteExpirationRelativeToNow = TimeSpan.FromMilliseconds(_explorerConfig.CurrentValue.MemoryCache?.ExpirationApiAbsoluteTime ?? 60000)
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMilliseconds(_memoryCacheConfig.CurrentValue.ExpirationApiAbsoluteTime)
         });
     }
 

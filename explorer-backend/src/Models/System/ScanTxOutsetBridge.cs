@@ -6,5 +6,5 @@ namespace ExplorerBackend.Models.System;
 public class ScanTxOutsetBridge
 {
     public NodeApiCacheSingleton? NodeApiCacheLink { get; set; }
-    public INodeRequester? NodeRequesterLink { get; set; }
+    public NodeRequester? NodeRequesterLink { get; set; }
 }

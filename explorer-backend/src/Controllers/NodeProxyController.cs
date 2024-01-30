@@ -8,6 +8,7 @@ using ExplorerBackend.Services.Caching;
 using ExplorerBackend.Services.Core;
 using Microsoft.AspNetCore.Cors;
 using ExplorerBackend.Core;
+using System.Collections.Frozen;
 
 namespace ExplorerBackend.Controllers;
 
@@ -16,27 +17,32 @@ namespace ExplorerBackend.Controllers;
 [Route("/")]
 public class NodeProxyController : ControllerBase
 {
-    private readonly static List<string> NODE_ALLOWED_METHODS = new(new string[] {
-        "importlightwalletaddress", "getwatchonlystatus", "getwatchonlytxes", "checkkeyimages", "getanonoutputs",
-        "sendrawtransaction", "getblockchaininfo", "getrawmempool"
-    });
-    private readonly static JsonSerializerOptions serializeOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    };
-
-    private readonly static List<string> emptyList = new();
-
-
+    private readonly FrozenSet<string> NODE_ALLOWED_METHODS;
+    
+    private readonly string _invalidOperation;
+    private readonly static List<string> _emptyList = [];
     private readonly IOptions<ServerConfig> _serverConfig;
-    private readonly INodeRequester _nodeRequester;
+    private readonly NodeRequester _nodeRequester;
     private readonly ChaininfoSingleton _chainInfoSingleton;
 
-    public NodeProxyController(IOptions<ServerConfig> serverConfig, INodeRequester nodeRequester, ChaininfoSingleton chainInfoSingleton)
+    public NodeProxyController(IOptions<ServerConfig> serverConfig, NodeRequester nodeRequester, ChaininfoSingleton chainInfoSingleton)
     {
+        List<string> set = ["importlightwalletaddress", "getwatchonlystatus", "getwatchonlytxes", "checkkeyimages", "getanonoutputs",
+        "sendrawtransaction", "getblockchaininfo", "getrawmempool"];
+        NODE_ALLOWED_METHODS = set.ToFrozenSet();
         _serverConfig = serverConfig;
         _nodeRequester = nodeRequester;
         _chainInfoSingleton = chainInfoSingleton;
+        _invalidOperation = JsonSerializer.Serialize(new GenericResult
+        {
+            Result = null,
+            Id = null,
+            Error = new()
+            {
+                Code = -2,
+                Message = "Forbidden by safe mode or invalid method name" // RPC_FORBIDDEN_BY_SAFE_MODE
+            }
+        });
     }
 
     [HttpGet]
@@ -53,19 +59,8 @@ public class NodeProxyController : ControllerBase
     {
         // verify method (and parameters?)
         if (!NODE_ALLOWED_METHODS.Contains(model.Method ?? ""))
-        {
-            var error = new GenericResult
-            {
-                Result = null,
-                Id = model.Id,
-                Error = new()
-                {
-                    Code = -2,
-                    Message = "Forbidden by safe mode" // RPC_FORBIDDEN_BY_SAFE_MODE
-                }
-            };
-            return Content(JsonSerializer.Serialize<GenericResult>(error, serializeOptions), "application/json");
-        }
+            return Content(_invalidOperation, "application/json");
+        
 
         if ((model.Method ?? "") == "getblockchaininfo")
         {
@@ -82,7 +77,7 @@ public class NodeProxyController : ControllerBase
             var res1 = new GetRawMempool
             {
                 Id = model.Id,
-                Result = _chainInfoSingleton.UnconfirmedTxs?.Select(a => a.txid ?? "").ToList() ?? emptyList
+                Result = _chainInfoSingleton.UnconfirmedTxs?.Select(a => a.txid ?? "").ToList() ?? _emptyList
             };
             return Ok(res1);
         }

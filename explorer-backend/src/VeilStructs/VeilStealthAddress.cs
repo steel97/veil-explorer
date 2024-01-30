@@ -19,8 +19,8 @@ public class VeilStealthAddress : IDestination
     public uint options = 0;
     public stealth_prefix prefix = new stealth_prefix();
     int number_signatures = 0;
-    byte[] scan_pubkey = new byte[] { };//ec_point
-    byte[] spend_pubkey = new byte[] { };//ec_point
+    byte[] scan_pubkey = [];//ec_point
+    byte[] spend_pubkey = [];//ec_point
     public byte[]? RawData { get; set; }
 
 
@@ -65,7 +65,7 @@ public class VeilStealthAddress : IDestination
         number_signatures = p[index++];
         prefix.number_bits = p[index++];
         prefix.bitfield = 0;
-        var nPrefixBytes = Math.Ceiling((float)prefix.number_bits / 8.0f);
+        var nPrefixBytes = Math.Ceiling(prefix.number_bits / 8.0f);
 
         if (nSize < MIN_STEALTH_RAW_SIZE + EC_COMPRESSED_SIZE * (spend_pubkeys - 1) + nPrefixBytes)
             return 1;

@@ -1,6 +1,7 @@
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Host=/var/run/postgresql/;Port=5432;Database=veilexplorer;Username=<USER>;Password=<PASSWORD>;Pooling=true;Maximum Pool Size=100;Tcp Keepalive=true;Keepalive=60;No Reset On Close=true;Client Encoding=UTF8"
+    "DefaultConnection": "Host=/var/run/postgresql/;Port=5432;Database=veilexplorer;Username=<USER>;Password=<PASSWORD>;Pooling=true;Maximum Pool Size=100;Tcp Keepalive=true;Keepalive=60;No Reset On Close=true;Client Encoding=UTF8",
+    "Redis" : "localhost:6379"
   },
   "Server": {
     "InternalAccessKey": "",
@@ -9,7 +10,8 @@
     ],
     "Swagger": {
       "Enabled": true,
-      "RoutePrefix": ""
+      "RoutePrefix": "/swagger",
+      "RedirectFromHomepage": true
     }
   },
   "API": {
@@ -20,6 +22,7 @@
     "ApiQueueSpinDelay": 20
   },
   "Explorer": {
+    "RPCMode": true,
     "TxScopeTimeout": 600,
     "HubNotifyDelay": 5000,
     "PullBlocksDelay": 500,
@@ -33,10 +36,6 @@
     "BlocksOrphanCheck": 12,
     "BudgetAddress": "35uS99ZnfaYB293sJ8ptUEXkUTQXH8WnDe",
     "FoundationAddress": "38J8RGLetRUNEXycBMPg8oZqLt4bB9hCbt",
-    "MemoryCache": {
-      "ExpirationScanFrequency": 10000,
-      "ExpirationApiAbsoluteTime": 3600000
-    },
     "Node": {
       "Url": "http://127.0.0.1:5050/",
       "Username": "[noderpc_username]",
@@ -46,6 +45,18 @@
       "Capacity": 50,
       "Mode": 2
     }
+  },
+  "MemoryCache":
+  {
+    "Port" : 6379,
+    "Host" : "localhost",
+    "ExpirationScanFrequency": 10000,
+    "ExpirationApiAbsoluteTime": 3600000,
+    "OldestSimplifiedBlocksCacheCount": 20010,
+    "SimplifiedBlocksCacheCount": 200010,
+    "RedisMaxMemoryUsage": 524288000,
+    "ServerAbsExpCacheTimeDays" : 7,
+    "UserAbsExpCacheTimeSec": 30
   },
   "AllowedHosts": "*",
   "Kestrel": {
@@ -65,9 +76,8 @@
         "Microsoft": "Warning",
         "Microsoft.AspNetCore": "Warning",
         "Microsoft.Hosting.Lifetime": "Information",
-        "System.Net.Http.HttpClient": "Error"
-        "Microsoft": "Warning",
-        "Microsoft.Hosting.Lifetime": "Information"
+        "System.Net.Http.HttpClient": "Error",
+        "Npgsql": "Warning"
       }
     },
     "Enrich": [

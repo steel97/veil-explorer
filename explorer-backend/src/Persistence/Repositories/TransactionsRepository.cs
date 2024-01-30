@@ -4,27 +4,21 @@ using ExplorerBackend.Services.Core;
 
 namespace ExplorerBackend.Persistence.Repositories;
 
-public class TransactionsRepository : BaseRepository, ITransactionsRepository
+public class TransactionsRepository(NpgsqlDataSource dataSource, IUtilityService utilityService) : BaseRepository(utilityService), ITransactionsRepository
 {
-    private readonly NpgsqlDataSource _dataSource;
-    public TransactionsRepository(NpgsqlDataSource dataSource, IUtilityService utilityService) : base(utilityService) => _dataSource = dataSource;
+    private readonly NpgsqlDataSource _dataSource = dataSource;
 
-    protected async Task<Transaction?> ReadTransactionAsync(NpgsqlDataReader reader, CancellationToken cancellationToken = default)
+    protected async Task<Transaction?> ReadTransactionAsync(NpgsqlDataReader reader, CancellationToken cancellationToken = default) => new() 
     {
-        var tx = new Transaction
-        {
-            txid_hex = await ReadHexFromByteaAsync(reader, 0, cancellationToken),
-            hash_hex = await ReadHexFromByteaAsync(reader, 1, cancellationToken),
-            version = reader.GetInt32(2),
-            size = reader.GetInt32(3),
-            vsize = reader.GetInt32(4),
-            weight = reader.GetInt32(5),
-            locktime = reader.GetInt64(6),
-            block_height = reader.GetInt32(7)
-        };
-
-        return tx;
-    }
+        txid_hex = await ReadHexFromByteaAsync(reader, 0, cancellationToken),
+        hash_hex = await ReadHexFromByteaAsync(reader, 1, cancellationToken),
+        version = reader.GetInt32(2),
+        size = reader.GetInt32(3),
+        vsize = reader.GetInt32(4),
+        weight = reader.GetInt32(5),
+        locktime = reader.GetInt64(6),
+        block_height = reader.GetInt32(7)
+    };
 
     public async Task<Transaction?> GetTransactionByIdAsync(string txid, CancellationToken cancellationToken = default)
     {
@@ -104,14 +98,6 @@ public class TransactionsRepository : BaseRepository, ITransactionsRepository
         return txs;
     }
 
-    public async Task<bool> RemoveTransactionsForBlockAsync(int blockHeight, CancellationToken cancellationToken = default)
-    {
-        await using var conn = await _dataSource.OpenConnectionAsync(cancellationToken);
-
-        await using var cmd = new NpgsqlCommand($"DELETE FROM transactions WHERE block_height = {blockHeight};", conn);
-        return await cmd.ExecuteNonQueryAsync(cancellationToken) > 0;
-    }
-
     public async Task<string?> ProbeTransactionByHashAsync(string txid, CancellationToken cancellationToken = default)
     {
         await using var conn = await _dataSource.OpenConnectionAsync(cancellationToken);
@@ -124,12 +110,20 @@ public class TransactionsRepository : BaseRepository, ITransactionsRepository
         return await ReadHexFromByteaAsync(reader, 0, cancellationToken);
     }
 
+    public async Task<bool> RemoveTransactionsForBlockAsync(int blockHeight, CancellationToken cancellationToken = default)
+    {
+        await using var conn = await _dataSource.OpenConnectionAsync(cancellationToken);
+
+        await using var cmd = new NpgsqlCommand($"DELETE FROM transactions WHERE block_height = {blockHeight};", conn);
+        return await cmd.ExecuteNonQueryAsync(cancellationToken) > 0;
+    }
+
     public async Task<bool> InsertTransactionAsync(Transaction txTemplate, CancellationToken cancellationToken = default)
     {
         await using var conn = await _dataSource.OpenConnectionAsync(cancellationToken);
 
         await using var cmd = new NpgsqlCommand("INSERT INTO transactions (txid,hash,\"version\",\"size\",vsize,weight,locktime,block_height) VALUES (" +
-                                            $"{TransformHex(txTemplate.txid_hex)}, {TransformHex(txTemplate.hash_hex)}, {txTemplate.version}, {txTemplate.size}, {txTemplate.vsize}, {txTemplate.weight}, {txTemplate.locktime}, {txTemplate.block_height});", conn);
+            $"{TransformHex(txTemplate.txid_hex)}, {TransformHex(txTemplate.hash_hex)}, {txTemplate.version}, {txTemplate.size}, {txTemplate.vsize}, {txTemplate.weight}, {txTemplate.locktime}, {txTemplate.block_height});", conn);
         await cmd.PrepareAsync(cancellationToken);
         return await cmd.ExecuteNonQueryAsync(cancellationToken) > 0;
     }

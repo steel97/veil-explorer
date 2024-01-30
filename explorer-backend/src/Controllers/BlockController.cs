@@ -5,29 +5,20 @@ using ExplorerBackend.Models.System;
 using ExplorerBackend.Configs;
 using ExplorerBackend.Models.Data;
 using ExplorerBackend.Services.Core;
-using ExplorerBackend.Persistence.Repositories;
+using ExplorerBackend.Services.Data;
 
 namespace ExplorerBackend.Controllers;
 
 [ApiController]
 [Route("/api/[controller]")]
 [Produces("application/json")]
-public class BlockController : ControllerBase
+public class BlockController(IOptions<APIConfig> apiConfig, IBlocksDataService blocksDataService, ITransactionsDataService transactionsDataService, ITransactionDecoder transactionDecoder, IUtilityService utilityService) : ControllerBase
 {
-    private readonly IOptions<APIConfig> _apiConfig;
-    private readonly IBlocksRepository _blocksRepository;
-    private readonly ITransactionsRepository _transactionsRepository;
-    private readonly ITransactionDecoder _transactionDecoder;
-    private readonly IUtilityService _utilityService;
-
-    public BlockController(IOptions<APIConfig> apiConfig, IBlocksRepository blocksRepository, ITransactionsRepository transactionsRepository, ITransactionDecoder transactionDecoder, IUtilityService utilityService)
-    {
-        _apiConfig = apiConfig;
-        _blocksRepository = blocksRepository;
-        _transactionsRepository = transactionsRepository;
-        _transactionDecoder = transactionDecoder;
-        _utilityService = utilityService;
-    }
+    private readonly IOptions<APIConfig> _apiConfig = apiConfig;
+    private readonly IBlocksDataService _blocksDataService = blocksDataService;
+    private readonly ITransactionsDataService _transactionsDataService = transactionsDataService;
+    private readonly ITransactionDecoder _transactionDecoder = transactionDecoder;
+    private readonly IUtilityService _utilityService = utilityService;
 
     [HttpPost(Name = "GetBlock")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -36,53 +27,63 @@ public class BlockController : ControllerBase
     {
         if (body.Offset < 0)
             return Problem("offset should be higher or equal to zero", statusCode: 400);
-        if (body.Count < 1)
-            return Problem("count should be more or equal to one", statusCode: 400);
-        if (body.Count > _apiConfig.Value.MaxTransactionsPullCount)
-            return Problem($"count should be less or equal than {_apiConfig.Value.MaxBlocksPullCount}", statusCode: 400);
+        if (body.Count > _apiConfig.Value.MaxTransactionsPullCount || body.Count < 1)
+            return Problem($"count should be between 1 and {_apiConfig.Value.MaxBlocksPullCount}", statusCode: 400);
 
         var response = new BlockResponse
         {
             Found = false
         };
 
-        Block? block = null;
-        if (body.Hash != null && _utilityService.VerifyHex(body.Hash))
-            block = await _blocksRepository.GetBlockByHashAsync(body.Hash, cancellationToken);
-        else if (body.Height != null)
-            block = await _blocksRepository.GetBlockByHeightAsync(body.Height.Value, cancellationToken);
+        Block? block;
+        if (body.Height != null)
+            block = await _blocksDataService.GetBlockAsync(body.Height.Value, 2, cancellationToken);
+        else if (body.Hash != null && body.Hash.Length == 64 && _utilityService.VerifyHex(body.Hash))
+            block = await _blocksDataService.GetBlockAsync(body.Hash, 2, cancellationToken);
         else
-            return Problem($"count should be less or equal than {_apiConfig.Value.MaxBlocksPullCount}", statusCode: 400);
+            return Problem($"a problem has occured, try again", statusCode: 400);
 
         if (block != null)
         {
-            var nextBlockHash = await _blocksRepository.ProbeHashByHeightAsync(block.height + 1, cancellationToken);
-            var prevBlockHash = await _blocksRepository.ProbeHashByHeightAsync(block.height - 1, cancellationToken);
+            Task<string?>? nextBlockHash = null;
+            Task<string?>? prevBlockHash = null;
+            try
+            {
+                nextBlockHash = _blocksDataService.ProbeHashByHeightAsync(block.height + 1, cancellationToken);
+                prevBlockHash = _blocksDataService.ProbeHashByHeightAsync(block.height - 1, cancellationToken);
+
+                await Task.WhenAll(nextBlockHash, prevBlockHash);
+            }
+            catch { }
 
             response.Found = true;
             response.Block = block;
             response.TxnCount = block.txnCount;
 
-            var verHex = BitConverter.GetBytes(block.version);
-            verHex = verHex.Reverse().ToArray();
+            var verHex = BitConverter.GetBytes(block.version).Reverse().ToArray();
             response.VersionHex = _utilityService.ToHex(verHex);
 
-            if (nextBlockHash != null)
+            if (nextBlockHash != null && nextBlockHash.Result != null)
                 response.NextBlock = new BlockBasicData
                 {
-                    Hash = nextBlockHash,
+                    Hash = nextBlockHash.Result,
                     Height = block.height + 1
                 };
 
-            if (prevBlockHash != null)
+            if (prevBlockHash != null && prevBlockHash.Result != null)
                 response.PrevBlock = new BlockBasicData
                 {
-                    Hash = prevBlockHash,
+                    Hash = prevBlockHash.Result,
                     Height = block.height - 1
                 };
 
+            List<TransactionExtended>? rtxs;
 
-            var rtxs = await _transactionsRepository.GetTransactionsForBlockAsync(block.height, body.Offset, body.Count, false, cancellationToken);
+            if (block.tx is null)
+                rtxs = await _transactionsDataService.GetTransactionsForBlockAsync(block.height, body.Offset, body.Count, false, cancellationToken);
+            else
+                rtxs = _transactionsDataService.ToTransactionExtended(block.tx, block.height);
+
             if (rtxs != null)
             {
                 var txTargets = new List<TxDecodeTarget>();

@@ -11,6 +11,7 @@ using ExplorerBackend.Configs;
 using ExplorerBackend.Services.Queues;
 using ExplorerBackend.Services.Core;
 using ExplorerBackend.Services.Caching;
+using System.Buffers;
 
 namespace ExplorerBackend.Controllers;
 
@@ -44,9 +45,9 @@ public class AddressController : ControllerBase
             IsValid = false
         };
 
-        if (_utilityService.VerifyAddress(body.Address) && body.Address != null)
+        if (body.Address != null && _utilityService.VerifyAddress(body.Address))
         {
-            var reqAddr = _utilityService.CleanupAddress(body.Address);
+            string reqAddr = _utilityService.CleanupAddress(body.Address);
 
             var validateRes = VeilAddress.ValidateAddress(body.Address);// decode internal
             var scanTxOutsetRes = _nodeApiCacheSingleton.GetApiCache<ScanTxOutset>($"scantxoutset-{reqAddr}");

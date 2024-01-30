@@ -11,20 +11,13 @@ namespace ExplorerBackend.Controllers;
 [ApiController]
 [Route("/api/[controller]")]
 [Produces("application/json")]
-public class UnconfirmedTransactions : ControllerBase
+public class UnconfirmedTransactions(IOptions<APIConfig> apiConfig, ChaininfoSingleton chaininfoSingleton, ITransactionDecoder transactionDecoder, IUtilityService utilityService)
+    : ControllerBase
 {
-    private readonly IOptions<APIConfig> _apiConfig;
-    private readonly ChaininfoSingleton _chaininfoSingleton;
-    private readonly ITransactionDecoder _transactionDecoder;
-    private readonly IUtilityService _utilityService;
-
-    public UnconfirmedTransactions(IOptions<APIConfig> apiConfig, ChaininfoSingleton chaininfoSingleton, ITransactionDecoder transactionDecoder, IUtilityService utilityService)
-    {
-        _apiConfig = apiConfig;
-        _chaininfoSingleton = chaininfoSingleton;
-        _transactionDecoder = transactionDecoder;
-        _utilityService = utilityService;
-    }
+    private readonly IOptions<APIConfig> _apiConfig = apiConfig;
+    private readonly ChaininfoSingleton _chaininfoSingleton = chaininfoSingleton;
+    private readonly ITransactionDecoder _transactionDecoder = transactionDecoder;
+    private readonly IUtilityService _utilityService = utilityService;
 
     [HttpGet(Name = "UnconfirmedTransactions")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -33,10 +26,8 @@ public class UnconfirmedTransactions : ControllerBase
     {
         if (offset < 0)
             return Problem("offset should be higher or equal to zero", statusCode: 400);
-        if (count < 1)
-            return Problem("count should be more or equal to one", statusCode: 400);
-        if (count > _apiConfig.Value.MaxTransactionsPullCount)
-            return Problem($"count should be less or equal than {_apiConfig.Value.MaxBlocksPullCount}", statusCode: 400);
+        if (count < 1 || count > _apiConfig.Value.MaxTransactionsPullCount)
+            return Problem($"count should be between 1 and {_apiConfig.Value.MaxBlocksPullCount}", statusCode: 400);
 
         var txncount = _chaininfoSingleton.UnconfirmedTxs?.Count ?? 0;
 
@@ -46,10 +37,10 @@ public class UnconfirmedTransactions : ControllerBase
         {
             if (_chaininfoSingleton.UnconfirmedTxs.Count > offset)
             {
-                txs = new List<TransactionSimpleDecoded>();
+                txs = [];
                 var rtxs = _chaininfoSingleton.UnconfirmedTxs.Skip(offset).Take(count);
 
-                var txTargets = new List<TxDecodeTarget>();
+                List<TxDecodeTarget> txTargets = [];
 
                 rtxs.ToList().ForEach(rtx => txTargets.Add(new TxDecodeTarget
                 {
@@ -58,7 +49,6 @@ public class UnconfirmedTransactions : ControllerBase
                 }));
 
                 txs = await _transactionDecoder.DecodeTransactionsAsync(txTargets, (int)((_chaininfoSingleton.CurrentChainInfo?.Blocks ?? 0) + 1), cancellationToken);
-
             }
         }
 

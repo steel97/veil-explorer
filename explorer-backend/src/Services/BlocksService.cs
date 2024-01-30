@@ -1,13 +1,12 @@
 using System.Text.Json;
 using System.Transactions;
-using System.Net.Http.Headers;
 using ExplorerBackend.Configs;
 using ExplorerBackend.Models.Data;
-using ExplorerBackend.Models.Node;
 using ExplorerBackend.Models.Node.Response;
 using ExplorerBackend.Persistence.Repositories;
 using Microsoft.Extensions.Options;
-using System.Text;
+using ExplorerBackend.Services.Core;
+using System.Runtime.CompilerServices;
 
 namespace ExplorerBackend.Services;
 
@@ -15,24 +14,13 @@ public class BlocksService : IBlocksService
 {
     private readonly ILogger _logger;
     private readonly IServiceProvider _serviceProvider;
-    private readonly IHttpClientFactory _httpClientFactory;
     private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
-    private readonly JsonSerializerOptions _serializerOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    };
+    private readonly NodeRequester _nodeRequester;
 
-    public BlocksService(ILogger<IBlocksService> logger,
-         IServiceProvider serviceProvider, IOptionsMonitor<ExplorerConfig> explorerConfig,
-         IHttpClientFactory httpClientFactory)
-    {
-        _logger = logger;
-        _serviceProvider = serviceProvider;
-        _explorerConfig = explorerConfig;
-        _httpClientFactory = httpClientFactory;
-    }
+    public BlocksService(ILogger<IBlocksService> logger, IServiceProvider serviceProvider, IOptionsMonitor<ExplorerConfig> explorerConfig, NodeRequester nodeRequester) =>
+        (_logger, _serviceProvider, _explorerConfig, _nodeRequester) = (logger, serviceProvider, explorerConfig, nodeRequester);
 
-    public Block RPCBlockToDb(GetBlockResult block) => new()
+    public Block RPCBlockToDb(GetBlockResult block, bool isSynced = false) => new()
     {
         anon_index = block.Anon_index,
         bits_hex = block.Bits,
@@ -44,6 +32,18 @@ public class BlocksService : IBlocksService
         mediantime = block.Mediantime,
         merkleroot_hex = block.Merkleroot,
         mixhash_hex = block.Mixhash,
+        tx = block.Tx?.Select(el =>
+        {
+            var jsonEl = (JsonElement)el;
+            if (jsonEl.ValueKind == JsonValueKind.String)
+                return new()
+                {
+                    txid = jsonEl.GetString()
+                };
+
+            var elem = JsonSerializer.Deserialize<GetRawTransactionResult>(jsonEl)!;
+            return elem;
+        }).ToList(),
         nonce = block.Nonce,
         nonce64 = block.Nonce64,
         prog_header_hash_hex = block.prog_header_hash,
@@ -57,42 +57,18 @@ public class BlocksService : IBlocksService
         size = block.Size,
         strippedsize = block.Strippedsize,
         time = block.Time,
-        proof_type = block.Proof_type switch
-        {
-            "Proof-of-Work (X16RT)" => BlockType.POW_X16RT,
-            "Proof-of-work (ProgPow)" => BlockType.POW_ProgPow,
-            "Proof-of-work (RandomX)" => BlockType.POW_RandomX,
-            "Proof-of-work (Sha256D)" => BlockType.POW_Sha256D,
-            "Proof-of-Stake" => BlockType.POS,
-            _ => BlockType.UNKNOWN
-        },
+        proof_type = GetBlockType(block.Proof_type ?? string.Empty),
         veil_data_hash_hex = block.Veil_data_hash,
         version = block.Version,
         weight = block.Weight,
-        synced = false
+        synced = isSynced
     };
 
     public async Task<bool> UpdateDbBlockAsync(int height, string validBlockHash, CancellationToken cancellationToken)
     {
-        using var httpClient = _httpClientFactory.CreateClient();
         using var scope = _serviceProvider.CreateAsyncScope();
 
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Url);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Username);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Password);
-
-        httpClient.BaseAddress = new Uri(_explorerConfig.CurrentValue.Node.Url);
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_explorerConfig.CurrentValue.Node.Username}:{_explorerConfig.CurrentValue.Node.Password}")));
-
-        var getBlockRequest = new JsonRPCRequest
-        {
-            Id = 1,
-            Method = "getblock",
-            Params = new List<object>(new object[] { validBlockHash })
-        };
-        var getBlockResponse = await httpClient.PostAsJsonAsync("", getBlockRequest, _serializerOptions, cancellationToken);
-        var validBlock = await getBlockResponse.Content.ReadFromJsonAsync<GetBlock>(_serializerOptions, cancellationToken);
+        var validBlock = await _nodeRequester.GetBlock(validBlockHash, cancellationToken);
 
         if (validBlock == null || validBlock.Result == null)
         {
@@ -105,21 +81,12 @@ public class BlocksService : IBlocksService
 
         await transactionsRepository.RemoveTransactionsForBlockAsync(height, cancellationToken);
         await blocksRepository.UpdateBlockAsync(height, RPCBlockToDb(validBlock.Result), cancellationToken);
-        return !await InsertTransactionsAsync(height, validBlock.Result.Tx, cancellationToken);
+        return !await InsertTransactionsAsync(height, validBlock.Result?.Tx?.Select(a => ((JsonElement)a).GetString() ?? string.Empty).ToList(), cancellationToken);
     }
 
     public async Task<bool> InsertTransactionsAsync(int blockId, List<string>? txIds, CancellationToken cancellationToken)
     {
-        using var httpClient = _httpClientFactory.CreateClient();
         using var scope = _serviceProvider.CreateAsyncScope();
-
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Url);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Username);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Password);
-
-        httpClient.BaseAddress = new Uri(_explorerConfig.CurrentValue.Node.Url);
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_explorerConfig.CurrentValue.Node.Username}:{_explorerConfig.CurrentValue.Node.Password}")));
 
         var transactionsRepository = scope.ServiceProvider.GetRequiredService<ITransactionsRepository>();
         var rawTxsRepository = scope.ServiceProvider.GetRequiredService<IRawTxsRepository>();
@@ -128,14 +95,7 @@ public class BlocksService : IBlocksService
         if (txIds != null)
             foreach (var txId in txIds)
             {
-                var getTxRequest = new JsonRPCRequest
-                {
-                    Id = 1,
-                    Method = "getrawtransaction",
-                    Params = new List<object>(new object[] { txId, true })
-                };
-                var getTxResponse = await httpClient.PostAsJsonAsync("", getTxRequest, _serializerOptions, cancellationToken);
-                var tx = await getTxResponse.Content.ReadFromJsonAsync<GetRawTransaction>(_serializerOptions, cancellationToken);
+                var tx = await _nodeRequester.GetRawTransaction(txId, cancellationToken);
 
                 if (tx == null || tx.Result == null)
                 {
@@ -146,7 +106,7 @@ public class BlocksService : IBlocksService
                 pulledTxs.Add(tx.Result);
             }
 
-        var txFailed = false;
+        var isTxFailed = false;
         foreach (var tx in pulledTxs)
         {
             ArgumentNullException.ThrowIfNull(tx);
@@ -177,17 +137,81 @@ public class BlocksService : IBlocksService
                 if (txCompleted && txRawCompleted)
                     txscope.Complete();
                 else
-                    txFailed = true;
+                    isTxFailed = true;
             }
 
             catch (TransactionAbortedException txex)
             {
                 _logger.LogError(txex, "Can't save transaction {txId} (insert) for block #{blockNumber}", tx.txid, blockId);
-                txFailed = true;
+                isTxFailed = true;
                 break;
             }
         }
 
-        return txFailed;
+        return isTxFailed;
     }
+
+    // if something doesn't work correctly, then switch back to the method above + revisit GetBlock model
+    public async Task<bool> InsertTransactionsAsync(int height, List<GetRawTransactionResult> txs, CancellationToken cancellationToken)
+    {
+        using var scope = _serviceProvider.CreateAsyncScope();
+
+        var transactionsRepository = scope.ServiceProvider.GetRequiredService<ITransactionsRepository>();
+        var rawTxsRepository = scope.ServiceProvider.GetRequiredService<IRawTxsRepository>();
+
+        var isTxFailed = false;
+        foreach (var tx in txs)
+        {
+            ArgumentNullException.ThrowIfNull(tx);
+            ArgumentNullException.ThrowIfNull(tx.txid);
+            ArgumentNullException.ThrowIfNull(tx.hex);
+
+            var targetTx = await transactionsRepository.GetTransactionByIdAsync(tx.txid, cancellationToken);
+            if (targetTx != null) continue;
+
+            try
+            {
+                using var txscope = new TransactionScope(TransactionScopeOption.Required, TimeSpan.FromSeconds(_explorerConfig.CurrentValue.TxScopeTimeout), TransactionScopeAsyncFlowOption.Enabled);
+                targetTx = new Models.Data.Transaction
+                {
+                    txid_hex = tx.txid,
+                    hash_hex = tx.hash,
+                    version = tx.version,
+                    size = tx.size,
+                    vsize = tx.vsize,
+                    weight = tx.weight,
+                    locktime = tx.locktime,
+                    block_height = height
+                };
+
+                var txCompleted = await transactionsRepository.InsertTransactionAsync(targetTx, cancellationToken);
+                var txRawCompleted = await rawTxsRepository.InsertTransactionAsync(tx.txid, tx.hex, cancellationToken);
+
+                if (txCompleted && txRawCompleted)
+                    txscope.Complete();
+                else
+                    isTxFailed = true;
+            }
+
+            catch (TransactionAbortedException txex)
+            {
+                _logger.LogError(txex, "Can't save transaction {txId} (insert) for block #{blockNumber}", tx.txid, height);
+                isTxFailed = true;
+                break;
+            }
+        }
+
+        return isTxFailed;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public BlockType GetBlockType(string proofType) => proofType switch
+    {
+        "Proof-of-Work (X16RT)" => BlockType.POW_X16RT,
+        "Proof-of-work (ProgPow)" => BlockType.POW_ProgPow,
+        "Proof-of-work (RandomX)" => BlockType.POW_RandomX,
+        "Proof-of-work (Sha256D)" => BlockType.POW_Sha256D,
+        "Proof-of-Stake" => BlockType.POS,
+        _ => BlockType.UNKNOWN
+    };
 }

@@ -3,29 +3,23 @@ using ExplorerBackend.Models.API;
 using ExplorerBackend.Models.System;
 using ExplorerBackend.Services.Core;
 using ExplorerBackend.Services.Caching;
-using ExplorerBackend.Persistence.Repositories;
+using ExplorerBackend.Services.Data;
+using ExplorerBackend.Models.Data;
 
 namespace ExplorerBackend.Controllers;
 
 [ApiController]
 [Route("/api/[controller]")]
 [Produces("application/json")]
-public class TxController : ControllerBase
+public class TxController(IBlocksDataService blocksDataService, ITransactionsDataService transactionsDataService, ITransactionDecoder transactionDecoder,
+    IUtilityService utilityService, ChaininfoSingleton chaininfoSingleton)
+    : ControllerBase
 {
-    private readonly IBlocksRepository _blocksRepository;
-    private readonly ITransactionsRepository _transactionsRepository;
-    private readonly ITransactionDecoder _transactionDecoder;
-    private readonly IUtilityService _utilityService;
-    private readonly ChaininfoSingleton _chaininfoSingleton;
-
-    public TxController(IBlocksRepository blocksRepository, ITransactionsRepository transactionsRepository, ITransactionDecoder transactionDecoder, IUtilityService utilityService, ChaininfoSingleton chaininfoSingleton)
-    {
-        _blocksRepository = blocksRepository;
-        _transactionsRepository = transactionsRepository;
-        _transactionDecoder = transactionDecoder;
-        _utilityService = utilityService;
-        _chaininfoSingleton = chaininfoSingleton;
-    }
+    private readonly IBlocksDataService _blocksDataService = blocksDataService;
+    private readonly ITransactionsDataService _transactionsDataService = transactionsDataService;
+    private readonly ITransactionDecoder _transactionDecoder = transactionDecoder;
+    private readonly IUtilityService _utilityService = utilityService;
+    private readonly ChaininfoSingleton _chaininfoSingleton = chaininfoSingleton;
 
     [HttpPost(Name = "GetTx")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -35,11 +29,11 @@ public class TxController : ControllerBase
         if (body.Hash == null) return Problem("hash can't be null", statusCode: 400);
         if (!_utilityService.VerifyHex(body.Hash)) return Problem("hash is not valid hex string", statusCode: 400);
 
-        var txTargets = new List<TxDecodeTarget>();
+        List<TxDecodeTarget> txTargets = [];
 
         var probeTx = _chaininfoSingleton.UnconfirmedTxs?.Where(tx => tx.txid == body.Hash).FirstOrDefault();
 
-        var response = new TxResponse();
+        TxResponse response = new();
 
         if (probeTx != null)
         {
@@ -60,32 +54,35 @@ public class TxController : ControllerBase
         }
         else
         {
-            var dbtx = await _transactionsRepository.GetTransactionFullByIdAsync(body.Hash, cancellationToken);
-            if (dbtx == null) return Problem("can't find tx", statusCode: 400);
+            var tx = await _transactionsDataService.GetTransactionFullByIdAsync(body.Hash, cancellationToken);
+            if (tx == null) return Problem("tx not found", statusCode: 400);
 
-            var block = await _blocksRepository.GetBlockByHeightAsync(dbtx.block_height, cancellationToken);
+            Block? block;
+            if (tx.block_height == 0)
+            {
+                block = await _blocksDataService.GetBlockAsync(tx.blockhash!, 1, cancellationToken);
+                tx.block_height = block!.height;
+            }
+            else
+                block = await _blocksDataService.GetBlockAsync(tx.block_height, 1, cancellationToken);
 
             txTargets.Add(new TxDecodeTarget
             {
-                TxId = dbtx.txid_hex!,
-                Data = dbtx.data
+                TxId = tx.txid_hex!,
+                Data = tx.data
             });
 
-            response.TxId = dbtx.txid_hex!;
+            response.TxId = tx.txid_hex!;
             response.Confirmed = true;
-            response.BlockHeight = dbtx.block_height;
+            response.BlockHeight = tx.block_height;
             response.Timestamp = block?.time ?? 0;
-            response.Version = dbtx.version;
-            response.Size = dbtx.size;
-            response.VSize = dbtx.vsize;
-            response.Locktime = dbtx.locktime;
+            response.Version = tx.version;
+            response.Size = tx.size;
+            response.VSize = tx.vsize;
+            response.Locktime = tx.locktime;
         }
 
-
-
         response.Transaction = (await _transactionDecoder.DecodeTransactionsAsync(txTargets, response.BlockHeight, cancellationToken))![0];
-
-
 
         return Ok(response);
     }

@@ -2,6 +2,7 @@ bin
 obj
 output
 internal
+logs
 appsettings.json
 appsettings.production.json
 *.cfg
