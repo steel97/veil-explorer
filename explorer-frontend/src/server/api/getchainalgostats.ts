@@ -3,8 +3,9 @@ import { parseApiString } from "~/composables/Configs";
 import type { ApiEntry } from "~/composables/Configs";
 
 export default defineEventHandler(async (event) => {
-    const defaultChain = process.env.CHAIN_DEFAULT!;
-    const apiPath = parseApiString(defaultChain, defaultChain, JSON.parse(process.env.CHAIN_APIS!) as Array<ApiEntry>);
+    const runtimeConfig = useRuntimeConfig();
+    const defaultChain = runtimeConfig.public.chainDefault;
+    const apiPath = parseApiString(defaultChain, defaultChain, runtimeConfig.public.chainApis as Array<ApiEntry>);
 
     const result = await $fetch(`${apiPath}/getchainalgostats`);
 

@@ -3,16 +3,12 @@ import { parseApiString } from "~/composables/Configs";
 import type { ApiEntry } from "~/composables/Configs";
 
 export default defineEventHandler(async (event) => {
-    const defaultChain = process.env.CHAIN_DEFAULT!;
-    const apiPath = parseApiString(defaultChain, defaultChain, JSON.parse(process.env.CHAIN_APIS!) as Array<ApiEntry>);
+    const runtimeConfig = useRuntimeConfig();
+    const defaultChain = runtimeConfig.public.chainDefault;
+    const apiPath = parseApiString(defaultChain, defaultChain, runtimeConfig.public.chainApis as Array<ApiEntry>);
 
-    let rq = event.node.req.url ?? "";
-    if (rq.length > 0)
-        rq = rq.substring(1);
-
-    // verify alpha numeric rq
+    let rq = event.context.params?.address ?? "";
     rq = rq.replace(/[^a-zA-Z0-9]/gi, '');
-    // end
 
     const result = await $fetch(`${apiPath}/getaddressbalance/${rq}`);
 
