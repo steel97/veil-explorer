@@ -19,10 +19,10 @@ export const parseApiString = (lookForChain: string, defaultChain: string, chain
 export const useConfigs = () => {
     const config = useRuntimeConfig();
 
-    const defaultChain = config.CHAIN_DEFAULT as string;
+    const defaultChain = config.public.chainDefault as string;
     const selectedChain = defaultChain; // for now
 
-    const getApiPath = (): string => parseApiString(selectedChain, defaultChain, config.CHAIN_APIS as Array<ApiEntry>);
+    const getApiPath = (): string => parseApiString(selectedChain, defaultChain, config.public.chainApis as Array<ApiEntry>);
 
     return { getApiPath };
 }

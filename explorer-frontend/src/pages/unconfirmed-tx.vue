@@ -3,13 +3,10 @@
     <h1 class="font-semibold pt-5 uppercase">
       {{ t("UnconfirmedTx.Title") }}
     </h1>
-    <div
-      v-if="
-        unconfirmedTxData == null ||
-        unconfirmedTxData.transactions == null ||
-        unconfirmedTxData.transactions.length == 0
-      "
-      class="
+    <div v-if="unconfirmedTxData == null ||
+      unconfirmedTxData.transactions == null ||
+      unconfirmedTxData.transactions.length == 0
+      " class="
         rounded
         p-8
         bg-gray-50
@@ -19,34 +16,26 @@
         items-center
         mb-4
         mt-4
-      "
-    >
+      ">
       {{ t("UnconfirmedTx.NoTxs") }}
     </div>
-    <BlockTransactionsView
-      v-if="unconfirmedTxData != null && unconfirmedTxData.transactions != null"
-      :txdata="unconfirmedTxData.transactions"
-    />
+    <BlockTransactionsView v-if="unconfirmedTxData != null && unconfirmedTxData.transactions != null"
+      :txdata="unconfirmedTxData.transactions" />
 
-    <SharedPagination
-      v-if="unconfirmedTxData != null && unconfirmedTxData.transactions != null"
-      :overallEntries="unconfirmedTxData.txnCount"
-      :entriesPerPage="config.TXS_PER_PAGE"
-      :currentPage="currentPage"
-      :linkTemplate="buildRouteTemplate()"
-      @pageSelected="selectPage"
-    />
+    <SharedPagination v-if="unconfirmedTxData != null && unconfirmedTxData.transactions != null"
+      :overallEntries="unconfirmedTxData.txnCount" :entriesPerPage="config.public.txsPerPage" :currentPage="currentPage"
+      :linkTemplate="buildRouteTemplate()" @pageSelected="selectPage" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { UnconfirmedTxResponse } from "@/models/API/UnconfirmedTxResponse";
+import type { UnconfirmedTxResponse } from "@/models/API/UnconfirmedTxResponse";
 import { useUI } from "@/composables/UI";
-import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
 const { getApiPath } = useConfigs();
 const { scrollToAnimated } = useUI();
+const localePath = useLocalePath();
 const route = useRoute();
 const config = useRuntimeConfig();
 
@@ -56,16 +45,14 @@ const page =
     : 1) - 1;
 const currentPage = ref(page + 1);
 
-const fetchUnconfirmedTx = async () =>
-  await useFetch<string, UnconfirmedTxResponse>(
-    `${getApiPath()}/unconfirmedtransactions?offset=${(
-      (currentPage.value - 1) *
-      config.TXS_PER_PAGE
-    ).toString()}&count=${config.TXS_PER_PAGE as any as string}`
-  );
+const getFetchUnconfirmedTxUrl = () =>
+  `${getApiPath()}/unconfirmedtransactions?offset=${(
+    (currentPage.value - 1) *
+    config.public.txsPerPage
+  ).toString()}&count=${config.public.txsPerPage as any as string}`;
 
-const unconfirmedTxData = ref((await fetchUnconfirmedTx()).data);
-const buildRouteTemplate = () => `/unconfirmed-tx/{page}/`;
+const unconfirmedTxData = ref((await useFetch<UnconfirmedTxResponse>(getFetchUnconfirmedTxUrl())).data);
+const buildRouteTemplate = () => decodeURI(localePath(`/unconfirmed-tx/{page}/`));
 
 const selectPage = async (pg: number) => {
   if (pg == currentPage.value) return;
@@ -81,8 +68,8 @@ const selectPage = async (pg: number) => {
   const link = buildRouteTemplate().replace("{page}", pg.toString());
   currentPage.value = pg;
   window.history.replaceState({}, "", link);
-  const unconfirmedTxDataLocal = await fetchUnconfirmedTx();
-  unconfirmedTxData.value = unconfirmedTxDataLocal.data.value;
+  const unconfirmedTxDataLocal = await $fetch<UnconfirmedTxResponse>(getFetchUnconfirmedTxUrl());
+  unconfirmedTxData.value = unconfirmedTxDataLocal;
 };
 
 const meta = computed(() => {
@@ -99,7 +86,7 @@ const meta = computed(() => {
       },
       {
         name: "og:url",
-        content: `${config.BASE_URL}${buildRouteTemplate().replace(
+        content: `${config.public.baseUrl}${buildRouteTemplate().replace(
           "{page}",
           currentPage.value.toString()
         )}`,
@@ -107,5 +94,5 @@ const meta = computed(() => {
     ],
   };
 });
-useMeta(meta);
+useHead(meta);
 </script>

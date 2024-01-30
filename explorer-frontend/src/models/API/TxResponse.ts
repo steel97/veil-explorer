@@ -1,4 +1,4 @@
-import { TransactionSimpleDecoded } from "@/models/API/BlockResponse";
+import type { TransactionSimpleDecoded } from "@/models/API/BlockResponse";
 
 export interface TxResponse {
     txId: string | null;

@@ -11,7 +11,7 @@
   <div class="grid grid-cols-2 md:grid-cols-7 p-1 py-4 text-sm gap-3" v-for="(val, index) in props.data"
     :key="'block-' + val.height" :class="index < props.data.length - 1 ? 'border-b' : ''" :id="'block-' + val.height">
     <div>
-      <NuxtLink :to="'/block-height/' + val.height" class="
+      <NuxtLink :to="localePath('/block-height/' + val.height)" class="
           text-sky-700
           dark:text-sky-400
           hover:underline
@@ -76,12 +76,10 @@
 </template>
 
 <script setup lang="ts">
-import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/vue/solid";
-import { useI18n } from "vue-i18n";
+import { ChevronDownIcon/*, ChevronUpIcon*/ } from "@heroicons/vue/24/solid";
 import { useFormatting } from "@/composables/Formatting";
-import { BlockType, SimplifiedBlock } from "@/models/API/SimplifiedBlock";
+import type { SimplifiedBlock } from "@/models/API/SimplifiedBlock";
 import { useBlockchain } from "@/composables/Blockchain";
-import locale from "@/localization/en";
 
 const config = useRuntimeConfig();
 const watcher = ref(0);
@@ -92,7 +90,13 @@ const props = defineProps<{
   reactivityFix: number;
 }>();
 
+const localePath = useLocalePath();
+
+const date = useState('date', () => Date.now());
+let mounted = false;
+
 onMounted(() => {
+  mounted = true;
   setTimeout(watcherTimer, 0);
 });
 
@@ -109,7 +113,7 @@ const { t } = useI18n();
 const getAge = (block: SimplifiedBlock) => {
   // 0 / watcher - reactivity trigger
   const reactivity = 0 / watcher.value;
-  const diff = Date.now() / 1000 - block.time;
+  const diff = (mounted ? Date.now() : date.value) / 1000 - block.time;
 
   const minuteCheck = 60;
   const hourCheck = minuteCheck * 60;
@@ -211,7 +215,7 @@ const getAge = (block: SimplifiedBlock) => {
 };
 
 const getBlockWeightRaw = (block: SimplifiedBlock) =>
-  ((100 * block.weight) / config.MAX_BLOCK_WEIGHT).toFixed(1);
+  ((100 * block.weight) / config.public.maxBlockWeight).toFixed(1);
 
 const getBlockWeight = (block: SimplifiedBlock) =>
   `width: ${getBlockWeightRaw(block)}%`;

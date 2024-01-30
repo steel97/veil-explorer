@@ -15,9 +15,8 @@
       </div>
       <div class="flex justify-between mb-2">
         <div class="flex items-center">
-          <HashtagIcon
-            class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400"
-          /><span>{{ t("NetworkSummary.BestBlockHash") }}</span>
+          <HashtagIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" /><span>{{ t("NetworkSummary.BestBlockHash")
+          }}</span>
         </div>
         <div class="text-right overflow-hidden text-ellipsis max-right-width">
           {{ blockchainData?.bestblockhash ?? t("Core.NoData") }}
@@ -25,9 +24,9 @@
       </div>
       <div class="flex justify-between mb-2">
         <div class="flex items-center">
-          <RefreshIcon
-            class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400"
-          /><span>{{ t("NetworkSummary.LastBlockUpdate") }}</span>
+          <ArrowPathIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" /><span>{{
+            t("NetworkSummary.LastBlockUpdate")
+          }}</span>
         </div>
         <div class="text-right overflow-hidden text-ellipsis max-right-width">
           <span v-if="blockchainData != null">{{
@@ -38,14 +37,14 @@
       </div>
       <div class="flex justify-between mb-2">
         <div class="flex items-center">
-          <DatabaseIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" />
+          <CircleStackIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" />
           <span>{{ t("NetworkSummary.DataSize") }}</span>
         </div>
         <div class="text-right max-right-width">{{ getSize() }}</div>
       </div>
       <div class="flex justify-between mb-2">
         <div class="flex items-center">
-          <PuzzleIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" />
+          <PuzzlePieceIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" />
           <span>{{ t("NetworkSummary.NextSuperblock") }}</span>
         </div>
         <div class="text-right max-right-width">
@@ -68,9 +67,7 @@
       </div>
       <div class="flex justify-between mb-2">
         <div class="flex items-center">
-          <ChipIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" /><span
-            >ProgPow</span
-          >
+          <CpuChipIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" /><span>ProgPow</span>
         </div>
         <div class="text-right">
           {{ blockchainData?.difficulty_progpow ?? t("Core.NoData") }}
@@ -78,9 +75,7 @@
       </div>
       <div class="flex justify-between mb-2">
         <div class="flex items-center">
-          <LightningBoltIcon
-            class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400"
-          /><span>RandomX</span>
+          <BoltIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" /><span>RandomX</span>
         </div>
         <div class="text-right">
           {{ blockchainData?.difficulty_randomx ?? t("Core.NoData") }}
@@ -106,56 +101,40 @@
           <span>PoS</span>
         </div>
         <div class="text-right">
-          <span
-            v-if="
-              backgroundData != null &&
-              backgroundData.algoStats != null &&
-              backgroundData.algoStats.pos
-            "
-            >{{ backgroundData?.algoStats?.pos }} ({{
-              calculateBlocksplit(backgroundData?.algoStats?.pos)
-            }}%)</span
-          >
+          <span v-if="backgroundData != null &&
+            backgroundData.algoStats != null &&
+            backgroundData.algoStats.pos
+            ">{{ backgroundData?.algoStats?.pos }} ({{
+    calculateBlocksplit(backgroundData?.algoStats?.pos)
+  }}%)</span>
           <span v-else>{{ t("Core.NoData") }}</span>
         </div>
       </div>
       <div class="flex justify-between mb-2">
         <div class="flex items-center">
-          <ChipIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" /><span
-            >ProgPow</span
-          >
+          <CpuChipIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" /><span>ProgPow</span>
         </div>
         <div class="text-right">
-          <span
-            v-if="
-              backgroundData != null &&
-              backgroundData.algoStats != null &&
-              backgroundData.algoStats.progpow
-            "
-            >{{ backgroundData?.algoStats?.progpow }} ({{
-              calculateBlocksplit(backgroundData?.algoStats?.progpow)
-            }}%)</span
-          >
+          <span v-if="backgroundData != null &&
+            backgroundData.algoStats != null &&
+            backgroundData.algoStats.progpow
+            ">{{ backgroundData?.algoStats?.progpow }} ({{
+    calculateBlocksplit(backgroundData?.algoStats?.progpow)
+  }}%)</span>
           <span v-else>{{ t("Core.NoData") }}</span>
         </div>
       </div>
       <div class="flex justify-between mb-2">
         <div class="flex items-center">
-          <LightningBoltIcon
-            class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400"
-          /><span>RandomX</span>
+          <BoltIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" /><span>RandomX</span>
         </div>
         <div class="text-right">
-          <span
-            v-if="
-              backgroundData != null &&
-              backgroundData.algoStats != null &&
-              backgroundData.algoStats.randomx
-            "
-            >{{ backgroundData?.algoStats?.randomx }} ({{
-              calculateBlocksplit(backgroundData?.algoStats?.randomx)
-            }}%)</span
-          >
+          <span v-if="backgroundData != null &&
+            backgroundData.algoStats != null &&
+            backgroundData.algoStats.randomx
+            ">{{ backgroundData?.algoStats?.randomx }} ({{
+    calculateBlocksplit(backgroundData?.algoStats?.randomx)
+  }}%)</span>
           <span v-else>{{ t("Core.NoData") }}</span>
         </div>
       </div>
@@ -165,12 +144,10 @@
           <span>SHA256D</span>
         </div>
         <div class="text-right">
-          <span
-            v-if="backgroundData != null && backgroundData.algoStats != null"
-            >{{ backgroundData?.algoStats?.sha256d }} ({{
+          <span v-if="backgroundData != null && backgroundData.algoStats != null">{{ backgroundData?.algoStats?.sha256d }}
+            ({{
               calculateBlocksplit(backgroundData?.algoStats?.sha256d)
-            }}%)</span
-          >
+            }}%)</span>
           <span v-else>{{ t("Core.NoData") }}</span>
         </div>
       </div>
@@ -181,7 +158,7 @@
       </div>
       <div class="flex justify-between mb-2">
         <div class="flex items-center">
-          <CashIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" />
+          <BanknotesIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" />
           <span>{{ t("NetworkSummary.Total") }}</span>
         </div>
         <div class="text-right">
@@ -193,41 +170,28 @@
       </div>
       <div class="flex justify-between mb-2">
         <div class="flex items-center">
-          <ChartBarIcon
-            class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400"
-          /><span>{{ t("NetworkSummary.ZerocoinTotal") }}</span>
+          <ChartBarIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" /><span>{{ t("NetworkSummary.ZerocoinTotal")
+          }}</span>
         </div>
         <div class="text-right">
-          <span
-            v-if="
-              blockchainData != null && blockchainData.zerocoinsupply != null
-            "
-            >{{ calculateZerocoinTotal() }} ({{
-              (
-                (parseInt(calculateZerocoinTotal()) /
-                  (blockchainData.moneysupply / supplyDelimiter)) *
-                100
-              ).toFixed(2)
-            }}%)</span
-          >
+          <span v-if="blockchainData != null && blockchainData.zerocoinsupply != null
+            ">{{ calculateZerocoinTotal() }} ({{
+    (
+      (parseInt(calculateZerocoinTotal()) /
+        (blockchainData.moneysupply / supplyDelimiter)) *
+      100
+    ).toFixed(2)
+  }}%)</span>
           <span v-else>{{ t("Core.NoData") }}</span>
         </div>
       </div>
-      <div
-        v-if="blockchainData != null && blockchainData.zerocoinsupply != null"
-      >
-        <div
-          class="flex justify-between mb-2"
-          v-for="(val, index) in blockchainData.zerocoinsupply.slice(
-            0,
-            blockchainData.zerocoinsupply.length - 1
-          )"
-          :key="'denom-' + index"
-        >
+      <div v-if="blockchainData != null && blockchainData.zerocoinsupply != null">
+        <div class="flex justify-between mb-2" v-for="(val, index) in blockchainData.zerocoinsupply.slice(
+              0,
+              blockchainData.zerocoinsupply.length - 1
+            )" :key="'denom-' + index">
           <div class="flex items-center">
-            <ChartPieIcon
-              class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400"
-            /><span>{{ val.denom }}-denom</span>
+            <ChartPieIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" /><span>{{ val.denom }}-denom</span>
           </div>
           <div class="text-right">
             {{ (val.amount / supplyDelimiter).toFixed(2) }} ({{
@@ -249,23 +213,22 @@
 import {
   CubeIcon,
   HashtagIcon,
-  RefreshIcon,
-  DatabaseIcon,
-  PuzzleIcon,
+  ArrowPathIcon,
+  CircleStackIcon,
+  PuzzlePieceIcon,
   //
   CreditCardIcon,
-  ChipIcon,
-  LightningBoltIcon,
+  CpuChipIcon,
+  BoltIcon,
   ServerIcon,
   //,
-  CashIcon,
+  BanknotesIcon,
   ChartBarIcon,
   ChartPieIcon,
-} from "@heroicons/vue/solid";
-import { BlockchainInfo } from "@/models/API/BlockchainInfo";
+} from "@heroicons/vue/24/solid";
+import type { BlockchainInfo } from "@/models/API/BlockchainInfo";
 import { useFormatting } from "@/composables/Formatting";
 import { useBackgroundInfo, useBlockchainInfo } from "@/composables/States";
-import { useI18n } from "vue-i18n";
 import { COIN } from "@/core/Constants";
 
 const { t } = useI18n();

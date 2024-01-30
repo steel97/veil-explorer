@@ -1,30 +1,28 @@
 <template>
-  <div :class="themeState" id="clfix">
-    <div
-      class="
+  <div>
+    <NuxtLayout>
+      <div :class="themeState" id="clfix">
+        <div class="
         bg-gray-200
         dark:bg-gray-700
         transition-colors
         ease-linear
         duration-200
-      "
-    >
-      <div class="min-h-screen mb-10">
-        <AppHeader />
-        <div class="w-full px-2 text-gray-800 dark:text-gray-300">
-          <SyncNotice v-if="isSynchronizing" />
-          <SearchBox />
-          <main class="max-w-7xl w-full mx-auto">
-            <transition name="fade" mode="out-in">
-              <div :key="route.path">
+      ">
+          <div class="min-h-screen mb-10">
+            <AppHeader />
+            <div class="w-full px-2 text-gray-800 dark:text-gray-300">
+              <SyncNotice v-if="isSynchronizing" />
+              <SearchBox />
+              <main class="max-w-7xl w-full mx-auto">
                 <NuxtPage />
-              </div>
-            </transition>
-          </main>
+              </main>
+            </div>
+          </div>
+          <AppFooter />
         </div>
       </div>
-      <AppFooter />
-    </div>
+    </NuxtLayout>
   </div>
 </template>
 
@@ -39,25 +37,19 @@ import {
   useBlockchainInfo,
 } from "@/composables/States";
 import { useNetworkManager } from "@/composables/NetworkManager";
-import { useLocalization } from "@/composables/Localization";
-import { BlockchainInfo } from "@/models/API/BlockchainInfo";
-import { useI18n } from "vue-i18n";
+import type { BlockchainInfo } from "@/models/API/BlockchainInfo";
 import Cookie from "js-cookie";
 
 const config = useRuntimeConfig();
-const route = useRoute();
 
 const { getApiPath } = useConfigs();
 const { connect } = useNetworkManager();
-const { getClientLocale } = useLocalization();
-const { t, availableLocales, fallbackLocale, locale } = useI18n();
+const { t, locale } = useI18n();
 const backgroundInfoDataState = useBackgroundInfo();
 const blockchaininfoDataState = useBlockchainInfo();
 const themeState = useThemeState();
 const theme = useCookie("theme").value ?? "";
-const lang = useCookie("lang").value ?? getClientLocale();
 
-let currentLang = lang.toString();
 let currentTheme = theme;
 
 let usedMedia = false;
@@ -70,7 +62,7 @@ if (process.client && currentTheme == "") {
     currentTheme = "dark";
 
     const now = new Date();
-    now.setDate(now.getDate() + config.COOKIE_SAVE_DAYS);
+    now.setDate(now.getDate() + config.public.cookieSaveDays);
     Cookie.set("theme", "dark", {
       expires: now,
       sameSite: "lax",
@@ -78,11 +70,6 @@ if (process.client && currentTheme == "") {
   }
 }
 
-if (availableLocales.indexOf(currentLang) == -1) {
-  currentLang = fallbackLocale.value.toString();
-}
-
-locale.value = currentLang;
 themeState.value = currentTheme == "dark" ? "dark" : "";
 
 const meta = computed(() => {
@@ -129,9 +116,9 @@ const meta = computed(() => {
   };
 });
 
-useMeta(meta);
+useHead(meta);
 
-const chainInfo = await useFetch<string, BlockchainInfo>(
+const chainInfo = await useFetch<BlockchainInfo>(
   `${getApiPath()}/blockchaininfo`
 );
 
@@ -152,7 +139,7 @@ const isSynchronizing = computed(() => {
 
   const shouldSync =
     blockchaininfoDataState.value.blocks -
-      (config.SYNC_NOTICE_CASE as any as number) >
+    (config.public.syncNoticeCase as any as number) >
     backgroundInfoDataState.value.currentSyncedBlock;
 
   return shouldSync;

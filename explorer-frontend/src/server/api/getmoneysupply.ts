@@ -1,14 +1,16 @@
-import type { IncomingMessage, ServerResponse } from "http";
-import { parseApiString, ApiEntry } from "~/composables/Configs";
+import { setResponseHeader } from "h3";
+import { parseApiString } from "~/composables/Configs";
+import type { ApiEntry } from "~/composables/Configs";
 
-export default async (req: IncomingMessage, res: ServerResponse) => {
-    const defaultChain = process.env.CHAIN_DEFAULT!;
-    const apiPath = parseApiString(defaultChain, defaultChain, JSON.parse(process.env.CHAIN_APIS!) as Array<ApiEntry>);
+export default defineEventHandler(async (event) => {
+    const runtimeConfig = useRuntimeConfig();
+    const defaultChain = runtimeConfig.public.chainDefault;
+    const apiPath = parseApiString(defaultChain, defaultChain, runtimeConfig.public.chainApis as Array<ApiEntry>);
 
     const result = await $fetch(`${apiPath}/getmoneysupply`);
 
-    res.statusCode = 200;
-    res.setHeader("content-type", "application/json");
+    setResponseStatus(event, 200);
+    setResponseHeader(event, "content-type", "application/json");
 
-    res.end(JSON.stringify(result));
-}
+    return result;
+});

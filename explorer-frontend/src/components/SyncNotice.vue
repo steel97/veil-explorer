@@ -1,7 +1,6 @@
 <template>
   <div class="flex justify-center">
-    <div
-      class="
+    <div class="
         my-6
         max-w-7xl
         w-full
@@ -13,8 +12,7 @@
         bg-yellow-300
         text-gray-600
         dark:bg-yellow-500 dark:text-gray-700
-      "
-    >
+      ">
       {{ t("Core.Synchronizing", { progress: syncState.toFixed(2) }) }}
     </div>
   </div>
@@ -22,7 +20,6 @@
 
 <script setup lang="ts">
 import { useBackgroundInfo, useBlockchainInfo } from "@/composables/States";
-import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
 const backgroundInfoDataState = useBackgroundInfo();

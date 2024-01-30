@@ -13,19 +13,15 @@
         <ChartsLineChart :data="getData('day', true)" class="my-2 md:mx-2" />
         <ChartsLineChart :data="getData('week', true)" class="my-2 md:mx-2" />
         <ChartsLineChart :data="getData('month', true)" class="my-2 md:mx-2" />
-        <ChartsLineChart
-          :data="getData('overall', true)"
-          class="my-2 md:mx-2"
-        />
+        <ChartsLineChart :data="getData('overall', true)" class="my-2 md:mx-2" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-import { TxStatsResponse, TxStatsEntry } from "@/models/API/TxStatsResponse";
-import { GraphData } from "@/models/System/GraphData";
+import type { TxStatsResponse, TxStatsEntry } from "@/models/API/TxStatsResponse";
+import type { GraphData } from "@/models/System/GraphData";
 
 const { t } = useI18n();
 const { getApiPath } = useConfigs();
@@ -33,7 +29,7 @@ const config = useRuntimeConfig();
 const pageReady = ref(false);
 
 const fetchStats = async () =>
-  await useFetch<string, TxStatsResponse>(`${getApiPath()}/txstats`);
+  await useFetch<TxStatsResponse>(`${getApiPath()}/txstats`);
 
 const stats = ref((await fetchStats()).data);
 
@@ -46,7 +42,7 @@ const getData = (key: string, rate = false) => {
     xaxisStep: 5,
     yaxisTitle: "unknown",
   };
-  if (!pageReady.value) return emptyData;
+  if (!pageReady.value || stats.value == null) return emptyData;
 
   const cdataval = stats.value.txStats[key] as TxStatsEntry;
 
@@ -81,10 +77,10 @@ const meta = computed(() => {
       },
       {
         name: "og:url",
-        content: `${config.BASE_URL}/tx-stats`,
+        content: `${config.public.baseUrl}/tx-stats`,
       },
     ],
   };
 });
-useMeta(meta);
+useHead(meta);
 </script>

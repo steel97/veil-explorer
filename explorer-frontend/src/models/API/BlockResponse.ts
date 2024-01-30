@@ -1,4 +1,4 @@
-import { Block } from "@/models/Data/Block";
+import type { Block } from "@/models/Data/Block";
 
 export interface TxVinSimpleDecoded {
     prevOutTx: string | null;

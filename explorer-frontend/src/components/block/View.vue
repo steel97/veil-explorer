@@ -7,16 +7,12 @@
           <!-- should never happend? -->
           <div v-if="props.block.prevBlock != null">
             <div class="max-w-full overflow-hidden text-ellipsis">
-              <RouterLink
-                :to="'/block/' + props.block.prevBlock.hash"
-                class="
+              <NuxtLink :to="localePath('/block/' + props.block.prevBlock.hash)" class="
                   text-sky-700
                   dark:text-sky-400
                   hover:underline
                   underline-offset-4
-                "
-                >{{ props.block.prevBlock.hash }}</RouterLink
-              >
+                ">{{ props.block.prevBlock.hash }}</NuxtLink>
             </div>
             <div class="text-xs text-gray-500 dark:text-gray-400">
               #{{ props.block.prevBlock.height }}
@@ -31,16 +27,12 @@
         <div class="text-right">
           <div v-if="props.block.nextBlock != null">
             <div class="max-w-full overflow-hidden text-ellipsis">
-              <RouterLink
-                :to="'/block/' + props.block.nextBlock.hash"
-                class="
+              <NuxtLink :to="localePath('/block/' + props.block.nextBlock.hash)" class="
                   text-sky-700
                   dark:text-sky-400
                   hover:underline
                   underline-offset-4
-                "
-                >{{ props.block.nextBlock.hash }}</RouterLink
-              >
+                ">{{ props.block.nextBlock.hash }}</NuxtLink>
             </div>
             <div class="text-xs text-gray-500 dark:text-gray-400">
               #{{ props.block.nextBlock.height }}
@@ -56,10 +48,7 @@
         <div>{{ t("Block.ProofType") }}</div>
         <div class="text-right">
           <div>{{ getPow(props.block.block.proof_type)[0] }}</div>
-          <div
-            class="text-xs text-gray-500 dark:text-gray-400"
-            v-html="getPow(props.block.block.proof_type)[1]"
-          ></div>
+          <div class="text-xs text-gray-500 dark:text-gray-400" v-html="getPow(props.block.block.proof_type)[1]"></div>
         </div>
       </div>
 
@@ -113,32 +102,19 @@
       <div class="grid grid-cols-2 gap-0.5 w-full py-4 border-b">
         <div>{{ t("Block.Confirmations.Title") }}</div>
         <div class="text-right" :class="getConfirmationClass">
-          <div
-            class="flex items-center float-right"
-            data-tooltip-target="tooltip-confirmations"
-            ref="confirmationsEl"
-            aria-describedby="tooltip-confirmations"
-            @mouseenter="showTooltip"
-            @focus="showTooltip"
-            @mouseleave="hideTooltip"
-            @blur="hideTooltip"
-            @click.prevent="toggleTooltip"
-          >
+          <div class="flex items-center float-right" data-tooltip-target="tooltip-confirmations" ref="confirmationsEl"
+            aria-describedby="tooltip-confirmations" @mouseenter="showTooltip" @focus="showTooltip"
+            @mouseleave="hideTooltip" @blur="hideTooltip" @click.prevent="toggleTooltip">
             <LockClosedIcon class="h-5 w-5" :class="getConfirmationClass" />
             {{ calculateConfirmations }}
           </div>
-          <div
-            ref="confirmationsTooltipEl"
-            id="tooltip-confirmations"
-            role="tooltip"
-            class="
+          <div ref="confirmationsTooltipEl" id="tooltip-confirmations" role="tooltip" class="
               tooltip
               bg-gray-300
               dark:bg-gray-600
               text-gray-800
               dark:text-gray-50
-            "
-          >
+            ">
             {{ getTitle }}
             <div id="arrow" data-popper-arrow></div>
           </div>
@@ -162,10 +138,8 @@
             }}%)
           </div>
           <div class="rounded bg-gray-200 dark:bg-gray-600 h-1 mt-2">
-            <div
-              class="rounded bg-sky-700 dark:bg-sky-400 h-full"
-              :style="getBlockWeight(props.block.block.weight)"
-            ></div>
+            <div class="rounded bg-sky-700 dark:bg-sky-400 h-full" :style="getBlockWeight(props.block.block.weight)">
+            </div>
           </div>
         </div>
       </div>
@@ -181,17 +155,16 @@
 </template>
 
 <script setup lang="ts">
-import { BlockResponse } from "@/models/API/BlockResponse";
+import type { BlockResponse } from "@/models/API/BlockResponse";
 import { useBlockchain } from "@/composables/Blockchain";
 import { useFormatting } from "@/composables/Formatting";
 import { useBlockchainInfo } from "@/composables/States";
-import { LockClosedIcon } from "@heroicons/vue/solid";
-import { useI18n } from "vue-i18n";
+import { LockClosedIcon } from "@heroicons/vue/24/solid";
 import {
   createPopperLite as createPopper,
-  preventOverflow,
+  /*preventOverflow,
   flip,
-  hide,
+  hide,*/
 } from "@popperjs/core";
 
 const props = defineProps<{
@@ -201,6 +174,7 @@ const props = defineProps<{
 const { t } = useI18n();
 const { getPow } = useBlockchain();
 const { formatDateLocal, formatTimeLocal } = useFormatting();
+const localePath = useLocalePath();
 const confirmationsEl = ref<HTMLElement | null>(null);
 const confirmationsTooltipEl = ref<HTMLElement | null>(null);
 const config = useRuntimeConfig();
@@ -226,7 +200,7 @@ const getTitle = computed(() =>
 );
 
 const getBlockWeightRaw = (weight: number) =>
-  ((100 * weight) / config.MAX_BLOCK_WEIGHT).toFixed(1);
+  ((100 * weight) / config.public.maxBlockWeight).toFixed(1);
 
 const getBlockWeight = (weight: number) =>
   `width: ${getBlockWeightRaw(weight)}%`;

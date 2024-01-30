@@ -20,23 +20,23 @@ HOST=0.0.0.0
 # listen port
 PORT=3000
 # url on which frontend available, used for SEO, meta tags etc.
-BASE_URL=http://<ip>:3000
+NUXT_BASE_URL=http://<ip>:3000
 # which chain should be selected from CHAIN_APIS by default
-CHAIN_DEFAULT=main
+NUXT_CHAIN_DEFAULT=main
 # JSON formatted configuration to connect frontend with backend
 # for now you should only change value of "path", so just replace <ip> and <backend_port>
-CHAIN_APIS="[{\"name\": \"main\", \"path\": \"http://<ip>:<backend_port>/api\"}]"
+NUXT_CHAIN_APIS="[{\"name\": \"main\", \"path\": \"http://<ip>:<backend_port>/api\"}]"
 # amount of blocks shown on main page in "Recent blocks" section
-RECENT_BLOCKS_COUNT=5
+NUXT_RECENT_BLOCKS_COUNT=5
 # amount of blocks shown on blocks list page
-BLOCKS_PER_PAGE=15
+NUXT_BLOCKS_PER_PAGE=15
 # amount of transactions on block page
-TXS_PER_PAGE=15
+NUXT_TXS_PER_PAGE=15
 # variable to calculate block fullness percent, taken from veil node source code
 # https://github.com/Veil-Project/veil/search?q=4000000
-MAX_BLOCK_WEIGHT=4000000
+NUXT_MAX_BLOCK_WEIGHT=4000000
 # how much blocks should be database behind veil node to display "synchronizing" notice
-SYNC_NOTICE_CASE=15
+NUXT_SYNC_NOTICE_CASE=15
 # user preferences store time
-COOKIE_SAVE_DAYS=90
+NUXT_COOKIE_SAVE_DAYS=90
 ```

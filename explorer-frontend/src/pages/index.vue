@@ -9,16 +9,13 @@
         {{ t("Home.RecentBlocks") }}
       </h1>
       <div class="text-right">
-        <NuxtLink
-          to="/blocks"
-          class="
+        <NuxtLink :to="localePath('/blocks')" class="
             uppercase
             text-sky-700
             dark:text-sky-400
             hover:underline
             underline-offset-4
-          "
-        >
+          ">
           {{ t("Home.BrowseBlocks") }}
         </NuxtLink>
       </div>
@@ -31,6 +28,7 @@
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
+const localePath = useLocalePath();
 const config = useRuntimeConfig();
 
 const meta = computed(() => {
@@ -47,10 +45,10 @@ const meta = computed(() => {
       },
       {
         name: "og:url",
-        content: `${config.BASE_URL}/`,
+        content: `${config.public.baseUrl}/`,
       },
     ],
   };
 });
-useMeta(meta);
+useHead(meta);
 </script>

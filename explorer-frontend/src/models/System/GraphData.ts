@@ -1,4 +1,4 @@
-import { TxStatsDataPoint } from "@/models/API/TxStatsResponse";
+import type { TxStatsDataPoint } from "@/models/API/TxStatsResponse";
 
 export interface GraphData {
     data: Array<TxStatsDataPoint>;
