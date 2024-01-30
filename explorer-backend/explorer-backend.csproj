@@ -11,6 +11,8 @@
     <Content Update="output\**\*.*" CopyToPublishDirectory="Never" CopyToOutputDirectory="Never" />
     <Content Update="appsettings.json" CopyToPublishDirectory="Never" CopyToOutputDirectory="Always" />
     <Content Update="appsettings.Production.json" CopyToPublishDirectory="Always" CopyToOutputDirectory="Never" />
+    <Content Update="appsettings.db.json" CopyToPublishDirectory="Never" CopyToOutputDirectory="Never" />
+    <Content Update="appsettings.rpc.json" CopyToPublishDirectory="Never" CopyToOutputDirectory="Never" />
   </ItemGroup>
 
   <ItemGroup>
