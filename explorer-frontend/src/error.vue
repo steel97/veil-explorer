@@ -1,26 +1,28 @@
 <template>
-    <NuxtLayout>
-        <div :class="themeState" id="clfix">
-            <div class="
+    <div>
+        <NuxtLayout>
+            <div :class="themeState" id="clfix">
+                <div class="
           bg-gray-200
           dark:bg-gray-700
           transition-colors
           ease-linear
           duration-200
         ">
-                <div class="min-h-screen mb-10">
-                    <AppHeader />
-                    <div class="w-full px-2 text-gray-800 dark:text-gray-300">
-                        <SearchBox />
-                        <main class="max-w-7xl w-full mx-auto">
-                            <Error :error="error" />
-                        </main>
+                    <div class="min-h-screen mb-10">
+                        <AppHeader />
+                        <div class="w-full px-2 text-gray-800 dark:text-gray-300">
+                            <SearchBox />
+                            <main class="max-w-7xl w-full mx-auto">
+                                <Error :error="error" />
+                            </main>
+                        </div>
                     </div>
+                    <AppFooter />
                 </div>
-                <AppFooter />
             </div>
-        </div>
-    </NuxtLayout>
+        </NuxtLayout>
+    </div>
 </template>
   
 <script setup lang="ts">
@@ -32,10 +34,11 @@ import {
 } from "@/composables/States";
 import { useNetworkManager } from "@/composables/NetworkManager";
 import Cookie from "js-cookie";
+import type { NuxtError } from "#app";
 
 const config = useRuntimeConfig();
 const props = defineProps({
-    error: Object
+    error: Object as () => NuxtError
 });
 
 const { connect } = useNetworkManager();

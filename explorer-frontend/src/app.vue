@@ -1,27 +1,29 @@
 <template>
-  <NuxtLayout>
-    <div :class="themeState" id="clfix">
-      <div class="
+  <div>
+    <NuxtLayout>
+      <div :class="themeState" id="clfix">
+        <div class="
         bg-gray-200
         dark:bg-gray-700
         transition-colors
         ease-linear
         duration-200
       ">
-        <div class="min-h-screen mb-10">
-          <AppHeader />
-          <div class="w-full px-2 text-gray-800 dark:text-gray-300">
-            <SyncNotice v-if="isSynchronizing" />
-            <SearchBox />
-            <main class="max-w-7xl w-full mx-auto">
-              <NuxtPage />
-            </main>
+          <div class="min-h-screen mb-10">
+            <AppHeader />
+            <div class="w-full px-2 text-gray-800 dark:text-gray-300">
+              <SyncNotice v-if="isSynchronizing" />
+              <SearchBox />
+              <main class="max-w-7xl w-full mx-auto">
+                <NuxtPage />
+              </main>
+            </div>
           </div>
+          <AppFooter />
         </div>
-        <AppFooter />
       </div>
-    </div>
-  </NuxtLayout>
+    </NuxtLayout>
+  </div>
 </template>
 
 <script setup lang="ts">

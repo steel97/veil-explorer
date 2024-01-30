@@ -9,7 +9,7 @@
     ">
     <div class="max-w-full mx-auto pr-3">
       <div class="flex justify-between items-center py-2">
-        <NuxtLink :to="localePath('/')" class="flex items-center">
+        <NuxtLink :to="localePath('/')" @click="clearError" class="flex items-center">
           <div class="px-3 pr-2">
             <div class="flex items-center">
               <img class="h-6 w-auto pr-2 my-3" src="/images/logo.png" :alt="t('Header.Title')" />
@@ -31,7 +31,7 @@
               text-gray-400
               hover:text-gray-500
               focus:outline-none
-            " @click="toggleMenu">
+            " @click="toggleMenu(false)">
             <span class="sr-only">{{ t("Header.OpenMenu") }}</span>
             <Bars3Icon class="h-6 w-6" />
           </button>
@@ -39,7 +39,7 @@
         <nav class="hidden lg:flex uppercase px-10 grow">
           <ul class="flex space-x-4 justify-center grow text-sm">
             <li v-for="(link, index) in getLinks()" :key="'link' + index">
-              <NuxtLink :to="link.link" class="
+              <NuxtLink :to="link.link" @click="clearError" class="
                   font-medium
                   hover:underline
                   underline-offset-14
@@ -98,7 +98,7 @@
                 dark:bg-gray-800 dark:text-gray-300
                 pt-2
               ">
-              <NuxtLink :to="switchLocalePath(val.code)" class="
+              <NuxtLink :to="switchLocalePath(val.code)" @click="clearError" class="
                   flex
                   items-center
                   justify-between
@@ -120,7 +120,7 @@
         <nav class="flex flex-col lg:hidden uppercase px-4 grow">
           <ul class="flex flex-col space-y-4 grow text-sm mb-4">
             <li v-for="(link, index) in getLinks()" :key="'link' + index">
-              <NuxtLink @click="toggleMenu()" :to="link.link" class="
+              <NuxtLink @click="toggleMenu(true)" :to="link.link" class="
                   font-medium
                   hover:text-sky-700 hover:underline
                   underline-offset-8
@@ -177,7 +177,7 @@
                 dark:bg-gray-800 dark:text-gray-300
                 pt-2
               ">
-              <NuxtLink :to="switchLocalePath(valm.code)" class="
+              <NuxtLink :to="switchLocalePath(valm.code)" @click="clearError" class="
                   flex
                   items-center
                   justify-between
@@ -309,8 +309,12 @@ const recalculateMenuSize = () => {
   menuHeight.value = menuOpened.value ? `${size}px` : "0px";
 };
 
-const toggleMenu = () => {
+const toggleMenu = (shouldClearError = false) => {
   menuOpened.value = !menuOpened.value;
+
+  if (shouldClearError) {
+    clearError();
+  }
 
   recalculateMenuSize();
 };

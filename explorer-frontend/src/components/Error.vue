@@ -15,7 +15,7 @@
       ">
       {{ t("Errors." + errLocale + ".Description") }}
     </div>
-    <NuxtLink :to="localePath('/')" class="
+    <NuxtLink to="javascript:void(0)" @click="clearErrorAndRedirect" class="
         uppercase
         text-sky-700
         dark:text-sky-400
@@ -28,6 +28,12 @@
 </template>
 
 <script setup lang="ts">
+import type { NuxtError } from "#app";
+
+const props = defineProps({
+  error: Object as () => NuxtError
+});
+
 const localePath = useLocalePath();
 const { t } = useI18n();
 const config = useRuntimeConfig();
@@ -35,13 +41,18 @@ const route = useRoute();
 
 const errLocale = computed(() => {
   let res = "Error404";
-  switch (route.name) {
-    case "500":
+  switch (props.error?.statusCode) {
+    case 500:
       res = "Error500";
       break;
   }
   return res;
 });
+
+const clearErrorAndRedirect = () => {
+  console.log('cn');
+  clearError({ redirect: localePath("/") });
+};
 
 const meta = computed(() => {
   return {
