@@ -90,7 +90,6 @@ import { useFormatting } from "@/composables/Formatting";
 import { useBlockchainInfo } from "@/composables/States";
 import type { TxResponse } from "@/models/API/TxResponse";
 import LockClosedIcon from "@heroicons/vue/24/solid/LockClosedIcon";
-import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
 const { getApiPath } = useConfigs();
@@ -144,7 +143,7 @@ const meta = computed(() => {
       },
       {
         name: "og:url",
-        content: `${config.BASE_URL}/tx/${mtxid}`,
+        content: `${config.public.baseUrl}/tx/${mtxid}`,
       },
     ],
   };

@@ -305,10 +305,8 @@ import type {
   TxVinSimpleDecoded,
   TxVoutSimpleDecoded,
 } from "@/models/API/BlockResponse";
-import { useI18n } from "vue-i18n";
 import { COIN } from "@/core/Constants";
 
-const config = useRuntimeConfig();
 const { t } = useI18n();
 
 const props = defineProps<{

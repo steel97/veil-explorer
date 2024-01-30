@@ -112,7 +112,7 @@
       </div>
       <div class="flex justify-between mb-2">
         <div class="flex items-center">
-          <ChipIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" /><span>ProgPow</span>
+          <CpuChipIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" /><span>ProgPow</span>
         </div>
         <div class="text-right">
           <span v-if="backgroundData != null &&
@@ -126,7 +126,7 @@
       </div>
       <div class="flex justify-between mb-2">
         <div class="flex items-center">
-          <LightningBoltIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" /><span>RandomX</span>
+          <BoltIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" /><span>RandomX</span>
         </div>
         <div class="text-right">
           <span v-if="backgroundData != null &&
@@ -229,7 +229,6 @@ import {
 import type { BlockchainInfo } from "@/models/API/BlockchainInfo";
 import { useFormatting } from "@/composables/Formatting";
 import { useBackgroundInfo, useBlockchainInfo } from "@/composables/States";
-import { useI18n } from "vue-i18n";
 import { COIN } from "@/core/Constants";
 
 const { t } = useI18n();

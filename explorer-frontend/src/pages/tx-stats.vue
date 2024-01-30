@@ -20,7 +20,6 @@
 </template>
 
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
 import type { TxStatsResponse, TxStatsEntry } from "@/models/API/TxStatsResponse";
 import type { GraphData } from "@/models/System/GraphData";
 
@@ -78,7 +77,7 @@ const meta = computed(() => {
       },
       {
         name: "og:url",
-        content: `${config.BASE_URL}/tx-stats`,
+        content: `${config.public.baseUrl}/tx-stats`,
       },
     ],
   };

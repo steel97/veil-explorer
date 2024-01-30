@@ -39,7 +39,6 @@ import {
 import { useNetworkManager } from "@/composables/NetworkManager";
 import { useLocalization } from "@/composables/Localization";
 import type { BlockchainInfo } from "@/models/API/BlockchainInfo";
-import { useI18n } from "vue-i18n";
 import Cookie from "js-cookie";
 
 const config = useRuntimeConfig();
@@ -150,7 +149,7 @@ const isSynchronizing = computed(() => {
 
   const shouldSync =
     blockchaininfoDataState.value.blocks -
-    (config.SYNC_NOTICE_CASE as any as number) >
+    (config.public.syncNoticeCase as any as number) >
     backgroundInfoDataState.value.currentSyncedBlock;
 
   return shouldSync;

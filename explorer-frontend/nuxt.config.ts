@@ -11,11 +11,7 @@ export default defineNuxtConfig({
             txsPerPage: parseInt(process.env.NUXT_TXS_PER_PAGE!),
             maxBlockWeight: parseInt(process.env.NUXT_MAX_BLOCK_WEIGHT!),
             syncNoticeCase: parseInt(process.env.NUXT_SYNC_NOTICE_CASE!),
-            cookieSaveDays: parseInt(process.env.NUXT_COOKIE_SAVE_DAYS!),
-            locales: {
-                "en": "English",
-                "ru": "Русский"
-            }
+            cookieSaveDays: parseInt(process.env.NUXT_COOKIE_SAVE_DAYS!)
         }
     },
     modules: [

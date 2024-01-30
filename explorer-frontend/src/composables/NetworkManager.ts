@@ -22,14 +22,18 @@ export const useNetworkManager = () => {
             .configureLogging(signalR.LogLevel.Error)
             .build();
 
-        connection.on("blockchainInfoUpdated", (chainInfo: GetBlockchainInfoResult) => blockchainInfoDataState.value = chainInfo);
-        connection.on("backgroundInfoUpdated", (currentSyncedBlock: number, algoStats: GetChainalgoStatsResult) =>
+        connection.on("blockchainInfoUpdated", (chainInfo: GetBlockchainInfoResult) => {
+            blockchainInfoDataState.value = chainInfo;
+        });
+        connection.on("backgroundInfoUpdated", (currentSyncedBlock: number, algoStats: GetChainalgoStatsResult) => {
             backgroundInfoDataState.value = {
                 currentSyncedBlock: currentSyncedBlock,
                 algoStats: algoStats
-            }
-        );
-        connection.on("blocksUpdated", (simplifiedBlock: SimplifiedBlock) => latestBlockState.value = simplifiedBlock);
+            };
+        });
+        connection.on("blocksUpdated", (simplifiedBlock: SimplifiedBlock) => {
+            latestBlockState.value = simplifiedBlock;
+        });
 
         connection.start().catch(err => console.log(err));
     }

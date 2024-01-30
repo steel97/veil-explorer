@@ -1,6 +1,4 @@
 //import { DateTime } from "luxon";
-import { useI18n } from "vue-i18n";
-
 import { useLocalization } from "@/composables/Localization";
 
 export const useFormatting = () => {

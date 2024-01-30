@@ -76,8 +76,7 @@
 </template>
 
 <script setup lang="ts">
-import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/vue/24/solid";
-import { useI18n } from "vue-i18n";
+import { ChevronDownIcon/*, ChevronUpIcon*/ } from "@heroicons/vue/24/solid";
 import { useFormatting } from "@/composables/Formatting";
 import type { SimplifiedBlock } from "@/models/API/SimplifiedBlock";
 import { useBlockchain } from "@/composables/Blockchain";

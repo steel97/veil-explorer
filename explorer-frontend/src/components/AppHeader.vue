@@ -200,10 +200,10 @@ import MoonIcon from "@heroicons/vue/24/solid/MoonIcon";
 //import SunIcon from "@heroicons/vue/24/solid/SunIcon";
 import Bars3Icon from "@heroicons/vue/24/outline/Bars3Icon";
 import { useThemeState, useBlockchainInfo } from "@/composables/States";
-import { useI18n } from "vue-i18n";
+import type { LocaleObject } from "vue-i18n-routing";
 import Cookie from "js-cookie";
 
-const { t, availableLocales, getLocaleMessage, locale, fallbackLocale } =
+const { t, locales, locale, fallbackLocale } =
   useI18n();
 const data = useBlockchainInfo();
 const themeState = useThemeState();
@@ -271,26 +271,27 @@ const getLinks = () => {
 const getCurrentLocale = () => {
   return {
     code: locale.value,
-    name: config.public.locales[locale.value],
+    name: (locales.value.filter(a => (a as LocaleObject).code == locale.value)[0] as LocaleObject).name
   };
 };
 
 const getLocales = () => {
-  const locales: Array<ILocale> = [];
-  availableLocales.forEach((lang) => {
-    if (lang == getCurrentLocale().code) return;
+  const loc: Array<ILocale> = [];
+  locales.value.forEach(locale => {
+    const lang = locale as LocaleObject;
+    if (lang.code == getCurrentLocale().code) return;
     const link: ILocale = {
-      code: lang,
-      name: config.public.locales[lang] as any as string,
+      code: lang.code,
+      name: lang.name ?? ""
     };
-    locales.push(link);
+    loc.push(link);
   });
-  return locales;
+  return loc;
 };
 
 const switchLang = (lang: string) => {
   let targetLang = lang;
-  if (availableLocales.indexOf(targetLang) == -1) {
+  if (locales.value.filter(a => (a as LocaleObject).code == targetLang).length == 0) {
     targetLang = fallbackLocale.value.toString();
   }
 

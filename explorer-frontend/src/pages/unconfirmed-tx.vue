@@ -31,7 +31,6 @@
 <script setup lang="ts">
 import type { UnconfirmedTxResponse } from "@/models/API/UnconfirmedTxResponse";
 import { useUI } from "@/composables/UI";
-import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
 const { getApiPath } = useConfigs();
@@ -88,7 +87,7 @@ const meta = computed(() => {
       },
       {
         name: "og:url",
-        content: `${config.BASE_URL}${buildRouteTemplate().replace(
+        content: `${config.public.baseUrl}${buildRouteTemplate().replace(
           "{page}",
           currentPage.value.toString()
         )}`,

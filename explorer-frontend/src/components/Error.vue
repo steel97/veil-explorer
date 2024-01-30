@@ -28,8 +28,6 @@
 </template>
 
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-
 const { t } = useI18n();
 const config = useRuntimeConfig();
 const route = useRoute();
@@ -58,7 +56,7 @@ const meta = computed(() => {
       },
       {
         name: "og:url",
-        content: `${config.BASE_URL}/${route.name as string}`,
+        content: `${config.public.baseUrl}/${route.name as string}`,
       },
     ],
   };

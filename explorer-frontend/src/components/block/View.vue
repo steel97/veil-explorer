@@ -160,12 +160,11 @@ import { useBlockchain } from "@/composables/Blockchain";
 import { useFormatting } from "@/composables/Formatting";
 import { useBlockchainInfo } from "@/composables/States";
 import { LockClosedIcon } from "@heroicons/vue/24/solid";
-import { useI18n } from "vue-i18n";
 import {
   createPopperLite as createPopper,
-  preventOverflow,
+  /*preventOverflow,
   flip,
-  hide,
+  hide,*/
 } from "@popperjs/core";
 
 const props = defineProps<{

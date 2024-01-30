@@ -28,8 +28,6 @@
 </template>
 
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-
 const { t } = useI18n();
 const config = useRuntimeConfig();
 
@@ -47,7 +45,7 @@ const meta = computed(() => {
       },
       {
         name: "og:url",
-        content: `${config.BASE_URL}/search/notfound`,
+        content: `${config.public.baseUrl}/search/notfound`,
       },
     ],
   };

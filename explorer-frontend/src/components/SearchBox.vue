@@ -36,7 +36,6 @@
 <script setup lang="ts">
 import { EntityType } from "@/models/API/SearchResponse";
 import type { SearchResponse } from "@/models/API/SearchResponse";
-import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
 const { getApiPath } = useConfigs();

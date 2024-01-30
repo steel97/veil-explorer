@@ -78,7 +78,7 @@ onBeforeUnmount(() => chart?.destroy());
 onMounted(() => {
   const ctx = ctxRef.value?.getContext("2d");
   chart = new Chart(ctx!, {
-    type: "scatter",
+    type: "line",
     data: {
       labels: props.data.labels,
       datasets: [

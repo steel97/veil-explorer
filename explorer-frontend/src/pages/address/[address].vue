@@ -119,7 +119,6 @@ import type { AddressResponse } from "@/models/API/AddressResponse";
 import DocumentDuplicateIcon from "@heroicons/vue/24/solid/DocumentDuplicateIcon";
 import CheckIcon from "@heroicons/vue/24/solid/CheckIcon";
 import XMarkIcon from "@heroicons/vue/24/solid/XMarkIcon";
-import { useI18n } from "vue-i18n";
 import QrcodeVue from "qrcode.vue";
 import Toastify from "toastify-js";
 
@@ -292,7 +291,7 @@ const meta = computed(() => {
       },
       {
         name: "og:url",
-        content: `${config.BASE_URL}/address/${address}`,
+        content: `${config.public.baseUrl}/address/${address}`,
       },
     ],
   };
