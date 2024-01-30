@@ -44,15 +44,13 @@ const page =
     : 1) - 1;
 const currentPage = ref(page + 1);
 
-const fetchUnconfirmedTx = async () =>
-  await useFetch<UnconfirmedTxResponse>(
-    `${getApiPath()}/unconfirmedtransactions?offset=${(
-      (currentPage.value - 1) *
-      config.public.txsPerPage
-    ).toString()}&count=${config.public.txsPerPage as any as string}`
-  );
+const getFetchUnconfirmedTxUrl = () =>
+  `${getApiPath()}/unconfirmedtransactions?offset=${(
+    (currentPage.value - 1) *
+    config.public.txsPerPage
+  ).toString()}&count=${config.public.txsPerPage as any as string}`;
 
-const unconfirmedTxData = ref((await fetchUnconfirmedTx()).data);
+const unconfirmedTxData = ref((await useFetch<UnconfirmedTxResponse>(getFetchUnconfirmedTxUrl())).data);
 const buildRouteTemplate = () => `/unconfirmed-tx/{page}/`;
 
 const selectPage = async (pg: number) => {
@@ -69,8 +67,8 @@ const selectPage = async (pg: number) => {
   const link = buildRouteTemplate().replace("{page}", pg.toString());
   currentPage.value = pg;
   window.history.replaceState({}, "", link);
-  const unconfirmedTxDataLocal = await fetchUnconfirmedTx();
-  unconfirmedTxData.value = unconfirmedTxDataLocal.data.value;
+  const unconfirmedTxDataLocal = await $fetch<UnconfirmedTxResponse>(getFetchUnconfirmedTxUrl());
+  unconfirmedTxData.value = unconfirmedTxDataLocal;
 };
 
 const meta = computed(() => {

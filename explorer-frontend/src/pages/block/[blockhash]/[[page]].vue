@@ -46,17 +46,16 @@ const page =
         : 1) - 1;
 const currentPage = ref(page + 1);
 
-const fetchBlock = async () =>
-    await useFetch<BlockResponse>(`${getApiPath()}/block`, {
-        method: "POST",
-        body: {
-            hash: route.params.blockhash,
-            offset: (currentPage.value - 1) * config.public.txsPerPage,
-            count: config.public.txsPerPage,
-        },
-    });
+const getFetchBlockUrl = () => `${getApiPath()}/block`;
+const getFetchBlockBody = () => {
+    return {
+        hash: route.params.blockhash,
+        offset: (currentPage.value - 1) * config.public.txsPerPage,
+        count: config.public.txsPerPage,
+    }
+};
 
-const blockData = ref((await fetchBlock()).data);
+const blockData = ref((await useFetch<BlockResponse>(getFetchBlockUrl(), { method: "POST", body: getFetchBlockBody() })).data);
 const blockHeight = computed(
     () => blockData.value?.block?.height ?? t("Core.NoData")
 );
@@ -81,8 +80,8 @@ const selectPage = async (pg: number) => {
     const link = buildRouteTemplate().replace("{page}", pg.toString());
     currentPage.value = pg;
     window.history.replaceState({}, "", link);
-    const blockInfoLocal = await fetchBlock();
-    blockData.value = blockInfoLocal.data.value;
+    const blockInfoLocal = await $fetch<BlockResponse>(getFetchBlockUrl(), { method: "POST", body: getFetchBlockBody() });
+    blockData.value = blockInfoLocal;
 };
 
 const meta = computed(() => {

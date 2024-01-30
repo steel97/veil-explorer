@@ -229,19 +229,33 @@ const copyToClipboard = () => {
   }
 };
 
-const fetchAddress = async (forceScanAmount = false) => {
+const fetchAddress = async (forceScanAmount = false, isInitial = false) => {
   try {
-    const { data } = await useFetch<AddressResponse>(
-      `${getApiPath()}/address`,
-      {
-        method: "POST",
-        body: {
-          address: address,
-          forceScanAmount: forceScanAmount,
-        },
-      }
-    );
-    return data.value;
+    if (isInitial) {
+      const { data } = await useFetch<AddressResponse>(
+        `${getApiPath()}/address`,
+        {
+          method: "POST",
+          body: {
+            address: address,
+            forceScanAmount: forceScanAmount,
+          },
+        }
+      );
+      return data.value;
+    } else {
+      const data = await $fetch<AddressResponse>(
+        `${getApiPath()}/address`,
+        {
+          method: "POST",
+          body: {
+            address: address,
+            forceScanAmount: forceScanAmount,
+          },
+        }
+      );
+      return data;
+    }
   } catch {
     return null;
   }
@@ -253,7 +267,7 @@ const reloadBalance = async () => {
   reloadingBalance.value = false;
 };
 
-const addressInfo = ref(await fetchAddress());
+const addressInfo = ref(await fetchAddress(false, true));
 
 const shouldFetchBalance = () =>
   addressInfo.value != null &&

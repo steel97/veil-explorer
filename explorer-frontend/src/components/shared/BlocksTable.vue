@@ -90,7 +90,11 @@ const props = defineProps<{
   reactivityFix: number;
 }>();
 
+const date = useState('date', () => Date.now());
+let mounted = false;
+
 onMounted(() => {
+  mounted = true;
   setTimeout(watcherTimer, 0);
 });
 
@@ -107,7 +111,7 @@ const { t } = useI18n();
 const getAge = (block: SimplifiedBlock) => {
   // 0 / watcher - reactivity trigger
   const reactivity = 0 / watcher.value;
-  const diff = Date.now() / 1000 - block.time;
+  const diff = (mounted ? Date.now() : date.value) / 1000 - block.time;
 
   const minuteCheck = 60;
   const hourCheck = minuteCheck * 60;

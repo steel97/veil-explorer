@@ -68,8 +68,8 @@ const buildRouteSort = (target: string) =>
 const changeSort = async (target: string) => {
     targetSort.value = target == "asc" ? 0 : 1;
     window.history.replaceState({}, "", buildRouteSort(target));
-    const blocksInfoLocal = await fetchBlocks();
-    blocks.value = blocksInfoLocal.data.value ?? [];
+    const blocksInfoLocal = await $fetch<Array<SimplifiedBlock> | null>(getFetchBlocksUrl());
+    blocks.value = blocksInfoLocal ?? [];
     reactivityFix.value++;
 };
 
@@ -90,18 +90,16 @@ const selectPage = async (pg: number) => {
     const link = buildRouteTemplate().replace("{page}", pg.toString());
     currentPage.value = pg;
     window.history.replaceState({}, "", link);
-    const blocksInfoLocal = await fetchBlocks();
-    blocks.value = blocksInfoLocal.data.value ?? [];
+    const blocksInfoLocal = await $fetch<Array<SimplifiedBlock> | null>(getFetchBlocksUrl());
+    blocks.value = blocksInfoLocal ?? [];
     reactivityFix.value++;
 };
 
-const fetchBlocks = async () =>
-    await useFetch<Array<SimplifiedBlock>>(
-        `${getApiPath()}/blocks?offset=${(currentPage.value - 1) * config.public.blocksPerPage
-        }&count=${config.public.blocksPerPage}&sort=${targetSort.value}`
-    );
+const getFetchBlocksUrl = () =>
+    `${getApiPath()}/blocks?offset=${(currentPage.value - 1) * config.public.blocksPerPage
+    }&count=${config.public.blocksPerPage}&sort=${targetSort.value}`;
 
-const blocksInfo = await fetchBlocks();
+const blocksInfo = await useFetch<Array<SimplifiedBlock>>(getFetchBlocksUrl());
 const blocks = ref<Array<SimplifiedBlock>>(blocksInfo.data.value ?? []);
 const reactivityFix = ref(0);
 
