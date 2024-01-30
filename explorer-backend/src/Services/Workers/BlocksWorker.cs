@@ -7,6 +7,7 @@ using ExplorerBackend.Persistence.Repositories;
 using ExplorerBackend.Models.API;
 using ExplorerBackend.Services.Core;
 using ExplorerBackend.Models.Node.Response;
+using System.Text.Json;
 
 namespace ExplorerBackend.Services.Workers;
 
@@ -20,8 +21,6 @@ public class BlocksWorker : BackgroundService
     private readonly IServiceProvider _serviceProvider;
     private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
     private readonly ChaininfoSingleton _chainInfoSingleton;
-    private readonly BlocksCacheSingleton _blocksCacheSingleton;
-    private readonly SimplifiedBlocksCacheSingleton _smpBlkCacheSingleton;
     private readonly NodeRequester _nodeRequester;
     private readonly IBlocksService _blocksService;
 
@@ -29,7 +28,6 @@ public class BlocksWorker : BackgroundService
 
     public BlocksWorker(ILogger<BlocksWorker> logger, IHubContext<EventsHub> hubContext, IServiceProvider serviceProvider,
         IOptionsMonitor<ExplorerConfig> explorerConfig, ChaininfoSingleton chaininfoSingleton,
-        BlocksCacheSingleton blocksCacheSingleton, SimplifiedBlocksCacheSingleton simplifiedBlocksCacheSingleton,
         NodeRequester nodeRequester, IBlocksService blocksService)
     {
         _logger = logger;
@@ -37,8 +35,6 @@ public class BlocksWorker : BackgroundService
         _serviceProvider = serviceProvider;
         _explorerConfig = explorerConfig;
         _chainInfoSingleton = chaininfoSingleton;
-        _blocksCacheSingleton = blocksCacheSingleton;
-        _smpBlkCacheSingleton = simplifiedBlocksCacheSingleton;
         _nodeRequester = nodeRequester;
         _blocksService = blocksService;
         _blocksPerBatch = _explorerConfig.CurrentValue.BlocksPerBatch == 0 ? 10 : _explorerConfig.CurrentValue.BlocksPerBatch;
@@ -48,16 +44,34 @@ public class BlocksWorker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
+        SimplifiedBlocksCacheSingleton? smpBlkCacheSingleton = null;
+        BlocksCacheSingleton? blocksCacheSingleton = null;
+
         if (_RPCMode)
         {
+            smpBlkCacheSingleton = _serviceProvider.GetService<SimplifiedBlocksCacheSingleton>();
+            blocksCacheSingleton = _serviceProvider.GetService<BlocksCacheSingleton>();
+
+            if (smpBlkCacheSingleton == null)
+            {
+                _logger.LogError("Can't get service {service}", nameof(SimplifiedBlocksCacheSingleton));
+                return;
+            }
+
+            if (blocksCacheSingleton == null)
+            {
+                _logger.LogError("Can't get service {service}", nameof(BlocksCacheSingleton));
+                return;
+            }
+
             try
             {
                 var latestBlock = await _nodeRequester.GetLatestBlock(cancellationToken);
 
-                if (latestBlock != null || latestBlock!.Result != null)
+                if (latestBlock != null && latestBlock.Result != null)
                 {
-                    _chainInfoSingleton.CurrentSyncedBlock = latestBlock.Result!.Height;
-                    _smpBlkCacheSingleton.SetBlockCache(latestBlock.Result, true);
+                    _chainInfoSingleton.CurrentSyncedBlock = latestBlock.Result.Height;
+                    smpBlkCacheSingleton.SetBlockCache(latestBlock.Result, true);
                 }
             }
             catch (Exception)
@@ -76,13 +90,14 @@ public class BlocksWorker : BackgroundService
                 _chainInfoSingleton.CurrentSyncedBlock = latestSyncedBlock.height;
         }
 
+
         while (!cancellationToken.IsCancellationRequested)
         {
             try
             {
                 if (_explorerConfig.CurrentValue.RPCMode)
                 {
-                    await RPCModeIteration(cancellationToken);
+                    await RPCModeIteration(smpBlkCacheSingleton!, blocksCacheSingleton!, cancellationToken);
                 }
                 else
                 {
@@ -120,7 +135,7 @@ public class BlocksWorker : BackgroundService
                 if (blockHash == null || blockHash.Result == null)
                     break;
 
-                var block = await _nodeRequester.GetBlock(blockHash.Result, cancellationToken, simplifiedTxInfo: 2); // 1 -> block, 2 -> block + tx
+                var block = await _nodeRequester.GetBlock(blockHash.Result, cancellationToken, simplifiedTxInfo: 1); // 1 -> block, 2 -> block + tx
 
                 if (block == null || block.Result == null)
                 {
@@ -144,7 +159,7 @@ public class BlocksWorker : BackgroundService
                 }
 
                 // save block's transactions
-                var txFailed = await _blocksService.InsertTransactionsAsync(i, block.Result.Tx!.Select(a => (string)a).ToList(), cancellationToken);
+                var txFailed = await _blocksService.InsertTransactionsAsync(i, block.Result.Tx?.Select(a => ((JsonElement)a).GetString() ?? string.Empty).ToList(), cancellationToken);
                 if (txFailed) break;
 
                 if (!await blocksRepository.SetBlockSyncStateAsync(i, true, cancellationToken))
@@ -185,7 +200,7 @@ public class BlocksWorker : BackgroundService
         }
     }
 
-    private async Task RPCModeIteration(CancellationToken cancellationToken)
+    private async Task RPCModeIteration(SimplifiedBlocksCacheSingleton smpBlkCacheSingleton, BlocksCacheSingleton blocksCacheSingleton, CancellationToken cancellationToken)
     {
         try
         {
@@ -197,11 +212,11 @@ public class BlocksWorker : BackgroundService
             if (newBlock is null || newBlock.Result is null)
                 return;
 
-            _smpBlkCacheSingleton.SetBlockCache(newBlock.Result, true);
-            
+            smpBlkCacheSingleton.SetBlockCache(newBlock.Result, true);
+
             try
             {
-                var setBlockCache = _blocksCacheSingleton.SetServerCacheDataAsync(newBlock.Result.Height, newBlock.Result.Hash!, newBlock.Result, cancellationToken);
+                var setBlockCache = blocksCacheSingleton.SetServerCacheDataAsync(newBlock.Result.Height, newBlock.Result.Hash!, newBlock.Result, cancellationToken);
                 var updateHub = OnNewBlockHubUpdate(newBlock, newBlock.Result.NTx, cancellationToken);
 
                 await Task.WhenAll(setBlockCache, updateHub);
@@ -218,7 +233,7 @@ public class BlocksWorker : BackgroundService
                 if (prevBlocksHash is null || prevBlocksHash.Result is null)
                     continue;
 
-                bool isPrevBlockHashValid = await _blocksCacheSingleton.ValidateCacheAsync(i.ToString(), prevBlocksHash.Result);
+                bool isPrevBlockHashValid = await blocksCacheSingleton.ValidateCacheAsync(i.ToString(), prevBlocksHash.Result);
 
                 if (isPrevBlockHashValid)
                 {
@@ -227,8 +242,8 @@ public class BlocksWorker : BackgroundService
                     if (prevBlock is null || prevBlock.Result is null)
                         continue;
 
-                    _smpBlkCacheSingleton.SetBlockCache(prevBlock.Result);
-                    await _blocksCacheSingleton.UpdateCachedDataAsync(i.ToString(), prevBlocksHash.Result, prevBlock.Result, cancellationToken);
+                    smpBlkCacheSingleton.SetBlockCache(prevBlock.Result);
+                    await blocksCacheSingleton.UpdateCachedDataAsync(i.ToString(), prevBlocksHash.Result, prevBlock.Result, cancellationToken);
                 }
             }
         }
@@ -241,14 +256,15 @@ public class BlocksWorker : BackgroundService
 
     private async Task OnNewBlockHubUpdate(GetBlock block, int txCount, CancellationToken cancellationToken)
     {
-        _chainInfoSingleton.CurrentSyncedBlock = block.Result!.Height;
+        if (block.Result == null) return;
+        _chainInfoSingleton.CurrentSyncedBlock = block.Result.Height;
         if (_chainInfoSingleton.CurrentSyncedBlock == _rpcLatestSyncedBlock) return;
         await _hubContext.Clients.Group(EventsHub.BlocksDataChannel).SendAsync("blocksUpdated", new SimplifiedBlock
         {
             Height = block.Result.Height,
             Size = block.Result.Size,
             Weight = block.Result.Weight,
-            ProofType = _blocksService.GetBlockType(block.Result.Proof_type!),
+            ProofType = _blocksService.GetBlockType(block.Result.Proof_type ?? string.Empty),
             Time = block.Result.Time,
             MedianTime = block.Result.Mediantime,
             TxCount = txCount

@@ -4,7 +4,6 @@ using ExplorerBackend.Configs;
 using ExplorerBackend.Models.System;
 using ExplorerBackend.Services.Caching;
 using ExplorerBackend.Services.Queues;
-using ExplorerBackend.Services.Core;
 using ExplorerBackend.Models.Node.Response;
 
 namespace ExplorerBackend.Services.Workers;
