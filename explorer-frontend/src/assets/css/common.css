@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
 
-html, body {
+html,
+body {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -13,17 +14,19 @@ html, body {
 }
 
 .form-switch .form-check-input {
-	margin-top: .1rem;
-	background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3E%3Ccircle r='3' fill='%23fff'/%3E%3C/svg%3E");
-	background-position: 0;
-	-webkit-transition: background-position .15s ease-in-out;
-	transition: background-position .15s ease-in-out;
+    margin-top: .1rem;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3E%3Ccircle r='3' fill='%23fff'/%3E%3C/svg%3E");
+    background-position: 0;
+    -webkit-transition: background-position .15s ease-in-out;
+    transition: background-position .15s ease-in-out;
 }
 
 .form-switch .form-check-input:checked {
     background-position: 100%;
 }
-.form-switch .form-check-input:checked, .form-switch .form-check-input:focus {
+
+.form-switch .form-check-input:checked,
+.form-switch .form-check-input:focus {
     background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3E%3Ccircle r='3' fill='%23fff'/%3E%3C/svg%3E");
 }
 
@@ -32,15 +35,17 @@ html, body {
     border-color: rgb(3 105 161);
 }
 
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.15s linear;
+.page-enter-active,
+.page-leave-active {
+    transition: all 0.4s;
 }
 
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
+.page-enter-from,
+.page-leave-to {
+    opacity: 0;
+    filter: blur(1rem);
 }
+
 
 .smargins {
     margin: 2px;
@@ -79,19 +84,19 @@ html, body {
     transform: rotate(45deg);
 }
 
-.tooltip[data-popper-placement^='top'] > #arrow {
+.tooltip[data-popper-placement^='top']>#arrow {
     bottom: -4px;
 }
 
-.tooltip[data-popper-placement^='bottom'] > #arrow {
+.tooltip[data-popper-placement^='bottom']>#arrow {
     top: -4px;
 }
 
-.tooltip[data-popper-placement^='left'] > #arrow {
+.tooltip[data-popper-placement^='left']>#arrow {
     right: -4px;
 }
 
-.tooltip[data-popper-placement^='right'] > #arrow {
+.tooltip[data-popper-placement^='right']>#arrow {
     left: -4px;
 }
 

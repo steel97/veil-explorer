@@ -14,6 +14,9 @@ export default defineNuxtConfig({
             cookieSaveDays: parseInt(process.env.NUXT_COOKIE_SAVE_DAYS!)
         }
     },
+    app: {
+        pageTransition: { name: "page", mode: "out-in" }
+    },
     modules: [
         "@nuxtjs/i18n",
         "@nuxtjs/tailwindcss"
