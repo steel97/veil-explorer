@@ -1,54 +1,73 @@
-import { defineNuxtConfig } from "nuxt3";
-
-// temporal fix for intlify
-import { IntlifyModuleOptions } from "@intlify/nuxt3";
-
-declare module "@nuxt/schema" {
-    export interface NuxtConfig {
-        intlify?: IntlifyModuleOptions;
-    }
-}
-//
-
-// https://v3.nuxtjs.org/docs/directory-structure/nuxt.config
+// https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-    publicRuntimeConfig: {
-        BASE_URL: process.env.BASE_URL! as string,
-        CHAIN_DEFAULT: process.env.CHAIN_DEFAULT! as string,
-        CHAIN_APIS: JSON.parse(process.env.CHAIN_APIS! as string),
-        RECENT_BLOCKS_COUNT: parseInt(process.env.RECENT_BLOCKS_COUNT!),
-        BLOCKS_PER_PAGE: parseInt(process.env.BLOCKS_PER_PAGE!),
-        TXS_PER_PAGE: parseInt(process.env.TXS_PER_PAGE!),
-        MAX_BLOCK_WEIGHT: parseInt(process.env.MAX_BLOCK_WEIGHT!),
-        SYNC_NOTICE_CASE: parseInt(process.env.SYNC_NOTICE_CASE!),
-        COOKIE_SAVE_DAYS: parseInt(process.env.COOKIE_SAVE_DAYS!),
-        locales: {
-            "en": "English",
-            "ru": "Русский"
+    devtools: { enabled: true },
+    runtimeConfig: {
+        public: {
+            baseUrl: process.env.NUXT_BASE_URL! as string,
+            chainDefault: process.env.NUXT_CHAIN_DEFAULT! as string,
+            chainApis: JSON.parse(process.env.NUXT_CHAIN_APIS! as string),
+            recentBlocksCount: parseInt(process.env.NUXT_RECENT_BLOCKS_COUNT!),
+            blocksPerPage: parseInt(process.env.NUXT_BLOCKS_PER_PAGE!),
+            txsPerPage: parseInt(process.env.NUXT_TXS_PER_PAGE!),
+            maxBlockWeight: parseInt(process.env.NUXT_MAX_BLOCK_WEIGHT!),
+            syncNoticeCase: parseInt(process.env.NUXT_SYNC_NOTICE_CASE!),
+            cookieSaveDays: parseInt(process.env.NUXT_COOKIE_SAVE_DAYS!),
+            locales: {
+                "en": "English",
+                "ru": "Русский"
+            }
         }
     },
-    privateRuntimeConfig: {
-        BASE_URL: process.env.BASE_URL! as string,
-        CHAIN_APIS: process.env.CHAIN_APIS! as string
+    modules: [
+        "@nuxtjs/i18n",
+        "@nuxtjs/tailwindcss"
+    ],
+    i18n: {
+        baseUrl: process.env.BASE_URL!,
+        locales: [
+            {
+                name: "English",
+                code: "en",
+                iso: "en-US",
+                file: "en.ts"
+            },
+            {
+                name: "Русский",
+                code: "ru",
+                iso: "ru-RU",
+                file: "ru.ts"
+            }
+        ],
+        defaultLocale: "en",
+        lazy: false,
+        langDir: "localization",
+        strategy: "prefix_and_default",
+        detectBrowserLanguage: {
+            useCookie: true,
+            cookieKey: "lang",
+            redirectOn: "root",
+            alwaysRedirect: true
+        }
     },
     srcDir: "src/",
     css: ["~/assets/css/tailwind.css"],
-    alias: {
-        "chart.js": "chart.js/dist/chart.esm.js",
-    },
-    build: {
-        transpile: [
-            "@heroicons/vue", "chart.js"
-        ],
-        postcss: {
-            postcssOptions: require("./postcss.config.js"),
+    postcss: {
+        plugins: {
+            tailwindcss: {},
+            autoprefixer: {},
         },
     },
-    typescript: {
-        strict: true
+    /*alias: {
+        "chart.js": "chart.js/dist/chart.js",
+    },*/
+    build: {
+        transpile: [
+            "@heroicons/vue",
+            "chart.js"
+        ]
     },
-    buildModules: ["@intlify/nuxt3"],
-    intlify: {
-        vueI18n: "vue-i18n.mjs"
+    typescript: {
+        typeCheck: true,
+        strict: true
     }
 })

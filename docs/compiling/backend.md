@@ -1,5 +1,5 @@
 # Backend compiling
-[Dotnet 6+ (SDK)](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) required to compile backend.
+[Dotnet 8+ (SDK)](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) required to compile backend.
 
 ## Setup
 

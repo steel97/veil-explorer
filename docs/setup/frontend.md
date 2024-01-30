@@ -8,7 +8,7 @@ Required OS: **ubuntu 20.04+**
 Recommended OS: **ubuntu 20.04.3 LTS**
 
 Required Software:
-1. [NodeJS 16+](https://nodejs.org/en/)
+1. [NodeJS 20+](https://nodejs.org/en/)
 
 ## Update packges
 ```bash
@@ -16,10 +16,10 @@ sudo apt update
 sudo apt upgrade
 ```
 
-## Install NodeJS 16
+## Install NodeJS 20
 ```bash
 # add nodesource PPA
-curl -fsSL https://deb.nodesource.com/setup_16.x | sudo bash -
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo bash -
 # install nodejs
 sudo apt install nodejs
 ```
@@ -62,18 +62,18 @@ export HOST=0.0.0.0
 # listen port
 export PORT=3000
 # url on which frontend available, used for SEO, meta tags etc.
-export BASE_URL=http://<ip>:3000
+export NUXT_BASE_URL=http://<ip>:3000
 # which chain should be selected from CHAIN_APIS by default
-export CHAIN_DEFAULT=main
+export NUXT_CHAIN_DEFAULT=main
 # JSON formatted configuration to connect frontend with backend
 # for now you should only change value of "path", so just replace <ip> and <backend_port>
-export CHAIN_APIS="[{\"name\": \"main\", \"path\": \"http://<ip>:<backend_port>/api\"}]"
-export RECENT_BLOCKS_COUNT=5
-export BLOCKS_PER_PAGE=15
-export TXS_PER_PAGE=15
-export MAX_BLOCK_WEIGHT=4000000
-export SYNC_NOTICE_CASE=15
-export COOKIE_SAVE_DAYS=90
+export NUXT_CHAIN_APIS="[{\"name\": \"main\", \"path\": \"http://<ip>:<backend_port>/api\"}]"
+export NUXT_RECENT_BLOCKS_COUNT=5
+export NUXT_BLOCKS_PER_PAGE=15
+export NUXT_TXS_PER_PAGE=15
+export NUXT_MAX_BLOCK_WEIGHT=4000000
+export NUXT_SYNC_NOTICE_CASE=15
+export NUXT_COOKIE_SAVE_DAYS=90
 
 node server/index.mjs
 ```

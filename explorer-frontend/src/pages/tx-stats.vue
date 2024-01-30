@@ -13,10 +13,7 @@
         <ChartsLineChart :data="getData('day', true)" class="my-2 md:mx-2" />
         <ChartsLineChart :data="getData('week', true)" class="my-2 md:mx-2" />
         <ChartsLineChart :data="getData('month', true)" class="my-2 md:mx-2" />
-        <ChartsLineChart
-          :data="getData('overall', true)"
-          class="my-2 md:mx-2"
-        />
+        <ChartsLineChart :data="getData('overall', true)" class="my-2 md:mx-2" />
       </div>
     </div>
   </div>

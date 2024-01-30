@@ -9,16 +9,13 @@
         {{ t("Home.RecentBlocks") }}
       </h1>
       <div class="text-right">
-        <NuxtLink
-          to="/blocks"
-          class="
+        <NuxtLink to="/blocks" class="
             uppercase
             text-sky-700
             dark:text-sky-400
             hover:underline
             underline-offset-4
-          "
-        >
+          ">
           {{ t("Home.BrowseBlocks") }}
         </NuxtLink>
       </div>

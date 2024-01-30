@@ -1,11 +1,11 @@
-import type { IncomingMessage, ServerResponse } from "http";
+import { setResponseHeader } from "h3";
 import { parseApiString, ApiEntry } from "~/composables/Configs";
 
-export default async (req: IncomingMessage, res: ServerResponse) => {
+export default defineEventHandler(async (event) => {
     const defaultChain = process.env.CHAIN_DEFAULT!;
     const apiPath = parseApiString(defaultChain, defaultChain, JSON.parse(process.env.CHAIN_APIS!) as Array<ApiEntry>);
 
-    let rq = req.url ?? "";
+    let rq = event.node.req.url ?? "";
     if (rq.length > 0)
         rq = rq.substring(1);
 
@@ -15,8 +15,8 @@ export default async (req: IncomingMessage, res: ServerResponse) => {
 
     const result = await $fetch(`${apiPath}/getaddressbalance/${rq}`);
 
-    res.statusCode = 200;
-    res.setHeader("content-type", "application/json");
+    setResponseStatus(event, 200);
+    setResponseHeader(event, "content-type", "application/json");
 
-    res.end(JSON.stringify(result));
-}
+    return result;
+});

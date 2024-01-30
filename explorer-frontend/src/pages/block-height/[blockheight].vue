@@ -4,41 +4,28 @@
       <div class="uppercase">
         {{ t("Block.BlockTitle") }}: #{{ blockHeight }}
       </div>
-      <div
-        class="
+      <div class="
           text-xs text-gray-500
           dark:text-gray-400
           max-w-full
           overflow-hidden
           text-ellipsis
-        "
-      >
+        ">
         {{ blockHash }}
       </div>
     </h1>
 
-    <BlockView
-      v-if="blockData != null && blockData.block != null"
-      :block="blockData"
-    />
+    <BlockView v-if="blockData != null && blockData.block != null" :block="blockData" />
 
     <h1 class="font-semibold pt-5 uppercase">
       {{ t("Block.Transactions") }}
     </h1>
 
-    <BlockTransactionsView
-      v-if="blockData != null && blockData.transactions != null"
-      :txdata="blockData.transactions"
-    />
+    <BlockTransactionsView v-if="blockData != null && blockData.transactions != null" :txdata="blockData.transactions" />
 
-    <SharedPagination
-      v-if="blockData != null && blockData.transactions != null"
-      :overallEntries="blockData.txnCount"
-      :entriesPerPage="config.TXS_PER_PAGE"
-      :currentPage="currentPage"
-      :linkTemplate="buildRouteTemplate()"
-      @pageSelected="selectPage"
-    />
+    <SharedPagination v-if="blockData != null && blockData.transactions != null" :overallEntries="blockData.txnCount"
+      :entriesPerPage="config.TXS_PER_PAGE" :currentPage="currentPage" :linkTemplate="buildRouteTemplate()"
+      @pageSelected="selectPage" />
   </div>
 </template>
 

@@ -2,24 +2,18 @@
   <div>
     <h1 class="font-semibold py-4">
       <div class="uppercase">{{ t("Tx.Title") }}</div>
-      <div
-        class="
+      <div class="
           text-xs text-gray-500
           dark:text-gray-400
           max-w-full
           overflow-hidden
           text-ellipsis
-        "
-        v-if="tx != null && tx.txId != null"
-      >
+        " v-if="tx != null && tx.txId != null">
         {{ tx.txId }}
       </div>
     </h1>
 
-    <div
-      class="rounded p-4 bg-gray-50 dark:bg-gray-800 text-sm"
-      v-if="tx != null"
-    >
+    <div class="rounded p-4 bg-gray-50 dark:bg-gray-800 text-sm" v-if="tx != null">
       <div class="grid grid-cols-2">
         <div v-if="!tx.confirmed" class="col-span-2 py-4">
           <div class="text-rose-700 dark:text-rose-400">
@@ -32,16 +26,12 @@
           {{ t("Tx.BlockHeight") }}
         </div>
         <div v-if="tx.confirmed" class="border-b py-4">
-          <RouterLink
-            :to="'/block-height/' + tx.blockHeight"
-            class="
+          <RouterLink :to="'/block-height/' + tx.blockHeight" class="
               text-sky-700
               dark:text-sky-400
               hover:underline
               underline-offset-4
-            "
-            >#{{ tx.blockHeight }}</RouterLink
-          >
+            ">#{{ tx.blockHeight }}</RouterLink>
         </div>
 
         <!-- timestamp -->
@@ -91,10 +81,7 @@
     <h1 class="font-semibold pt-4 uppercase">
       {{ t("Tx.InputsOutputs") }}
     </h1>
-    <SharedTransactionData
-      :tx="tx.transaction"
-      v-if="tx != null && tx.transaction != null"
-    />
+    <SharedTransactionData :tx="tx.transaction" v-if="tx != null && tx.transaction != null" />
   </div>
 </template>
 

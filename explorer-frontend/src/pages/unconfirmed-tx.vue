@@ -3,13 +3,10 @@
     <h1 class="font-semibold pt-5 uppercase">
       {{ t("UnconfirmedTx.Title") }}
     </h1>
-    <div
-      v-if="
-        unconfirmedTxData == null ||
-        unconfirmedTxData.transactions == null ||
-        unconfirmedTxData.transactions.length == 0
-      "
-      class="
+    <div v-if="unconfirmedTxData == null ||
+      unconfirmedTxData.transactions == null ||
+      unconfirmedTxData.transactions.length == 0
+      " class="
         rounded
         p-8
         bg-gray-50
@@ -19,23 +16,15 @@
         items-center
         mb-4
         mt-4
-      "
-    >
+      ">
       {{ t("UnconfirmedTx.NoTxs") }}
     </div>
-    <BlockTransactionsView
-      v-if="unconfirmedTxData != null && unconfirmedTxData.transactions != null"
-      :txdata="unconfirmedTxData.transactions"
-    />
+    <BlockTransactionsView v-if="unconfirmedTxData != null && unconfirmedTxData.transactions != null"
+      :txdata="unconfirmedTxData.transactions" />
 
-    <SharedPagination
-      v-if="unconfirmedTxData != null && unconfirmedTxData.transactions != null"
-      :overallEntries="unconfirmedTxData.txnCount"
-      :entriesPerPage="config.TXS_PER_PAGE"
-      :currentPage="currentPage"
-      :linkTemplate="buildRouteTemplate()"
-      @pageSelected="selectPage"
-    />
+    <SharedPagination v-if="unconfirmedTxData != null && unconfirmedTxData.transactions != null"
+      :overallEntries="unconfirmedTxData.txnCount" :entriesPerPage="config.TXS_PER_PAGE" :currentPage="currentPage"
+      :linkTemplate="buildRouteTemplate()" @pageSelected="selectPage" />
   </div>
 </template>
 

@@ -37,7 +37,7 @@ On production environment it is recommended to use the latest version of the LTS
 - [Veil Node](https://github.com/Veil-Project/veil) - required for backend to pull blockchain information
 - [PostgreSQL 13+](https://www.postgresql.org/download/) - required to run backend
 - [Dotnet 6+ (runtime)](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) - required to run backend **in case** when using non self-contained build
-- [NodeJS 16+](https://nodejs.org/en/) - required to run frontend
+- [NodeJS 20+](https://nodejs.org/en/) - required to run frontend
 
 ## Installation
 There are basic setup guide that suitable for all supported environments and full setup tutorial wrote for **Ubuntu 20.04**
@@ -83,17 +83,17 @@ HOST=127.0.0.1
 # listen port
 PORT=3000
 # url on which frontend available, used for SEO, meta tags etc.
-BASE_URL=http://<ip>:3000
-CHAIN_DEFAULT=main
+NUXT_BASE_URL=http://<ip>:3000
+NUXT_CHAIN_DEFAULT=main
 # JSON formatted configuration to connect frontend with backend
 # for now you should only change value of "path", so just replace <ip> and <backend_port>
-CHAIN_APIS="[{\"name\": \"main\", \"path\": \"http://<ip>:5000/api\"}]"
-RECENT_BLOCKS_COUNT=5
-BLOCKS_PER_PAGE=15
-TXS_PER_PAGE=15
-MAX_BLOCK_WEIGHT=4000000
-SYNC_NOTICE_CASE=15
-COOKIE_SAVE_DAYS=90
+NUXT_CHAIN_APIS="[{\"name\": \"main\", \"path\": \"http://<ip>:5000/api\"}]"
+NUXT_RECENT_BLOCKS_COUNT=5
+NUXT_BLOCKS_PER_PAGE=15
+NUXT_TXS_PER_PAGE=15
+NUXT_MAX_BLOCK_WEIGHT=4000000
+NUXT_SYNC_NOTICE_CASE=15
+NUXT_COOKIE_SAVE_DAYS=90
 ```
 See: [/docs/frontend-configuration.md](/docs/frontend-configuration.md)
 

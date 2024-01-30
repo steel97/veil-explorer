@@ -1,16 +1,10 @@
 <template>
   <div class="flex justify-center flex-wrap mt-4" v-show="localMaxPages > 1">
     <div v-for="(element, index) in elements" :key="'pagination-' + index">
-      <a
-        v-if="element.interactable"
-        :href="element.link"
-        @click.prevent="navigateTo(element.targetPage)"
-        :class="
-          element.current
-            ? 'bg-sky-700 text-gray-50 dark:bg-sky-700 dark:text-gray-50'
-            : ''
-        "
-        class="
+      <a v-if="element.interactable" :href="element.link" @click.prevent="navigateTo(element.targetPage)" :class="element.current
+          ? 'bg-sky-700 text-gray-50 dark:bg-sky-700 dark:text-gray-50'
+          : ''
+        " class="
           hover:bg-sky-700
           hover:dark:bg-sky-700
           hover:text-gray-50
@@ -25,12 +19,10 @@
           justify-center
           items-center
           text-sm
-        "
-      >
+        ">
         {{ element.text }}
       </a>
-      <button
-        class="
+      <button class="
           p-2
           smargins
           bg-gray-300
@@ -42,10 +34,7 @@
           items-center
           text-sm
           cursor-not-allowed
-        "
-        disabled
-        v-if="!element.interactable"
-      >
+        " disabled v-if="!element.interactable">
         {{ element.text }}
       </button>
     </div>

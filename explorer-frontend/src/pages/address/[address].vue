@@ -3,23 +3,16 @@
     <h1 class="font-semibold py-4">
       <span class="uppercase">{{ t("Address.ViewTitle") }}:</span>
       &nbsp;
-      <button
-        class="inline-flex items-center max-w-full"
-        @click="copyToClipboard()"
-        :title="t('Address.CopyToClipboard')"
-      >
-        <span
-          class="
+      <button class="inline-flex items-center max-w-full" @click="copyToClipboard()"
+        :title="t('Address.CopyToClipboard')">
+        <span class="
             text-sky-700
             dark:text-sky-400
             overflow-hidden
             text-ellipsis
             max-address-width
-          "
-          >{{ address }}</span
-        >&nbsp;
-        <DuplicateIcon
-          class="
+          ">{{ address }}</span>&nbsp;
+        <DuplicateIcon class="
             inline-block
             h-5
             w-5
@@ -27,49 +20,35 @@
             text-sky-700
             dark:text-sky-400
             cursor-pointer
-          "
-        />
+          " />
       </button>
     </h1>
     <div class="rounded p-4 bg-gray-50 dark:bg-gray-800 text-sm">
       <div class="md:grid grid-cols-2">
         <div>
           <!-- Info section -->
-          <div
-            class="grid grid-cols-2 gap-0.5 w-full py-4 border-b"
-            v-for="(val, index) in getAddressDetails"
-            :class="index < getAddressDetails.length - 1 ? '' : 'md:border-b-0'"
-            :key="'detail-' + index"
-          >
+          <div class="grid grid-cols-2 gap-0.5 w-full py-4 border-b" v-for="(val, index) in getAddressDetails"
+            :class="index < getAddressDetails.length - 1 ? '' : 'md:border-b-0'" :key="'detail-' + index">
             <div>{{ t(val.placeholder) }}</div>
             <div class="text-right md:text-left overflow-hidden text-ellipsis">
               <span v-if="val.check == null">{{ val.value }}</span>
-              <span
-                v-else
-                :title="val.check ? t('Address.Yes') : t('Address.No')"
-              >
-                <CheckIcon
-                  v-if="val.check"
-                  class="
+              <span v-else :title="val.check ? t('Address.Yes') : t('Address.No')">
+                <CheckIcon v-if="val.check" class="
                     inline-block
                     h-5
                     w-5
                     mr-2
                     text-sky-700
                     dark:text-sky-400
-                  "
-                />
-                <XIcon
-                  v-if="!val.check"
-                  class="
+                  " />
+                <XIcon v-if="!val.check" class="
                     inline-block
                     h-5
                     w-5
                     mr-2
                     text-sky-700
                     dark:text-sky-400
-                  "
-                />
+                  " />
               </span>
             </div>
           </div>
@@ -78,63 +57,40 @@
           <!-- QR section -->
           <div>
             <!-- TO-DO, use <client-only/> when nuxt3 implement it -->
-            <QrcodeVue
-              v-if="renderQR"
-              :value="addressReactive"
-              :size="180"
-              :margin="2"
-              render-as="svg"
-              level="H"
-              :aria-label="t('Address.QrCode')"
-            />
+            <QrcodeVue v-if="renderQR" :value="addressReactive" :size="180" :margin="2" render-as="svg" level="H"
+              :aria-label="t('Address.QrCode')" />
             <div>
               <div class="flex justify-between mt-2">
                 <div>{{ t("Address.Balance") }}:</div>
-                <a
-                  href="javascript:void(0)"
-                  class="
+                <a href="javascript:void(0)" class="
                     text-sky-700
                     dark:text-sky-400
                     hover:underline
                     underline-offset-4
-                  "
-                  @click="reloadBalance()"
-                  v-if="
-                    addressInfo != null &&
+                  " @click="reloadBalance()" v-if="addressInfo != null &&
                     addressInfo.amountFetched &&
                     !reloadingBalance &&
                     addressInfo.address != null &&
                     (addressInfo.address.isstealthaddress == null ||
                       !addressInfo.address.isstealthaddress)
-                  "
-                  >{{ t("Address.Update") }}</a
-                >
+                    ">{{ t("Address.Update") }}</a>
               </div>
-              <div
-                v-if="
-                  !reloadingBalance &&
-                  addressInfo != null &&
-                  addressInfo.amountFetched
-                "
-                class="mt-1"
-              >
+              <div v-if="!reloadingBalance &&
+                addressInfo != null &&
+                addressInfo.amountFetched
+                " class="mt-1">
                 {{ addressInfo.amount }} veil
               </div>
-              <div
-                v-else-if="
-                  !reloadingBalance &&
-                  addressInfo != null &&
-                  addressInfo.address != null &&
-                  addressInfo.address.isstealthaddress != null &&
-                  addressInfo.address.isstealthaddress
-                "
-                class="mt-1"
-              >
+              <div v-else-if="!reloadingBalance &&
+                addressInfo != null &&
+                addressInfo.address != null &&
+                addressInfo.address.isstealthaddress != null &&
+                addressInfo.address.isstealthaddress
+                " class="mt-1">
                 {{ t("Address.BalanceHidden") }}
               </div>
               <div v-else class="flex items-center mt-1">
-                <svg
-                  class="
+                <svg class="
                     animate-spin
                     ml-1
                     mr-3
@@ -142,24 +98,11 @@
                     w-5
                     text-gray-800
                     dark:text-gray-300
-                  "
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    class="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    stroke-width="4"
-                  ></circle>
-                  <path
-                    class="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
+                  " xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                  </path>
                 </svg>
                 {{ t("Address.Loading") }}
               </div>

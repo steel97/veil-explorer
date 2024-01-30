@@ -1,14 +1,12 @@
 <template>
   <div :class="themeState" id="clfix">
-    <div
-      class="
+    <div class="
         bg-gray-200
         dark:bg-gray-700
         transition-colors
         ease-linear
         duration-200
-      "
-    >
+      ">
       <div class="min-h-screen mb-10">
         <AppHeader />
         <div class="w-full px-2 text-gray-800 dark:text-gray-300">
@@ -40,7 +38,7 @@ import {
 } from "@/composables/States";
 import { useNetworkManager } from "@/composables/NetworkManager";
 import { useLocalization } from "@/composables/Localization";
-import { BlockchainInfo } from "@/models/API/BlockchainInfo";
+import type { BlockchainInfo } from "@/models/API/BlockchainInfo";
 import { useI18n } from "vue-i18n";
 import Cookie from "js-cookie";
 
@@ -70,7 +68,7 @@ if (process.client && currentTheme == "") {
     currentTheme = "dark";
 
     const now = new Date();
-    now.setDate(now.getDate() + config.COOKIE_SAVE_DAYS);
+    now.setDate(now.getDate() + config.public.cookieSaveDays);
     Cookie.set("theme", "dark", {
       expires: now,
       sameSite: "lax",
@@ -152,7 +150,7 @@ const isSynchronizing = computed(() => {
 
   const shouldSync =
     blockchaininfoDataState.value.blocks -
-      (config.SYNC_NOTICE_CASE as any as number) >
+    (config.SYNC_NOTICE_CASE as any as number) >
     backgroundInfoDataState.value.currentSyncedBlock;
 
   return shouldSync;

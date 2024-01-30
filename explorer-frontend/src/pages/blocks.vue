@@ -5,31 +5,23 @@
         {{ t("Blocks.Title") }}
       </h1>
       <div class="text-right">
-        <a
-          :href="buildRouteSort('desc')"
-          @click.prevent="changeSort('desc')"
-          class="
+        <a :href="buildRouteSort('desc')" @click.prevent="changeSort('desc')" class="
             uppercase
             text-sky-700
             dark:text-sky-400
             hover:underline
             underline-offset-4
-          "
-        >
+          ">
           {{ t("Blocks.SortDesc") }}
         </a>
         |
-        <a
-          :href="buildRouteSort('asc')"
-          @click.prevent="changeSort('asc')"
-          class="
+        <a :href="buildRouteSort('asc')" @click.prevent="changeSort('asc')" class="
             uppercase
             text-sky-700
             dark:text-sky-400
             hover:underline
             underline-offset-4
-          "
-        >
+          ">
           {{ t("Blocks.SortAsc") }}
         </a>
       </div>
@@ -37,18 +29,12 @@
     <div class="rounded p-4 bg-gray-50 dark:bg-gray-800">
       <SharedBlocksTable :data="blocks" :reactivityFix="reactivityFix" />
     </div>
-    <SharedPagination
-      :overallEntries="
-        backgroundInfoDataState != null &&
+    <SharedPagination :overallEntries="backgroundInfoDataState != null &&
         backgroundInfoDataState.currentSyncedBlock != null
-          ? backgroundInfoDataState.currentSyncedBlock
-          : 0
-      "
-      :entriesPerPage="config.BLOCKS_PER_PAGE"
-      :currentPage="currentPage"
-      :linkTemplate="buildRouteTemplate()"
-      @pageSelected="selectPage"
-    />
+        ? backgroundInfoDataState.currentSyncedBlock
+        : 0
+      " :entriesPerPage="config.BLOCKS_PER_PAGE" :currentPage="currentPage" :linkTemplate="buildRouteTemplate()"
+      @pageSelected="selectPage" />
   </div>
 </template>
 
@@ -112,8 +98,7 @@ const selectPage = async (pg: number) => {
 
 const fetchBlocks = async () =>
   await useFetch<string, Array<SimplifiedBlock>>(
-    `${getApiPath()}/blocks?offset=${
-      (currentPage.value - 1) * config.BLOCKS_PER_PAGE
+    `${getApiPath()}/blocks?offset=${(currentPage.value - 1) * config.BLOCKS_PER_PAGE
     }&count=${config.BLOCKS_PER_PAGE}&sort=${targetSort.value}`
   );
 
