@@ -37,15 +37,15 @@ import {
 import { useNetworkManager } from "@/composables/NetworkManager";
 import { useLocalization } from "@/composables/Localization";
 import type { BlockchainInfo } from "@/models/API/BlockchainInfo";
+import type { LocaleObject } from "vue-i18n-routing";
 import Cookie from "js-cookie";
 
 const config = useRuntimeConfig();
-const route = useRoute();
 
 const { getApiPath } = useConfigs();
 const { connect } = useNetworkManager();
 const { getClientLocale } = useLocalization();
-const { t, availableLocales, fallbackLocale, locale } = useI18n();
+const { t, locales, fallbackLocale, locale } = useI18n();
 const backgroundInfoDataState = useBackgroundInfo();
 const blockchaininfoDataState = useBlockchainInfo();
 const themeState = useThemeState();
@@ -73,7 +73,7 @@ if (process.client && currentTheme == "") {
   }
 }
 
-if (availableLocales.indexOf(currentLang) == -1) {
+if (locales.value.filter(locale => (locale as LocaleObject).code == currentLang).length == 0) {
   currentLang = fallbackLocale.value.toString();
 }
 

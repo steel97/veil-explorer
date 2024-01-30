@@ -309,6 +309,10 @@ const switchLang = (lang: string) => {
 };
 
 const computeClasses = (link: ILink) => {
+  if (route.name === undefined) {
+    return ["text-gray-600", "dark:text-gray-300"];
+  }
+
   if (
     (link.name == route.name && route.name == "") ||
     (route.name as any as string).startsWith(link.name)
