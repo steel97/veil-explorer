@@ -124,6 +124,7 @@ import Toastify from "toastify-js";
 
 const { t } = useI18n();
 const { getApiPath } = useConfigs();
+const { chainPath } = useRoutingHelper();
 const route = useRoute();
 const config = useRuntimeConfig();
 
@@ -284,7 +285,7 @@ const checkLoad = async () => {
 };
 
 if (addressInfo.value != null && !addressInfo.value.fetched)
-  router.push("/search/notfound");
+  await navigateTo(chainPath("/search/notfound"));
 
 onMounted(() => {
   if (process.client) renderQR.value = true;

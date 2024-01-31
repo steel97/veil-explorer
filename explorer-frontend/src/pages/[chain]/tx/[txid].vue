@@ -97,7 +97,6 @@ const { formatDateTimeLocal } = useFormatting();
 const { chainPath } = useRoutingHelper();
 const data = useBlockchainInfo();
 const route = useRoute();
-const router = useRouter();
 const config = useRuntimeConfig();
 
 const mtxid = (route.params.txid as string).split("#")[0];
@@ -111,7 +110,7 @@ const fetchTx = async () =>
   });
 const cdata = await fetchTx();
 if (cdata.error.value) {
-  router.replace("/search/notfound");
+  await navigateTo(chainPath("/search/notfound"));
 }
 const tx = ref(cdata.data);
 

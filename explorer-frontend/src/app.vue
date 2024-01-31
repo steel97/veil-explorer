@@ -45,8 +45,9 @@ const config = useRuntimeConfig();
 
 const { getApiPath } = useConfigs();
 const { connect } = useNetworkManager();
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const localePath = useLocalePath();
+const img = useImage();
 const route = useRoute();
 const backgroundInfoDataState = useBackgroundInfo();
 const blockchaininfoDataState = useBlockchainInfo();
@@ -96,15 +97,20 @@ if (!epFound) {
 themeState.value = currentTheme == "dark" ? "dark" : "";
 chainState.value = currentChain;
 if (route.path == localePath("/")) {
-  navigateTo(localePath(`/${chainState.value}`), { redirectCode: 301 });
+  await navigateTo(localePath(`/${chainState.value}`), { redirectCode: 301 });
 }
 
+const i18nHead = useLocaleHead({});
 const meta = computed(() => {
   return {
     meta: [
       {
         name: "viewport",
         content: "width=device-width, initial-scale=1, maximum-scale=5",
+      },
+      {
+        name: "theme-color",
+        content: themeState.value == "dark" ? "#1F2937" : "#F9FAFB",
       },
       {
         "http-equiv": "X-UA-Compatible",
@@ -116,7 +122,7 @@ const meta = computed(() => {
       },
       {
         name: "og:image",
-        content: "/images/ogimage.png",
+        content: img("/images/ogimage.png", { width: 251 }),
       },
       {
         name: "og:site_name",
@@ -126,6 +132,7 @@ const meta = computed(() => {
         name: "og:type",
         content: "website",
       },
+      ...(i18nHead.value.meta || []),
     ],
     link: [
       {
@@ -136,10 +143,11 @@ const meta = computed(() => {
         rel: "preconnect",
         href: "https://fonts.gstatic.com",
       },
+      ...(i18nHead.value.link || []),
     ],
     htmlAttrs: {
-      lang: locale.value,
-    },
+      lang: i18nHead.value.htmlAttrs!.lang
+    }
   };
 });
 

@@ -12,7 +12,8 @@
         <NuxtLink :to="chainPath('/')" @click="clearError" class="flex items-center">
           <div class="px-3 pr-2">
             <div class="flex items-center">
-              <img class="h-6 w-auto pr-2 my-3" src="/images/logo.png" :alt="t('Header.Title')" />
+              <NuxtImg class="h-6 w-auto pr-2 my-3" width="256" height="223" src="/images/logo.png"
+                :alt="t('Header.Title')" />
               <span class="font-semibold">{{ t("Header.Title") }}</span>
             </div>
           </div>
@@ -84,8 +85,10 @@
           </div>
           <div class="mx-2 popover-wrapper text-sm">
             <div class="flex justify-between items-center lang-width px-2">
-              <span class="mr-2"><img class="locale-icon" :alt="getCurrentLocale().name"
-                  :src="'/images/locales/' + getCurrentLocale().code + '.png'" /></span>
+              <span class="mr-2">
+                <NuxtImg class="locale-icon" width="24" height="14" :alt="getCurrentLocale().name"
+                  :src="'/images/locales/' + getCurrentLocale().code + '.png'" />
+              </span>
               <span class="grow cursor-default uppercase">{{
                 getCurrentLocale().name
               }}</span>
@@ -106,8 +109,10 @@
                   px-2
                   cursor-pointer
                 " v-for="val in getLocales()" :key="'lang-' + val.code">
-                <span class="mr-2"><img class="locale-icon" :alt="val.name"
-                    :src="'/images/locales/' + val.code + '.png'" /></span>
+                <span class="mr-2">
+                  <NuxtImg class="locale-icon" width="24" height="14" :alt="val.name"
+                    :src="'/images/locales/' + val.code + '.png'" />
+                </span>
                 <span class="grow uppercase">{{ val.name }}</span>
               </NuxtLink>
             </div>

@@ -1,7 +1,6 @@
 import Cookie from "js-cookie";
 
 export default defineNuxtRouteMiddleware(to => {
-    //const nuxtApp = useNuxtApp();
     const chainState = useChainState();
     const config = useRuntimeConfig();
 

@@ -42,12 +42,12 @@ const props = defineProps({
 });
 const localePath = useLocalePath();
 const { t, locale, locales } = useI18n();
+const img = useImage();
 const themeState = useThemeState();
 const theme = useCookie("theme").value ?? "";
 const chain = useCookie("chain").value ?? config.public.chainDefault;
 
 if (props.error != null) {
-    console.log(props.error.message);
     let turl = props.error.message.substring((props.error.message.indexOf(":") ?? 0) + 1).trim(); // stupid workaround..
 
     if (!turl.startsWith("/")) {
@@ -73,7 +73,8 @@ if (props.error != null) {
         turl.startsWith("/blocks") ||
         turl.startsWith("/tx-stats") ||
         turl.startsWith("/unconfirmed-tx")) {
-        clearError({ redirect: localePath("/" + chain + turl) });
+        await clearError();
+        await navigateTo(localePath("/" + chain + turl), { redirectCode: 301 });
     }
 }
 
@@ -99,6 +100,7 @@ if (process.client && currentTheme == "") {
 
 themeState.value = currentTheme == "dark" ? "dark" : "";
 
+const i18nHead = useLocaleHead({});
 const meta = computed(() => {
     return {
         meta: [
@@ -116,7 +118,7 @@ const meta = computed(() => {
             },
             {
                 name: "og:image",
-                content: "/images/ogimage.png",
+                content: img("/images/ogimage.png", { width: 251 }),
             },
             {
                 name: "og:site_name",
@@ -126,6 +128,7 @@ const meta = computed(() => {
                 name: "og:type",
                 content: "website",
             },
+            ...(i18nHead.value.meta || []),
         ],
         link: [
             {
@@ -136,10 +139,11 @@ const meta = computed(() => {
                 rel: "preconnect",
                 href: "https://fonts.gstatic.com",
             },
+            ...(i18nHead.value.link || []),
         ],
         htmlAttrs: {
-            lang: locale.value,
-        },
+            lang: i18nHead.value.htmlAttrs!.lang
+        }
     };
 });
 

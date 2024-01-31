@@ -18,11 +18,12 @@ export default defineNuxtConfig({
         pageTransition: { name: "page", mode: "out-in" }
     },
     modules: [
+        "@nuxt/image",
         "@nuxtjs/i18n",
         "@nuxtjs/tailwindcss"
     ],
     i18n: {
-        baseUrl: process.env.BASE_URL!,
+        baseUrl: process.env.NUXT_BASE_URL!,
         locales: [
             {
                 name: "English",
@@ -38,15 +39,19 @@ export default defineNuxtConfig({
             }
         ],
         defaultLocale: "en",
-        lazy: false,
+        lazy: true,
         langDir: "localization",
         strategy: "prefix_and_default",
         detectBrowserLanguage: {
             useCookie: true,
             cookieKey: "lang",
-            redirectOn: "root",
+            redirectOn: "all",
             alwaysRedirect: true
         }
+    },
+    image: {
+        quality: 100,
+        format: ["webp"]
     },
     srcDir: "src/",
     css: ["~/assets/css/tailwind.css"],
