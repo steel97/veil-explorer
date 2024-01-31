@@ -23,6 +23,16 @@
   },
   "Explorer": {
     "RPCMode": true,
+    "NodeProxyAllowedMethods": [
+      "importlightwalletaddress",
+      "getwatchonlystatus",
+      "getwatchonlytxes",
+      "checkkeyimages",
+      "getanonoutputs",
+      "sendrawtransaction",
+      "getblockchaininfo",
+      "getrawmempool"
+    ],
     "TxScopeTimeout": 600,
     "HubNotifyDelay": 5000,
     "PullBlocksDelay": 500,

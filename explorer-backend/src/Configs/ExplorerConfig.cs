@@ -2,6 +2,8 @@ namespace ExplorerBackend.Configs;
 
 public class ExplorerConfig
 {
+    public bool RPCMode { get; set; }
+    public List<string>? NodeProxyAllowedMethods { get; set; }
     public int TxScopeTimeout { get; set; }
     public int HubNotifyDelay { get; set; }
     public int PullBlocksDelay { get; set; }
@@ -17,7 +19,6 @@ public class ExplorerConfig
     public string? FoundationAddress { get; set; }
     public Node? Node { get; set; }
     public QueueConfig? ScanTxOutsetQueue { get; set; }
-    public bool RPCMode { get; set; }
 }
 
 

@@ -8,7 +8,6 @@ using ExplorerBackend.Services.Caching;
 using ExplorerBackend.Services.Core;
 using Microsoft.AspNetCore.Cors;
 using ExplorerBackend.Core;
-using System.Collections.Frozen;
 
 namespace ExplorerBackend.Controllers;
 
@@ -17,19 +16,16 @@ namespace ExplorerBackend.Controllers;
 [Route("/")]
 public class NodeProxyController : ControllerBase
 {
-    private readonly FrozenSet<string> NODE_ALLOWED_METHODS;
-    
     private readonly string _invalidOperation;
     private readonly static List<string> _emptyList = [];
     private readonly IOptions<ServerConfig> _serverConfig;
+    private readonly IOptions<ExplorerConfig> _explorerConfig;
     private readonly NodeRequester _nodeRequester;
     private readonly ChaininfoSingleton _chainInfoSingleton;
 
-    public NodeProxyController(IOptions<ServerConfig> serverConfig, NodeRequester nodeRequester, ChaininfoSingleton chainInfoSingleton)
+    public NodeProxyController(IOptions<ServerConfig> serverConfig, IOptions<ExplorerConfig> explorerConfig, NodeRequester nodeRequester, ChaininfoSingleton chainInfoSingleton)
     {
-        List<string> set = ["importlightwalletaddress", "getwatchonlystatus", "getwatchonlytxes", "checkkeyimages", "getanonoutputs",
-        "sendrawtransaction", "getblockchaininfo", "getrawmempool"];
-        NODE_ALLOWED_METHODS = set.ToFrozenSet();
+        _explorerConfig = explorerConfig;
         _serverConfig = serverConfig;
         _nodeRequester = nodeRequester;
         _chainInfoSingleton = chainInfoSingleton;
@@ -58,9 +54,9 @@ public class NodeProxyController : ControllerBase
     public async Task<IActionResult> Post(JsonRPCRequest model, CancellationToken cancellationToken)
     {
         // verify method (and parameters?)
-        if (!NODE_ALLOWED_METHODS.Contains(model.Method ?? ""))
+        if (!_explorerConfig.Value.NodeProxyAllowedMethods?.Contains(model.Method ?? "") ?? false)
             return Content(_invalidOperation, "application/json");
-        
+
 
         if ((model.Method ?? "") == "getblockchaininfo")
         {
