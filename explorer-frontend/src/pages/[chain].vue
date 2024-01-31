@@ -1,7 +1,7 @@
 <template>
-    <div>
+    <NuxtLayout>
         <NuxtPage />
-    </div>
+    </NuxtLayout>
 </template>
 <script setup lang="ts">
 import type { ApiEntry } from "~/composables/Configs";
