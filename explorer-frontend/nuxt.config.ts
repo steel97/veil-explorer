@@ -50,8 +50,15 @@ export default defineNuxtConfig({
         }
     },
     image: {
+        format: ["webp", "png"],
+        provider: "ipx",
         quality: 100,
-        format: ["webp"]
+        ipx: {
+            modifiers: {
+                format: "webp",
+                quality: 100
+            },
+        },
     },
     srcDir: "src/",
     css: ["~/assets/css/tailwind.css"],
