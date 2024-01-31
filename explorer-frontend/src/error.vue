@@ -73,8 +73,7 @@ if (props.error != null) {
         turl.startsWith("/blocks") ||
         turl.startsWith("/tx-stats") ||
         turl.startsWith("/unconfirmed-tx")) {
-        clearError();
-        navigateTo(localePath("/" + chain + turl), { redirectCode: 301 });
+        clearError({ redirect: localePath("/" + chain + turl) });
     }
 }
 
