@@ -9,7 +9,7 @@
     ">
     <div class="max-w-full mx-auto pr-3">
       <div class="flex justify-between items-center py-2">
-        <NuxtLink :to="localePath('/')" @click="clearError" class="flex items-center">
+        <NuxtLink :to="chainPath('/')" @click="clearError" class="flex items-center">
           <div class="px-3 pr-2">
             <div class="flex items-center">
               <img class="h-6 w-auto pr-2 my-3" src="/images/logo.png" :alt="t('Header.Title')" />
@@ -205,7 +205,7 @@ import Cookie from "js-cookie";
 
 const { t, locales, locale, fallbackLocale } =
   useI18n();
-const localePath = useLocalePath();
+const { chainPath } = useRoutingHelper();
 const switchLocalePath = useSwitchLocalePath();
 const data = useBlockchainInfo();
 const themeState = useThemeState();
@@ -249,22 +249,22 @@ const getLinks = () => {
     {
       locale: t("Header.Links.Home"),
       name: "index",
-      link: localePath("/"),
+      link: chainPath("/"),
     },
     {
       locale: t("Header.Links.Blocks"),
       name: "block",
-      link: localePath("/blocks"),
+      link: chainPath("/blocks"),
     },
     {
       locale: t("Header.Links.TxStats"),
       name: "tx-stats",
-      link: localePath("/tx-stats"),
+      link: chainPath("/tx-stats"),
     },
     {
       locale: t("Header.Links.UTxs"),
       name: "unconfirmed-tx",
-      link: localePath("/unconfirmed-tx"),
+      link: chainPath("/unconfirmed-tx"),
     },
   ];
   return ret;

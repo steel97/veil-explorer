@@ -38,6 +38,7 @@ import {
 } from "@/composables/States";
 import { useNetworkManager } from "@/composables/NetworkManager";
 import type { BlockchainInfo } from "@/models/API/BlockchainInfo";
+import type { ApiEntry } from "~/composables/Configs";
 import Cookie from "js-cookie";
 
 const config = useRuntimeConfig();
@@ -45,12 +46,17 @@ const config = useRuntimeConfig();
 const { getApiPath } = useConfigs();
 const { connect } = useNetworkManager();
 const { t, locale } = useI18n();
+const localePath = useLocalePath();
+const route = useRoute();
 const backgroundInfoDataState = useBackgroundInfo();
 const blockchaininfoDataState = useBlockchainInfo();
+const chainState = useChainState();
 const themeState = useThemeState();
 const theme = useCookie("theme").value ?? "";
+const chain = useCookie("chain").value ?? "";
 
 let currentTheme = theme;
+let currentChain = chain;
 
 let usedMedia = false;
 if (process.client && currentTheme == "") {
@@ -70,7 +76,28 @@ if (process.client && currentTheme == "") {
   }
 }
 
+if (process.client && currentChain == "") {
+  currentChain = config.public.chainDefault;
+  const now = new Date();
+  now.setDate(now.getDate() + config.public.cookieSaveDays);
+  Cookie.set("chain", currentChain, {
+    expires: now,
+    sameSite: "lax",
+  });
+}
+
+// validate currentChain
+const apiEndpoints = config.public.chainApis as Array<ApiEntry>;
+const epFound = apiEndpoints.filter(a => a.name == currentChain).length > 0;
+if (!epFound) {
+  currentChain = config.public.chainDefault;
+}
+
 themeState.value = currentTheme == "dark" ? "dark" : "";
+chainState.value = currentChain;
+if (route.path == localePath("/")) {
+  navigateTo(localePath(`/${chainState.value}`), { redirectCode: 301 });
+}
 
 const meta = computed(() => {
   return {

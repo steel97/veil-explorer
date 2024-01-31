@@ -45,7 +45,7 @@ export default defineNuxtConfig({
             useCookie: true,
             cookieKey: "lang",
             redirectOn: "root",
-            alwaysRedirect: true
+            alwaysRedirect: false
         }
     },
     srcDir: "src/",

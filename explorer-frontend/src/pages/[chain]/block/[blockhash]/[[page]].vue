@@ -37,7 +37,7 @@ import { useUI } from "@/composables/UI";
 const { t } = useI18n();
 const { getApiPath } = useConfigs();
 const { scrollToAnimated } = useUI();
-const localePath = useLocalePath();
+const { chainPath } = useRoutingHelper();
 const route = useRoute();
 const config = useRuntimeConfig();
 
@@ -50,7 +50,7 @@ const currentPage = ref(page + 1);
 const getFetchBlockUrl = () => `${getApiPath()}/block`;
 const getFetchBlockBody = () => {
     return {
-        height: route.params.blockheight,
+        hash: route.params.blockhash,
         offset: (currentPage.value - 1) * config.public.txsPerPage,
         count: config.public.txsPerPage,
     }
@@ -65,7 +65,7 @@ const blockHash = computed(
 );
 
 const buildRouteTemplate = () =>
-    decodeURI(localePath(`/block-height/${route.params.blockheight as string}/{page}/`));
+    decodeURI(chainPath(`/block/${route.params.blockhash as string}/{page}/`));
 
 const selectPage = async (pg: number) => {
     if (pg == currentPage.value) return;

@@ -34,7 +34,7 @@ const props = defineProps({
   error: Object as () => NuxtError
 });
 
-const localePath = useLocalePath();
+const { chainPath } = useRoutingHelper();
 const { t } = useI18n();
 const config = useRuntimeConfig();
 const route = useRoute();
@@ -50,8 +50,7 @@ const errLocale = computed(() => {
 });
 
 const clearErrorAndRedirect = () => {
-  console.log('cn');
-  clearError({ redirect: localePath("/") });
+  clearError({ redirect: chainPath("/") });
 };
 
 const meta = computed(() => {

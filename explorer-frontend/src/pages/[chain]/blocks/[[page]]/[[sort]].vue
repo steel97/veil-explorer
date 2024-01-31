@@ -47,7 +47,7 @@ import type { SimplifiedBlock } from "@/models/API/SimplifiedBlock";
 
 const { getApiPath } = useConfigs();
 const { scrollToAnimated } = useUI();
-const localePath = useLocalePath();
+const { chainPath } = useRoutingHelper();
 const config = useRuntimeConfig();
 const latestBlock = useLatestBlockInfo();
 const backgroundInfoDataState = useBackgroundInfo();
@@ -64,7 +64,7 @@ const sort: string = (route.params.sort as string) ?? "desc";
 const targetSort = ref(sort.toLowerCase() == "asc" ? 0 : 1);
 
 const buildRouteSort = (target: string) =>
-    localePath("/blocks/" + currentPage.value + "/" + target);
+    chainPath("/blocks/" + currentPage.value + "/" + target);
 
 const changeSort = async (target: string) => {
     targetSort.value = target == "asc" ? 0 : 1;
@@ -75,7 +75,7 @@ const changeSort = async (target: string) => {
 };
 
 const buildRouteTemplate = () =>
-    decodeURI(localePath("/blocks/{page}/" + (targetSort.value == 0 ? "asc" : "desc")));
+    decodeURI(chainPath("/blocks/{page}/" + (targetSort.value == 0 ? "asc" : "desc")));
 
 const selectPage = async (pg: number) => {
     if (pg == currentPage.value) return;

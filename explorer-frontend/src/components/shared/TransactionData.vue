@@ -67,7 +67,7 @@
                     dark:text-sky-400
                     mr-2
                   " />
-                <NuxtLink :to="localePath('/address/' + input.prevOutAddresses[0])" class="
+                <NuxtLink :to="chainPath('/address/' + input.prevOutAddresses[0])" class="
                     inline-block
                     max-width-hack
                     align-middle
@@ -95,7 +95,7 @@
                   height-offset-fix
                 ">
                 via&nbsp;
-                <NuxtLink :to="localePath('/tx/' + input.prevOutTx + '#output-' + input.prevOutNum)" class="
+                <NuxtLink :to="chainPath('/tx/' + input.prevOutTx + '#output-' + input.prevOutNum)" class="
                     text-sky-700
                     dark:text-sky-400
                     hover:underline
@@ -134,7 +134,7 @@
           <div class="block lg:flex justify-between">
             <div v-if="output.addresses != null && output.addresses.length > 0">
               <div class="mr-2 block lg:inline-block">#{{ outputId + 0 }}</div>
-              <NuxtLink :to="localePath('/address/' + output.addresses[0])" class="
+              <NuxtLink :to="chainPath('/address/' + output.addresses[0])" class="
                   inline-block
                   align-middle
                   lg:align-bottom lg:max-w-none
@@ -308,7 +308,7 @@ import type {
 import { COIN } from "@/core/Constants";
 
 const { t } = useI18n();
-const localePath = useLocalePath();
+const { chainPath } = useRoutingHelper();
 
 const props = defineProps<{
   tx: TransactionSimpleDecoded;

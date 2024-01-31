@@ -41,7 +41,7 @@ const { t } = useI18n();
 const { getApiPath } = useConfigs();
 const searchmodel = ref<string>("");
 const router = useRouter();
-const localePath = useLocalePath();
+const { chainPath } = useRoutingHelper();
 
 const search = async () => {
   await searchInner();
@@ -62,7 +62,7 @@ const searchInner = async (retry = 0) => {
 
   const data = resData;
   if (data == null) {
-    router.replace(localePath(`/search/notfound`));
+    router.replace(chainPath(`/search/notfound`));
     return;
   }
 
@@ -73,19 +73,19 @@ const searchInner = async (retry = 0) => {
 
   switch (data.type) {
     case EntityType.UNKNOWN:
-      router.replace(localePath(`/search/notfound`));
+      router.replace(chainPath(`/search/notfound`));
       break;
     case EntityType.BLOCK_HEIGHT:
-      router.replace(localePath(`/block-height/${data.query}`));
+      router.replace(chainPath(`/block-height/${data.query}`));
       break;
     case EntityType.BLOCK_HASH:
-      router.replace(localePath(`/block/${data.query}`));
+      router.replace(chainPath(`/block/${data.query}`));
       break;
     case EntityType.TRANSACTION_HASH:
-      router.replace(localePath(`/tx/${data.query}`));
+      router.replace(chainPath(`/tx/${data.query}`));
       break;
     case EntityType.ADDRESS:
-      router.replace(localePath(`/address/${data.query}`));
+      router.replace(chainPath(`/address/${data.query}`));
       break;
   }
 };

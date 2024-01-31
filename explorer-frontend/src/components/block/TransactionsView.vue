@@ -1,7 +1,7 @@
 <template>
   <div v-for="tx in props.txdata" :key="'tx-' + tx.txId">
     <h2 class="font-semibold pt-4">
-      <NuxtLink :to="localePath('/tx/' + tx.txId)" class="
+      <NuxtLink :to="chainPath('/tx/' + tx.txId)" class="
           block
           text-sky-700
           dark:text-sky-400
@@ -27,5 +27,5 @@ const props = defineProps<{
   txdata: Array<TransactionSimpleDecoded>;
 }>();
 
-const localePath = useLocalePath();
+const { chainPath } = useRoutingHelper();
 </script>

@@ -7,7 +7,7 @@
           <!-- should never happend? -->
           <div v-if="props.block.prevBlock != null">
             <div class="max-w-full overflow-hidden text-ellipsis">
-              <NuxtLink :to="localePath('/block/' + props.block.prevBlock.hash)" class="
+              <NuxtLink :to="chainPath('/block/' + props.block.prevBlock.hash)" class="
                   text-sky-700
                   dark:text-sky-400
                   hover:underline
@@ -27,7 +27,7 @@
         <div class="text-right">
           <div v-if="props.block.nextBlock != null">
             <div class="max-w-full overflow-hidden text-ellipsis">
-              <NuxtLink :to="localePath('/block/' + props.block.nextBlock.hash)" class="
+              <NuxtLink :to="chainPath('/block/' + props.block.nextBlock.hash)" class="
                   text-sky-700
                   dark:text-sky-400
                   hover:underline
@@ -174,7 +174,7 @@ const props = defineProps<{
 const { t } = useI18n();
 const { getPow } = useBlockchain();
 const { formatDateLocal, formatTimeLocal } = useFormatting();
-const localePath = useLocalePath();
+const { chainPath } = useRoutingHelper();
 const confirmationsEl = ref<HTMLElement | null>(null);
 const confirmationsTooltipEl = ref<HTMLElement | null>(null);
 const config = useRuntimeConfig();
