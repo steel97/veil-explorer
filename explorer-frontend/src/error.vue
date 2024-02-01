@@ -34,49 +34,15 @@ import {
 } from "@/composables/States";
 import Cookie from "js-cookie";
 import type { NuxtError } from "#app";
-import type { LocaleObject } from "vue-i18n-routing";
 
 const config = useRuntimeConfig();
 const props = defineProps({
     error: Object as () => NuxtError
 });
-const localePath = useLocalePath();
-const { t, locale, locales } = useI18n();
+const { t } = useI18n();
 const img = useImage();
 const themeState = useThemeState();
 const theme = useCookie("theme").value ?? "";
-const chain = useCookie("chain").value ?? config.public.chainDefault;
-
-if (props.error != null) {
-    let turl = props.error.message.substring((props.error.message.indexOf(":") ?? 0) + 1).trim(); // stupid workaround..
-
-    if (!turl.startsWith("/")) {
-        turl = "/" + turl;
-    }
-
-    for (const locale of locales.value) {
-        const localeObj = locale as LocaleObject;
-        const lookup = "/" + localeObj.code;
-        if (turl.startsWith(lookup)) {
-            turl = turl.substring(lookup.length);
-            break;
-        }
-    }
-
-    if (!turl.startsWith("/")) {
-        turl = "/" + turl;
-    }
-
-    if (turl.startsWith("/tx/") ||
-        turl.startsWith("/block/") ||
-        turl.startsWith("/block-height/") ||
-        turl.startsWith("/blocks") ||
-        turl.startsWith("/tx-stats") ||
-        turl.startsWith("/unconfirmed-tx")) {
-        await clearError();
-        await navigateTo(localePath("/" + chain + turl), { redirectCode: 301 });
-    }
-}
 
 let currentTheme = theme;
 

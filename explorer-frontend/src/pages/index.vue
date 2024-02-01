@@ -1,4 +1,9 @@
 <template>
-    <div>
-    </div>
+    <div></div>
 </template>
+
+<script setup lang="ts">
+definePageMeta({
+    middleware: ["home"]
+});    
+</script>

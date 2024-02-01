@@ -3,15 +3,18 @@ export default defineNuxtConfig({
     devtools: { enabled: true },
     runtimeConfig: {
         public: {
-            baseUrl: process.env.NUXT_BASE_URL! as string,
-            chainDefault: process.env.NUXT_CHAIN_DEFAULT! as string,
-            chainApis: JSON.parse(process.env.NUXT_CHAIN_APIS! as string),
-            recentBlocksCount: parseInt(process.env.NUXT_RECENT_BLOCKS_COUNT!),
-            blocksPerPage: parseInt(process.env.NUXT_BLOCKS_PER_PAGE!),
-            txsPerPage: parseInt(process.env.NUXT_TXS_PER_PAGE!),
-            maxBlockWeight: parseInt(process.env.NUXT_MAX_BLOCK_WEIGHT!),
-            syncNoticeCase: parseInt(process.env.NUXT_SYNC_NOTICE_CASE!),
-            cookieSaveDays: parseInt(process.env.NUXT_COOKIE_SAVE_DAYS!)
+            i18n: {
+                baseUrl: process.env.NUXT_PUBLIC_I18N_BASE_URL! as string,
+            },
+            baseUrl: process.env.NUXT_PUBLIC_BASE_URL! as string,
+            chainDefault: process.env.NUXT_PUBLIC_CHAIN_DEFAULT! as string,
+            chainApis: JSON.parse(process.env.NUXT_PUBLIC_CHAIN_APIS! as string),
+            recentBlocksCount: parseInt(process.env.NUXT_PUBLIC_RECENT_BLOCKS_COUNT!),
+            blocksPerPage: parseInt(process.env.NUXT_PUBLIC_BLOCKS_PER_PAGE!),
+            txsPerPage: parseInt(process.env.NUXT_PUBLIC_TXS_PER_PAGE!),
+            maxBlockWeight: parseInt(process.env.NUXT_PUBLIC_MAX_BLOCK_WEIGHT!),
+            syncNoticeCase: parseInt(process.env.NUXT_PUBLIC_SYNC_NOTICE_CASE!),
+            cookieSaveDays: parseInt(process.env.NUXT_PUBLIC_COOKIE_SAVE_DAYS!)
         }
     },
     app: {
@@ -22,8 +25,45 @@ export default defineNuxtConfig({
         "@nuxtjs/i18n",
         "@nuxtjs/tailwindcss"
     ],
+    routeRules: {
+        "/tx/**": {
+            redirect: {
+                to: "/main/tx/**",
+                statusCode: 301
+            }
+        },
+        "/block/**": {
+            redirect: {
+                to: "/main/block/**",
+                statusCode: 301
+            }
+        },
+        "/blocks/**": {
+            redirect: {
+                to: "/main/blocks/**",
+                statusCode: 301
+            }
+        },
+        "/block-height/**": {
+            redirect: {
+                to: "/main/block-height/**",
+                statusCode: 301
+            }
+        },
+        "/tx-stats/**": {
+            redirect: {
+                to: "/main/tx-stats/**",
+                statusCode: 301
+            }
+        },
+        "/unconfirmed-tx/**": {
+            redirect: {
+                to: "/main/unconfirmed-tx/**",
+                statusCode: 301
+            }
+        }
+    },
     i18n: {
-        baseUrl: process.env.NUXT_BASE_URL!,
         locales: [
             {
                 name: "English",
@@ -41,7 +81,7 @@ export default defineNuxtConfig({
         defaultLocale: "en",
         lazy: true,
         langDir: "localization",
-        strategy: "prefix_and_default",
+        strategy: "prefix_except_default",
         detectBrowserLanguage: {
             useCookie: true,
             cookieKey: "lang",

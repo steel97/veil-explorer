@@ -1,0 +1,11 @@
+https://github.com/nuxt/nuxt/issues/25196
+navigateTo seems raise warning <NuxtLayout /> component has not been used
+
+https://github.com/nuxt/image/issues/1210
+nuxt-image sharp issue under linux OS
+
+https://github.com/unjs/nitro/pull/1976
+required to support for redirection from old url scheme
+
+https://nuxtseo.com/
+nuxtseo integration

@@ -31,6 +31,17 @@ const { t } = useI18n();
 const { chainPath } = useRoutingHelper();
 const config = useRuntimeConfig();
 
+definePageMeta({
+  validate: async (route) => {
+    // Check if the id is made up of digits
+    const configMW = useRuntimeConfig();
+    const chain = route.params.chain;
+    const apiEndpoints = configMW.public.chainApis as Array<ApiEntry>;
+    const epFound = apiEndpoints.filter(a => a.name == chain).length > 0;
+    return epFound;
+  }
+});
+
 const meta = computed(() => {
   return {
     title: t("Home.Meta.Title"),
