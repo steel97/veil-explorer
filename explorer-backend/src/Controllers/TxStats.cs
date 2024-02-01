@@ -7,14 +7,9 @@ namespace ExplorerBackend.Controllers;
 [ApiController]
 [Route("/api/[controller]")]
 [Produces("application/json")]
-public class TxStatsController : ControllerBase
+public class TxStatsController(ChaininfoSingleton chainInfoSingleton) : ControllerBase
 {
-    private readonly ChaininfoSingleton _chainInfoSingleton;
-
-    public TxStatsController(ChaininfoSingleton chainInfoSingleton)
-    {
-        _chainInfoSingleton = chainInfoSingleton;
-    }
+    private readonly ChaininfoSingleton _chainInfoSingleton = chainInfoSingleton;
 
     [HttpGet(Name = "TxStats")]
     [ProducesResponseType(typeof(TxStatsComposite), StatusCodes.Status200OK)]

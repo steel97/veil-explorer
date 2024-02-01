@@ -7,14 +7,9 @@ namespace ExplorerBackend.Controllers;
 [ApiController]
 [Route("/api/[controller]")]
 [Produces("application/json")]
-public class GetBlockchainInfoController : ControllerBase
+public class GetBlockchainInfoController(ChaininfoSingleton chainInfoSingleton) : ControllerBase
 {
-    private readonly ChaininfoSingleton _chainInfoSingleton;
-
-    public GetBlockchainInfoController(ChaininfoSingleton chainInfoSingleton)
-    {
-        _chainInfoSingleton = chainInfoSingleton;
-    }
+    private readonly ChaininfoSingleton _chainInfoSingleton = chainInfoSingleton;
 
     [HttpGet(Name = "GetBlockchainInfo")]
     [ProducesResponseType(typeof(GetBlockchainInfoResult), StatusCodes.Status200OK)]

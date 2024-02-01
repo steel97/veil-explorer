@@ -6,16 +6,10 @@ using ExplorerBackend.Services.Caching;
 
 namespace ExplorerBackend.Persistence.Repositories;
 
-public class BlocksRepository : BaseRepository, IBlocksRepository
+public class BlocksRepository(NpgsqlDataSource dataSource, IUtilityService utilityService, ChaininfoSingleton chainInfoSingleton) : BaseRepository(utilityService), IBlocksRepository
 {
-    private readonly NpgsqlDataSource _dataSource;
-    private readonly ChaininfoSingleton _chainInfoSingleton;
-
-    public BlocksRepository(NpgsqlDataSource dataSource, IUtilityService utilityService, ChaininfoSingleton chainInfoSingleton) : base(utilityService)
-    {
-        _dataSource = dataSource;
-        _chainInfoSingleton = chainInfoSingleton;
-    }
+    private readonly NpgsqlDataSource _dataSource = dataSource;
+    private readonly ChaininfoSingleton _chainInfoSingleton = chainInfoSingleton;
 
     protected async Task<Block?> ReadBlockAsync(NpgsqlDataReader reader, CancellationToken cancellationToken = default)
     {

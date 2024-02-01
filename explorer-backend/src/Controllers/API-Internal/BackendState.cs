@@ -9,16 +9,10 @@ namespace ExplorerBackend.Controllers;
 [ApiController]
 [Route("/api/internal/[controller]")]
 [Produces("application/json")]
-public class BackendState : ControllerBase
+public class BackendState(IOptions<ServerConfig> serverConfig, InternalSingleton internalSingleton) : ControllerBase
 {
-    private readonly IOptions<ServerConfig> _serverConfig;
-    private readonly InternalSingleton _internalSingleton;
-
-    public BackendState(IOptions<ServerConfig> serverConfig, InternalSingleton internalSingleton)
-    {
-        _serverConfig = serverConfig;
-        _internalSingleton = internalSingleton;
-    }
+    private readonly IOptions<ServerConfig> _serverConfig = serverConfig;
+    private readonly InternalSingleton _internalSingleton = internalSingleton;
 
     [HttpGet(Name = "BackendState")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

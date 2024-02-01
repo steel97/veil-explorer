@@ -11,18 +11,11 @@ namespace ExplorerBackend.Controllers;
 [ApiController]
 [Route("/api/[controller]")]
 [Produces("application/json")]
-public class BlocksController : ControllerBase
+public class BlocksController(IOptions<APIConfig> apiConfig, ChaininfoSingleton chaininfoSingleton, IBlocksDataService blocksDataService) : ControllerBase
 {
-    private readonly IOptions<APIConfig> _apiConfig;
-    private readonly ChaininfoSingleton _chaininfoSingleton;
-    private readonly IBlocksDataService _blocksDataService;
-
-    public BlocksController(IOptions<APIConfig> apiConfig, ChaininfoSingleton chaininfoSingleton, IBlocksDataService blocksDataService)
-    {
-        _apiConfig = apiConfig;
-        _chaininfoSingleton = chaininfoSingleton;
-        _blocksDataService = blocksDataService;
-    }
+    private readonly IOptions<APIConfig> _apiConfig = apiConfig;
+    private readonly ChaininfoSingleton _chaininfoSingleton = chaininfoSingleton;
+    private readonly IBlocksDataService _blocksDataService = blocksDataService;
 
     [HttpGet(Name = "GetBlocks")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -37,28 +30,28 @@ public class BlocksController : ControllerBase
         bool isOutOfBounds = false;
         int offsetDifference;
 
-        if(sort is SortDirection.DESC)
+        if (sort is SortDirection.DESC)
         {
             offsetDifference = latestBlockHeight - offset - count;
 
-            if(offsetDifference <= count * (-1))
+            if (offsetDifference <= count * (-1))
                 isOutOfBounds = true;
-            else if(offsetDifference < 0)
+            else if (offsetDifference < 0)
                 count += offsetDifference;
         }
         else
         {
-            offsetDifference =  1 + offset + count;
+            offsetDifference = 1 + offset + count;
 
-            if(offsetDifference - latestBlockHeight > count - 1)
-                isOutOfBounds = true;  
-            else if(offsetDifference - latestBlockHeight >= 0)
+            if (offsetDifference - latestBlockHeight > count - 1)
+                isOutOfBounds = true;
+            else if (offsetDifference - latestBlockHeight >= 0)
                 count -= offsetDifference - latestBlockHeight;
         }
 
         if (isOutOfBounds)
             return Problem($"offset should be higher or equal to 0 and less than {_chaininfoSingleton.CurrentSyncedBlock}", statusCode: 400);
-        
+
         return Ok(await _blocksDataService.GetSimplifiedBlocksAsync(offset, count, sort, cancellationToken));
     }
 }

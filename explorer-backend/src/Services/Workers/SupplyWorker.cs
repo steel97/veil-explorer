@@ -8,25 +8,15 @@ using ExplorerBackend.Models.Node.Response;
 
 namespace ExplorerBackend.Services.Workers;
 
-public class SupplyWorker : BackgroundService
+public class SupplyWorker(ILogger<SupplyWorker> logger, IOptionsMonitor<ExplorerConfig> explorerConfig, IOptionsMonitor<APIConfig> apiConfig, ChaininfoSingleton chaininfoSingleton,
+    ScanTxOutsetBackgroundTaskQueue scanTxOutsetBackgroundTaskQueue, NodeApiCacheSingleton nodeApiCacheSingleton) : BackgroundService
 {
-    private readonly ILogger _logger;
-    private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
-    private readonly IOptionsMonitor<APIConfig> _apiConfig;
-    private readonly ChaininfoSingleton _chainInfoSingleton;
-    private readonly ScanTxOutsetBackgroundTaskQueue _scanTxOutsetBackgroundTaskQueue;
-    private readonly NodeApiCacheSingleton _nodeApiCacheSingleton;
-
-    public SupplyWorker(ILogger<SupplyWorker> logger, IOptionsMonitor<ExplorerConfig> explorerConfig, IOptionsMonitor<APIConfig> apiConfig, ChaininfoSingleton chaininfoSingleton,
-        ScanTxOutsetBackgroundTaskQueue scanTxOutsetBackgroundTaskQueue, NodeApiCacheSingleton nodeApiCacheSingleton)
-    {
-        _logger = logger;
-        _explorerConfig = explorerConfig;
-        _apiConfig = apiConfig;
-        _chainInfoSingleton = chaininfoSingleton;
-        _scanTxOutsetBackgroundTaskQueue = scanTxOutsetBackgroundTaskQueue;
-        _nodeApiCacheSingleton = nodeApiCacheSingleton;
-    }
+    private readonly ILogger _logger = logger;
+    private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig = explorerConfig;
+    private readonly IOptionsMonitor<APIConfig> _apiConfig = apiConfig;
+    private readonly ChaininfoSingleton _chainInfoSingleton = chaininfoSingleton;
+    private readonly ScanTxOutsetBackgroundTaskQueue _scanTxOutsetBackgroundTaskQueue = scanTxOutsetBackgroundTaskQueue;
+    private readonly NodeApiCacheSingleton _nodeApiCacheSingleton = nodeApiCacheSingleton;
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {

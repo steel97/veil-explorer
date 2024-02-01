@@ -7,7 +7,6 @@ using ExplorerBackend.Services.Caching;
 using ExplorerBackend.Models.Node;
 using ExplorerBackend.Models.Node.Response;
 using ExplorerBackend.Models.API;
-using System.Security.Cryptography;
 
 namespace ExplorerBackend.Services.Core;
 
@@ -97,7 +96,7 @@ public class NodeRequester
         {
             Id = 1,
             Method = "getblockchaininfo",
-            Params = new List<object>(Array.Empty<object>())
+            Params = new List<object>([])
         };
         var getBlockchainInfoResponse = await httpClient.PostAsJsonAsync("", getBlockchainInfoRequest, _serializerOptions, cancellationToken);
         return await getBlockchainInfoResponse.Content.ReadFromJsonAsync<GetBlockchainInfo>(_serializerOptions, cancellationToken);

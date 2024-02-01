@@ -32,17 +32,16 @@ public class BlockchainWorker : BackgroundService
             try
             {
                 // get blockchain info
-                var blockchainInfo = _nodeRequester.GetBlockChainInfo(cancellationToken);
+                var blockchainInfo = await _nodeRequester.GetBlockChainInfo(cancellationToken);
 
                 //  chainalgo stats
-                var chainalgoStats = _nodeRequester.GetChainAlgoStats(cancellationToken);
+                var chainalgoStats = await _nodeRequester.GetChainAlgoStats(cancellationToken);
 
-                await Task.WhenAll(chainalgoStats, blockchainInfo);
 
                 // updating cache
                 if (blockchainInfo != null && blockchainInfo.Result != null)
                 {
-                    _chainInfoSingleton.CurrentChainInfo = blockchainInfo.Result.Result!;
+                    _chainInfoSingleton.CurrentChainInfo = blockchainInfo.Result;
                     _chainInfoSingleton.CurrentChainInfo.Next_super_block = (uint)Math.Floor((_chainInfoSingleton.CurrentChainInfo.Blocks / (double)43200) + 1) * 43200;
                     if (_chainInfoSingleton.LastSyncedBlockOnNode < _chainInfoSingleton.CurrentChainInfo?.Blocks)
                         _chainInfoSingleton.LastSyncedBlockOnNode = (int)(_chainInfoSingleton.CurrentChainInfo?.Blocks ?? 0);
@@ -74,12 +73,10 @@ public class BlockchainWorker : BackgroundService
                 //    _logger.LogWarning("BlockChainInfo is null");
 
                 if (chainalgoStats != null && chainalgoStats.Result != null)
-                    _chainInfoSingleton.CurrentChainAlgoStats = chainalgoStats.Result.Result;
+                    _chainInfoSingleton.CurrentChainAlgoStats = chainalgoStats.Result;
                 //else
                 //    _logger.LogWarning("ChainalgoStats is null");
 
-                // TimeSpan not reuired here since we use milliseconds, still put it there to change in future if required
-                await Task.Delay(TimeSpan.FromMilliseconds(_explorerConfig.CurrentValue.PullBlockchainInfoDelay), cancellationToken);
             }
             catch (OperationCanceledException)
             {
@@ -88,6 +85,16 @@ public class BlockchainWorker : BackgroundService
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Can't handle blockchain info");
+            }
+
+            try
+            {
+                // TimeSpan not reuired here since we use milliseconds, still put it there to change in future if required
+                await Task.Delay(TimeSpan.FromMilliseconds(_explorerConfig.CurrentValue.PullBlockchainInfoDelay), cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+
             }
         }
 

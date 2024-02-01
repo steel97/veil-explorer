@@ -7,22 +7,13 @@ using ExplorerBackend.Services.Caching;
 
 namespace ExplorerBackend.Services.Workers;
 
-public class ScanTxOutsetWorker : BackgroundService
+public class ScanTxOutsetWorker(ILogger<ScanTxOutsetWorker> logger, IOptionsMonitor<ExplorerConfig> explorerConfig, ScanTxOutsetBackgroundTaskQueue taskQueue, NodeApiCacheSingleton nodeApiCacheSingleton, NodeRequester nodeRequester) : BackgroundService
 {
-    private readonly ILogger _logger;
-    private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
-    private readonly IBackgroundTaskQueue _taskQueue;
-    private readonly NodeApiCacheSingleton _nodeApiCacheSingleton;
-    private readonly NodeRequester _nodeRequester;
-
-    public ScanTxOutsetWorker(ILogger<ScanTxOutsetWorker> logger, IOptionsMonitor<ExplorerConfig> explorerConfig, ScanTxOutsetBackgroundTaskQueue taskQueue, NodeApiCacheSingleton nodeApiCacheSingleton, NodeRequester nodeRequester)
-    {
-        _logger = logger;
-        _explorerConfig = explorerConfig;
-        _taskQueue = taskQueue;
-        _nodeApiCacheSingleton = nodeApiCacheSingleton;
-        _nodeRequester = nodeRequester;
-    }
+    private readonly ILogger _logger = logger;
+    private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig = explorerConfig;
+    private readonly IBackgroundTaskQueue _taskQueue = taskQueue;
+    private readonly NodeApiCacheSingleton _nodeApiCacheSingleton = nodeApiCacheSingleton;
+    private readonly NodeRequester _nodeRequester = nodeRequester;
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {

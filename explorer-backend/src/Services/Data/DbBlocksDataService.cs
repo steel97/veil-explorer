@@ -4,10 +4,9 @@ using ExplorerBackend.Persistence.Repositories;
 
 namespace ExplorerBackend.Services.Data;
 
-public class DbBlocksDataService : IBlocksDataService
+public class DbBlocksDataService(IBlocksRepository blocksRepository) : IBlocksDataService
 {
-    private readonly IBlocksRepository _blocksRepository;
-    public DbBlocksDataService(IBlocksRepository blocksRepository) => _blocksRepository = blocksRepository;
+    private readonly IBlocksRepository _blocksRepository = blocksRepository;
 
     public Task<Block?> GetBlockAsync(string hash, int simplifiedTxInfo, CancellationToken cancellationToken) =>
         _blocksRepository.GetBlockAsync(hash, cancellationToken);

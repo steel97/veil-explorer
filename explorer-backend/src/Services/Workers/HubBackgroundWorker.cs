@@ -6,20 +6,12 @@ using ExplorerBackend.Services.Caching;
 
 namespace ExplorerBackend.Services.Workers;
 
-public class HubBackgroundWorker : BackgroundService
+public class HubBackgroundWorker(ILogger<HubBackgroundWorker> logger, IHubContext<EventsHub> hubContext, IOptionsMonitor<ExplorerConfig> explorerConfig, ChaininfoSingleton chaininfoSingleton) : BackgroundService
 {
-    private readonly ILogger _logger;
-    private readonly IHubContext<EventsHub> _hubContext;
-    private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
-    private readonly ChaininfoSingleton _chainInfoSingleton;
-
-    public HubBackgroundWorker(ILogger<HubBackgroundWorker> logger, IHubContext<EventsHub> hubContext, IOptionsMonitor<ExplorerConfig> explorerConfig, ChaininfoSingleton chaininfoSingleton)
-    {
-        _logger = logger;
-        _hubContext = hubContext;
-        _explorerConfig = explorerConfig;
-        _chainInfoSingleton = chaininfoSingleton;
-    }
+    private readonly ILogger _logger = logger;
+    private readonly IHubContext<EventsHub> _hubContext = hubContext;
+    private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig = explorerConfig;
+    private readonly ChaininfoSingleton _chainInfoSingleton = chaininfoSingleton;
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {

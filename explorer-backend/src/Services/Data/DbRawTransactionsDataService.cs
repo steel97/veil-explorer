@@ -2,10 +2,10 @@ using ExplorerBackend.Persistence.Repositories;
 
 namespace ExplorerBackend.Services.Data;
 
-public class DbRawTransactionsDataService : IRawTransactionsDataService
+public class DbRawTransactionsDataService(IRawTxsRepository rawTxsRepository) : IRawTransactionsDataService
 {
-    private readonly IRawTxsRepository _rawTxsRepository;
-    public DbRawTransactionsDataService(IRawTxsRepository rawTxsRepository) => _rawTxsRepository = rawTxsRepository;
+    private readonly IRawTxsRepository _rawTxsRepository = rawTxsRepository;
+
     public Task<byte[]?> GetTransactionByIdAsync(string txid, CancellationToken cancellationToken = default) =>
         _rawTxsRepository.GetTransactionByIdAsync(txid, cancellationToken);
 

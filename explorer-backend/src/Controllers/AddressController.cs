@@ -18,21 +18,13 @@ namespace ExplorerBackend.Controllers;
 [ApiController]
 [Route("/api/[controller]")]
 [Produces("application/json")]
-public class AddressController : ControllerBase
+public class AddressController(IOptions<APIConfig> apiConfig, IUtilityService utilityService,
+    ScanTxOutsetBackgroundTaskQueue scanTxOutsetBackgroundTaskQueue, NodeApiCacheSingleton nodeApiCacheSingleton) : ControllerBase
 {
-    private readonly IOptions<APIConfig> _apiConfig;
-    private readonly IUtilityService _utilityService;
-    private readonly ScanTxOutsetBackgroundTaskQueue _scanTxOutsetBackgroundTaskQueue;
-    private readonly NodeApiCacheSingleton _nodeApiCacheSingleton;
-
-    public AddressController(IOptions<APIConfig> apiConfig, IUtilityService utilityService,
-        ScanTxOutsetBackgroundTaskQueue scanTxOutsetBackgroundTaskQueue, NodeApiCacheSingleton nodeApiCacheSingleton)
-    {
-        _apiConfig = apiConfig;
-        _utilityService = utilityService;
-        _scanTxOutsetBackgroundTaskQueue = scanTxOutsetBackgroundTaskQueue;
-        _nodeApiCacheSingleton = nodeApiCacheSingleton;
-    }
+    private readonly IOptions<APIConfig> _apiConfig = apiConfig;
+    private readonly IUtilityService _utilityService = utilityService;
+    private readonly ScanTxOutsetBackgroundTaskQueue _scanTxOutsetBackgroundTaskQueue = scanTxOutsetBackgroundTaskQueue;
+    private readonly NodeApiCacheSingleton _nodeApiCacheSingleton = nodeApiCacheSingleton;
 
     [HttpPost(Name = "Address")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

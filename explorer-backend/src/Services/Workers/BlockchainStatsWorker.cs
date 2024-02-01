@@ -7,35 +7,27 @@ using ExplorerBackend.Services.Core;
 
 namespace ExplorerBackend.Services.Workers;
 
-public class BlockchainStatsWorker : BackgroundService
+public class BlockchainStatsWorker(ILogger<BlockchainStatsWorker> logger, IOptionsMonitor<ExplorerConfig> explorerConfig,
+    NodeRequester nodeRequester, ChaininfoSingleton chaininfoSingleton) : BackgroundService
 {
-    private readonly ILogger _logger;
-    private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
-    private readonly NodeRequester _nodeRequester;
-    private readonly ChaininfoSingleton _chainInfoSingleton;
-
-    public BlockchainStatsWorker(ILogger<BlockchainStatsWorker> logger, IOptionsMonitor<ExplorerConfig> explorerConfig,
-        NodeRequester nodeRequester, ChaininfoSingleton chaininfoSingleton)
-    {
-        _logger = logger;
-        _explorerConfig = explorerConfig;
-        _nodeRequester = nodeRequester;
-        _chainInfoSingleton = chaininfoSingleton;
-    }
+    private readonly ILogger _logger = logger;
+    private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig = explorerConfig;
+    private readonly NodeRequester _nodeRequester = nodeRequester;
+    private readonly ChaininfoSingleton _chainInfoSingleton = chaininfoSingleton;
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         var targetBlocksPerDay = 24 * 60 * 60 / Constants.BLOCK_TIME;
 
         // let other services warm up, this allows us not to wait PullBlockchainStatsDelay if some data is unavailable at beginning
-        await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken); 
+        await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
 
         while (!cancellationToken.IsCancellationRequested)
         {
             try
             {
                 var txStatsDay = _nodeRequester.GetTxStatsAsync(targetBlocksPerDay / 4, -144, cancellationToken);
-                var txStatsWeek = _nodeRequester.GetTxStatsAsync( targetBlocksPerDay / 4, -144 * 7, cancellationToken);
+                var txStatsWeek = _nodeRequester.GetTxStatsAsync(targetBlocksPerDay / 4, -144 * 7, cancellationToken);
                 var txStatsMonth = _nodeRequester.GetTxStatsAsync(targetBlocksPerDay / 4, -144 * 30, cancellationToken);
                 var txStatsOverall = _nodeRequester.GetTxStatsAsync(_explorerConfig.CurrentValue.StatsPointsCount, 0, cancellationToken);
 

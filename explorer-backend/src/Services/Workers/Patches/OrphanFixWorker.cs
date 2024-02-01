@@ -5,26 +5,16 @@ using ExplorerBackend.Services.Core;
 
 namespace ExplorerBackend.Services.Workers.Patches;
 
-public class OrphanFixWorker : BackgroundService
+public class OrphanFixWorker(ILogger<OrphanFixWorker> logger, IServiceProvider serviceProvider, IOptionsMonitor<ExplorerConfig> explorerConfig,
+    IHttpClientFactory httpClientFactory, IBlocksService blocksService, NodeRequester nodeRequester) : BackgroundService
 {
     public static int StartingBlock { get; set; }
-    private readonly ILogger _logger;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IBlocksService _blocksService;
-    private readonly NodeRequester _nodeRequester;
-
-    public OrphanFixWorker(ILogger<OrphanFixWorker> logger, IServiceProvider serviceProvider, IOptionsMonitor<ExplorerConfig> explorerConfig,
-        IHttpClientFactory httpClientFactory, IBlocksService blocksService, NodeRequester nodeRequester)
-    {
-        _logger = logger;
-        _serviceProvider = serviceProvider;
-        _explorerConfig = explorerConfig;
-        _httpClientFactory = httpClientFactory;
-        _blocksService = blocksService;
-        _nodeRequester = nodeRequester;
-    }
+    private readonly ILogger _logger = logger;
+    private readonly IServiceProvider _serviceProvider = serviceProvider;
+    private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig = explorerConfig;
+    private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
+    private readonly IBlocksService _blocksService = blocksService;
+    private readonly NodeRequester _nodeRequester = nodeRequester;
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {

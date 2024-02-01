@@ -9,21 +9,13 @@ namespace ExplorerBackend.Controllers;
 [ApiController]
 [Route("/api/[controller]")]
 [Produces("application/json")]
-public class SearchController : ControllerBase
+public class SearchController(IBlocksDataService blocksRepository, ITransactionsDataService transactionsDataService,
+    ChaininfoSingleton chaininfoSingleton, IUtilityService utilityService) : ControllerBase
 {
-    private readonly IBlocksDataService _blocksDataService;
-    private readonly ITransactionsDataService _transactionsDataService;
-    private readonly ChaininfoSingleton _chaininfoSingleton;
-    private readonly IUtilityService _utilityService;
-
-    public SearchController(IBlocksDataService blocksRepository, ITransactionsDataService transactionsDataService,
-        ChaininfoSingleton chaininfoSingleton, IUtilityService utilityService)
-    {
-        _blocksDataService = blocksRepository;
-        _transactionsDataService = transactionsDataService;
-        _chaininfoSingleton = chaininfoSingleton;
-        _utilityService = utilityService;
-    }
+    private readonly IBlocksDataService _blocksDataService = blocksRepository;
+    private readonly ITransactionsDataService _transactionsDataService = transactionsDataService;
+    private readonly ChaininfoSingleton _chaininfoSingleton = chaininfoSingleton;
+    private readonly IUtilityService _utilityService = utilityService;
 
     [HttpPost(Name = "Search")]
     [ProducesResponseType(typeof(SearchResponse), StatusCodes.Status200OK)]

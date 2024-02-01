@@ -6,21 +6,13 @@ using ExplorerBackend.Services.Core;
 
 namespace ExplorerBackend.Services.Workers;
 
-public class MempoolWorker : BackgroundService
+public class MempoolWorker(ILogger<MempoolWorker> logger, IOptionsMonitor<ExplorerConfig> explorerConfig, IHttpClientFactory httpClientFactory,
+    ChaininfoSingleton chaininfoSingleton, NodeRequester nodeRequester) : BackgroundService
 {
-    private readonly ILogger _logger;
-    private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
-    private readonly ChaininfoSingleton _chainInfoSingleton;
-    private readonly NodeRequester _nodeRequester;
-
-    public MempoolWorker(ILogger<MempoolWorker> logger, IOptionsMonitor<ExplorerConfig> explorerConfig, IHttpClientFactory httpClientFactory,
-        ChaininfoSingleton chaininfoSingleton, NodeRequester nodeRequester)
-    {
-        _logger = logger;
-        _explorerConfig = explorerConfig;
-        _chainInfoSingleton = chaininfoSingleton;
-        _nodeRequester = nodeRequester;
-    }
+    private readonly ILogger _logger = logger;
+    private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig = explorerConfig;
+    private readonly ChaininfoSingleton _chainInfoSingleton = chaininfoSingleton;
+    private readonly NodeRequester _nodeRequester = nodeRequester;
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {

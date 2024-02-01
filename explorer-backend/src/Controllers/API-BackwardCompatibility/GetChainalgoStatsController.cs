@@ -7,14 +7,9 @@ namespace ExplorerBackend.Controllers;
 [ApiController]
 [Route("/api/[controller]")]
 [Produces("application/json")]
-public class GetChainalgoStatsController : ControllerBase
+public class GetChainalgoStatsController(ChaininfoSingleton chainInfoSingleton) : ControllerBase
 {
-    private readonly ChaininfoSingleton _chainInfoSingleton;
-
-    public GetChainalgoStatsController(ChaininfoSingleton chainInfoSingleton)
-    {
-        _chainInfoSingleton = chainInfoSingleton;
-    }
+    private readonly ChaininfoSingleton _chainInfoSingleton = chainInfoSingleton;
 
     [HttpGet(Name = "GetChainalgoStats")]
     [ProducesResponseType(typeof(GetChainalgoStatsResult), StatusCodes.Status200OK)]

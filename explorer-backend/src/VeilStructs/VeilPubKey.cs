@@ -3,16 +3,14 @@ using NBitcoin.Crypto;
 
 namespace ExplorerBackend.VeilStructs;
 
-public class VeilPubKey
+public class VeilPubKey(byte[] buf)
 {
     public const uint PUBLIC_KEY_SIZE = 65;
     public const uint COMPRESSED_PUBLIC_KEY_SIZE = 33;
     public const uint SIGNATURE_SIZE = 72;
     public const uint COMPACT_SIGNATURE_SIZE = 65;
 
-    private byte[] _buf;
-
-    public VeilPubKey(byte[] buf) => _buf = buf;
+    private byte[] _buf = buf;
 
     public KeyId GetID() => new(Hashes.Hash160(_buf));
 

@@ -3,11 +3,9 @@ using ExplorerBackend.Services.Core;
 
 namespace ExplorerBackend.Persistence;
 
-public class BaseRepository
+public class BaseRepository(IUtilityService utilityService)
 {
-    private readonly IUtilityService _utilityService;
-
-    public BaseRepository(IUtilityService utilityService) => _utilityService = utilityService;
+    private readonly IUtilityService _utilityService = utilityService;
 
     protected string? TransformDouble(double input) => TransformHex(BitConverter.ToString(BitConverter.GetBytes(input)).Replace("-", "").ToLowerInvariant());
 

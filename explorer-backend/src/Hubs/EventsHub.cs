@@ -3,17 +3,12 @@ using ExplorerBackend.Services.Caching;
 
 namespace ExplorerBackend.Hubs;
 
-public class EventsHub : Hub
+public class EventsHub(ChaininfoSingleton chainInfoSingleton) : Hub
 {
     public const string BackgroundDataChannel = "background_data";
     public const string BlocksDataChannel = "blocks_update";
 
-    private readonly ChaininfoSingleton _chainInfoSingleton;
-
-    public EventsHub(ChaininfoSingleton chainInfoSingleton)
-    {
-        _chainInfoSingleton = chainInfoSingleton;
-    }
+    private readonly ChaininfoSingleton _chainInfoSingleton = chainInfoSingleton;
 
     public override async Task OnConnectedAsync()
     {

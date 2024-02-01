@@ -8,14 +8,9 @@ namespace ExplorerBackend.Controllers;
 [ApiController]
 [Route("/api/internal/[controller]")]
 [Produces("application/json")]
-public class FetchExportedTxs : ControllerBase
+public class FetchExportedTxs(IOptions<ServerConfig> serverConfig) : ControllerBase
 {
-    private readonly IOptions<ServerConfig> _serverConfig;
-
-    public FetchExportedTxs(IOptions<ServerConfig> serverConfig)
-    {
-        _serverConfig = serverConfig;
-    }
+    private readonly IOptions<ServerConfig> _serverConfig = serverConfig;
 
     [HttpGet(Name = "FetchExportedTxs")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

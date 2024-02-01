@@ -10,16 +10,10 @@ namespace ExplorerBackend.Controllers;
 [ApiController]
 [Route("/api/[controller]")]
 [Produces("application/json")]
-public class GetMoneySupplyController : ControllerBase
+public class GetMoneySupplyController(IOptions<ExplorerConfig> apiConfig, ChaininfoSingleton chainInfoSingleton) : ControllerBase
 {
-    private readonly IOptions<ExplorerConfig> _apiConfig;
-    private readonly ChaininfoSingleton _chainInfoSingleton;
-
-    public GetMoneySupplyController(IOptions<ExplorerConfig> apiConfig, ChaininfoSingleton chainInfoSingleton)
-    {
-        _apiConfig = apiConfig;
-        _chainInfoSingleton = chainInfoSingleton;
-    }
+    private readonly IOptions<ExplorerConfig> _apiConfig = apiConfig;
+    private readonly ChaininfoSingleton _chainInfoSingleton = chainInfoSingleton;
 
     [HttpGet(Name = "GetMoneySupplyController")]
     [ProducesResponseType(typeof(MoneySupplyResponse), StatusCodes.Status200OK)]
