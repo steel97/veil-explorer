@@ -19,8 +19,8 @@
           </div>
           <div class="border-l">
             <span class="pl-2 font-base uppercase text-sm">{{
-              data?.chain ?? t("Core.NoData")
-            }}</span>
+          data?.chain ?? t("Core.NoData")
+        }}</span>
           </div>
         </NuxtLink>
         <div class="-mr-2 -my-2 lg:hidden">
@@ -90,8 +90,8 @@
                   :src="'/images/locales/' + getCurrentLocale().code + '.png'" />
               </span>
               <span class="grow cursor-default uppercase">{{
-                getCurrentLocale().name
-              }}</span>
+          getCurrentLocale().name
+        }}</span>
             </div>
             <div class="
                 lang-width
@@ -172,8 +172,8 @@
               <span class="mr-2"><img class="locale-icon"
                   :src="'/images/locales/' + getCurrentLocale().code + '.png'" /></span>
               <span class="grow cursor-default uppercase">{{
-                getCurrentLocale().name
-              }}</span>
+          getCurrentLocale().name
+        }}</span>
             </div>
             <div v-if="menuLocaleOpened" class="
                 lang-width
@@ -205,8 +205,8 @@ import MoonIcon from "@heroicons/vue/24/solid/MoonIcon";
 //import SunIcon from "@heroicons/vue/24/solid/SunIcon";
 import Bars3Icon from "@heroicons/vue/24/outline/Bars3Icon";
 import { useThemeState, useBlockchainInfo } from "@/composables/States";
-import type { LocaleObject } from "vue-i18n-routing";
 import Cookie from "js-cookie";
+import type { LocaleObject } from "@nuxtjs/i18n";
 
 const { t, locales, locale, fallbackLocale } =
   useI18n();
