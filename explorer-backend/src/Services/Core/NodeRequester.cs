@@ -282,6 +282,7 @@ public class NodeRequester
         for (var i = chainTxStatsIntervals.Count - 1; i >= 0; i--)
         {
             var res = await GetChainTxStatsAsync(chainTxStatsIntervals[i], cancellationToken);
+            await Task.Delay(_explorerConfig.CurrentValue.PullTxStatsDelay, cancellationToken);
 
             if (res.window_tx_count == 0) continue;
 
@@ -301,8 +302,11 @@ public class NodeRequester
         return txStatsEntry;
     }
 
+    //private static long counter = 0;
     private void CheckHttpClientConfig(HttpClient httpClient)
     {
+        //counter++;
+        //Console.WriteLine(counter);
         if (_passHash != _explorerConfig.CurrentValue.Node!.Password!.GetHashCode() || _usernameHash != _explorerConfig.CurrentValue.Node!.Username!.GetHashCode())
             ConfigureHttpClient();
 

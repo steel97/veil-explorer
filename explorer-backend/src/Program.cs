@@ -35,11 +35,11 @@ builder.Services.Configure<MemoryCacheConfig>(builder.Configuration.GetSection("
 bool rpcMode = builder.Configuration.GetSection("Explorer:RPCMode").Get<bool>();
 
 // Add services to the container.
-if(rpcMode)
+if (rpcMode)
     // Redis config: save "", activedefrag yes, maxmemory 524288000 (500MB in bytes, both valid),maxmemory-policy volatile-ttl, 
     // loglevel warning, crash-log-enabled no, crash-memcheck-enabled no, protected-mode yes
     // CLI exmp: CONFIG SET SAVE ""
-    builder.Services.AddSingleton<IConnectionMultiplexer>(options =>    
+    builder.Services.AddSingleton<IConnectionMultiplexer>(options =>
         ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("Redis") ?? ""));
 else
     builder.Services.AddNpgsqlDataSource(builder.Configuration.GetConnectionString("DefaultConnection") ?? "");
@@ -54,7 +54,7 @@ builder.Services.AddSingleton<IUtilityService, UtilityService>();
 builder.Services.AddSingleton<IBlocksService, BlocksService>();
 
 builder.Services.AddHostedService<BlocksWorker>();
-if(rpcMode)
+if (rpcMode)
 {
     builder.Services.AddHostedService<RedisStatWorker>();
     builder.Services.AddHostedService<CacheInitialBlocksWorker>();
@@ -72,11 +72,11 @@ if (args.Length > 1 && args[0] == "--fixorphans" && !rpcMode)
     builder.Services.AddHostedService<OrphanFixWorker>();
 }
 
-if(rpcMode)
+if (rpcMode)
 {
     builder.Services.AddSingleton<BlocksCacheSingleton>();
     builder.Services.AddSingleton<SimplifiedBlocksCacheSingleton>();
-    
+
     builder.Services.AddTransient<IBlocksDataService, RealtimeBlocksDataService>();
     builder.Services.AddTransient<ITransactionsDataService, RealtimeTransactionsDataService>();
     builder.Services.AddTransient<IRawTransactionsDataService, RealtimeRawTransactionsDataService>();

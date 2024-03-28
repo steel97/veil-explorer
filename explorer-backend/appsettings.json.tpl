@@ -38,6 +38,7 @@
     "PullBlocksDelay": 500,
     "PullBlockchainInfoDelay": 500,
     "PullBlockchainStatsDelay": 1800000,
+    "PullTxStatsDelay": 10,
     "NodeWorkersPullDelay": 20,
     "SupplyPullDelay": 60000,
     "PullMempoolDelay": 1000,

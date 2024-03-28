@@ -9,6 +9,7 @@ public class ExplorerConfig
     public int PullBlocksDelay { get; set; }
     public int PullBlockchainInfoDelay { get; set; }
     public int PullBlockchainStatsDelay { get; set; }
+    public int PullTxStatsDelay { get; set; }
     public int NodeWorkersPullDelay { get; set; }
     public int SupplyPullDelay { get; set; }
     public int PullMempoolDelay { get; set; }
