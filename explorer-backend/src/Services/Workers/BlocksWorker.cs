@@ -64,19 +64,24 @@ public class BlocksWorker : BackgroundService
                 return;
             }
 
-            try
+            while (true)
             {
-                var latestBlock = await _nodeRequester.GetLatestBlock(cancellationToken);
-
-                if (latestBlock != null && latestBlock.Result != null)
+                try
                 {
-                    _chainInfoSingleton.CurrentSyncedBlock = latestBlock.Result.Height;
-                    smpBlkCacheSingleton.SetBlockCache(latestBlock.Result, true);
+                    var latestBlock = await _nodeRequester.GetLatestBlock(cancellationToken);
+
+                    if (latestBlock != null && latestBlock.Result != null)
+                    {
+                        _chainInfoSingleton.CurrentSyncedBlock = latestBlock.Result.Height;
+                        smpBlkCacheSingleton.SetBlockCache(latestBlock.Result, true);
+                    }
+                    break;
                 }
-            }
-            catch (Exception)
-            {
-                _logger.LogError("Can't get blocks");
+                catch (Exception)
+                {
+                    _logger.LogError("Can't get blocks");
+                }
+                await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
             }
         }
         else
