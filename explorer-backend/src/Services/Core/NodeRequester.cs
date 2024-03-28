@@ -16,6 +16,7 @@ public class NodeRequester
     private AuthenticationHeaderValue? _authHeader;
     private int _usernameHash;
     private int _passHash;
+    private long _lastRequestTime = 0;
     private readonly string _nodeFailureError;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
@@ -305,6 +306,15 @@ public class NodeRequester
     //private static long counter = 0;
     private void CheckHttpClientConfig(HttpClient httpClient)
     {
+        if (_explorerConfig.CurrentValue.UseHardRequestThrottle.HasValue)
+        {
+            var wait = _explorerConfig.CurrentValue.UseHardRequestThrottle;
+            var time = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            if (_lastRequestTime + wait > time)
+            {
+                throw new Exception("Not ready yet.");
+            }
+        }
         //counter++;
         //Console.WriteLine(counter);
         if (_passHash != _explorerConfig.CurrentValue.Node!.Password!.GetHashCode() || _usernameHash != _explorerConfig.CurrentValue.Node!.Username!.GetHashCode())

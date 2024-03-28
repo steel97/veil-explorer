@@ -20,6 +20,7 @@ public class ExplorerConfig
     public string? FoundationAddress { get; set; }
     public Node? Node { get; set; }
     public QueueConfig? ScanTxOutsetQueue { get; set; }
+    public int? UseHardRequestThrottle { get; set; }
 }
 
 
