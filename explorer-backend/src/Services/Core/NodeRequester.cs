@@ -47,7 +47,8 @@ public class NodeRequester
     {
         using var httpClient = _httpClientFactory.CreateClient();
 
-        CheckHttpClientConfig(httpClient);
+        var ready = CheckHttpClientConfig(httpClient);
+        if (!ready) return "";
 
         try
         {
@@ -69,7 +70,8 @@ public class NodeRequester
     {
         using var httpClient = _httpClientFactory.CreateClient();
 
-        CheckHttpClientConfig(httpClient);
+        var ready = CheckHttpClientConfig(httpClient);
+        if (!ready) return;
 
         try
         {
@@ -91,7 +93,8 @@ public class NodeRequester
     {
         using var httpClient = _httpClientFactory.CreateClient();
 
-        CheckHttpClientConfig(httpClient);
+        var ready = CheckHttpClientConfig(httpClient);
+        if (!ready) return null;
 
         JsonRPCRequest getBlockchainInfoRequest = new()
         {
@@ -107,7 +110,8 @@ public class NodeRequester
     {
         using var httpClient = _httpClientFactory.CreateClient();
 
-        CheckHttpClientConfig(httpClient);
+        var ready = CheckHttpClientConfig(httpClient);
+        if (!ready) return null;
         var getBlockHashRequest = new JsonRPCRequest
         {
             Id = 1,
@@ -122,7 +126,8 @@ public class NodeRequester
     {
         using var httpClient = _httpClientFactory.CreateClient();
 
-        CheckHttpClientConfig(httpClient);
+        var ready = CheckHttpClientConfig(httpClient);
+        if (!ready) return null;
 
         var getBlockRequest = new JsonRPCRequest
         {
@@ -144,7 +149,8 @@ public class NodeRequester
     {
         using var httpClient = _httpClientFactory.CreateClient();
 
-        CheckHttpClientConfig(httpClient);
+        var ready = CheckHttpClientConfig(httpClient);
+        if (!ready) return null;
 
         var getChainalgoStatsRequest = new JsonRPCRequest
         {
@@ -160,7 +166,8 @@ public class NodeRequester
     {
         using var httpClient = _httpClientFactory.CreateClient();
 
-        CheckHttpClientConfig(httpClient);
+        var ready = CheckHttpClientConfig(httpClient);
+        if (!ready) return null;
 
         var getRawMempoolRequest = new JsonRPCRequest
         {
@@ -176,7 +183,8 @@ public class NodeRequester
     {
         using var httpClient = _httpClientFactory.CreateClient();
 
-        CheckHttpClientConfig(httpClient);
+        var ready = CheckHttpClientConfig(httpClient);
+        if (!ready) return null;
 
         var getRawTxRequest = new JsonRPCRequest
         {
@@ -242,7 +250,8 @@ public class NodeRequester
     {
         using var httpClient = _httpClientFactory.CreateClient();
 
-        CheckHttpClientConfig(httpClient);
+        var ready = CheckHttpClientConfig(httpClient);
+        if (!ready) return new();
         // get blockchain info
         var getChainTxStatsRequest = new JsonRPCRequest
         {
@@ -282,7 +291,13 @@ public class NodeRequester
 
         for (var i = chainTxStatsIntervals.Count - 1; i >= 0; i--)
         {
+        retry:
             var res = await GetChainTxStatsAsync(chainTxStatsIntervals[i], cancellationToken);
+            if (res == null)
+            {
+                await Task.Delay(500, cancellationToken);
+                goto retry;
+            }
             await Task.Delay(_explorerConfig.CurrentValue.PullTxStatsDelay, cancellationToken);
 
             if (res.window_tx_count == 0) continue;
@@ -304,7 +319,7 @@ public class NodeRequester
     }
 
     //private static long counter = 0;
-    private void CheckHttpClientConfig(HttpClient httpClient)
+    private bool CheckHttpClientConfig(HttpClient httpClient)
     {
         if (_explorerConfig.CurrentValue.UseHardRequestThrottle.HasValue)
         {
@@ -312,8 +327,9 @@ public class NodeRequester
             var time = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             if (_lastRequestTime + wait > time)
             {
-                throw new Exception("Not ready yet.");
+                return false;
             }
+            _lastRequestTime = time;
         }
         //counter++;
         //Console.WriteLine(counter);
@@ -322,6 +338,7 @@ public class NodeRequester
 
         httpClient.BaseAddress = _uri;
         httpClient.DefaultRequestHeaders.Authorization = _authHeader;
+        return true;
     }
     private void ConfigureHttpClient()
     {
