@@ -11,9 +11,9 @@ backend and/or frontend used with reverse-proxy should not listen to public ip a
 *To save file and close nano editor* press **CTRL+X** than **SHIFT+Y** than **ENTER**
 
 ## Setup
-Required OS: **ubuntu 20.04+**
+Required OS: **ubuntu 22.04+**
 
-Recommended OS: **ubuntu 20.04.3 LTS**
+Recommended OS: **ubuntu 22.04 LTS**
 
 Required Software:
 1. [nginx 1.18.0+](https://nginx.org/en/)

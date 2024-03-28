@@ -3,9 +3,9 @@
 *To save file and close nano editor* press **CTRL+X** than **SHIFT+Y** than **ENTER**
 
 ## Setup
-Required OS: **ubuntu 20.04+**
+Required OS: **ubuntu 22.04+**
 
-Recommended OS: **ubuntu 20.04.3 LTS**
+Recommended OS: **ubuntu 22.04 LTS**
 
 Required Software:
 1. [NodeJS 20+](https://nodejs.org/en/)
@@ -62,18 +62,20 @@ export HOST=0.0.0.0
 # listen port
 export PORT=3000
 # url on which frontend available, used for SEO, meta tags etc.
-export NUXT_BASE_URL=http://<ip>:3000
+export NUXT_PUBLIC_I18N_BASE_URL=http://<ip>:3000
+# url on which frontend available, used for SEO, meta tags etc.
+export NUXT_PUBLIC_BASE_URL=http://<ip>:3000
 # which chain should be selected from CHAIN_APIS by default
-export NUXT_CHAIN_DEFAULT=main
+export NUXT_PUBLIC_CHAIN_DEFAULT=main
 # JSON formatted configuration to connect frontend with backend
 # for now you should only change value of "path", so just replace <ip> and <backend_port>
-export NUXT_CHAIN_APIS="[{\"name\": \"main\", \"path\": \"http://<ip>:<backend_port>/api\"}]"
-export NUXT_RECENT_BLOCKS_COUNT=5
-export NUXT_BLOCKS_PER_PAGE=15
-export NUXT_TXS_PER_PAGE=15
-export NUXT_MAX_BLOCK_WEIGHT=4000000
-export NUXT_SYNC_NOTICE_CASE=15
-export NUXT_COOKIE_SAVE_DAYS=90
+export NUXT_PUBLIC_CHAIN_APIS="[{\"name\": \"main\", \"path\": \"http://<ip>:<backend_port>/api\"}]"
+export NUXT_PUBLIC_RECENT_BLOCKS_COUNT=5
+export NUXT_PUBLIC_BLOCKS_PER_PAGE=15
+export NUXT_PUBLIC_TXS_PER_PAGE=15
+export NUXT_PUBLIC_MAX_BLOCK_WEIGHT=4000000
+export NUXT_PUBLIC_SYNC_NOTICE_CASE=15
+export NUXT_PUBLIC_COOKIE_SAVE_DAYS=90
 
 node server/index.mjs
 ```
@@ -88,31 +90,13 @@ If there are no errors, move to next step.
 
 ## Register frontend as systemd service
 ```bash
-# create new service file
-sudo nano /etc/systemd/system/explorer-frontend.service
-```
-
-Add this content to opened file:
-```bash
-[Unit]
-Description=Veil-explorer frontend service
-
-[Service]
-User=explorer-frontend
-KillMode=control-group
-WorkingDirectory=/home/explorer-frontend/server/
-ExecStart=/home/explorer-frontend/server/start.sh
-Restart=always
-TimeoutSec=300
-RestartSec=5
-
-[Install]
-WantedBy=multi-user.target
+cd /home/explorer-frontend/server/
+wget https://raw.githubusercontent.com/steel97/veil-explorer/master/docs/systemd/explorer-frontend.service
+sudo systemctl link /home/explorer-frontend/server/explorer-frontend.service
 ```
 
 ## Finilize service creation
 ```bash
-sudo chmod 664 /etc/systemd/system/explorer-frontend.service
 sudo systemctl daemon-reload
 sudo systemctl enable explorer-frontend.service
 sudo systemctl start explorer-frontend.service

@@ -29,14 +29,14 @@ See [/docs/compiling/frontend.md](/docs/compiling/frontend.md)
 
 # Getting started
 ## Tested OSes
-Both of frontend and backend tested on **Windows 11** and **Ubuntu 20.04**
+Both of frontend and backend tested on **Windows 11** and **Ubuntu 22.04**
 
 On production environment it is recommended to use the latest version of the LTS **Ubuntu**
 
 ## Required software
 - [Veil Node](https://github.com/Veil-Project/veil) - required for backend to pull blockchain information
 - [PostgreSQL 13+](https://www.postgresql.org/download/) - required to run backend
-- [Dotnet 6+ (runtime)](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) - required to run backend **in case** when using non self-contained build
+- [Dotnet 8+ (runtime)](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) - required to run backend **in case** when using non self-contained build
 - [NodeJS 20+](https://nodejs.org/en/) - required to run frontend
 
 ## Installation
@@ -83,17 +83,19 @@ HOST=127.0.0.1
 # listen port
 PORT=3000
 # url on which frontend available, used for SEO, meta tags etc.
-NUXT_BASE_URL=http://<ip>:3000
-NUXT_CHAIN_DEFAULT=main
+NUXT_PUBLIC_I18N_BASE_URL=http://<ip>:3000
+# url on which frontend available, used for SEO, meta tags etc.
+NUXT_PUBLIC_BASE_URL=http://<ip>:3000
+NUXT_PUBLIC_CHAIN_DEFAULT=main
 # JSON formatted configuration to connect frontend with backend
 # for now you should only change value of "path", so just replace <ip> and <backend_port>
-NUXT_CHAIN_APIS="[{\"name\": \"main\", \"path\": \"http://<ip>:5000/api\"}]"
-NUXT_RECENT_BLOCKS_COUNT=5
-NUXT_BLOCKS_PER_PAGE=15
-NUXT_TXS_PER_PAGE=15
-NUXT_MAX_BLOCK_WEIGHT=4000000
-NUXT_SYNC_NOTICE_CASE=15
-NUXT_COOKIE_SAVE_DAYS=90
+NUXT_PUBLIC_CHAIN_APIS="[{\"name\": \"main\", \"path\": \"http://<ip>:5000/api\"}]"
+NUXT_PUBLIC_RECENT_BLOCKS_COUNT=5
+NUXT_PUBLIC_BLOCKS_PER_PAGE=15
+NUXT_PUBLIC_TXS_PER_PAGE=15
+NUXT_PUBLIC_MAX_BLOCK_WEIGHT=4000000
+NUXT_PUBLIC_SYNC_NOTICE_CASE=15
+NUXT_PUBLIC_COOKIE_SAVE_DAYS=90
 ```
 See: [/docs/frontend-configuration.md](/docs/frontend-configuration.md)
 

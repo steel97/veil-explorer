@@ -1,0 +1,14 @@
+[Unit]
+Description=Veil-explorer frontend service
+
+[Service]
+User=explorer-frontend
+KillMode=control-group
+WorkingDirectory=/home/explorer-frontend/server/
+ExecStart=/home/explorer-frontend/server/start.sh
+Restart=always
+TimeoutSec=300
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -3,9 +3,9 @@
 *To save file and close nano editor* press **CTRL+X** than **SHIFT+Y** than **ENTER**
 
 ## Setup
-Required OS: **ubuntu 20.04+**
+Required OS: **ubuntu 22.04+**
 
-Recommended OS: **ubuntu 20.04.3 LTS**
+Recommended OS: **ubuntu 22.04 LTS**
 
 ## Update packges
 ```bash
@@ -42,7 +42,7 @@ sudo chown -R explorer-backend /home/explorer-backend/server/
 ## Edit backend configuration
 ```bash
 # Create configuration from template
-sudo cd /home/explorer-backend/server/
+cd /home/explorer-backend/server/
 sudo wget https://raw.githubusercontent.com/steel97/veil-explorer/master/explorer-backend/appsettings.json.tpl
 sudo mv /home/explorer-backend/server/appsettings.json.tpl /home/explorer-backend/server/appsettings.json
 
@@ -61,31 +61,13 @@ If there are no errors, move to next step.
 
 ## Register backend as systemd service
 ```bash
-# create new service file
-sudo nano /etc/systemd/system/explorer-backend.service
-```
-
-Add this content to opened file:
-```bash
-[Unit]
-Description=Veil-explorer backend service
-
-[Service]
-User=explorer-backend
-KillMode=process
-WorkingDirectory=/home/explorer-backend/server/
-ExecStart=/home/explorer-backend/server/explorer-backend
-Restart=always
-TimeoutSec=300
-RestartSec=5
-
-[Install]
-WantedBy=multi-user.target
+cd /home/explorer-backend/server/
+wget https://raw.githubusercontent.com/steel97/veil-explorer/master/docs/systemd/explorer-backend.service
+sudo systemctl link /home/explorer-backend/server/explorer-backend.service
 ```
 
 ## Finilize service creation
 ```bash
-sudo chmod 664 /etc/systemd/system/explorer-backend.service
 sudo systemctl daemon-reload
 sudo systemctl enable explorer-backend.service
 sudo systemctl start explorer-backend.service

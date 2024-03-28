@@ -1,0 +1,14 @@
+[Unit]
+Description=Veil-explorer backend service
+
+[Service]
+User=explorer-backend
+KillMode=process
+WorkingDirectory=/home/explorer-backend/server/
+ExecStart=/home/explorer-backend/server/explorer-backend
+Restart=always
+TimeoutSec=300
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
