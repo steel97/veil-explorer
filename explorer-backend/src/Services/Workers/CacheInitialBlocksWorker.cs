@@ -35,7 +35,7 @@ public class CacheInitialBlocksWorker : BackgroundService
     }
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
-        while(_blockHeight <= _blockToCache)
+        while (_blockHeight <= _blockToCache)
         {
             try
             {
@@ -44,14 +44,13 @@ public class CacheInitialBlocksWorker : BackgroundService
                     continue;
 
                 var block = await _nodeRequester.GetBlock(blockHash.Result, cancellationToken);
-                if(block is null || block.Result is null)
+                if (block is null || block.Result is null)
                     continue;
 
                 _smpBlocksCacheSingleton.SetBlockCache(block.Result);
             }
             catch
             {
-                _blockHeight--;
                 _logger.LogWarning("{serivce} failed to pull block", nameof(CacheInitialBlocksWorker));
             }
 
