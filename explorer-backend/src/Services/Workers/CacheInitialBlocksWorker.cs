@@ -48,13 +48,13 @@ public class CacheInitialBlocksWorker : BackgroundService
                     continue;
 
                 _smpBlocksCacheSingleton.SetBlockCache(block.Result);
+
+                _blockHeight++;
             }
             catch
             {
                 _logger.LogWarning("{serivce} failed to pull block", nameof(CacheInitialBlocksWorker));
             }
-
-            _blockHeight++;
 
             await Task.Delay(_blockPullDelay, cancellationToken);
         }
