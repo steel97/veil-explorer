@@ -17,6 +17,7 @@ public class NodeRequester
     private int _usernameHash;
     private int _passHash;
     private long _lastRequestTime = 0;
+    private int _requestsCount = 0;
     private readonly string _nodeFailureError;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IOptionsMonitor<ExplorerConfig> _explorerConfig;
@@ -329,7 +330,13 @@ public class NodeRequester
             {
                 return false;
             }
-            _lastRequestTime = time;
+
+            _requestsCount++;
+            if (_requestsCount >= 5)
+            {
+                _lastRequestTime = time;
+                _requestsCount = 0;
+            }
         }
         //counter++;
         //Console.WriteLine(counter);
