@@ -21,6 +21,7 @@ public class ExplorerConfig
     public Node? Node { get; set; }
     public QueueConfig? ScanTxOutsetQueue { get; set; }
     public int? UseHardRequestThrottle { get; set; }
+    public int? UseHardRequestThrottleProxy { get; set; }
 }
 
 

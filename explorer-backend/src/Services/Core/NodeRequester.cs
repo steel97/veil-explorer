@@ -44,11 +44,11 @@ public class NodeRequester
         }, _serializerOptions);
     }
 
-    public async Task<string> NodeRequest(string? method, List<object>? parameters, CancellationToken cancellationToken)
+    public async Task<string> NodeRequest(string? method, List<object>? parameters, int? customRequestThrottle, CancellationToken cancellationToken)
     {
         using var httpClient = _httpClientFactory.CreateClient();
 
-        var ready = CheckHttpClientConfig(httpClient);
+        var ready = CheckHttpClientConfig(httpClient, customRequestThrottle);
         if (!ready) return "";
 
         try
@@ -320,22 +320,27 @@ public class NodeRequester
     }
 
     //private static long counter = 0;
-    private bool CheckHttpClientConfig(HttpClient httpClient)
+    private bool CheckHttpClientConfig(HttpClient httpClient, int? customRequestThrottle = null)
     {
-        if (_explorerConfig.CurrentValue.UseHardRequestThrottle.HasValue)
+        if (_explorerConfig.CurrentValue.UseHardRequestThrottle.HasValue || customRequestThrottle != null)
         {
-            var wait = _explorerConfig.CurrentValue.UseHardRequestThrottle;
-            var time = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-            if (_lastRequestTime + wait > time)
+            if (
+                (customRequestThrottle != null && customRequestThrottle > 0) ||
+                (_explorerConfig.CurrentValue.UseHardRequestThrottle != null && _explorerConfig.CurrentValue.UseHardRequestThrottle > 0 && customRequestThrottle == null))
             {
-                return false;
-            }
+                var wait = customRequestThrottle ?? _explorerConfig.CurrentValue.UseHardRequestThrottle;
+                var time = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                if (_lastRequestTime + wait > time)
+                {
+                    return false;
+                }
 
-            _requestsCount++;
-            if (_requestsCount >= 5)
-            {
-                _lastRequestTime = time;
-                _requestsCount = 0;
+                _requestsCount++;
+                if (_requestsCount >= 5)
+                {
+                    _lastRequestTime = time;
+                    _requestsCount = 0;
+                }
             }
         }
         //counter++;

@@ -79,7 +79,7 @@ public class NodeProxyController : ControllerBase
         }
 
 
-        var res = await _nodeRequester.NodeRequest(model.Method, model.Params, cancellationToken);
+        var res = await _nodeRequester.NodeRequest(model.Method, model.Params, _explorerConfig.Value.UseHardRequestThrottleProxy, cancellationToken);
         return Content(res, "application/json");
     }
 }
