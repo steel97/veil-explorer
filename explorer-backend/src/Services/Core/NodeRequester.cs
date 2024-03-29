@@ -322,7 +322,7 @@ public class NodeRequester
     //private static long counter = 0;
     private bool CheckHttpClientConfig(HttpClient httpClient, int? customRequestThrottle = null)
     {
-        if (_explorerConfig.CurrentValue.UseHardRequestThrottle.HasValue || customRequestThrottle != null)
+        if (_explorerConfig.CurrentValue.UseHardRequestThrottle.HasValue || customRequestThrottle.HasValue)
         {
             if (
                 (customRequestThrottle != null && customRequestThrottle > 0) ||
