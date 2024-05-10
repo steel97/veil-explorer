@@ -24,10 +24,8 @@
         </NuxtLayout>
     </div>
 </template>
-  
+
 <script setup lang="ts">
-import "@/assets/css/tailwind.css";
-import "@/assets/css/common.css";
 import "toastify-js/src/toastify.css";
 import {
     useThemeState

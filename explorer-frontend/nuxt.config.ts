@@ -101,7 +101,7 @@ export default defineNuxtConfig({
         },
     },
     srcDir: "src/",
-    css: ["~/assets/css/tailwind.css"],
+    css: ["~/assets/css/tailwind.css", "~/assets/css/common.css"],
     postcss: {
         plugins: {
             tailwindcss: {},
