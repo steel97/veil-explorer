@@ -12,23 +12,23 @@
   },
   "devDependencies": {
     "@heroicons/vue": "^2.1.5",
-    "@nuxtjs/i18n": "^8.3.1",
-    "@nuxtjs/tailwindcss": "^6.12.1",
-    "nuxt": "^3.12.3",
-    "typescript": "^5.5.3",
-    "vue": "^3.4.31",
-    "vue-router": "^4.4.0",
-    "vue-tsc": "^2.0.26"
+    "@nuxtjs/i18n": "^9.0.0",
+    "@nuxtjs/tailwindcss": "^6.12.2",
+    "nuxt": "^3.14.159",
+    "typescript": "^5.6.3",
+    "vue": "^3.5.12",
+    "vue-router": "^4.4.5",
+    "vue-tsc": "^2.1.10"
   },
   "dependencies": {
     "@microsoft/signalr": "^8.0.7",
-    "@nuxt/image": "1.7.0",
+    "@nuxt/image": "1.8.1",
     "@popperjs/core": "^2.11.2",
     "@types/js-cookie": "^3.0.1",
     "@types/toastify-js": "^1.11.0",
-    "chart.js": "^4.4.3",
+    "chart.js": "^4.4.6",
     "js-cookie": "^3.0.1",
-    "qrcode.vue": "^3.3.3",
+    "qrcode.vue": "^3.6.0",
     "toastify-js": "^1.11.2"
   }
 }

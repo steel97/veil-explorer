@@ -19,8 +19,8 @@
           </div>
           <div class="border-l">
             <span class="pl-2 font-base uppercase text-sm">{{
-          data?.chain ?? t("Core.NoData")
-        }}</span>
+              data?.chain ?? t("Core.NoData")
+            }}</span>
           </div>
         </NuxtLink>
         <div class="-mr-2 -my-2 lg:hidden">
@@ -90,8 +90,8 @@
                   :src="'/images/locales/' + getCurrentLocale().code + '.png'" />
               </span>
               <span class="grow cursor-default uppercase">{{
-          getCurrentLocale().name
-        }}</span>
+                getCurrentLocale().name
+              }}</span>
             </div>
             <div class="
                 lang-width
@@ -101,7 +101,7 @@
                 dark:bg-gray-800 dark:text-gray-300
                 pt-2
               ">
-              <NuxtLink :to="switchLocalePath(val.code)" @click="clearError" class="
+              <NuxtLink :to="switchLocalePath(val.code as any)" @click="clearError" class="
                   flex
                   items-center
                   justify-between
@@ -172,8 +172,8 @@
               <span class="mr-2"><img class="locale-icon"
                   :src="'/images/locales/' + getCurrentLocale().code + '.png'" /></span>
               <span class="grow cursor-default uppercase">{{
-          getCurrentLocale().name
-        }}</span>
+                getCurrentLocale().name
+              }}</span>
             </div>
             <div v-if="menuLocaleOpened" class="
                 lang-width
@@ -182,7 +182,7 @@
                 dark:bg-gray-800 dark:text-gray-300
                 pt-2
               ">
-              <NuxtLink :to="switchLocalePath(valm.code)" @click="clearError" class="
+              <NuxtLink :to="switchLocalePath(valm.code as any)" @click="clearError" class="
                   flex
                   items-center
                   justify-between
@@ -206,7 +206,7 @@ import MoonIcon from "@heroicons/vue/24/solid/MoonIcon";
 import Bars3Icon from "@heroicons/vue/24/outline/Bars3Icon";
 import { useThemeState, useBlockchainInfo } from "@/composables/States";
 import Cookie from "js-cookie";
-import type { LocaleObject } from "@nuxtjs/i18n";
+//import type { LocaleObject } from "@nuxtjs/i18n";
 
 const { t, locales, locale, fallbackLocale } =
   useI18n();
@@ -278,14 +278,14 @@ const getLinks = () => {
 const getCurrentLocale = () => {
   return {
     code: locale.value,
-    name: (locales.value.filter(a => (a as LocaleObject).code == locale.value)[0] as LocaleObject).name
+    name: locales.value.filter(a => a.code == locale.value)[0].name
   };
 };
 
 const getLocales = () => {
   const loc: Array<ILocale> = [];
   locales.value.forEach(locale => {
-    const lang = locale as LocaleObject;
+    const lang = locale;// as LocaleObject;
     if (lang.code == getCurrentLocale().code) return;
     const link: ILocale = {
       code: lang.code,

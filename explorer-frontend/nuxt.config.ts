@@ -79,6 +79,7 @@ export default defineNuxtConfig({
                 file: "ru.ts"
             }
         ],
+        restructureDir: false,
         defaultLocale: "en",
         lazy: true,
         langDir: "localization",

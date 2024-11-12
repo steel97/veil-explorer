@@ -59,7 +59,7 @@ const getData = (key: string, rate = false) => {
 };
 
 onMounted(() => {
-  if (!process.client) return; // should never happend?
+  if (!import.meta.client) return; // should never happend?
   pageReady.value = true;
 });
 

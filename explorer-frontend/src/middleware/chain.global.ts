@@ -7,7 +7,7 @@ export default defineNuxtRouteMiddleware(to => {
     const chain = useCookie("chain").value ?? "";
     let currentChain = chain;
 
-    if (process.client && currentChain == "") {
+    if (import.meta.client && currentChain == "") {
         currentChain = config.public.chainDefault;
         const now = new Date();
         now.setDate(now.getDate() + config.public.cookieSaveDays);

@@ -73,12 +73,12 @@
                     addressInfo.address != null &&
                     (addressInfo.address.isstealthaddress == null ||
                       !addressInfo.address.isstealthaddress)
-                    ">{{ t("Address.Update") }}</a>
+                  ">{{ t("Address.Update") }}</a>
               </div>
               <div v-if="!reloadingBalance &&
                 addressInfo != null &&
                 addressInfo.amountFetched
-                " class="mt-1">
+              " class="mt-1">
                 {{ addressInfo.amount }} veil
               </div>
               <div v-else-if="!reloadingBalance &&
@@ -86,7 +86,7 @@
                 addressInfo.address != null &&
                 addressInfo.address.isstealthaddress != null &&
                 addressInfo.address.isstealthaddress
-                " class="mt-1">
+              " class="mt-1">
                 {{ t("Address.BalanceHidden") }}
               </div>
               <div v-else class="flex items-center mt-1">
@@ -288,7 +288,7 @@ if (addressInfo.value != null && !addressInfo.value.fetched)
   await navigateTo(chainPath("/search/notfound"));
 
 onMounted(() => {
-  if (process.client) renderQR.value = true;
+  if (import.meta.client) renderQR.value = true;
   setTimeout(checkLoad, 500);
 });
 

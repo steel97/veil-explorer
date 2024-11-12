@@ -16,7 +16,7 @@ export const useLocalization = () => {
             }
         }
 
-        const retLocale = targetLocale ?? (process.client ? navigator.language ?? "en-US" : "en-US");
+        const retLocale = targetLocale ?? (import.meta.client ? navigator.language ?? "en-US" : "en-US");
         return retLocale == "*" ? "en-US" : retLocale;
     };
 
@@ -40,11 +40,11 @@ export const useLocalization = () => {
                 }
             });
         }
-        const navlocales = process.client ? (navigator.languages ?? ["en-US", "en"]) : ["en-US", "en"];
+        const navlocales = import.meta.client ? (navigator.languages ?? ["en-US", "en"]) : ["en-US", "en"];
         const locales = acceptLanguagesPr.length > 0 ? acceptLanguagesPr : navlocales;
 
         for (const locale of locales) {
-            if (availableLocales.indexOf(locale) > -1) {
+            if (availableLocales.indexOf(locale as any) > -1) {
                 return locale;
             }
         }

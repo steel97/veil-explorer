@@ -45,7 +45,7 @@ const theme = useCookie("theme").value ?? "";
 let currentTheme = theme;
 
 let usedMedia = false;
-if (process.client && currentTheme == "") {
+if (import.meta.client && currentTheme == "") {
     if (
         window.matchMedia &&
         window.matchMedia("(prefers-color-scheme: dark)").matches

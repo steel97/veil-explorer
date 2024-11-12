@@ -56,7 +56,7 @@
             </div>
             <div v-else-if="input.prevOutAddresses != null &&
               input.prevOutAddresses.length > 0
-              ">
+            ">
               <div class="block lg:flex flex-wrap basis-0 flex-grow items-center">
                 <ArrowRightCircleIcon class="
                     inline-block
@@ -172,7 +172,7 @@
 
             <div v-if="output.type == OutputTypes.OUTPUT_STANDARD &&
               output.scriptPubKeyType == txnouttype.TX_ZEROCOINMINT
-              " class="flex flex-wrap basis-0 flex-grow items-center">
+            " class="flex flex-wrap basis-0 flex-grow items-center">
               <div class="mr-2">#{{ outputId + 0 }}</div>
               <div class="
                   bg-sky-700
@@ -193,7 +193,7 @@
             <div v-if="output.type == OutputTypes.OUTPUT_STANDARD &&
               output.scriptPubKeyType == txnouttype.TX_NONSTANDARD &&
               !output.isCoinBase
-              " class="flex flex-wrap basis-0 flex-grow items-center">
+            " class="flex flex-wrap basis-0 flex-grow items-center">
               <div class="mr-2">#{{ outputId + 0 }}</div>
               <div class="
                   bg-sky-700
@@ -212,7 +212,7 @@
 
             <div v-if="output.isCoinBase &&
               output.scriptPubKeyType == txnouttype.TX_NONSTANDARD
-              " class="flex flex-wrap basis-0 flex-grow items-center">
+            " class="flex flex-wrap basis-0 flex-grow items-center">
               <div class="mr-2">#{{ outputId + 0 }}</div>
               <div class="
                   bg-sky-700
@@ -276,7 +276,7 @@
                   whitespace-nowrap
                 " v-if="output.type != OutputTypes.OUTPUT_STANDARD ||
                   output.amount > 0
-                  ">
+                ">
                 <span v-if="output.type != OutputTypes.OUTPUT_STANDARD">
                   {{ t("Tx.HiddenAmount") }}
                 </span>
@@ -345,7 +345,7 @@ const getAmountForInput = (input: TxVinSimpleDecoded) => {
 const getOutputClasses = (outputId: number, output: TxVoutSimpleDecoded) => {
   let classes = [outputId == props.tx.outputs!.length - 1 ? "" : "mb-4"];
 
-  if (process.client) {
+  if (import.meta.client) {
     if (
       window.location.hash &&
       (window.location.hash as any as string) == `#output-${outputId}`
