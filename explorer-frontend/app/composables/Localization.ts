@@ -7,7 +7,7 @@ export const useLocalization = () => {
     let targetLocale: string | null = null;
 
     if (acceptLanguages != null) {
-      const langs = acceptLanguages.split(";")[0].split(",");
+      const langs = acceptLanguages.split(";")[0]!.split(",");
       for (const entr of langs) {
         if (entr.startsWith("q="))
           continue;
@@ -33,8 +33,10 @@ export const useLocalization = () => {
             const lang = entr.split("-")[0];
             if (!acceptLanguagesPr.includes(entr))
               acceptLanguagesPr.push(entr); // add language and region
+            if(lang !== undefined) {
             if (!acceptLanguagesPr.includes(lang))
               acceptLanguagesPr.push(lang); // add language
+          }
           }
         }
         catch {

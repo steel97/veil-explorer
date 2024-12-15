@@ -2,6 +2,9 @@
 export default defineNuxtConfig({
   devtools: { enabled: true },
   compatibilityDate: "2024-12-14",
+  future: {
+    compatibilityVersion: 4,
+  },
   runtimeConfig: {
     public: {
       site: {
@@ -105,7 +108,6 @@ export default defineNuxtConfig({
       },
     },
   },
-  srcDir: "src/",
   seo: {
     redirectToCanonicalSiteUrl: process.env.NODE_ENV !== "development",
   },

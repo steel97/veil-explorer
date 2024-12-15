@@ -6,11 +6,11 @@ export interface ApiEntry {
 export const parseApiString = (lookForChain: string, defaultChain: string, chainApis: Array<ApiEntry>) => {
   let cchainRes = chainApis.filter(api => api.name === lookForChain);
   if (cchainRes.length > 0)
-    return cchainRes[0].path;
+    return cchainRes[0]!.path;
 
   cchainRes = chainApis.filter(api => api.name === defaultChain);
   if (cchainRes.length > 0)
-    return cchainRes[0].path;
+    return cchainRes[0]!.path;
 
   // log error?
   return "";

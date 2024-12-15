@@ -175,7 +175,7 @@ const getAge = (block: SimplifiedBlock) => {
 
   let resp = "";
   for (let index = 0; index < allChecks.length; index++) {
-    const check = allChecks[index];
+    const check = allChecks[index]!;
     if (diff <= check.val)
       continue;
 
@@ -185,7 +185,7 @@ const getAge = (block: SimplifiedBlock) => {
     let secondaryInfFormatted = 0;
     let secondaryInfFloor = 0;
     if (index + 1 < allChecks.length) {
-      const scheck = allChecks[index + 1];
+      const scheck = allChecks[index + 1]!;
       const previnf
         = (Math.floor(infFormatted) * check.val)
         / (scheck.val > 0 ? scheck.val : 1);
@@ -255,7 +255,7 @@ watch(reactivityWatcher, () => {
   if (el != null)
     el.style.opacity = "1.0";
 
-  latestBlock.value = props.data[0].height;
+  latestBlock.value = props.data[0]!.height;
   targetOpacity = 0;
   lastTime = null;
   if (!document.hidden)

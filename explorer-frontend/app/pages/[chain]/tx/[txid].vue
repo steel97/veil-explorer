@@ -5,7 +5,7 @@
         {{ t("Tx.Title") }}
       </div>
       <div
-        v-if="tx !== null && tx.txId !== null" class="
+        v-if="tx !== null && tx?.txId !== null && tx !== undefined" class="
           text-xs text-gray-500
           dark:text-gray-400
           max-w-full
@@ -17,7 +17,7 @@
       </div>
     </h1>
 
-    <div v-if="tx !== null" class="rounded p-4 bg-gray-50 dark:bg-gray-800 text-sm">
+    <div v-if="tx !== null && tx !== undefined" class="rounded p-4 bg-gray-50 dark:bg-gray-800 text-sm">
       <div class="grid grid-cols-2">
         <div v-if="!tx.confirmed" class="col-span-2 py-4">
           <div class="text-rose-700 dark:text-rose-400">
@@ -89,7 +89,7 @@
     <h1 class="font-semibold pt-4 uppercase">
       {{ t("Tx.InputsOutputs") }}
     </h1>
-    <SharedTransactionData v-if="tx !== null && tx.transaction !== null" :tx="tx.transaction" />
+    <SharedTransactionData v-if="tx !== null && tx !== undefined && tx.transaction !== null" :tx="tx.transaction" />
   </div>
 </template>
 
@@ -132,7 +132,7 @@ const getConfirmationClass = computed(() => {
 });
 
 const calculateConfirmations = computed(() => {
-  if (tx.value === null)
+  if (tx.value === null || tx.value == undefined)
     return 0;
   if (!tx.value.confirmed)
     return 0;

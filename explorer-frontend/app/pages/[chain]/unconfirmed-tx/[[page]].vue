@@ -4,8 +4,9 @@
       {{ t("UnconfirmedTx.Title") }}
     </h1>
     <div
-      v-if="unconfirmedTxData === null
+      v-if="unconfirmedTxData === null || unconfirmedTxData === undefined
         || unconfirmedTxData.transactions === null
+        || unconfirmedTxData.transactions === undefined
         || unconfirmedTxData.transactions.length === 0
       " class="
         rounded
@@ -22,12 +23,12 @@
       {{ t("UnconfirmedTx.NoTxs") }}
     </div>
     <BlockTransactionsView
-      v-if="unconfirmedTxData !== null && unconfirmedTxData.transactions !== null"
+      v-if="unconfirmedTxData !== null && unconfirmedTxData !== undefined && unconfirmedTxData.transactions !== null"
       :txdata="unconfirmedTxData.transactions"
     />
 
     <SharedPagination
-      v-if="unconfirmedTxData !== null && unconfirmedTxData.transactions !== null"
+      v-if="unconfirmedTxData !== null && unconfirmedTxData !== undefined && unconfirmedTxData.transactions !== null&& unconfirmedTxData.transactions !== undefined"
       :overall-entries="unconfirmedTxData.txnCount" :entries-per-page="config.public.txsPerPage" :current-page="currentPage"
       :link-template="buildRouteTemplate()" @page-selected="selectPage"
     />

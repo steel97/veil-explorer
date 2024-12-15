@@ -311,7 +311,7 @@ const getLinks = () => {
 const getCurrentLocale = () => {
   return {
     code: locale.value,
-    name: locales.value.filter(a => a.code === locale.value)[0].name,
+    name: locales.value.filter(a => a.code === locale.value)[0]!.name,
   };
 };
 
