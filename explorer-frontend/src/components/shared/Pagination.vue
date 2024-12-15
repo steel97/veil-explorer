@@ -1,7 +1,8 @@
 <template>
-  <div class="flex justify-center flex-wrap mt-4" v-show="localMaxPages > 1">
-    <div v-for="(element, index) in elements" :key="'pagination-' + index">
-      <a v-if="element.interactable" :href="element.link" @click.prevent="navigateTo(element.targetPage)" :class="element.current
+  <div v-show="localMaxPages > 1" class="flex justify-center flex-wrap mt-4">
+    <div v-for="(element, index) in elements" :key="`pagination-${index}`">
+      <a
+        v-if="element.interactable" :href="element.link" :class="element.current
           ? 'bg-sky-700 text-gray-50 dark:bg-sky-700 dark:text-gray-50'
           : ''
         " class="
@@ -19,10 +20,12 @@
           justify-center
           items-center
           text-sm
-        ">
+        " @click.prevent="navigateTo(element.targetPage)"
+      >
         {{ element.text }}
       </a>
-      <button class="
+      <button
+        v-if="!element.interactable" class="
           p-2
           smargins
           bg-gray-300
@@ -34,7 +37,8 @@
           items-center
           text-sm
           cursor-not-allowed
-        " disabled v-if="!element.interactable">
+        " disabled
+      >
         {{ element.text }}
       </button>
     </div>
@@ -71,24 +75,24 @@ const elements = computed(() => {
   const targetElements: Array<NavElement> = [];
   targetElements.push({
     interactable: props.currentPage > 1,
-    current: props.currentPage == 1,
+    current: props.currentPage === 1,
     text: "«",
     link: props.linkTemplate.replace(
       "{page}",
-      (props.currentPage - 1).toString()
+      (props.currentPage - 1).toString(),
     ),
     targetPage: props.currentPage - 1,
   });
 
   targetElements.push({
     interactable: props.currentPage > 1,
-    current: props.currentPage == 1,
+    current: props.currentPage === 1,
     text: "1",
     link: props.linkTemplate.replace("{page}", "1"),
     targetPage: 1,
   });
 
-  if (props.currentPage - pmOffset > 1)
+  if (props.currentPage - pmOffset > 1) {
     targetElements.push({
       interactable: false,
       current: false,
@@ -96,6 +100,7 @@ const elements = computed(() => {
       link: props.linkTemplate.replace("{page}", "1"),
       targetPage: 1,
     });
+  }
 
   const maxPages = Math.ceil(props.overallEntries / props.entriesPerPage);
   localMaxPages.value = maxPages;
@@ -108,23 +113,26 @@ const elements = computed(() => {
     i <= props.currentPage + pmOffset;
     i++
   ) {
-    if (i >= maxPages) break;
+    if (i >= maxPages)
+      break;
     if (i > 1) {
       targetElements.push({
         interactable: true,
-        current: i == props.currentPage,
+        current: i === props.currentPage,
         text: i.toString(),
         link: props.linkTemplate.replace("{page}", i.toString()),
         targetPage: i,
       });
-      if (i < props.currentPage) renderedEntriesBefore++;
-      if (i > props.currentPage) renderedEntriesAfter++;
+      if (i < props.currentPage)
+        renderedEntriesBefore++;
+      if (i > props.currentPage)
+        renderedEntriesAfter++;
       if (renderedEntriesBefore >= pmOffset && renderedEntriesAfter >= pmOffset)
         break;
     }
   }
 
-  if (props.currentPage + pmOffset < maxPages)
+  if (props.currentPage + pmOffset < maxPages) {
     targetElements.push({
       interactable: false,
       current: false,
@@ -132,10 +140,11 @@ const elements = computed(() => {
       link: props.linkTemplate.replace("{page}", maxPages.toString()),
       targetPage: maxPages,
     });
+  }
 
   targetElements.push({
     interactable: props.currentPage < maxPages,
-    current: props.currentPage == maxPages,
+    current: props.currentPage === maxPages,
     text: maxPages.toString(),
     link: props.linkTemplate.replace("{page}", maxPages.toString()),
     targetPage: maxPages,
@@ -147,7 +156,7 @@ const elements = computed(() => {
     text: "»",
     link: props.linkTemplate.replace(
       "{page}",
-      (props.currentPage + 1).toString()
+      (props.currentPage + 1).toString(),
     ),
     targetPage: props.currentPage + 1,
   });

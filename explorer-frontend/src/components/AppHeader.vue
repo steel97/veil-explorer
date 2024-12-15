@@ -1,19 +1,23 @@
 <template>
-  <header class="
+  <header
+    class="
       relative
       shadow
       mb-3
       bg-gray-50
       text-gray-800
       dark:bg-gray-800 dark:text-gray-300
-    ">
+    "
+  >
     <div class="max-w-full mx-auto pr-3">
       <div class="flex justify-between items-center py-2">
-        <NuxtLink :to="chainPath('/')" @click="clearError" class="flex items-center">
+        <NuxtLink :to="chainPath('/')" class="flex items-center" @click="clearError">
           <div class="px-3 pr-2">
             <div class="flex items-center">
-              <NuxtImg class="h-6 w-auto pr-2 my-3" width="256" height="223" src="/images/logo.png"
-                :alt="t('Header.Title')" />
+              <NuxtImg
+                class="h-6 w-auto pr-2 my-3" width="256" height="223" src="/images/logo.png"
+                :alt="t('Header.Title')"
+              />
               <span class="font-semibold">{{ t("Header.Title") }}</span>
             </div>
           </div>
@@ -24,7 +28,8 @@
           </div>
         </NuxtLink>
         <div class="-mr-2 -my-2 lg:hidden">
-          <button type="button" class="
+          <button
+            type="button" class="
               p-2
               inline-flex
               items-center
@@ -32,21 +37,24 @@
               text-gray-400
               hover:text-gray-500
               focus:outline-none
-            " @click="toggleMenu(false)">
+            " @click="toggleMenu(false)"
+          >
             <span class="sr-only">{{ t("Header.OpenMenu") }}</span>
             <Bars3Icon class="h-6 w-6" />
           </button>
         </div>
         <nav class="hidden lg:flex uppercase px-10 grow">
           <ul class="flex space-x-4 justify-center grow text-sm">
-            <li v-for="(link, index) in getLinks()" :key="'link' + index">
-              <NuxtLink :to="link.link" @click="clearError" class="
+            <li v-for="(link, index) in getLinks()" :key="`link${index}`">
+              <NuxtLink
+                :to="link.link" class="
                   font-medium
                   hover:underline
                   underline-offset-14
                   decoration-2
                   hover:text-sky-700 hover:dark:text-sky-400
-                " :class="computeClasses(link)">
+                " :class="computeClasses(link)" @click="clearError"
+              >
                 {{ link.locale }}
               </NuxtLink>
             </li>
@@ -55,18 +63,21 @@
         <div class="hidden lg:flex items-center justify-end">
           <div class="flex justify-center">
             <div class="form-check form-switch flex items-center">
-              <label class="
+              <label
+                class="
                   form-check-label
                   inline-block
                   text-sm
                   flex
                   items-center
                   mr-4
-                " for="switchTheme">
+                " for="switchTheme"
+              >
                 <MoonIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" />
                 <span class="uppercase">{{ t("Header.DarkMode") }}</span>
               </label>
-              <input class="
+              <input
+                id="switchTheme" v-model="themeSwitch" class="
                   form-check-input
                   appearance-none
                   w-9
@@ -80,38 +91,47 @@
                   shadow-sm
                   bg-gray-300
                   dark:bg-gray-600
-                " type="checkbox" role="switch" id="switchTheme" v-model="themeSwitch" />
+                " type="checkbox" role="switch"
+              />
             </div>
           </div>
           <div class="mx-2 popover-wrapper text-sm">
             <div class="flex justify-between items-center lang-width px-2">
               <span class="mr-2">
-                <NuxtImg class="locale-icon" width="24" height="14" :alt="getCurrentLocale().name"
-                  :src="'/images/locales/' + getCurrentLocale().code + '.png'" />
+                <NuxtImg
+                  class="locale-icon" width="24" height="14" :alt="getCurrentLocale().name"
+                  :src="`/images/locales/${getCurrentLocale().code}.png`"
+                />
               </span>
               <span class="grow cursor-default uppercase">{{
                 getCurrentLocale().name
               }}</span>
             </div>
-            <div class="
+            <div
+              class="
                 lang-width
                 popover-content
                 bg-gray-50
                 text-gray-800
                 dark:bg-gray-800 dark:text-gray-300
                 pt-2
-              ">
-              <NuxtLink :to="switchLocalePath(val.code as any)" @click="clearError" class="
+              "
+            >
+              <NuxtLink
+                v-for="val in getLocales()" :key="`lang-${val.code}`" :to="switchLocalePath(val.code as any)" class="
                   flex
                   items-center
                   justify-between
                   lang-entry
                   px-2
                   cursor-pointer
-                " v-for="val in getLocales()" :key="'lang-' + val.code">
+                " @click="clearError"
+              >
                 <span class="mr-2">
-                  <NuxtImg class="locale-icon" width="24" height="14" :alt="val.name"
-                    :src="'/images/locales/' + val.code + '.png'" />
+                  <NuxtImg
+                    class="locale-icon" width="24" height="14" :alt="val.name"
+                    :src="`/images/locales/${val.code}.png`"
+                  />
                 </span>
                 <span class="grow uppercase">{{ val.name }}</span>
               </NuxtLink>
@@ -124,13 +144,15 @@
       <div class="transition-[height] ease-out duration-200 menu-collapse">
         <nav class="flex flex-col lg:hidden uppercase px-4 grow">
           <ul class="flex flex-col space-y-4 grow text-sm mb-4">
-            <li v-for="(link, index) in getLinks()" :key="'link' + index">
-              <NuxtLink @click="toggleMenu(true)" :to="link.link" class="
+            <li v-for="(link, index) in getLinks()" :key="`link${index}`">
+              <NuxtLink
+                :to="link.link" class="
                   font-medium
                   hover:text-sky-700 hover:underline
                   underline-offset-8
                   decoration-2
-                " :class="computeClasses(link)">
+                " :class="computeClasses(link)" @click="toggleMenu(true)"
+              >
                 {{ link.locale }}
               </NuxtLink>
             </li>
@@ -138,18 +160,21 @@
         </nav>
         <div class="flex px-4">
           <div class="form-check form-switch flex items-center">
-            <label class="
+            <label
+              class="
                 form-check-label
                 inline-block
                 text-sm
                 flex
                 items-center
                 mr-4
-              " for="switchThemeMobile">
+              " for="switchThemeMobile"
+            >
               <MoonIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" />
               <span class="uppercase">{{ t("Header.DarkMode") }}</span>
             </label>
-            <input class="
+            <input
+              id="switchThemeMobile" v-model="themeSwitch" class="
                 form-check-input
                 appearance-none
                 w-9
@@ -163,34 +188,41 @@
                 shadow-sm
                 bg-gray-300
                 dark:bg-gray-600
-              " type="checkbox" role="switch" id="switchThemeMobile" v-model="themeSwitch" />
+              " type="checkbox" role="switch"
+            />
           </div>
         </div>
         <div>
           <div class="mx-2 mt-4 text-sm">
             <div class="flex justify-between items-center lang-width px-2" @click="openLocaleMenu()">
-              <span class="mr-2"><img class="locale-icon"
-                  :src="'/images/locales/' + getCurrentLocale().code + '.png'" /></span>
+              <span class="mr-2"><img
+                class="locale-icon"
+                :src="`/images/locales/${getCurrentLocale().code}.png`"
+              /></span>
               <span class="grow cursor-default uppercase">{{
                 getCurrentLocale().name
               }}</span>
             </div>
-            <div v-if="menuLocaleOpened" class="
+            <div
+              v-if="menuLocaleOpened" class="
                 lang-width
                 bg-gray-50
                 text-gray-800
                 dark:bg-gray-800 dark:text-gray-300
                 pt-2
-              ">
-              <NuxtLink :to="switchLocalePath(valm.code as any)" @click="clearError" class="
+              "
+            >
+              <NuxtLink
+                v-for="valm in getLocales()" :key="`lang-m-${valm.code}`" :to="switchLocalePath(valm.code as any)" class="
                   flex
                   items-center
                   justify-between
                   lang-entry
                   px-2
                   cursor-pointer
-                " v-for="valm in getLocales()" :key="'lang-m-' + valm.code">
-                <span class="mr-2"><img class="locale-icon" :src="'/images/locales/' + valm.code + '.png'" /></span>
+                " @click="clearError"
+              >
+                <span class="mr-2"><img class="locale-icon" :src="`/images/locales/${valm.code}.png`" /></span>
                 <span class="grow uppercase">{{ valm.name }}</span>
               </NuxtLink>
             </div>
@@ -200,16 +232,17 @@
     </div>
   </header>
 </template>
-<script setup lang="ts">
-import MoonIcon from "@heroicons/vue/24/solid/MoonIcon";
-//import SunIcon from "@heroicons/vue/24/solid/SunIcon";
-import Bars3Icon from "@heroicons/vue/24/outline/Bars3Icon";
-import { useThemeState, useBlockchainInfo } from "@/composables/States";
-import Cookie from "js-cookie";
-//import type { LocaleObject } from "@nuxtjs/i18n";
 
-const { t, locales, locale, fallbackLocale } =
-  useI18n();
+<script setup lang="ts">
+import { useBlockchainInfo, useThemeState } from "@/composables/States";
+// import SunIcon from "@heroicons/vue/24/solid/SunIcon";
+import Bars3Icon from "@heroicons/vue/24/outline/Bars3Icon";
+import MoonIcon from "@heroicons/vue/24/solid/MoonIcon";
+import Cookie from "js-cookie";
+// import type { LocaleObject } from "@nuxtjs/i18n";
+
+const { t, locales, locale, fallbackLocale }
+  = useI18n();
 const { chainPath } = useRoutingHelper();
 const switchLocalePath = useSwitchLocalePath();
 const data = useBlockchainInfo();
@@ -222,7 +255,7 @@ const menuOpened = ref(false);
 const menuHeight = ref("0px");
 const menuLocaleOpened = ref(false);
 
-const themeSwitch = ref(themeState.value == "dark" ? true : false);
+const themeSwitch = ref(themeState.value === "dark");
 
 export interface ILocale {
   code: string;
@@ -278,18 +311,19 @@ const getLinks = () => {
 const getCurrentLocale = () => {
   return {
     code: locale.value,
-    name: locales.value.filter(a => a.code == locale.value)[0].name
+    name: locales.value.filter(a => a.code === locale.value)[0].name,
   };
 };
 
 const getLocales = () => {
   const loc: Array<ILocale> = [];
-  locales.value.forEach(locale => {
+  locales.value.forEach((locale) => {
     const lang = locale;// as LocaleObject;
-    if (lang.code == getCurrentLocale().code) return;
+    if (lang.code === getCurrentLocale().code)
+      return;
     const link: ILocale = {
       code: lang.code,
-      name: lang.name ?? ""
+      name: lang.name ?? "",
     };
     loc.push(link);
   });
@@ -302,15 +336,16 @@ const computeClasses = (link: ILink) => {
   }
 
   if (
-    (link.name == route.name && route.name == "") ||
-    (route.name as any as string).startsWith(link.name)
-  )
+    (link.name === route.name && route.name === "")
+    || (route.name as any as string).startsWith(link.name)
+  ) {
     return ["underline", "text-sky-700", "dark:text-sky-400"];
+  }
   return ["text-gray-600", "dark:text-gray-300"];
 };
 
 const recalculateMenuSize = () => {
-  let size = 220 + (menuLocaleOpened.value ? getLocales().length * 30 : 0);
+  const size = 220 + (menuLocaleOpened.value ? getLocales().length * 30 : 0);
   menuHeight.value = menuOpened.value ? `${size}px` : "0px";
 };
 

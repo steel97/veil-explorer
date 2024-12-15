@@ -3,16 +3,21 @@
     <h1 class="font-semibold py-4">
       <span class="uppercase">{{ t("Address.ViewTitle") }}:</span>
       &nbsp;
-      <button class="inline-flex items-center max-w-full" @click="copyToClipboard()"
-        :title="t('Address.CopyToClipboard')">
-        <span class="
+      <button
+        class="inline-flex items-center max-w-full" :title="t('Address.CopyToClipboard')"
+        @click="copyToClipboard()"
+      >
+        <span
+          class="
             text-sky-700
             dark:text-sky-400
             overflow-hidden
             text-ellipsis
             max-address-width
-          ">{{ address }}</span>&nbsp;
-        <DocumentDuplicateIcon class="
+          "
+        >{{ address }}</span>&nbsp;
+        <DocumentDuplicateIcon
+          class="
             inline-block
             h-5
             w-5
@@ -20,35 +25,42 @@
             text-sky-700
             dark:text-sky-400
             cursor-pointer
-          " />
+          "
+        />
       </button>
     </h1>
     <div class="rounded p-4 bg-gray-50 dark:bg-gray-800 text-sm">
       <div class="md:grid grid-cols-2">
         <div>
           <!-- Info section -->
-          <div class="grid grid-cols-2 gap-0.5 w-full py-4 border-b" v-for="(val, index) in getAddressDetails"
-            :class="index < getAddressDetails.length - 1 ? '' : 'md:border-b-0'" :key="'detail-' + index">
+          <div
+            v-for="(val, index) in getAddressDetails" :key="`detail-${index}`"
+            class="grid grid-cols-2 gap-0.5 w-full py-4 border-b" :class="index < getAddressDetails.length - 1 ? '' : 'md:border-b-0'"
+          >
             <div>{{ t(val.placeholder) }}</div>
             <div class="text-right md:text-left overflow-hidden text-ellipsis">
               <span v-if="val.check == null">{{ val.value }}</span>
               <span v-else :title="val.check ? t('Address.Yes') : t('Address.No')">
-                <CheckIcon v-if="val.check" class="
+                <CheckIcon
+                  v-if="val.check" class="
                     inline-block
                     h-5
                     w-5
                     mr-2
                     text-sky-700
                     dark:text-sky-400
-                  " />
-                <XMarkIcon v-if="!val.check" class="
+                  "
+                />
+                <XMarkIcon
+                  v-if="!val.check" class="
                     inline-block
                     h-5
                     w-5
                     mr-2
                     text-sky-700
                     dark:text-sky-400
-                  " />
+                  "
+                />
               </span>
             </div>
           </div>
@@ -57,40 +69,49 @@
           <!-- QR section -->
           <div>
             <!-- TO-DO, use <client-only/> when nuxt3 implement it -->
-            <QrcodeVue v-if="renderQR" :value="addressReactive" :size="180" :margin="2" render-as="svg" level="H"
-              :aria-label="t('Address.QrCode')" />
+            <QrcodeVue
+              v-if="renderQR" :value="addressReactive" :size="180" :margin="2" render-as="svg" level="H"
+              :aria-label="t('Address.QrCode')"
+            />
             <div>
               <div class="flex justify-between mt-2">
                 <div>{{ t("Address.Balance") }}:</div>
-                <a href="javascript:void(0)" class="
+                <a
+                  v-if="addressInfo != null
+                    && addressInfo.amountFetched
+                    && !reloadingBalance
+                    && addressInfo.address != null
+                    && (addressInfo.address.isstealthaddress == null
+                      || !addressInfo.address.isstealthaddress)
+                  " href="javascript:void(0)" class="
                     text-sky-700
                     dark:text-sky-400
                     hover:underline
                     underline-offset-4
-                  " @click="reloadBalance()" v-if="addressInfo != null &&
-                    addressInfo.amountFetched &&
-                    !reloadingBalance &&
-                    addressInfo.address != null &&
-                    (addressInfo.address.isstealthaddress == null ||
-                      !addressInfo.address.isstealthaddress)
-                  ">{{ t("Address.Update") }}</a>
+                  " @click="reloadBalance()"
+                >{{ t("Address.Update") }}</a>
               </div>
-              <div v-if="!reloadingBalance &&
-                addressInfo != null &&
-                addressInfo.amountFetched
-              " class="mt-1">
+              <div
+                v-if="!reloadingBalance
+                  && addressInfo != null
+                  && addressInfo.amountFetched
+                " class="mt-1"
+              >
                 {{ addressInfo.amount }} veil
               </div>
-              <div v-else-if="!reloadingBalance &&
-                addressInfo != null &&
-                addressInfo.address != null &&
-                addressInfo.address.isstealthaddress != null &&
-                addressInfo.address.isstealthaddress
-              " class="mt-1">
+              <div
+                v-else-if="!reloadingBalance
+                  && addressInfo != null
+                  && addressInfo.address != null
+                  && addressInfo.address.isstealthaddress != null
+                  && addressInfo.address.isstealthaddress
+                " class="mt-1"
+              >
                 {{ t("Address.BalanceHidden") }}
               </div>
               <div v-else class="flex items-center mt-1">
-                <svg class="
+                <svg
+                  class="
                     animate-spin
                     ml-1
                     mr-3
@@ -98,10 +119,13 @@
                     w-5
                     text-gray-800
                     dark:text-gray-300
-                  " xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  " xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                >
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                  <path
+                    class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  >
                   </path>
                 </svg>
                 {{ t("Address.Loading") }}
@@ -116,8 +140,8 @@
 
 <script setup lang="ts">
 import type { AddressResponse } from "@/models/API/AddressResponse";
-import DocumentDuplicateIcon from "@heroicons/vue/24/solid/DocumentDuplicateIcon";
 import CheckIcon from "@heroicons/vue/24/solid/CheckIcon";
+import DocumentDuplicateIcon from "@heroicons/vue/24/solid/DocumentDuplicateIcon";
 import XMarkIcon from "@heroicons/vue/24/solid/XMarkIcon";
 import QrcodeVue from "qrcode.vue";
 import Toastify from "toastify-js";
@@ -135,73 +159,83 @@ const renderQR = ref(false);
 const router = useRouter();
 
 const getAddressDetails = computed(() => {
-  if (addressInfo.value == null) return [];
+  if (addressInfo.value == null)
+    return [];
 
   const res = [];
 
-  if (addressInfo.value.hash != null)
+  if (addressInfo.value.hash != null) {
     res.push({
       placeholder: "Address.Hash160",
       value: addressInfo.value.hash,
       check: null,
     });
+  }
 
-  if (addressInfo.value.version != null)
+  if (addressInfo.value.version != null) {
     res.push({
       placeholder: "Address.Version",
       value: addressInfo.value.version,
       check: null,
     });
+  }
 
-  if (addressInfo.value.scriptHash != null)
+  if (addressInfo.value.scriptHash != null) {
     res.push({
       placeholder: "Address.Scripthash",
       value: addressInfo.value.scriptHash,
       check: null,
     });
+  }
 
   if (addressInfo.value.address != null) {
-    if (addressInfo.value.address.scriptPubKey != null)
+    if (addressInfo.value.address.scriptPubKey != null) {
       res.push({
         placeholder: "Address.ScriptPublicKey",
         value: addressInfo.value.address.scriptPubKey,
         check: null,
       });
+    }
 
-    if (addressInfo.value.address.isvalid != null)
+    if (addressInfo.value.address.isvalid != null) {
       res.push({
         placeholder: "Address.IsValid",
         value: addressInfo.value.address.isvalid,
         check: addressInfo.value.address.isvalid,
       });
+    }
 
-    if (addressInfo.value.address.isstealthaddress != null)
+    if (addressInfo.value.address.isstealthaddress != null) {
       res.push({
         placeholder: "Address.IsStealth",
         value: addressInfo.value.address.isstealthaddress,
         check: addressInfo.value.address.isstealthaddress,
       });
+    }
 
-    if (addressInfo.value.address.iswitness != null)
+    if (addressInfo.value.address.iswitness != null) {
       res.push({
         placeholder: "Address.IsWitness",
         value: addressInfo.value.address.iswitness,
         check: addressInfo.value.address.iswitness,
       });
+    }
 
-    if (addressInfo.value.address.witness_version != null)
+    if (addressInfo.value.address.witness_version != null) {
       res.push({
         placeholder: "Address.WitnessVersion",
         value: addressInfo.value.address.witness_version,
         check: null,
       });
+    }
 
-    if (addressInfo.value.address.witness_program != null)
+    if (addressInfo.value.address.witness_program != null) {
       res.push({
         placeholder: "Address.WitnessProgram",
         value: addressInfo.value.address.witness_program,
         check: null,
       });
+    }
   }
 
   return res;
@@ -223,9 +257,10 @@ const copyToClipboard = () => {
       },
       () => {
         console.log("Can't copy text to clipboard (1)");
-      }
+      },
     );
-  } catch {
+  }
+  catch {
     console.log("Can't copy text to clipboard (2)");
   }
 };
@@ -238,26 +273,28 @@ const fetchAddress = async (forceScanAmount = false, isInitial = false) => {
         {
           method: "POST",
           body: {
-            address: address,
-            forceScanAmount: forceScanAmount,
+            address,
+            forceScanAmount,
           },
-        }
+        },
       );
       return data.value;
-    } else {
+    }
+    else {
       const data = await $fetch<AddressResponse>(
         `${getApiPath()}/address`,
         {
           method: "POST",
           body: {
-            address: address,
-            forceScanAmount: forceScanAmount,
+            address,
+            forceScanAmount,
           },
-        }
+        },
       );
       return data;
     }
-  } catch {
+  }
+  catch {
     return null;
   }
 };
@@ -271,11 +308,11 @@ const reloadBalance = async () => {
 const addressInfo = ref(await fetchAddress(false, true));
 
 const shouldFetchBalance = () =>
-  addressInfo.value != null &&
-  addressInfo.value.address != null &&
-  (addressInfo.value.address.isstealthaddress == null ||
-    !addressInfo.value.address.isstealthaddress) &&
-  !addressInfo.value.amountFetched;
+  addressInfo.value != null
+  && addressInfo.value.address != null
+  && (addressInfo.value.address.isstealthaddress == null
+    || !addressInfo.value.address.isstealthaddress)
+  && !addressInfo.value.amountFetched;
 
 const checkLoad = async () => {
   if (shouldFetchBalance()) {
@@ -288,21 +325,22 @@ if (addressInfo.value != null && !addressInfo.value.fetched)
   await navigateTo(chainPath("/search/notfound"));
 
 onMounted(() => {
-  if (import.meta.client) renderQR.value = true;
+  if (import.meta.client)
+    renderQR.value = true;
   setTimeout(checkLoad, 500);
 });
 
 const meta = computed(() => {
   return {
-    title: t("Address.Meta.Title", { address: address }),
+    title: t("Address.Meta.Title", { address }),
     meta: [
       {
         name: "description",
-        content: t("Address.Meta.Description", { address: address }),
+        content: t("Address.Meta.Description", { address }),
       },
       {
         name: "og:title",
-        content: t("Address.Meta.Title", { address: address }),
+        content: t("Address.Meta.Title", { address }),
       },
       {
         name: "og:url",

@@ -2,7 +2,7 @@ import type { GetBlockchainInfoResult } from "@/models/Node/GetBlockchainInfoRes
 import type { GetChainalgoStatsResult } from "@/models/Node/GetChainalgoStatsResult";
 
 export interface BlockchainInfo {
-    currentSyncedBlock: number;
-    chainInfo: GetBlockchainInfoResult;
-    algoStats: GetChainalgoStatsResult;
+  currentSyncedBlock: number;
+  chainInfo: GetBlockchainInfoResult;
+  algoStats: GetChainalgoStatsResult;
 }

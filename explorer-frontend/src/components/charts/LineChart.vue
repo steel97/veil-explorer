@@ -6,17 +6,18 @@
 
 <script setup lang="ts">
 import type { GraphData } from "@/models/System/GraphData";
-import { Chart } from "chart.js";
 import type { ChartOptions } from "chart.js";
-
-const ctxRef = ref<HTMLCanvasElement | null>(null);
+import { Chart } from "chart.js";
 
 const props = defineProps<{
   data: GraphData;
 }>();
 
+const ctxRef = ref<HTMLCanvasElement | null>(null);
+
 watch(props, (np) => {
-  if (chart == null) return;
+  if (chart == null)
+    return;
   chart.options = getChartOptions();
   chart.update();
 });
@@ -59,13 +60,14 @@ const getChartOptions = (): ChartOptions => {
           text: props.data.yaxisTitle,
         },
         ticks: {
-          callback: function (value, index, values) {
-            const numValue =
-              typeof value == "string" ? parseFloat(value) : value;
+          callback(value, index, values) {
+            const numValue
+              = typeof value == "string" ? Number.parseFloat(value) : value;
             if (numValue > 1000000) {
-              return (numValue / 1000000).toLocaleString() + "M";
-            } else {
-              return parseFloat(numValue.toFixed(3)).toString();
+              return `${(numValue / 1000000).toLocaleString()}M`;
+            }
+            else {
+              return Number.parseFloat(numValue.toFixed(3)).toString();
             }
           },
         },

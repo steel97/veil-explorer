@@ -1,27 +1,19 @@
 {
   "name": "explorer-frontend",
-  "private": true,
   "type": "module",
+  "private": true,
   "scripts": {
     "build": "npm run check-types && nuxt build",
     "dev": "nuxt dev --max-http-header-size 10000000",
     "check-types": "npx nuxi typecheck",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
-  },
-  "devDependencies": {
-    "@heroicons/vue": "^2.1.5",
-    "@nuxtjs/i18n": "^9.0.0",
-    "@nuxtjs/seo": "^2.0.2",
-    "@nuxtjs/tailwindcss": "^6.12.2",
-    "nuxt": "^3.14.1592",
-    "typescript": "^5.6.3",
-    "vue": "^3.5.12",
-    "vue-router": "^4.4.5",
-    "vue-tsc": "^2.1.10"
+    "postinstall": "nuxt prepare",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
+    "@antfu/eslint-config": "^3.9.2",
     "@microsoft/signalr": "^8.0.7",
     "@nuxt/image": "1.8.1",
     "@popperjs/core": "^2.11.2",
@@ -31,5 +23,18 @@
     "js-cookie": "^3.0.1",
     "qrcode.vue": "^3.6.0",
     "toastify-js": "^1.11.2"
+  },
+  "devDependencies": {
+    "@heroicons/vue": "^2.1.5",
+    "@nuxt/eslint": "^0.7.3",
+    "@nuxtjs/i18n": "^9.0.0",
+    "@nuxtjs/seo": "^2.0.2",
+    "@nuxtjs/tailwindcss": "^6.12.2",
+    "eslint": "^9.17.0",
+    "nuxt": "^3.14.1592",
+    "typescript": "^5.6.3",
+    "vue": "^3.5.12",
+    "vue-router": "^4.4.5",
+    "vue-tsc": "^2.1.10"
   }
 }

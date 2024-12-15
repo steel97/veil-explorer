@@ -40,7 +40,9 @@
           <CircleStackIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" />
           <span>{{ t("NetworkSummary.DataSize") }}</span>
         </div>
-        <div class="text-right max-right-width">{{ getSize() }}</div>
+        <div class="text-right max-right-width">
+          {{ getSize() }}
+        </div>
       </div>
       <div class="flex justify-between mb-2">
         <div class="flex items-center">
@@ -101,12 +103,14 @@
           <span>PoS</span>
         </div>
         <div class="text-right">
-          <span v-if="backgroundData != null &&
-            backgroundData.algoStats != null &&
-            backgroundData.algoStats.pos
-            ">{{ backgroundData?.algoStats?.pos }} ({{
-    calculateBlocksplit(backgroundData?.algoStats?.pos)
-  }}%)</span>
+          <span
+            v-if="backgroundData != null
+              && backgroundData.algoStats != null
+              && backgroundData.algoStats.pos
+            "
+          >{{ backgroundData?.algoStats?.pos }} ({{
+            calculateBlocksplit(backgroundData?.algoStats?.pos)
+          }}%)</span>
           <span v-else>{{ t("Core.NoData") }}</span>
         </div>
       </div>
@@ -115,12 +119,14 @@
           <CpuChipIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" /><span>ProgPow</span>
         </div>
         <div class="text-right">
-          <span v-if="backgroundData != null &&
-            backgroundData.algoStats != null &&
-            backgroundData.algoStats.progpow
-            ">{{ backgroundData?.algoStats?.progpow }} ({{
-    calculateBlocksplit(backgroundData?.algoStats?.progpow)
-  }}%)</span>
+          <span
+            v-if="backgroundData != null
+              && backgroundData.algoStats != null
+              && backgroundData.algoStats.progpow
+            "
+          >{{ backgroundData?.algoStats?.progpow }} ({{
+            calculateBlocksplit(backgroundData?.algoStats?.progpow)
+          }}%)</span>
           <span v-else>{{ t("Core.NoData") }}</span>
         </div>
       </div>
@@ -129,12 +135,14 @@
           <BoltIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" /><span>RandomX</span>
         </div>
         <div class="text-right">
-          <span v-if="backgroundData != null &&
-            backgroundData.algoStats != null &&
-            backgroundData.algoStats.randomx
-            ">{{ backgroundData?.algoStats?.randomx }} ({{
-    calculateBlocksplit(backgroundData?.algoStats?.randomx)
-  }}%)</span>
+          <span
+            v-if="backgroundData != null
+              && backgroundData.algoStats != null
+              && backgroundData.algoStats.randomx
+            "
+          >{{ backgroundData?.algoStats?.randomx }} ({{
+            calculateBlocksplit(backgroundData?.algoStats?.randomx)
+          }}%)</span>
           <span v-else>{{ t("Core.NoData") }}</span>
         </div>
       </div>
@@ -174,32 +182,36 @@
           }}</span>
         </div>
         <div class="text-right">
-          <span v-if="blockchainData != null && blockchainData.zerocoinsupply != null
-            ">{{ calculateZerocoinTotal() }} ({{
-    (
-      (parseInt(calculateZerocoinTotal()) /
-        (blockchainData.moneysupply / supplyDelimiter)) *
-      100
-    ).toFixed(2)
-  }}%)</span>
+          <span
+            v-if="blockchainData != null && blockchainData.zerocoinsupply != null
+            "
+          >{{ calculateZerocoinTotal() }} ({{
+            (
+              (parseInt(calculateZerocoinTotal())
+                / (blockchainData.moneysupply / supplyDelimiter))
+              * 100
+            ).toFixed(2)
+          }}%)</span>
           <span v-else>{{ t("Core.NoData") }}</span>
         </div>
       </div>
       <div v-if="blockchainData != null && blockchainData.zerocoinsupply != null">
-        <div class="flex justify-between mb-2" v-for="(val, index) in blockchainData.zerocoinsupply.slice(
-              0,
-              blockchainData.zerocoinsupply.length - 1
-            )" :key="'denom-' + index">
+        <div
+          v-for="(val, index) in blockchainData.zerocoinsupply.slice(
+            0,
+            blockchainData.zerocoinsupply.length - 1,
+          )" :key="`denom-${index}`" class="flex justify-between mb-2"
+        >
           <div class="flex items-center">
             <ChartPieIcon class="h-5 w-5 mr-2 text-sky-700 dark:text-sky-400" /><span>{{ val.denom }}-denom</span>
           </div>
           <div class="text-right">
             {{ (val.amount / supplyDelimiter).toFixed(2) }} ({{
               (
-                (val.amount /
-                  supplyDelimiter /
-                  (blockchainData?.moneysupply / supplyDelimiter)) *
-                100
+                (val.amount
+                  / supplyDelimiter
+                  / (blockchainData?.moneysupply / supplyDelimiter))
+                * 100
               ).toFixed(2)
             }}%)
           </div>
@@ -210,26 +222,25 @@
 </template>
 
 <script setup lang="ts">
-import {
-  CubeIcon,
-  HashtagIcon,
-  ArrowPathIcon,
-  CircleStackIcon,
-  PuzzlePieceIcon,
-  //
-  CreditCardIcon,
-  CpuChipIcon,
-  BoltIcon,
-  ServerIcon,
-  //,
-  BanknotesIcon,
-  ChartBarIcon,
-  ChartPieIcon,
-} from "@heroicons/vue/24/solid";
-import type { BlockchainInfo } from "@/models/API/BlockchainInfo";
 import { useFormatting } from "@/composables/Formatting";
 import { useBackgroundInfo, useBlockchainInfo } from "@/composables/States";
 import { COIN } from "@/core/Constants";
+import {
+  ArrowPathIcon,
+  // ,
+  BanknotesIcon,
+  BoltIcon,
+  ChartBarIcon,
+  ChartPieIcon,
+  CircleStackIcon,
+  CpuChipIcon,
+  //
+  CreditCardIcon,
+  CubeIcon,
+  HashtagIcon,
+  PuzzlePieceIcon,
+  ServerIcon,
+} from "@heroicons/vue/24/solid";
 
 const { t } = useI18n();
 const { formatDateTimeLocal } = useFormatting();
@@ -241,25 +252,25 @@ const supplyDelimiter = ref(COIN);
 const getSize = () => {
   let size = blockchainData.value?.size_on_disk ?? t("Core.NoData");
   if (blockchainData.value != null) {
-    size =
-      ((size as number) / 1024 / 1024 / 1024).toFixed(2).toString() + " GB";
+    size
+      = `${((size as number) / 1024 / 1024 / 1024).toFixed(2).toString()} GB`;
   }
   return size;
 };
 
 const calculateBlocksplit = (val: number) => {
-  const overall =
-    backgroundData.value?.algoStats?.pos! +
-    backgroundData.value?.algoStats?.progpow! +
-    backgroundData.value?.algoStats?.randomx! +
-    backgroundData.value?.algoStats?.sha256d!;
+  const overall
+    = backgroundData.value?.algoStats?.pos!
+    + backgroundData.value?.algoStats?.progpow!
+    + backgroundData.value?.algoStats?.randomx!
+    + backgroundData.value?.algoStats?.sha256d!;
   return ((val / overall) * 100).toFixed(2);
 };
 
 const calculateZerocoinTotal = () =>
   (
     (blockchainData.value?.zerocoinsupply?.filter(
-      (filter) => filter.denom == "total"
+      filter => filter.denom === "total",
     )[0].amount ?? 0) / supplyDelimiter.value
   ).toFixed(2);
 </script>

@@ -1,8 +1,9 @@
 export default defineNuxtRouteMiddleware((to, from) => {
-    if (import.meta.client) return;
+  if (import.meta.client)
+    return;
 
-    const nuxtApp = useNuxtApp();
-    const chainState = useChainState();
+  const nuxtApp = useNuxtApp();
+  const chainState = useChainState();
 
-    return navigateTo(nuxtApp.$localePath("/" + chainState.value), { redirectCode: 301 });
-})
+  return navigateTo(nuxtApp.$localePath(`/${chainState.value}`), { redirectCode: 301 });
+});

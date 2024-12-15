@@ -1,5 +1,5 @@
 export default () => {
-    return {
-        "RelatedWebsites": "Related links"
-    }
-}
+  return {
+    RelatedWebsites: "Related links",
+  };
+};

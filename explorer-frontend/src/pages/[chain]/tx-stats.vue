@@ -4,7 +4,7 @@
       {{ t("TxStats.Title") }}
     </h1>
     <div class="rounded bg-gray-50 dark:bg-gray-800 mb-4 mt-4">
-      <div class="block md:grid grid-cols-2" v-if="pageReady">
+      <div v-if="pageReady" class="block md:grid grid-cols-2">
         <ChartsLineChart :data="getData('day')" class="my-2 md:mx-2" />
         <ChartsLineChart :data="getData('week')" class="my-2 md:mx-2" />
         <ChartsLineChart :data="getData('month')" class="my-2 md:mx-2" />
@@ -20,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import type { TxStatsResponse, TxStatsEntry } from "@/models/API/TxStatsResponse";
+import type { TxStatsEntry, TxStatsResponse } from "@/models/API/TxStatsResponse";
 import type { GraphData } from "@/models/System/GraphData";
 
 const { t } = useI18n();
@@ -42,7 +42,8 @@ const getData = (key: string, rate = false) => {
     xaxisStep: 5,
     yaxisTitle: "unknown",
   };
-  if (!pageReady.value || stats.value == null) return emptyData;
+  if (!pageReady.value || stats.value == null)
+    return emptyData;
 
   const cdataval = stats.value.txStats[key] as TxStatsEntry;
 
@@ -50,16 +51,17 @@ const getData = (key: string, rate = false) => {
   const ret: GraphData = {
     data: rate ? cdataval.txRates : cdataval.txCounts,
     labels: cdataval.labels,
-    title: t(blocaleKey + "Title"),
-    xaxisTitle: t(blocaleKey + "XAxis"),
+    title: t(`${blocaleKey}Title`),
+    xaxisTitle: t(`${blocaleKey}XAxis`),
     xaxisStep: 5,
-    yaxisTitle: t(blocaleKey + "YAxis"),
+    yaxisTitle: t(`${blocaleKey}YAxis`),
   };
   return ret;
 };
 
 onMounted(() => {
-  if (!import.meta.client) return; // should never happend?
+  if (!import.meta.client)
+    return; // should never happend?
   pageReady.value = true;
 });
 

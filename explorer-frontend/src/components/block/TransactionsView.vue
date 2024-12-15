@@ -1,7 +1,8 @@
 <template>
-  <div v-for="tx in props.txdata" :key="'tx-' + tx.txId">
+  <div v-for="tx in props.txdata" :key="`tx-${tx.txId}`">
     <h2 class="font-semibold pt-4">
-      <NuxtLink :to="chainPath('/tx/' + tx.txId)" class="
+      <NuxtLink
+        :to="chainPath(`/tx/${tx.txId}`)" class="
           block
           text-sky-700
           dark:text-sky-400
@@ -12,7 +13,8 @@
           overflow-x-hidden
           text-ellipsis
           height-offset-fix
-        ">
+        "
+      >
         {{ tx.txId }}
       </NuxtLink>
     </h2>

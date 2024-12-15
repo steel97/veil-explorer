@@ -3,7 +3,8 @@
     <h1 class="uppercase font-semibold py-4">
       {{ t("Search.Title") }}
     </h1>
-    <div class="
+    <div
+      class="
         rounded
         p-8
         bg-gray-50
@@ -12,16 +13,19 @@
         justify-center
         items-center
         mb-4
-      ">
+      "
+    >
       {{ t("Search.Description") }}
     </div>
-    <NuxtLink :to="chainPath('/')" class="
+    <NuxtLink
+      :to="chainPath('/')" class="
         uppercase
         text-sky-700
         dark:text-sky-400
         hover:underline
         underline-offset-4
-      ">
+      "
+    >
       {{ t("Search.ToHome") }}
     </NuxtLink>
   </div>

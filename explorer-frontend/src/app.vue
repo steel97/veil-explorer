@@ -1,14 +1,16 @@
 <template>
   <div>
     <NuxtLayout>
-      <div :class="themeState" id="clfix">
-        <div class="
+      <div id="clfix" :class="themeState">
+        <div
+          class="
         bg-gray-200
         dark:bg-gray-700
         transition-colors
         ease-linear
         duration-200
-      ">
+      "
+        >
           <div class="min-h-screen mb-10">
             <AppHeader />
             <div class="w-full px-2 text-gray-800 dark:text-gray-300">
@@ -27,16 +29,16 @@
 </template>
 
 <script setup lang="ts">
-import "toastify-js/src/toastify.css";
+import type { BlockchainInfo } from "@/models/API/BlockchainInfo";
 import { useConfigs } from "@/composables/Configs";
+import { useNetworkManager } from "@/composables/NetworkManager";
 import {
-  useThemeState,
   useBackgroundInfo,
   useBlockchainInfo,
+  useThemeState,
 } from "@/composables/States";
-import { useNetworkManager } from "@/composables/NetworkManager";
-import type { BlockchainInfo } from "@/models/API/BlockchainInfo";
 import Cookie from "js-cookie";
+import "toastify-js/src/toastify.css";
 
 const config = useRuntimeConfig();
 
@@ -52,10 +54,10 @@ const theme = useCookie("theme").value ?? "";
 let currentTheme = theme;
 
 let usedMedia = false;
-if (import.meta.client && currentTheme == "") {
+if (import.meta.client && currentTheme === "") {
   if (
-    window.matchMedia &&
-    window.matchMedia("(prefers-color-scheme: dark)").matches
+    window.matchMedia
+    && window.matchMedia("(prefers-color-scheme: dark)").matches
   ) {
     usedMedia = true;
     currentTheme = "dark";
@@ -69,7 +71,7 @@ if (import.meta.client && currentTheme == "") {
   }
 }
 
-themeState.value = currentTheme == "dark" ? "dark" : "";
+themeState.value = currentTheme === "dark" ? "dark" : "";
 
 const i18nHead = useLocaleHead({});
 const meta = computed(() => {
@@ -81,11 +83,11 @@ const meta = computed(() => {
       },
       {
         name: "theme-color",
-        content: themeState.value == "dark" ? "#1F2937" : "#F9FAFB",
+        content: themeState.value === "dark" ? "#1F2937" : "#F9FAFB",
       },
       {
         "http-equiv": "X-UA-Compatible",
-        content: "IE=edge",
+        "content": "IE=edge",
       },
       ...(i18nHead.value.meta || []),
     ],
@@ -99,14 +101,14 @@ const meta = computed(() => {
         href: "https://fonts.gstatic.com",
       },
       ...(i18nHead.value.link || []),
-    ]
+    ],
   };
 });
 
 useHead(meta);
 
 const chainInfo = await useFetch<BlockchainInfo>(
-  `${getApiPath()}/blockchaininfo`
+  `${getApiPath()}/blockchaininfo`,
 );
 
 if (chainInfo.data.value != null) {
@@ -119,15 +121,16 @@ if (chainInfo.data.value != null) {
 
 const isSynchronizing = computed(() => {
   if (
-    backgroundInfoDataState.value == null ||
-    blockchaininfoDataState.value == null
-  )
+    backgroundInfoDataState.value === null
+    || blockchaininfoDataState.value === null
+  ) {
     return false;
+  }
 
-  const shouldSync =
-    blockchaininfoDataState.value.blocks -
-    config.public.syncNoticeCase >
-    backgroundInfoDataState.value.currentSyncedBlock;
+  const shouldSync
+    = blockchaininfoDataState.value.blocks
+    - config.public.syncNoticeCase
+    > backgroundInfoDataState.value.currentSyncedBlock;
 
   return shouldSync;
 });

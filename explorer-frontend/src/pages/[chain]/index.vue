@@ -9,13 +9,15 @@
         {{ t("Home.RecentBlocks") }}
       </h1>
       <div class="text-right">
-        <NuxtLink :to="chainPath('/blocks')" class="
+        <NuxtLink
+          :to="chainPath('/blocks')" class="
             uppercase
             text-sky-700
             dark:text-sky-400
             hover:underline
             underline-offset-4
-          ">
+          "
+        >
           {{ t("Home.BrowseBlocks") }}
         </NuxtLink>
       </div>
@@ -37,9 +39,9 @@ definePageMeta({
     const configMW = useRuntimeConfig();
     const chain = route.params.chain;
     const apiEndpoints = configMW.public.chainApis as Array<ApiEntry>;
-    const epFound = apiEndpoints.filter(a => a.name == chain).length > 0;
+    const epFound = apiEndpoints.filter(a => a.name === chain).length > 0;
     return epFound;
-  }
+  },
 });
 
 const meta = computed(() => {

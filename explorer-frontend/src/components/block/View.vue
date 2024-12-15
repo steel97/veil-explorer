@@ -7,18 +7,24 @@
           <!-- should never happend? -->
           <div v-if="props.block.prevBlock != null">
             <div class="max-w-full overflow-hidden text-ellipsis">
-              <NuxtLink :to="chainPath('/block/' + props.block.prevBlock.hash)" class="
+              <NuxtLink
+                :to="chainPath(`/block/${props.block.prevBlock.hash}`)" class="
                   text-sky-700
                   dark:text-sky-400
                   hover:underline
                   underline-offset-4
-                ">{{ props.block.prevBlock.hash }}</NuxtLink>
+                "
+              >
+                {{ props.block.prevBlock.hash }}
+              </NuxtLink>
             </div>
             <div class="text-xs text-gray-500 dark:text-gray-400">
               #{{ props.block.prevBlock.height }}
             </div>
           </div>
-          <div v-else>{{ t("Core.NoData") }}</div>
+          <div v-else>
+            {{ t("Core.NoData") }}
+          </div>
         </div>
       </div>
 
@@ -27,18 +33,24 @@
         <div class="text-right">
           <div v-if="props.block.nextBlock != null">
             <div class="max-w-full overflow-hidden text-ellipsis">
-              <NuxtLink :to="chainPath('/block/' + props.block.nextBlock.hash)" class="
+              <NuxtLink
+                :to="chainPath(`/block/${props.block.nextBlock.hash}`)" class="
                   text-sky-700
                   dark:text-sky-400
                   hover:underline
                   underline-offset-4
-                ">{{ props.block.nextBlock.hash }}</NuxtLink>
+                "
+              >
+                {{ props.block.nextBlock.hash }}
+              </NuxtLink>
             </div>
             <div class="text-xs text-gray-500 dark:text-gray-400">
               #{{ props.block.nextBlock.height }}
             </div>
           </div>
-          <div v-else>{{ t("Block.LatestBlock") }}</div>
+          <div v-else>
+            {{ t("Block.LatestBlock") }}
+          </div>
         </div>
       </div>
     </div>
@@ -102,19 +114,23 @@
       <div class="grid grid-cols-2 gap-0.5 w-full py-4 border-b">
         <div>{{ t("Block.Confirmations.Title") }}</div>
         <div class="text-right" :class="getConfirmationClass">
-          <div class="flex items-center float-right" data-tooltip-target="tooltip-confirmations" ref="confirmationsEl"
+          <div
+            ref="confirmationsEl" class="flex items-center float-right" data-tooltip-target="tooltip-confirmations"
             aria-describedby="tooltip-confirmations" @mouseenter="showTooltip" @focus="showTooltip"
-            @mouseleave="hideTooltip" @blur="hideTooltip" @click.prevent="toggleTooltip">
+            @mouseleave="hideTooltip" @blur="hideTooltip" @click.prevent="toggleTooltip"
+          >
             <LockClosedIcon class="h-5 w-5" :class="getConfirmationClass" />
             {{ calculateConfirmations }}
           </div>
-          <div ref="confirmationsTooltipEl" id="tooltip-confirmations" role="tooltip" class="
+          <div
+            id="tooltip-confirmations" ref="confirmationsTooltipEl" role="tooltip" class="
               tooltip
               bg-gray-300
               dark:bg-gray-600
               text-gray-800
               dark:text-gray-50
-            ">
+            "
+          >
             {{ getTitle }}
             <div id="arrow" data-popper-arrow></div>
           </div>
@@ -162,9 +178,9 @@ import { useBlockchainInfo } from "@/composables/States";
 import { LockClosedIcon } from "@heroicons/vue/24/solid";
 import {
   createPopperLite as createPopper,
-  /*preventOverflow,
+  /* preventOverflow,
   flip,
-  hide,*/
+  hide, */
 } from "@popperjs/core";
 
 const props = defineProps<{
@@ -181,22 +197,24 @@ const config = useRuntimeConfig();
 const data = useBlockchainInfo();
 
 const calculateConfirmations = computed(() => {
-  const confirmations =
-    (data.value?.blocks ?? 0) - props.block.block.height + 1;
+  const confirmations
+    = (data.value?.blocks ?? 0) - props.block.block.height + 1;
   return confirmations > 0 ? confirmations : 0;
 });
 
 const getConfirmationClass = computed(() => {
   const confirmations = calculateConfirmations.value;
-  if (confirmations == 0) return "text-rose-700 dark:text-rose-400";
-  if (confirmations < 12) return "text-yellow-700 dark:text-yellow-400";
+  if (confirmations === 0)
+    return "text-rose-700 dark:text-rose-400";
+  if (confirmations < 12)
+    return "text-yellow-700 dark:text-yellow-400";
   return "text-green-700 dark:text-green-400";
 });
 
 const getTitle = computed(() =>
   calculateConfirmations.value < 12
     ? t("Block.Confirmations.Low")
-    : t("Block.Confirmations.Enough")
+    : t("Block.Confirmations.Enough"),
 );
 
 const getBlockWeightRaw = (weight: number) =>
@@ -217,7 +235,8 @@ const tooltipState = ref(false);
 
 const toggleTooltip = () => {
   tooltipState.value = !tooltipState.value;
-  if (tooltipState.value) showTooltip();
+  if (tooltipState.value)
+    showTooltip();
   else hideTooltip();
 };
 

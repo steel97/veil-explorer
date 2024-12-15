@@ -1,19 +1,23 @@
 <template>
   <div>
     <h1 class="font-semibold py-4">
-      <div class="uppercase">{{ t("Tx.Title") }}</div>
-      <div class="
+      <div class="uppercase">
+        {{ t("Tx.Title") }}
+      </div>
+      <div
+        v-if="tx !== null && tx.txId !== null" class="
           text-xs text-gray-500
           dark:text-gray-400
           max-w-full
           overflow-hidden
           text-ellipsis
-        " v-if="tx != null && tx.txId != null">
+        "
+      >
         {{ tx.txId }}
       </div>
     </h1>
 
-    <div class="rounded p-4 bg-gray-50 dark:bg-gray-800 text-sm" v-if="tx != null">
+    <div v-if="tx !== null" class="rounded p-4 bg-gray-50 dark:bg-gray-800 text-sm">
       <div class="grid grid-cols-2">
         <div v-if="!tx.confirmed" class="col-span-2 py-4">
           <div class="text-rose-700 dark:text-rose-400">
@@ -26,19 +30,23 @@
           {{ t("Tx.BlockHeight") }}
         </div>
         <div v-if="tx.confirmed" class="border-b py-4">
-          <NuxtLink :to="chainPath('/block-height/' + tx.blockHeight)" class="
+          <NuxtLink
+            :to="chainPath(`/block-height/${tx.blockHeight}`)" class="
               text-sky-700
               dark:text-sky-400
               hover:underline
               underline-offset-4
-            ">#{{ tx.blockHeight }}</NuxtLink>
+            "
+          >
+            #{{ tx.blockHeight }}
+          </NuxtLink>
         </div>
 
         <!-- timestamp -->
-        <div class="border-b py-4" v-if="tx.timestamp > 0">
+        <div v-if="tx.timestamp > 0" class="border-b py-4">
           {{ t("Tx.Timestamp") }}
         </div>
-        <div class="border-b py-4" v-if="tx.timestamp > 0">
+        <div v-if="tx.timestamp > 0" class="border-b py-4">
           {{ formatDateTimeLocal(tx.timestamp) }}
         </div>
 
@@ -56,14 +64,14 @@
         </div>
         <div class="border-b py-4">
           <span>{{ tx.size }} B</span>
-          <span v-if="tx.size != tx.vSize">&nbsp;({{ tx.size }} vB)</span>
+          <span v-if="tx.size !== tx.vSize">&nbsp;({{ tx.size }} vB)</span>
         </div>
 
         <!-- locktime -->
-        <div class="border-b py-4" v-if="tx.locktime > 0">
+        <div v-if="tx.locktime > 0" class="border-b py-4">
           {{ t("Tx.Locktime") }}
         </div>
-        <div class="border-b py-4" v-if="tx.locktime > 0">
+        <div v-if="tx.locktime > 0" class="border-b py-4">
           {{ t("Tx.SpendableInBlock") }} #{{ tx.locktime }}
         </div>
 
@@ -81,14 +89,14 @@
     <h1 class="font-semibold pt-4 uppercase">
       {{ t("Tx.InputsOutputs") }}
     </h1>
-    <SharedTransactionData :tx="tx.transaction" v-if="tx != null && tx.transaction != null" />
+    <SharedTransactionData v-if="tx !== null && tx.transaction !== null" :tx="tx.transaction" />
   </div>
 </template>
 
 <script setup lang="ts">
+import type { TxResponse } from "@/models/API/TxResponse";
 import { useFormatting } from "@/composables/Formatting";
 import { useBlockchainInfo } from "@/composables/States";
-import type { TxResponse } from "@/models/API/TxResponse";
 import LockClosedIcon from "@heroicons/vue/24/solid/LockClosedIcon";
 
 const { t } = useI18n();
@@ -116,14 +124,18 @@ const tx = ref(cdata.data);
 
 const getConfirmationClass = computed(() => {
   const confirmations = calculateConfirmations.value;
-  if (confirmations == 0) return "text-rose-700 dark:text-rose-400";
-  if (confirmations < 12) return "text-yellow-700 dark:text-yellow-400";
+  if (confirmations === 0)
+    return "text-rose-700 dark:text-rose-400";
+  if (confirmations < 12)
+    return "text-yellow-700 dark:text-yellow-400";
   return "text-green-700 dark:text-green-400";
 });
 
 const calculateConfirmations = computed(() => {
-  if (tx.value == null) return 0;
-  if (!tx.value.confirmed) return 0;
+  if (tx.value === null)
+    return 0;
+  if (!tx.value.confirmed)
+    return 0;
   return (data.value?.blocks ?? 0) - tx.value.blockHeight + 1;
 });
 

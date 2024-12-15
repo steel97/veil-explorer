@@ -1,6 +1,7 @@
 <template>
   <div class="flex justify-center">
-    <div class="
+    <div
+      class="
         my-6
         max-w-7xl
         w-full
@@ -12,7 +13,8 @@
         bg-yellow-300
         text-gray-600
         dark:bg-yellow-500 dark:text-gray-700
-      ">
+      "
+    >
       {{ t("Core.Synchronizing", { progress: syncState.toFixed(2) }) }}
     </div>
   </div>
@@ -27,14 +29,15 @@ const blockchaininfoDataState = useBlockchainInfo();
 
 const syncState = computed(() => {
   if (
-    backgroundInfoDataState.value == null ||
-    blockchaininfoDataState.value == null
-  )
+    backgroundInfoDataState.value == null
+    || blockchaininfoDataState.value == null
+  ) {
     return 0;
+  }
   return (
-    (backgroundInfoDataState.value.currentSyncedBlock /
-      blockchaininfoDataState.value.blocks) *
-    100
+    (backgroundInfoDataState.value.currentSyncedBlock
+      / blockchaininfoDataState.value.blocks)
+    * 100
   );
 });
 </script>

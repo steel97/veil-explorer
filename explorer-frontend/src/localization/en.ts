@@ -1,17 +1,17 @@
-import Core from "./en/core";
-import Meta from "./en/meta";
-import Errors from "./en/errors";
-import Header from "./en/header";
-import Footer from "./en/footer";
-import Home from "./en/home";
-import NetworkSummary from "./en/network_summary";
-import Blocks from "./en/blocks";
-import Search from "./en/search";
 import Address from "./en/address";
 import Block from "./en/block";
+import Blocks from "./en/blocks";
+import Core from "./en/core";
+import Errors from "./en/errors";
+import Footer from "./en/footer";
+import Header from "./en/header";
+import Home from "./en/home";
+import Meta from "./en/meta";
+import NetworkSummary from "./en/network_summary";
+import Search from "./en/search";
 import Tx from "./en/tx";
-import UnconfirmedTx from "./en/unconfirmedtx";
 import TxStats from "./en/txstats";
+import UnconfirmedTx from "./en/unconfirmedtx";
 
 export default defineI18nLocale(async (locale) => {
   return {
@@ -32,6 +32,6 @@ export default defineI18nLocale(async (locale) => {
     Block: Block(),
     Tx: Tx(),
     UnconfirmedTx: UnconfirmedTx(),
-    TxStats: TxStats()
-  }
+    TxStats: TxStats(),
+  };
 });

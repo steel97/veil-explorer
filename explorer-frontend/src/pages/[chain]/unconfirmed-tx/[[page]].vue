@@ -3,9 +3,10 @@
     <h1 class="font-semibold pt-5 uppercase">
       {{ t("UnconfirmedTx.Title") }}
     </h1>
-    <div v-if="unconfirmedTxData == null ||
-      unconfirmedTxData.transactions == null ||
-      unconfirmedTxData.transactions.length == 0
+    <div
+      v-if="unconfirmedTxData === null
+        || unconfirmedTxData.transactions === null
+        || unconfirmedTxData.transactions.length === 0
       " class="
         rounded
         p-8
@@ -16,15 +17,20 @@
         items-center
         mb-4
         mt-4
-      ">
+      "
+    >
       {{ t("UnconfirmedTx.NoTxs") }}
     </div>
-    <BlockTransactionsView v-if="unconfirmedTxData != null && unconfirmedTxData.transactions != null"
-      :txdata="unconfirmedTxData.transactions" />
+    <BlockTransactionsView
+      v-if="unconfirmedTxData !== null && unconfirmedTxData.transactions !== null"
+      :txdata="unconfirmedTxData.transactions"
+    />
 
-    <SharedPagination v-if="unconfirmedTxData != null && unconfirmedTxData.transactions != null"
-      :overallEntries="unconfirmedTxData.txnCount" :entriesPerPage="config.public.txsPerPage" :currentPage="currentPage"
-      :linkTemplate="buildRouteTemplate()" @pageSelected="selectPage" />
+    <SharedPagination
+      v-if="unconfirmedTxData !== null && unconfirmedTxData.transactions !== null"
+      :overall-entries="unconfirmedTxData.txnCount" :entries-per-page="config.public.txsPerPage" :current-page="currentPage"
+      :link-template="buildRouteTemplate()" @page-selected="selectPage"
+    />
   </div>
 </template>
 
@@ -39,30 +45,31 @@ const { chainPath } = useRoutingHelper();
 const route = useRoute();
 const config = useRuntimeConfig();
 
-const page =
-  ((route.params.page as any as number) > 0
+const page
+  = ((route.params.page as any as number) > 0
     ? (route.params.page as any as number)
     : 1) - 1;
 const currentPage = ref(page + 1);
 
 const getFetchUnconfirmedTxUrl = () =>
   `${getApiPath()}/unconfirmedtransactions?offset=${(
-    (currentPage.value - 1) *
-    config.public.txsPerPage
+    (currentPage.value - 1)
+    * config.public.txsPerPage
   ).toString()}&count=${config.public.txsPerPage as any as string}`;
 
 const unconfirmedTxData = ref((await useFetch<UnconfirmedTxResponse>(getFetchUnconfirmedTxUrl())).data);
-const buildRouteTemplate = () => decodeURI(chainPath(`/unconfirmed-tx/{page}/`));
+const buildRouteTemplate = () => decodeURI(chainPath("/unconfirmed-tx/{page}/"));
 
 const selectPage = async (pg: number) => {
-  if (pg == currentPage.value) return;
+  if (pg === currentPage.value)
+    return;
 
   scrollToAnimated(
     document.documentElement,
     document.documentElement.scrollTop,
     0,
     150,
-    150
+    150,
   );
 
   const link = buildRouteTemplate().replace("{page}", pg.toString());
@@ -88,7 +95,7 @@ const meta = computed(() => {
         name: "og:url",
         content: `${config.public.baseUrl}${buildRouteTemplate().replace(
           "{page}",
-          currentPage.value.toString()
+          currentPage.value.toString(),
         )}`,
       },
     ],

@@ -8,14 +8,14 @@ module.exports = {
     "./src/plugins/**/*.{js,ts}",
     "./nuxt.config.{js,ts}",
     "./src/app.vue",
-    "./src/error.vue"
+    "./src/error.vue",
   ],
   theme: {
     extend: {
       fontFamily: {
-        "inter": ["Inter", "sans-serif"],
-      }
-    }
+        inter: ["Inter", "sans-serif"],
+      },
+    },
   },
   variants: {
     extend: {},

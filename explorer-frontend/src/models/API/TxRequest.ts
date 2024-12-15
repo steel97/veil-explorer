@@ -1,3 +1,3 @@
 export interface TxRequest {
-    hash: string | null;
+  hash: string | null;
 }

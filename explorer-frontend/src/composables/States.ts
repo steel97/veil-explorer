@@ -1,5 +1,5 @@
-import type { BackgroundInfo } from "@/models/Hub/BackgroundInfo";
 import type { SimplifiedBlock } from "@/models/API/SimplifiedBlock";
+import type { BackgroundInfo } from "@/models/Hub/BackgroundInfo";
 import type { GetBlockchainInfoResult } from "@/models/Node/GetBlockchainInfoResult";
 
 export const useThemeState = () => useState<string>("themestate", () => "");
