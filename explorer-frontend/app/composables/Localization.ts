@@ -33,10 +33,10 @@ export const useLocalization = () => {
             const lang = entr.split("-")[0];
             if (!acceptLanguagesPr.includes(entr))
               acceptLanguagesPr.push(entr); // add language and region
-            if(lang !== undefined) {
-            if (!acceptLanguagesPr.includes(lang))
-              acceptLanguagesPr.push(lang); // add language
-          }
+            if (lang !== undefined) {
+              if (!acceptLanguagesPr.includes(lang))
+                acceptLanguagesPr.push(lang); // add language
+            }
           }
         }
         catch {

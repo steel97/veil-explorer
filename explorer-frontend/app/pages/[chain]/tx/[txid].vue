@@ -132,7 +132,7 @@ const getConfirmationClass = computed(() => {
 });
 
 const calculateConfirmations = computed(() => {
-  if (tx.value === null || tx.value == undefined)
+  if (tx.value === null || tx.value === undefined)
     return 0;
   if (!tx.value.confirmed)
     return 0;

@@ -28,7 +28,7 @@
     />
 
     <SharedPagination
-      v-if="unconfirmedTxData !== null && unconfirmedTxData !== undefined && unconfirmedTxData.transactions !== null&& unconfirmedTxData.transactions !== undefined"
+      v-if="unconfirmedTxData !== null && unconfirmedTxData !== undefined && unconfirmedTxData.transactions !== null && unconfirmedTxData.transactions !== undefined"
       :overall-entries="unconfirmedTxData.txnCount" :entries-per-page="config.public.txsPerPage" :current-page="currentPage"
       :link-template="buildRouteTemplate()" @page-selected="selectPage"
     />
