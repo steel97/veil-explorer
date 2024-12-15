@@ -15,6 +15,10 @@ import TxStats from "./ru/txstats";
 
 export default defineI18nLocale(async (locale) => {
   return {
+    nuxtSiteConfig: {
+      name: "Veil Explorer",
+      description: "Обзор блокчейна, поиск блоков, транзакций, просмотр адресов",
+    },
     Core: Core(),
     Meta: Meta(),
     Errors: Errors(),

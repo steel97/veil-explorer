@@ -4,7 +4,7 @@ export default () => {
         "Title": "Not found",
         "Description": "Requested tx/block/address not found",
         "Meta": {
-            "Title": "Veil Explorer - Tx/Block/Address not found",
+            "Title": "Tx/Block/Address not found",
             "Description": "Tx/Block/Address not found"
         }
     }

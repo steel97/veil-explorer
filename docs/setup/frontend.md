@@ -62,6 +62,8 @@ export HOST=0.0.0.0
 # listen port
 export PORT=3000
 # url on which frontend available, used for SEO, meta tags etc.
+export NUXT_PUBLIC_SITE_URL=http://<ip>:3000
+# url on which frontend available, used for SEO, meta tags etc.
 export NUXT_PUBLIC_I18N_BASE_URL=http://<ip>:3000
 # url on which frontend available, used for SEO, meta tags etc.
 export NUXT_PUBLIC_BASE_URL=http://<ip>:3000

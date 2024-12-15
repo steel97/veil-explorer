@@ -87,22 +87,6 @@ const meta = computed(() => {
         "http-equiv": "X-UA-Compatible",
         content: "IE=edge",
       },
-      {
-        name: "robots",
-        content: "index,follow",
-      },
-      {
-        name: "og:image",
-        content: img("/images/ogimage.png", { width: 251 }),
-      },
-      {
-        name: "og:site_name",
-        content: t("Meta.SiteName"),
-      },
-      {
-        name: "og:type",
-        content: "website",
-      },
       ...(i18nHead.value.meta || []),
     ],
     link: [
@@ -115,10 +99,7 @@ const meta = computed(() => {
         href: "https://fonts.gstatic.com",
       },
       ...(i18nHead.value.link || []),
-    ],
-    htmlAttrs: {
-      lang: i18nHead.value.htmlAttrs!.lang
-    }
+    ]
   };
 });
 

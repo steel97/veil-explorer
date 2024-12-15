@@ -2,7 +2,7 @@ export default () => {
     return {
         "Title": "Transaction",
         "Meta": {
-            "Title": "Veil Explorer - Transaction {txid}",
+            "Title": "Transaction {txid}",
             "Description": "Viewing transaction {txid}"
         },
         "InputsOutputs": "Inputs and outputs",

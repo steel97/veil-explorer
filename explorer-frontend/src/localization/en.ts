@@ -15,6 +15,10 @@ import TxStats from "./en/txstats";
 
 export default defineI18nLocale(async (locale) => {
   return {
+    nuxtSiteConfig: {
+      name: "Veil Explorer",
+      description: "View blockchain, addresses, search blocks and transactions",
+    },
     Core: Core(),
     Meta: Meta(),
     Errors: Errors(),

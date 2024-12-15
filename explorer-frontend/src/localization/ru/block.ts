@@ -3,7 +3,7 @@ export default () => {
         "BlockTitle": "Просмотр блока",
         "Transactions": "Транзакции",
         "Meta": {
-            "Title": "Veil Explorer - Просмотр блока {block}",
+            "Title": "Просмотр блока {block}",
             "Description": "Просмотр информации о блоке {block}"
         },
         "LatestBlock": "Нет (последний блок)",

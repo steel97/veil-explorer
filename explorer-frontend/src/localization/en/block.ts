@@ -3,7 +3,7 @@ export default () => {
         "BlockTitle": "Viewing block",
         "Transactions": "Transactions",
         "Meta": {
-            "Title": "Veil Explorer - Viewing block {block}",
+            "Title": "Viewing block {block}",
             "Description": "Viewing information about block {block}"
         },
         "LatestBlock": "None (latest block)",

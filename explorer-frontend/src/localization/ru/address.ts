@@ -5,7 +5,7 @@ export default () => {
         "CopySuccess": "Адрес скопирован",
         "QrCode": "QR код",
         "Meta": {
-            "Title": "Veil Explorer - Просмотр адреса {address}",
+            "Title": "Просмотр адреса {address}",
             "Description": "Просмотр информации об адресе {address}"
         },
         "Hash160": "Hash 160",

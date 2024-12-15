@@ -26,7 +26,8 @@ const { t } = useI18n();
 const head = useLocaleHead({
     dir: true,
     key: "id",
-    seo: true
+    seo: true,
+    lang: true,
 });
 
 const title = computed(() => t(route.meta.title as any ?? "Meta.SiteName"));

@@ -2,7 +2,7 @@ export default () => {
     return {
         "Title": "Transactions statistics",
         "Meta": {
-            "Title": "Veil Explorer - Transactions statistics",
+            "Title": "Transactions statistics",
             "Description": "View veil transactions statistics"
         },
         "Charts": {

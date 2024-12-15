@@ -1,12 +1,12 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
     devtools: { enabled: true },
-    compatibilityDate: "2024-07-12",
+    compatibilityDate: "2024-12-14",
     runtimeConfig: {
         public: {
-            i18n: {
-                baseUrl: process.env.NUXT_PUBLIC_I18N_BASE_URL! as string,
-            },
+            site: {
+                url: "http://localhost:3000",
+            },        
             baseUrl: process.env.NUXT_PUBLIC_BASE_URL! as string,
             chainDefault: process.env.NUXT_PUBLIC_CHAIN_DEFAULT! as string,
             chainApis: JSON.parse(process.env.NUXT_PUBLIC_CHAIN_APIS! as string),
@@ -19,13 +19,15 @@ export default defineNuxtConfig({
         }
     },
     app: {
-        pageTransition: { name: "page", mode: "out-in" }
+        pageTransition: { name: "page", mode: "out-in" },
+        head: {
+            templateParams: {
+              separator: "-",
+            },
+            titleTemplate: "%siteName %separator %s",
+          },      
     },
-    modules: [
-        "@nuxt/image",
-        "@nuxtjs/i18n",
-        "@nuxtjs/tailwindcss"
-    ],
+    modules: ["@nuxt/image", "@nuxtjs/i18n", "@nuxtjs/tailwindcss", "@nuxtjs/seo"],
     routeRules: {
         "/tx/**": {
             redirect: {
@@ -89,7 +91,8 @@ export default defineNuxtConfig({
             cookieKey: "lang",
             redirectOn: "all",
             alwaysRedirect: true
-        }
+        },
+        baseUrl: process.env.NUXT_I18N_BASE_URL || "https://explorer.veil-project.com"
     },
     image: {
         format: ["webp", "png"],
@@ -103,13 +106,21 @@ export default defineNuxtConfig({
         },
     },
     srcDir: "src/",
-    css: ["~/assets/css/tailwind.css", "~/assets/css/common.css"],
-    postcss: {
-        plugins: {
-            tailwindcss: {},
-            autoprefixer: {},
+    seo: {
+        redirectToCanonicalSiteUrl: process.env.NODE_ENV !== "development",
+      },
+    site: {
+        url: process.env.NUXT_PUBLIC_SITE_URL || "https://explorer.veil-project.com",
+    },
+    schemaOrg: {
+        identity: {
+          type: "Organization",
+          name: "Veil Project",
+          url: "https://veil-project.com",
+          logo: `${process.env.NUXT_PUBLIC_SITE_URL || "https://veilproject.org"}/icon-192x192-light.png`,
         },
     },
+    css: ["~/assets/css/tailwind.css", "~/assets/css/common.css"],
     /*alias: {
         "chart.js": "chart.js/dist/chart.js",
     },*/

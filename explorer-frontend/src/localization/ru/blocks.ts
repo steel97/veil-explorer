@@ -8,7 +8,7 @@ export default () => {
         "Size": "Размер (байты)",
         "Weight": "Вес (wu)",
         "Meta": {
-            "Title": "Veil Explorer - обзор блоков",
+            "Title": "обзор блоков",
             "Description": "Обзор блоков veil"
         },
         "Expand": "Раскрыть",
