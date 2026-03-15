@@ -111,7 +111,7 @@ jobs:
         with:
           node-version: 24.x
       - name: Setup pnpm
-        uses: https://github.com/pnpm/action-setup@v4
+        uses: pnpm/action-setup@v4
       - name: version
         run: echo "version=$(cat VERSION.md)" >> $GITHUB_OUTPUT
         id: version
