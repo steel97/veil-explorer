@@ -26,9 +26,6 @@ public class CacheInitialBlocksWorker : BackgroundService
         _nodeRequester = nodeRequester;
         _blockHeight = 1;
 
-        ArgumentNullException.ThrowIfNull(_memoryCacheConfig.CurrentValue.OldestSimplifiedBlocksCacheCount);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.PullBlocksDelay);
-
         _blockToCache = (uint)_memoryCacheConfig.CurrentValue.OldestSimplifiedBlocksCacheCount;
         _blockPullDelay = _explorerConfig.CurrentValue.PullBlocksDelay;
 

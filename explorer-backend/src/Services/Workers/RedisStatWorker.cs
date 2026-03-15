@@ -19,7 +19,6 @@ public class RedisStatWorker : BackgroundService
         _cache = cache;
         _memoryCacheConfig = memoryCacheConfig;
 
-        ArgumentNullException.ThrowIfNull(_memoryCacheConfig.CurrentValue.Port);
         ArgumentNullException.ThrowIfNull(_memoryCacheConfig.CurrentValue.Host);
 
         _port = _memoryCacheConfig.CurrentValue.Port;

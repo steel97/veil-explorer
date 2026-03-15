@@ -23,10 +23,6 @@ public class BlocksCacheSingleton
         _memoryCacheConfig = memoryCacheConfig;
         _logger = logger;
 
-        ArgumentNullException.ThrowIfNull(_memoryCacheConfig.CurrentValue.RedisMaxMemoryUsage);
-        ArgumentNullException.ThrowIfNull(_memoryCacheConfig.CurrentValue.ServerAbsExpCacheTimeDays);
-        ArgumentNullException.ThrowIfNull(_memoryCacheConfig.CurrentValue.UserAbsExpCacheTimeSec);
-
         _redisMaxMemoryUsage = _memoryCacheConfig.CurrentValue.RedisMaxMemoryUsage;
         _serverAbsExpTime = TimeSpan.FromMinutes(_memoryCacheConfig.CurrentValue.ServerAbsExpCacheTimeDays);
         _userAbsExpTime = TimeSpan.FromMinutes(_memoryCacheConfig.CurrentValue.UserAbsExpCacheTimeSec);
@@ -85,7 +81,7 @@ public class BlocksCacheSingleton
         var rawBlock = await db.StringGetAsync(hash);
         if (string.IsNullOrWhiteSpace(rawBlock)) return null;
 
-        return JsonSerializer.Deserialize<GetBlockResult>(rawBlock!);
+        return JsonSerializer.Deserialize<GetBlockResult>((string)rawBlock!);
     }
 
     public async Task<GetBlockResult?> GetCachedBlockByHeightAsync(string height, CancellationToken ct)
@@ -98,7 +94,7 @@ public class BlocksCacheSingleton
         var rawBlock = await db.StringGetAsync(hash);
         if (string.IsNullOrWhiteSpace(rawBlock)) return null;
 
-        return JsonSerializer.Deserialize<GetBlockResult>(rawBlock!);
+        return JsonSerializer.Deserialize<GetBlockResult>((string)rawBlock!);
     }
 
     public async Task UpdateCachedDataAsync(string height, string newHash, GetBlockResult newData, CancellationToken ct = default)

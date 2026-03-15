@@ -51,7 +51,7 @@ public class TxVoutSimpleDecoded
     public bool IsCoinBase { get; set; }
     public long Amount { get; set; }
     public OutputTypes Type { get; set; }
-    public txnouttype ScriptPubKeyType { get; set; }
+    public Txnouttype ScriptPubKeyType { get; set; }
     public ulong? CTFee { get; set; }
 
 }

@@ -326,16 +326,16 @@ public class Converters
         }
     }
 
-    public static int DecodeOP_N(opcodetype opcode)
+    public static int DecodeOP_N(Opcodetype opcode)
     {
-        if (opcode == opcodetype.OP_0)
+        if (opcode == Opcodetype.OP_0)
             return 0;
-        if (!(opcode >= opcodetype.OP_1 && opcode <= opcodetype.OP_16))
+        if (!(opcode >= Opcodetype.OP_1 && opcode <= Opcodetype.OP_16))
             throw new Exception("DecodeOP_N");
-        return (int)opcode - (int)(opcodetype.OP_1 - 1);
+        return (int)opcode - (int)(Opcodetype.OP_1 - 1);
     }
 
-    public static bool Solver(Script scriptPubKey, out txnouttype typeRet, List<byte[]>? vSolutionsRet)
+    public static bool Solver(Script scriptPubKey, out Txnouttype typeRet, List<byte[]>? vSolutionsRet)
     {
         vSolutionsRet?.Clear();
 
@@ -343,7 +343,7 @@ public class Converters
         // it is always OP_HASH160 20 [20 byte hash] OP_EQUAL
         if (scriptPubKey.IsPayToScriptHash())
         {
-            typeRet = txnouttype.TX_SCRIPTHASH;
+            typeRet = Txnouttype.TX_SCRIPTHASH;
             byte[] hashBytes = new byte[20];
             Array.Copy(scriptPubKey.Hash!, 2, hashBytes, 0, hashBytes.Length);
             vSolutionsRet?.Add(hashBytes);
@@ -354,24 +354,24 @@ public class Converters
         {
             if (witnessversion == 0 && witnessprogram.Length == WITNESS_V0_KEYHASH_SIZE)
             {
-                typeRet = txnouttype.TX_WITNESS_V0_KEYHASH;
+                typeRet = Txnouttype.TX_WITNESS_V0_KEYHASH;
                 vSolutionsRet?.Add(witnessprogram);
                 return true;
             }
             if (witnessversion == 0 && witnessprogram.Length == WITNESS_V0_SCRIPTHASH_SIZE)
             {
-                typeRet = txnouttype.TX_WITNESS_V0_SCRIPTHASH;
+                typeRet = Txnouttype.TX_WITNESS_V0_SCRIPTHASH;
                 vSolutionsRet?.Add(witnessprogram);
                 return true;
             }
             if (witnessversion != 0)
             {
-                typeRet = txnouttype.TX_WITNESS_UNKNOWN;
+                typeRet = Txnouttype.TX_WITNESS_UNKNOWN;
                 vSolutionsRet?.Add([(byte)witnessversion]);
                 vSolutionsRet?.Add(witnessprogram);
                 return true;
             }
-            typeRet = txnouttype.TX_NONSTANDARD;
+            typeRet = Txnouttype.TX_NONSTANDARD;
             return false;
         }
 
@@ -380,22 +380,22 @@ public class Converters
         // So long as script passes the IsUnspendable() test and all but the first
         // byte passes the IsPushOnly() test we don't care what exactly is in the
         // script.
-        if (scriptPubKey.Hash?.Length >= 1 && scriptPubKey.Hash![0] == (byte)opcodetype.OP_RETURN && scriptPubKey.IsPushOnly(1))
+        if (scriptPubKey.Hash?.Length >= 1 && scriptPubKey.Hash![0] == (byte)Opcodetype.OP_RETURN && scriptPubKey.IsPushOnly(1))
         {
-            typeRet = txnouttype.TX_NULL_DATA;
+            typeRet = Txnouttype.TX_NULL_DATA;
             return true;
         }
 
         if (MatchPayToPubkey(scriptPubKey, out byte[] data))
         {
-            typeRet = txnouttype.TX_PUBKEY;
+            typeRet = Txnouttype.TX_PUBKEY;
             vSolutionsRet?.Add(data);
             return true;
         }
 
         if (MatchPayToPubkeyHash(scriptPubKey, out data))
         {
-            typeRet = txnouttype.TX_PUBKEYHASH;
+            typeRet = Txnouttype.TX_PUBKEYHASH;
             vSolutionsRet?.Add(data);
             return true;
         }
@@ -403,9 +403,9 @@ public class Converters
         List<byte[]> keys = [];
         if (MatchMultisig(scriptPubKey, out uint required, keys))
         {
-            typeRet = txnouttype.TX_MULTISIG;
+            typeRet = Txnouttype.TX_MULTISIG;
             vSolutionsRet?.Add([(byte)required]); // safe as required is in range 1..16
-                                                               //vSolutionsRet.insert(vSolutionsRet.end(), keys.begin(), keys.end());
+                                                  //vSolutionsRet.insert(vSolutionsRet.end(), keys.begin(), keys.end());
             foreach (var key in keys)
                 vSolutionsRet?.Add(key);
 
@@ -415,11 +415,11 @@ public class Converters
 
         if (scriptPubKey.IsZerocoinMint())
         {
-            typeRet = txnouttype.TX_ZEROCOINMINT;
+            typeRet = Txnouttype.TX_ZEROCOINMINT;
             // Zerocoin
             if (scriptPubKey.IsZerocoinMint())
             {
-                typeRet = txnouttype.TX_ZEROCOINMINT;
+                typeRet = Txnouttype.TX_ZEROCOINMINT;
                 if (scriptPubKey.Hash?.Length > 150) return false;
                 byte[] hashBytes = new byte[(scriptPubKey.Hash?.Length ?? 0) - 2];
                 Array.Copy(scriptPubKey.Hash!, 2, hashBytes, 0, hashBytes.Length);
@@ -430,21 +430,21 @@ public class Converters
         }
 
         vSolutionsRet?.Clear();
-        typeRet = txnouttype.TX_NONSTANDARD;
+        typeRet = Txnouttype.TX_NONSTANDARD;
         return false;
     }
 
     public static bool MatchPayToPubkey(Script script, out byte[] pubkey)
     {
         pubkey = [];
-        if (script.Size() == VeilPubKey.PUBLIC_KEY_SIZE + 2 && script.Hash?[0] == VeilPubKey.PUBLIC_KEY_SIZE && script.Hash?.Last() == (byte)opcodetype.OP_CHECKSIG)
+        if (script.Size() == VeilPubKey.PUBLIC_KEY_SIZE + 2 && script.Hash?[0] == VeilPubKey.PUBLIC_KEY_SIZE && script.Hash?.Last() == (byte)Opcodetype.OP_CHECKSIG)
         {
             //pubkey = valtype(script.begin() + 1, script.begin() + CPubKey::PUBLIC_KEY_SIZE + 1);
             pubkey = new byte[VeilPubKey.PUBLIC_KEY_SIZE];
             Array.Copy(script.Hash!, 1, pubkey, 0, pubkey.Length);
             return VeilPubKey.ValidSize(pubkey);
         }
-        if (script.Size() == VeilPubKey.COMPRESSED_PUBLIC_KEY_SIZE + 2 && script.Hash?[0] == VeilPubKey.COMPRESSED_PUBLIC_KEY_SIZE && script.Hash.Last() == (byte)opcodetype.OP_CHECKSIG)
+        if (script.Size() == VeilPubKey.COMPRESSED_PUBLIC_KEY_SIZE + 2 && script.Hash?[0] == VeilPubKey.COMPRESSED_PUBLIC_KEY_SIZE && script.Hash.Last() == (byte)Opcodetype.OP_CHECKSIG)
         {
             //pubkey = valtype(script.begin() + 1, script.begin() + CPubKey::COMPRESSED_PUBLIC_KEY_SIZE + 1);
             pubkey = new byte[VeilPubKey.COMPRESSED_PUBLIC_KEY_SIZE];
@@ -457,7 +457,7 @@ public class Converters
     public static bool MatchPayToPubkeyHash(Script script, out byte[] pubkeyhash)
     {
         pubkeyhash = [];
-        if (script.Size() == 25 && script.Hash?[0] == (byte)opcodetype.OP_DUP && script.Hash?[1] == (byte)opcodetype.OP_HASH160 && script.Hash?[2] == 20 && script.Hash?[23] == (byte)opcodetype.OP_EQUALVERIFY && script.Hash?[24] == (byte)opcodetype.OP_CHECKSIG)
+        if (script.Size() == 25 && script.Hash?[0] == (byte)Opcodetype.OP_DUP && script.Hash?[1] == (byte)Opcodetype.OP_HASH160 && script.Hash?[2] == 20 && script.Hash?[23] == (byte)Opcodetype.OP_EQUALVERIFY && script.Hash?[24] == (byte)Opcodetype.OP_CHECKSIG)
         {
             //pubkeyhash = valtype(script.begin() + 3, script.begin() + 23);
             pubkeyhash = new byte[20];
@@ -467,20 +467,20 @@ public class Converters
         return false;
     }
 
-    public static bool IsSmallInteger(opcodetype opcode) => opcode >= opcodetype.OP_1 && opcode <= opcodetype.OP_16;
+    public static bool IsSmallInteger(Opcodetype opcode) => opcode >= Opcodetype.OP_1 && opcode <= Opcodetype.OP_16;
 
 
     public static bool MatchMultisig(Script script, out uint required, List<byte[]> pubkeys)
     {
-        opcodetype opcode = opcodetype.OP_0;
+        Opcodetype opcode = Opcodetype.OP_0;
         required = 0;
         int it = 0;
-        if (script.Size() < 1 || script.Hash?.Last() != (byte)opcodetype.OP_CHECKMULTISIG) return false;
+        if (script.Size() < 1 || script.Hash?.Last() != (byte)Opcodetype.OP_CHECKMULTISIG) return false;
 
         if (!script.GetOp(ref it, ref opcode, out byte[] data) || !IsSmallInteger(opcode)) return false;
 
         required = (uint)Script.DecodeOP_N(opcode);
-        
+
         while (script.GetOp(ref it, ref opcode, out data) && VeilPubKey.ValidSize(data))
         {
             pubkeys.Add(data);
@@ -495,10 +495,10 @@ public class Converters
     {
         var vSolutions = new List<byte[]>();
         addressRet = new KeyId();
-        if (!Solver(scriptPubKey, out txnouttype whichType, vSolutions))
+        if (!Solver(scriptPubKey, out Txnouttype whichType, vSolutions))
             return false;
 
-        if (whichType == txnouttype.TX_PUBKEY)
+        if (whichType == Txnouttype.TX_PUBKEY)
         {
             var pubKey = vSolutions[0];
             //if (!pubKey.IsValid())
@@ -507,17 +507,17 @@ public class Converters
             addressRet = new VeilPubKey(pubKey).GetID();
             return true;
         }
-        else if (whichType == txnouttype.TX_PUBKEYHASH)
+        else if (whichType == Txnouttype.TX_PUBKEYHASH)
         {
             addressRet = new KeyId(new uint160(vSolutions[0]));
             return true;
         }
-        else if (whichType == txnouttype.TX_SCRIPTHASH)
+        else if (whichType == Txnouttype.TX_SCRIPTHASH)
         {
             addressRet = new ScriptId(new uint160(vSolutions[0]));
             return true;
         }
-        else if (whichType == txnouttype.TX_WITNESS_V0_KEYHASH)
+        else if (whichType == Txnouttype.TX_WITNESS_V0_KEYHASH)
         {
             //new WitnessScript
             //WitnessV0KeyHash hash;
@@ -525,14 +525,14 @@ public class Converters
             addressRet = new WitKeyId(vSolutions[0]);
             return true;
         }
-        else if (whichType == txnouttype.TX_WITNESS_V0_SCRIPTHASH)
+        else if (whichType == Txnouttype.TX_WITNESS_V0_SCRIPTHASH)
         {
             //WitnessV0ScriptHash hash;
             //std::copy(vSolutions[0].begin(), vSolutions[0].end(), hash.begin());            
             addressRet = new WitScriptId(vSolutions[0]);
             return true;
         }
-        else if (whichType == txnouttype.TX_WITNESS_UNKNOWN)
+        else if (whichType == Txnouttype.TX_WITNESS_UNKNOWN)
         {
             //WitnessUnknown unk;
             //unk.version = vSolutions[0][0];
@@ -546,14 +546,14 @@ public class Converters
         return false;
     }
 
-    public static bool ExtractDestinations(Script scriptPubKey, out txnouttype typeRet, List<IDestination> addressRet, out int nRequiredRet)
+    public static bool ExtractDestinations(Script scriptPubKey, out Txnouttype typeRet, List<IDestination> addressRet, out int nRequiredRet)
     {
         addressRet.Clear();
 
-        typeRet = txnouttype.TX_NONSTANDARD;
+        typeRet = Txnouttype.TX_NONSTANDARD;
         nRequiredRet = 0;
 
-        txnouttype ctout;
+        Txnouttype ctout;
 
         List<byte[]> vSolutions = [];
 
@@ -562,13 +562,13 @@ public class Converters
 
         typeRet = ctout;
 
-        if (typeRet == txnouttype.TX_NULL_DATA)
+        if (typeRet == Txnouttype.TX_NULL_DATA)
         {
             // This is data, not addresses
             return false;
         }
 
-        if (typeRet == txnouttype.TX_MULTISIG)
+        if (typeRet == Txnouttype.TX_MULTISIG)
         {
             nRequiredRet = vSolutions[0][0];
             for (uint i = 1; i < vSolutions.Count - 1; i++)
@@ -598,7 +598,7 @@ public class Converters
     }
 }
 
-public enum txnouttype
+public enum Txnouttype
 {
     TX_NONSTANDARD,
     // 'standard' transaction types:

@@ -113,13 +113,13 @@ public class TransactionsDecoder(IRawTransactionsDataService rawTransactionsData
                 {
                     var txoutsimple = new TxVoutSimpleDecoded();
 
-                    var scriptType = txnouttype.TX_NONSTANDARD;
+                    var scriptType = Txnouttype.TX_NONSTANDARD;
 
                     if (txout.ScriptPubKey != null)
                     {
                         Converters.Solver(txout.ScriptPubKey, out scriptType, []);
                         if (txout.ScriptPubKey.Hash != null && txout.ScriptPubKey.Hash.Length > 0)
-                            txoutsimple.IsOpreturn = txout.ScriptPubKey.Hash[0] == (byte)opcodetype.OP_RETURN;
+                            txoutsimple.IsOpreturn = txout.ScriptPubKey.Hash[0] == (byte)Opcodetype.OP_RETURN;
                         else
                             txoutsimple.IsOpreturn = false;
                     }

@@ -201,7 +201,7 @@ public class NodeRequester
     {
         byte failedRequests = 0;
 
-    // get blockchain info
+        // get blockchain info
     repeatBlockInfoRequest:
         GetBlockchainInfo? blockInfo = await GetBlockChainInfo(cancellationToken);
 
@@ -216,7 +216,7 @@ public class NodeRequester
         }
         failedRequests = 0;
 
-    // get hash by height
+        // get hash by height
     repeatBlockHashRequest:
         GetBlockHash? blockHash = await GetBlockHash(isOrphanFix ? (uint)((blockInfo.Result.Blocks - _explorerConfig.CurrentValue.BlocksOrphanCheck) < 1 ? 1 : (blockInfo.Result.Blocks - _explorerConfig.CurrentValue.BlocksOrphanCheck)) : blockInfo.Result.Blocks, cancellationToken);
 
@@ -231,7 +231,7 @@ public class NodeRequester
         }
         failedRequests = 0;
 
-    // get block info by hash
+        // get block info by hash
     repeatBlockRequest:
         GetBlock? block = await GetBlock(blockHash.Result, cancellationToken, simplifiedTxInfo: 2);
 
@@ -358,8 +358,6 @@ public class NodeRequester
         ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Url);
         ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Username);
         ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.Node.Password);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.NodeWorkersPullDelay);
-        ArgumentNullException.ThrowIfNull(_explorerConfig.CurrentValue.BlocksOrphanCheck);
 
         _passHash = _explorerConfig.CurrentValue.Node.Password.GetHashCode();
         _usernameHash = _explorerConfig.CurrentValue.Node.Username.GetHashCode();

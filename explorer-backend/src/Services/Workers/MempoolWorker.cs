@@ -6,7 +6,7 @@ using ExplorerBackend.Services.Core;
 
 namespace ExplorerBackend.Services.Workers;
 
-public class MempoolWorker(ILogger<MempoolWorker> logger, IOptionsMonitor<ExplorerConfig> explorerConfig, IHttpClientFactory httpClientFactory,
+public class MempoolWorker(ILogger<MempoolWorker> logger, IOptionsMonitor<ExplorerConfig> explorerConfig,
     ChaininfoSingleton chaininfoSingleton, NodeRequester nodeRequester) : BackgroundService
 {
     private readonly ILogger _logger = logger;

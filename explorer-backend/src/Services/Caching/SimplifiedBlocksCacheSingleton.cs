@@ -29,9 +29,6 @@ public class SimplifiedBlocksCacheSingleton
         _logger = logger;
         _blocksService = blocksService;
 
-        ArgumentNullException.ThrowIfNull(_memoryCacheConfig.CurrentValue.OldestSimplifiedBlocksCacheCount);
-        ArgumentNullException.ThrowIfNull(_memoryCacheConfig.CurrentValue.SimplifiedBlocksCacheCount);
-
         _oldestBlocksBufferCapacity = _memoryCacheConfig.CurrentValue.OldestSimplifiedBlocksCacheCount;
         _blocksBufferCapacity = _memoryCacheConfig.CurrentValue.SimplifiedBlocksCacheCount;
 

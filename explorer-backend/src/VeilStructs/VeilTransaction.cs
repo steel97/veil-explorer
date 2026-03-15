@@ -131,13 +131,13 @@ public class Script
         Hash = serializationContext.ReadByteArray(size);
     }
 
-    public static int DecodeOP_N(opcodetype opcode)
+    public static int DecodeOP_N(Opcodetype opcode)
     {
-        if (opcode == opcodetype.OP_0)
+        if (opcode == Opcodetype.OP_0)
             return 0;
-        if (!(opcode >= opcodetype.OP_1 && opcode <= opcodetype.OP_16))
+        if (!(opcode >= Opcodetype.OP_1 && opcode <= Opcodetype.OP_16))
             throw new Exception("DecodeOP_N");
-        return (int)opcode - (int)(opcodetype.OP_1 - 1);
+        return (int)opcode - (int)(Opcodetype.OP_1 - 1);
     }
 
     public int Size() => Hash?.Length ?? 0;
@@ -159,14 +159,14 @@ public class Script
     {
         if (Hash == null) return false;
         //fast test for Zerocoin Mint CScripts
-        return Hash.Length > 0 && Hash[0] == (byte)opcodetype.OP_ZEROCOINMINT;
+        return Hash.Length > 0 && Hash[0] == (byte)Opcodetype.OP_ZEROCOINMINT;
     }
 
     public bool IsZerocoinSpend()
     {
         if (Hash == null || Empty()) return false;
 
-        return Hash[0] == (byte)opcodetype.OP_ZEROCOINSPEND;
+        return Hash[0] == (byte)Opcodetype.OP_ZEROCOINSPEND;
     }
 
     public bool IsPayToScriptHash()
@@ -174,9 +174,9 @@ public class Script
         if (Hash == null) return false;
         // Extra-fast test for pay-to-script-hash CScripts:
         return Hash.Length == 23 &&
-                Hash[0] == (byte)opcodetype.OP_HASH160 &&
+                Hash[0] == (byte)Opcodetype.OP_HASH160 &&
                 Hash[1] == 0x14 &&
-                Hash[22] == (byte)opcodetype.OP_EQUAL;
+                Hash[22] == (byte)Opcodetype.OP_EQUAL;
     }
 
     public bool IsWitnessProgram(out int version, out byte[] program)
@@ -188,13 +188,13 @@ public class Script
         {
             return false;
         }
-        if (Hash[0] != (byte)opcodetype.OP_0 && (Hash[0] < (byte)opcodetype.OP_1 || Hash[0] > (byte)opcodetype.OP_16))
+        if (Hash[0] != (byte)Opcodetype.OP_0 && (Hash[0] < (byte)Opcodetype.OP_1 || Hash[0] > (byte)Opcodetype.OP_16))
         {
             return false;
         }
         if ((Hash[1] + 2) == Hash.Length)
         {
-            version = Converters.DecodeOP_N((opcodetype)Hash[0]);
+            version = Converters.DecodeOP_N((Opcodetype)Hash[0]);
             program = new byte[Hash.Length - 2];
             Array.Copy(Hash, 2, program, 0, program.Length);
             return true;
@@ -208,24 +208,24 @@ public class Script
         if (Hash == null) return false;
         while (s < Hash.Length)
         {
-            opcodetype opcode;
+            Opcodetype opcode;
             if (!GetOp(ref s, out opcode))
                 return false;
             // Note that IsPushOnly() *does* consider OP_RESERVED to be a
             // push-type opcode, however execution of OP_RESERVED fails, so
             // it's not relevant to P2SH/BIP62 as the scriptSig would fail prior to
             // the P2SH special validation code being executed.
-            if (opcode > opcodetype.OP_16)
+            if (opcode > Opcodetype.OP_16)
                 return false;
         }
         return true;
     }
 
-    public bool GetScriptOp(ref int pc, int end, out opcodetype opcodeRet, out byte[] pvchRet)
+    public bool GetScriptOp(ref int pc, int end, out Opcodetype opcodeRet, out byte[] pvchRet)
     {
 
         pvchRet = [];
-        opcodeRet = opcodetype.OP_INVALIDOPCODE;
+        opcodeRet = Opcodetype.OP_INVALIDOPCODE;
 
         if (Hash == null) return false;
 
@@ -235,23 +235,23 @@ public class Script
         // Read instruction
         if (end - pc < 1)
             return false;
-        opcodetype opcode = (opcodetype)Hash[pc++];
+        Opcodetype opcode = (Opcodetype)Hash[pc++];
 
         // Immediate operand
-        if (opcode <= opcodetype.OP_PUSHDATA4)
+        if (opcode <= Opcodetype.OP_PUSHDATA4)
         {
             uint nSize = 0;
-            if (opcode < opcodetype.OP_PUSHDATA1)
+            if (opcode < Opcodetype.OP_PUSHDATA1)
             {
                 nSize = (uint)opcode;
             }
-            else if (opcode == opcodetype.OP_PUSHDATA1)
+            else if (opcode == Opcodetype.OP_PUSHDATA1)
             {
                 if (end - pc < 1)
                     return false;
                 nSize = Hash[pc++];
             }
-            else if (opcode == opcodetype.OP_PUSHDATA2)
+            else if (opcode == Opcodetype.OP_PUSHDATA2)
             {
                 if (end - pc < 2)
                     return false;
@@ -259,7 +259,7 @@ public class Script
 
                 pc += 2;
             }
-            else if (opcode == opcodetype.OP_PUSHDATA4)
+            else if (opcode == Opcodetype.OP_PUSHDATA4)
             {
                 if (end - pc < 4)
                     return false;
@@ -280,13 +280,13 @@ public class Script
     }
 
 
-    public bool GetOp(ref int pc, ref opcodetype opcodeRet, out byte[] vchRet)
+    public bool GetOp(ref int pc, ref Opcodetype opcodeRet, out byte[] vchRet)
     {
         vchRet = [];
-        opcodeRet = opcodetype.OP_0;
+        opcodeRet = Opcodetype.OP_0;
         if (Hash == null) return false;
         var pcl = pc;
-        var res = GetScriptOp(ref pcl, Hash.Length, out opcodetype opr, out byte[] vch);
+        var res = GetScriptOp(ref pcl, Hash.Length, out Opcodetype opr, out byte[] vch);
         if (res)
         {
             pc = pcl;
@@ -296,12 +296,12 @@ public class Script
         return res;
     }
 
-    public bool GetOp(ref int pc, out opcodetype opcodeRet)
+    public bool GetOp(ref int pc, out Opcodetype opcodeRet)
     {
-        opcodeRet = opcodetype.OP_0;
+        opcodeRet = Opcodetype.OP_0;
         if (Hash == null) return false;
         var pcl = pc;
-        var res = GetScriptOp(ref pcl, Hash.Length, out opcodetype tmpop, out _);
+        var res = GetScriptOp(ref pcl, Hash.Length, out Opcodetype tmpop, out _);
         if (res)
         {
             pc = pcl;
@@ -385,7 +385,7 @@ public class VeilTxOut
         if (OutputType == OutputTypes.OUTPUT_STANDARD || OutputType == OutputTypes.OUTPUT_CT)
         {
             var addresses = new List<IDestination>();
-            Converters.ExtractDestinations(ScriptPubKey, out txnouttype ctype, addresses, out int nrr);
+            Converters.ExtractDestinations(ScriptPubKey, out Txnouttype ctype, addresses, out int nrr);
             addresses.ForEach(addr => ret.Add(Converters.EncodeDestination(addr)));
         }
         return ret;
@@ -486,7 +486,7 @@ public enum OutputTypes : byte
     OUTPUT_DATA = 4,
 }
 
-public enum opcodetype : byte
+public enum Opcodetype : byte
 {
     // push value
     OP_0 = 0x00,
