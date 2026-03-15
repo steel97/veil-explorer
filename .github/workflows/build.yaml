@@ -106,20 +106,20 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Use Node.js 20.x
+      - name: Use Node.js 24.x
         uses: actions/setup-node@v4
         with:
-          node-version: 20.x
-          cache: "npm"
-          cache-dependency-path: explorer-frontend/package-lock.json
+          node-version: 24.x
+      - name: Setup pnpm
+        uses: https://github.com/pnpm/action-setup@v4
       - name: version
         run: echo "version=$(cat VERSION.md)" >> $GITHUB_OUTPUT
         id: version
-      - run: cd ./explorer-frontend/ && npm ci
+      - run: cd ./explorer-frontend/ && pnpm install
       - name: Publish universal release
-        run: cd ./explorer-frontend/ && npm run build --if-present
+        run: cd ./explorer-frontend/ && pnpm run build --if-present
       # no tests for now...
-      #    - run: npm test
+      #    - run: pnpm test
 
       # universal builds
       - name: Publish universal

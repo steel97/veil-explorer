@@ -241,7 +241,7 @@ const toggleTooltip = () => {
 };
 
 onMounted(() => {
-  createPopper(confirmationsEl.value!, confirmationsTooltipEl.value!, {
+  createPopper(confirmationsEl.value!, confirmationsTooltipEl.value! as any, {
     placement: "top",
   });
 });

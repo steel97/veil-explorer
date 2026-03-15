@@ -57,7 +57,7 @@
           </div>
         </div>
         <div class="text-left mx-2 mt-4 md:mt-0 md:flex-center">
-          &copy; VEIL-PROJECT 2025
+          &copy; VEIL-PROJECT {{ new Date().getFullYear() }}
         </div>
       </div>
     </div>

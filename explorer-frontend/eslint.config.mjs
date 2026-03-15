@@ -37,5 +37,6 @@ export default antfu({
     "no-case-declarations": "off",
     "no-console": process.env.NODE_ENV === "production" ? "warn" : "off",
     "no-debugger": process.env.NODE_ENV === "production" ? "warn" : "off",
+    "pnpm/json-prefer-workspace-settings": "off",
   },
 });

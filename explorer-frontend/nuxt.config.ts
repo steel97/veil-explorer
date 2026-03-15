@@ -1,9 +1,9 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   devtools: { enabled: true },
-  compatibilityDate: "2025-07-15",
+  compatibilityDate: "2026-03-15",
   future: {
-    compatibilityVersion: 4,
+    compatibilityVersion: 5,
   },
   runtimeConfig: {
     public: {
@@ -12,7 +12,7 @@ export default defineNuxtConfig({
       },
       baseUrl: process.env.NUXT_PUBLIC_BASE_URL! as string,
       chainDefault: process.env.NUXT_PUBLIC_CHAIN_DEFAULT! as string,
-      chainApis: JSON.parse(process.env.NUXT_PUBLIC_CHAIN_APIS! as string),
+      chainApis: {} as any, // JSON.parse(process.env.NUXT_PUBLIC_CHAIN_APIS! as string),
       recentBlocksCount: Number.parseInt(process.env.NUXT_PUBLIC_RECENT_BLOCKS_COUNT!),
       blocksPerPage: Number.parseInt(process.env.NUXT_PUBLIC_BLOCKS_PER_PAGE!),
       txsPerPage: Number.parseInt(process.env.NUXT_PUBLIC_TXS_PER_PAGE!),

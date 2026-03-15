@@ -11,7 +11,7 @@
   >
     <div class="max-w-full mx-auto pr-3">
       <div class="flex justify-between items-center py-2">
-        <NuxtLink :to="chainPath('/')" class="flex items-center" @click="clearError">
+        <NuxtLink :to="chainPath('/')" class="flex items-center" @click="() => clearError()">
           <div class="px-3 pr-2">
             <div class="flex items-center">
               <NuxtImg
@@ -53,7 +53,7 @@
                   underline-offset-14
                   decoration-2
                   hover:text-sky-700 hover:dark:text-sky-400
-                " :class="computeClasses(link)" @click="clearError"
+                " :class="computeClasses(link)" @click="() => clearError()"
               >
                 {{ link.locale }}
               </NuxtLink>
@@ -66,7 +66,6 @@
               <label
                 class="
                   form-check-label
-                  inline-block
                   text-sm
                   flex
                   items-center
@@ -125,7 +124,7 @@
                   lang-entry
                   px-2
                   cursor-pointer
-                " @click="clearError"
+                " @click="() => clearError()"
               >
                 <span class="mr-2">
                   <NuxtImg
@@ -163,7 +162,6 @@
             <label
               class="
                 form-check-label
-                inline-block
                 text-sm
                 flex
                 items-center
@@ -220,7 +218,7 @@
                   lang-entry
                   px-2
                   cursor-pointer
-                " @click="clearError"
+                " @click="() => clearError()"
               >
                 <span class="mr-2"><img class="locale-icon" :src="`/images/locales/${valm.code}.png`" /></span>
                 <span class="grow uppercase">{{ valm.name }}</span>
