@@ -325,9 +325,10 @@ if (addressInfo.value != null && !addressInfo.value.fetched)
   await navigateTo(chainPath("/search/notfound"));
 
 onMounted(() => {
-  if (import.meta.client)
+  if (import.meta.client) {
     renderQR.value = true;
-  setTimeout(checkLoad, 500);
+    setTimeout(checkLoad, 500);
+  }
 });
 
 const meta = computed(() => {

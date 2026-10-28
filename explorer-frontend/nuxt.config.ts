@@ -31,7 +31,13 @@ export default defineNuxtConfig({
       titleTemplate: "%siteName %separator %s",
     },
   },
-  modules: ["@nuxt/image", "@nuxtjs/i18n", "@nuxtjs/tailwindcss", "@nuxtjs/seo", "@nuxt/eslint"],
+  modules: [
+    "@nuxt/image",
+    "@nuxtjs/i18n",
+    "@nuxtjs/tailwindcss",
+    "@nuxtjs/seo",
+    "@nuxt/eslint",
+  ],
   routeRules: {
     "/tx/**": {
       redirect: {
@@ -112,6 +118,13 @@ export default defineNuxtConfig({
   },
   site: {
     url: process.env.NUXT_PUBLIC_SITE_URL || "https://explorer.veil-project.com",
+  },
+  nitro: {
+    imports: {
+      imports: [
+        { name: "useRuntimeConfig", from: "nitropack/runtime" },
+      ],
+    },
   },
   schemaOrg: {
     identity: {
