@@ -1,4 +1,28 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+
+const locales = [
+  {
+    name: "English",
+    code: "en",
+    language: "en-US",
+    file: "en.ts",
+  },
+  {
+    name: "Русский",
+    code: "ru",
+    language: "ru-RU",
+    file: "ru.ts",
+  },
+];
+
+const i18nSwrRules = locales.reduce(
+  (acc, locale) => {
+    acc[`/${locale.code}`] = { swr: 60 };
+    return acc;
+  },
+  {} as Record<string, any>,
+);
+
 // @ts-ignore
 export default defineNuxtConfig({
   devtools: { enabled: true },
@@ -77,20 +101,7 @@ export default defineNuxtConfig({
     },
   },
   i18n: {
-    locales: [
-      {
-        name: "English",
-        code: "en",
-        language: "en-US",
-        file: "en.ts",
-      },
-      {
-        name: "Русский",
-        code: "ru",
-        language: "ru-RU",
-        file: "ru.ts",
-      },
-    ],
+    locales: locales,
     defaultLocale: "en",
     langDir: "localization",
     strategy: "prefix_except_default",
@@ -101,6 +112,10 @@ export default defineNuxtConfig({
       alwaysRedirect: false,
     },
     baseUrl: process.env.NUXT_I18N_BASE_URL || "https://explorer.veil-project.com",
+  },
+  routeRules: {
+    // "/": { prerender: true },
+    ...i18nSwrRules,
   },
   image: {
     format: ["webp", "png"],
