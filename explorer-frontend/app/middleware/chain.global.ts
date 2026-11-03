@@ -18,7 +18,7 @@ export default defineNuxtRouteMiddleware((to) => {
   }
   // validate currentChain
   const apiEndpoints = config.public.chainApis as Array<ApiEntry>;
-  const epFound = apiEndpoints.filter(a => a.name === currentChain).length > 0;
+  const epFound = apiEndpoints.some(a => a.name === currentChain);
   if (!epFound) {
     currentChain = config.public.chainDefault;
   }
