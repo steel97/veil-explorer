@@ -45,9 +45,6 @@ public class BlockchainStatsWorker(ILogger<BlockchainStatsWorker> logger, IOptio
                 {
                     TxStats = finalDict
                 };
-
-                // TimeSpan not reuired here since we use milliseconds, still put it there to change in future if required
-                await Task.Delay(TimeSpan.FromMilliseconds(_explorerConfig.CurrentValue.PullBlockchainStatsDelay), cancellationToken);
             }
             catch (OperationCanceledException)
             {
@@ -56,6 +53,18 @@ public class BlockchainStatsWorker(ILogger<BlockchainStatsWorker> logger, IOptio
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Can't handle blockchain stats info");
+            }
+            finally
+            {
+                try
+                {
+                    // TimeSpan not required here since we use milliseconds, still put it there to change in future if required
+                    await Task.Delay(TimeSpan.FromMilliseconds(_explorerConfig.CurrentValue.PullBlockchainStatsDelay), cancellationToken);
+                }
+                catch
+                {
+
+                }
             }
         }
     }
