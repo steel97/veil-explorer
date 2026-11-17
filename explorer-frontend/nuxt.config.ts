@@ -23,6 +23,19 @@ const i18nSwrRules = locales.reduce(
   {} as Record<string, any>,
 );
 
+// @nuxtjs/tailwindcss registers "tailwindcss/nesting", but Nuxt 4 cannot resolve
+// that extensionless subpath (tailwindcss 3 has no exports map). Point it at the
+// actual file so PostCSS can load it instead of warning NUXT_B7027.
+function fixTailwindNesting(_options: any, nuxt: any) {
+  nuxt.hook("modules:done", () => {
+    const plugins = nuxt.options.postcss?.plugins;
+    if (plugins?.["tailwindcss/nesting"]) {
+      plugins["tailwindcss/nesting/index.js"] = plugins["tailwindcss/nesting"];
+      delete plugins["tailwindcss/nesting"];
+    }
+  });
+}
+
 // @ts-ignore
 export default defineNuxtConfig({
   devtools: { enabled: true },
@@ -59,6 +72,7 @@ export default defineNuxtConfig({
     "@nuxt/image",
     "@nuxtjs/i18n",
     "@nuxtjs/tailwindcss",
+    fixTailwindNesting,
     "@nuxtjs/seo",
     "@nuxt/eslint",
   ],
