@@ -1,22 +1,28 @@
 # Database setup guide
+
 ## Notes
-*To save file and close nano editor* press **CTRL+X** than **SHIFT+Y** than **ENTER**
+
+_To save file and close nano editor_ press **CTRL+X** than **SHIFT+Y** than **ENTER**
 
 ## Setup
+
 Required OS: **ubuntu 22.04+**
 
 Recommended OS: **ubuntu 22.04 LTS**
 
 Required Software:
+
 1. [PostgreSQL 13+](https://www.postgresql.org/download/)
 
 ## Update packges
+
 ```bash
 sudo apt update
 sudo apt upgrade
 ```
 
 ## Install PostgreSQL 13
+
 ```bash
 # https://www.postgresql.org/download/linux/ubuntu/
 # Create the file repository configuration:
@@ -34,12 +40,14 @@ sudo apt-get -y install postgresql
 ```
 
 ## Change password for postgres user and switch to this user
+
 ```bash
 sudo passwd postgres
 sudo -i -u postgres
 ```
 
 ## Create postgres user and database
+
 ```bash
 # not superuser, you will be asked to type "veilusr" password
 createuser --interactive -e veilusr -D -P -R
@@ -47,33 +55,42 @@ createdb veilexplorer -O veilusr -E UTF8
 ```
 
 ## Back to administrator user
+
 ```bash
 su [your_user]
 ```
 
 ## Change postgres configuration
+
 ```bash
 sudo nano /etc/postgresql/13/main/postgresql.conf
 ```
+
 you can tweak configuration by using pgtune: https://pgtune.leopard.in.ua/#/
 
 ## Change pg_hba.conf to allow unix domain socket connection from app
+
 ```bash
 sudo nano /etc/postgresql/13/main/pg_hba.conf
 ```
-Add this content to opened file:
+
+Add this content to opened file, before "local all all peer":
+
 ```
 local   veilexplorer    veilusr                                 md5
 ```
 
 ## Restart postgresql server
+
 ```bash
 sudo service postgresql restart
 ```
 
 ## Import sql scripts to newly created database
+
 SQL scripts located at [/explorer-backend/schemas](/explorer-backend/schemas) directory.
-Upload this sql scripts to **postgres** user root: */var/lib/postgresql*
+Upload this sql scripts to **postgres** user root: _/var/lib/postgresql_
+
 ```bash
 sudo -i -u postgres
 cd ~
