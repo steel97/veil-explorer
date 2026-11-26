@@ -1,62 +1,83 @@
 # Frontend setup guide
+
 ## Notes
-*To save file and close nano editor* press **CTRL+X** than **SHIFT+Y** than **ENTER**
+
+_To save file and close nano editor_ press **CTRL+X** than **SHIFT+Y** than **ENTER**
 
 ## Setup
-Required OS: **ubuntu 22.04+**
 
-Recommended OS: **ubuntu 22.04 LTS**
+Required OS: **ubuntu 26.04+**
+
+Recommended OS: **ubuntu 26.04 LTS**
 
 Required Software:
-1. [NodeJS 20+](https://nodejs.org/en/)
+
+1. [NodeJS 26+](https://nodejs.org/en/)
+   Better to install via nvm
 
 ## Update packges
+
 ```bash
 sudo apt update
 sudo apt upgrade
 ```
 
-## Install NodeJS 20
+## Install NodeJS 26+
+
 ```bash
-# add nodesource PPA
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo bash -
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.41.0/install.sh | bash
 # install nodejs
-sudo apt install nodejs
+nvm install --lts
+# activate in current shell
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 ```
 
 ## Create user for frontend app
+
 ```bash
 sudo adduser explorer-frontend
 sudo usermod -aG sudo explorer-frontend
 ```
 
 ## Create app directory
+
 ```bash
 sudo mkdir /home/explorer-frontend/server/
 ```
 
 ## Download and unpack frontend build (change version in link and command to actual)
+
 ```bash
 sudo wget https://github.com/steel97/veil-explorer/releases/download/latest/explorer-frontend.universal-1.1.0.tar.gz
 sudo tar -xzf explorer-frontend.universal-1.1.0.tar.gz -C /home/explorer-frontend/server/
 ```
 
 ## Issue permissions for frontend
+
 ```bash
 sudo chmod 755 /home/explorer-frontend/server
 sudo chown -R explorer-frontend /home/explorer-frontend/server/
 ```
 
 ## Create startup script
-*variables starting from CHAIN_DEFAULT are public, so dont use sensetive data here*
+
+_variables starting from CHAIN_DEFAULT are public, so dont use sensetive data here_
+
 ```bash
 su explorer-frontend
 cd /home/explorer-frontend/server/
 sudo nano start.sh
 ```
+
 Add this content to opened file, change variables if required:
+
 ```bash
 #!/bin/bash
+. /home/explorer-frontend/.nvm/nvm.sh
+nvm use 26
+node --version
 # listen address, highly recommended to change it to localhost and hide nuxt server behind nginx proxy for example
 export HOST=0.0.0.0
 # listen port
@@ -81,16 +102,20 @@ export NUXT_PUBLIC_COOKIE_SAVE_DAYS=90
 
 node server/index.mjs
 ```
+
 See: [/docs/frontend-configuration.md](/docs/frontend-configuration.md)
 
 ## Change permissions and test frontend
+
 ```bash
-sudo chmod 777 start.sh
+chmod +x start.sh
 node server/index.mjs
 ```
+
 If there are no errors, move to next step.
 
 ## Register frontend as systemd service
+
 ```bash
 cd /home/explorer-frontend/server/
 wget https://raw.githubusercontent.com/steel97/veil-explorer/master/docs/systemd/explorer-frontend.service
@@ -98,6 +123,7 @@ sudo systemctl link /home/explorer-frontend/server/explorer-frontend.service
 ```
 
 ## Finilize service creation
+
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl enable explorer-frontend.service

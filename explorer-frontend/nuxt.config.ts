@@ -50,7 +50,7 @@ export default defineNuxtConfig({
       },
       baseUrl: process.env.NUXT_PUBLIC_BASE_URL! as string,
       chainDefault: process.env.NUXT_PUBLIC_CHAIN_DEFAULT! as string,
-      chainApis: {} as any, // JSON.parse(process.env.NUXT_PUBLIC_CHAIN_APIS! as string),
+      chainApis: [] as { name: string; path: string }[],
       recentBlocksCount: Number.parseInt(process.env.NUXT_PUBLIC_RECENT_BLOCKS_COUNT!),
       blocksPerPage: Number.parseInt(process.env.NUXT_PUBLIC_BLOCKS_PER_PAGE!),
       txsPerPage: Number.parseInt(process.env.NUXT_PUBLIC_TXS_PER_PAGE!),
@@ -115,7 +115,7 @@ export default defineNuxtConfig({
     },
   },
   i18n: {
-    locales: locales,
+    locales,
     defaultLocale: "en",
     langDir: "localization",
     strategy: "prefix_except_default",
@@ -161,6 +161,11 @@ export default defineNuxtConfig({
       name: "Veil Project",
       url: "https://veil-project.com",
       logo: `${process.env.NUXT_PUBLIC_SITE_URL || "https://veilproject.org"}/icon-192x192-light.png`,
+    },
+  },
+  ogImage: {
+    security: {
+      secret: false,
     },
   },
   css: ["~/assets/css/tailwind.css", "~/assets/css/common.css"],
