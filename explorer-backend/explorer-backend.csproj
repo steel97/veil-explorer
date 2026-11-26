@@ -17,14 +17,14 @@
 
   <ItemGroup>
     <PackageReference Include="NanoXLSX" Version="3.2.2" />
-    <PackageReference Include="NBitcoin" Version="9.0.5" />
+    <PackageReference Include="NBitcoin" Version="10.0.23" />
     <PackageReference Include="Npgsql" Version="10.0.4" />
     <PackageReference Include="Npgsql.DependencyInjection" Version="10.0.4" />
-    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="11.0.0" />
     <PackageReference Include="Serilog.Formatting.Compact" Version="3.0.0" />
     <PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
-    <PackageReference Include="StackExchange.Redis" Version="2.12.1" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.5" />
+    <PackageReference Include="StackExchange.Redis" Version="3.4.35" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="11.0.1" />
   </ItemGroup>
 
 </Project>
